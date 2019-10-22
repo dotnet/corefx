@@ -725,11 +725,13 @@ namespace System.Text.Encodings.Web
                         Vector128<sbyte> mask = Sse2Helper.CreateAsciiMask(sourceValue);
                         int index = Sse2.MoveMask(mask.AsByte());
 
-                        int processNextSixteen = idx + 16;
-                        Debug.Assert(processNextSixteen <= utf8Text.Length);
                         if (index != 0)
                         {
                             // At least one of the following 16 bytes is non-ASCII.
+
+                            int processNextSixteen = idx + 16;
+                            Debug.Assert(processNextSixteen <= utf8Text.Length);
+
                             while (idx < processNextSixteen)
                             {
                                 Debug.Assert((ptr + idx) <= (ptr + utf8Text.Length));

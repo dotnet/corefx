@@ -168,63 +168,9 @@ namespace System.Text.Encodings.Web
                 case '\f': toCopy = s_f; break;
                 case '\r': toCopy = s_r; break;
                 case '\\': toCopy = s_back; break;
-                default: return TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten);
+                default: return JavaScriptEncoderHelper.TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten);
             }
             return TryCopyCharacters(toCopy, buffer, bufferLength, out numberOfCharactersWritten);
-        }
-
-        private static unsafe bool TryWriteEncodedScalarAsNumericEntity(int unicodeScalar, char* buffer, int length, out int numberOfCharactersWritten)
-        {
-            Debug.Assert(buffer != null && length >= 0);
-
-            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar))
-            {
-                // Convert this back to UTF-16 and write out both characters.
-                char leadingSurrogate, trailingSurrogate;
-                UnicodeHelpers.GetUtf16SurrogatePairFromAstralScalarValue(unicodeScalar, out leadingSurrogate, out trailingSurrogate);
-                int leadingSurrogateCharactersWritten;
-                if (TryWriteEncodedSingleCharacter(leadingSurrogate, buffer, length, out leadingSurrogateCharactersWritten) &&
-                    TryWriteEncodedSingleCharacter(trailingSurrogate, buffer + leadingSurrogateCharactersWritten, length - leadingSurrogateCharactersWritten, out numberOfCharactersWritten)
-                )
-                {
-                    numberOfCharactersWritten += leadingSurrogateCharactersWritten;
-                    return true;
-                }
-                else
-                {
-                    numberOfCharactersWritten = 0;
-                    return false;
-                }
-            }
-            else
-            {
-                // This is only a single character.
-                return TryWriteEncodedSingleCharacter(unicodeScalar, buffer, length, out numberOfCharactersWritten);
-            }
-        }
-
-        // Writes an encoded scalar value (in the BMP) as a JavaScript-escaped character.
-        private static unsafe bool TryWriteEncodedSingleCharacter(int unicodeScalar, char* buffer, int length, out int numberOfCharactersWritten)
-        {
-            Debug.Assert(buffer != null && length >= 0);
-            Debug.Assert(!UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar), "The incoming value should've been in the BMP.");
-
-            if (length < 6)
-            {
-                numberOfCharactersWritten = 0;
-                return false;
-            }
-
-            // Encode this as 6 chars "\uFFFF".
-            *buffer = '\\'; buffer++;
-            *buffer = 'u'; buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit(unicodeScalar >> 12); buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit((int)((unicodeScalar >> 8) & 0xFU)); buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit((int)((unicodeScalar >> 4) & 0xFU)); buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit((int)(unicodeScalar & 0xFU)); buffer++;
-
-            numberOfCharactersWritten = 6;
-            return true;
         }
     }
 }

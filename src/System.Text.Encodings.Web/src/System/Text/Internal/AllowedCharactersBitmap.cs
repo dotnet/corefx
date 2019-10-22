@@ -90,7 +90,7 @@ namespace System.Text.Internal
         {
             int i = 0;
 
-            while (i < textLength - 8)
+            while (i <= textLength - 8)
             {
                 if (!IsCharacterAllowed(text[i])
                     || !IsCharacterAllowed(text[++i])
@@ -106,7 +106,7 @@ namespace System.Text.Internal
                 i++;
             }
 
-            while (i < textLength - 4)
+            while (i <= textLength - 4)
             {
                 if (!IsCharacterAllowed(text[i])
                     || !IsCharacterAllowed(text[++i])
