@@ -154,7 +154,7 @@ namespace System.Text.Encodings.Web
                         Vector128<sbyte> sourceValue = Sse2.LoadVector128(startingAddress);
 
                         Vector128<sbyte> mask = Sse2Helper.CreateAsciiMask(sourceValue);
-                        int index = Sse2.MoveMask(mask.AsByte());
+                        int index = Sse2.MoveMask(mask);
 
                         if (index != 0)
                         {
@@ -196,7 +196,7 @@ namespace System.Text.Encodings.Web
                             // Check if any of the 16 bytes need to be escaped.
                             mask = Sse2Helper.CreateEscapingMask_UnsafeRelaxedJavaScriptEncoder(sourceValue);
 
-                            index = Sse2.MoveMask(mask.AsByte());
+                            index = Sse2.MoveMask(mask);
                             // If index == 0, that means none of the 16 bytes needed to be escaped.
                             // TrailingZeroCount is relatively expensive, avoid it if possible.
                             if (index != 0)

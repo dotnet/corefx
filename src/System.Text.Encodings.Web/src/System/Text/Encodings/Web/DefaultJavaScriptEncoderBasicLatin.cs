@@ -155,7 +155,7 @@ namespace System.Text.Encodings.Web
                         // Check if any of the 16 bytes need to be escaped.
                         Vector128<sbyte> mask = Sse2Helper.CreateEscapingMask_DefaultJavaScriptEncoderBasicLatin(sourceValue);
 
-                        int index = Sse2.MoveMask(mask.AsByte());
+                        int index = Sse2.MoveMask(mask);
                         // If index == 0, that means none of the 16 bytes needed to be escaped.
                         // TrailingZeroCount is relatively expensive, avoid it if possible.
                         if (index != 0)

@@ -17,7 +17,8 @@ namespace System.Text.Encodings.Web
         {
             Debug.Assert(Sse2.IsSupported);
 
-            Vector128<short> mask = Sse2.CompareLessThan(sourceValue, s_mask_UInt16_0x20); // Space ' ', anything in the control characters range
+            // Space ' ', anything in the control characters range, and anything above short.MaxValue but less than or equal char.MaxValue
+            Vector128<short> mask = Sse2.CompareLessThan(sourceValue, s_mask_UInt16_0x20);
 
             mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x22)); // Quotation Mark '"'
             mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x5C)); // Reverse Solidus '\'

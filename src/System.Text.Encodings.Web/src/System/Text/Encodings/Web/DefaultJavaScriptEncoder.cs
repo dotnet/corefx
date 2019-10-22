@@ -99,7 +99,7 @@ namespace System.Text.Encodings.Web
                         Vector128<sbyte> sourceValue = Sse2.LoadVector128(startingAddress);
 
                         Vector128<sbyte> mask = Sse2Helper.CreateAsciiMask(sourceValue);
-                        int index = Sse2.MoveMask(mask.AsByte());
+                        int index = Sse2.MoveMask(mask);
 
                         if (index != 0)
                         {
