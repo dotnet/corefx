@@ -19,6 +19,7 @@ steps:
   inputs:
     script: |
       export LC_ALL=C.UTF-8
+      export LANG=$LC_ALL
       ./build.sh -ci -c $(BUILD_CONFIGURATION)
 
 - task: CmdLine@2
