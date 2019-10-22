@@ -18,6 +18,7 @@ steps:
   displayName: Build Corefx
   inputs:
     script: |
+      docker run bash ls
       ./build.sh -ci -c $(BUILD_CONFIGURATION)
 
 - task: CmdLine@2
