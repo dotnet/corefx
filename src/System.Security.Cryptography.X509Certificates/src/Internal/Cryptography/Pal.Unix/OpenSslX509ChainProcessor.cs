@@ -4,6 +4,7 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -30,6 +31,9 @@ namespace Internal.Cryptography.Pal
 
         private static readonly CachedDirectoryStoreProvider s_userPersonalStore =
             new CachedDirectoryStoreProvider(X509Store.MyStoreName);
+
+        private static readonly ConcurrentDictionary<Interop.Crypto.X509VerifyStatusCode, string> s_errorStrings =
+            new ConcurrentDictionary<Interop.Crypto.X509VerifyStatusCode, string>();
 
         private SafeX509Handle _leafHandle;
         private SafeX509StoreHandle _store;
@@ -934,7 +938,7 @@ namespace Internal.Cryptography.Pal
                     {
                         Status = X509ChainStatusFlags.OfflineRevocation,
 
-                        StatusInformation = Interop.Crypto.GetX509VerifyCertErrorString(
+                        StatusInformation = GetErrorString(
                             Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_CRL),
                     };
 
@@ -970,7 +974,7 @@ namespace Internal.Cryptography.Pal
             X509ChainStatus chainStatus = new X509ChainStatus
             {
                 Status = statusFlag,
-                StatusInformation = Interop.Crypto.GetX509VerifyCertErrorString(errorCode),
+                StatusInformation = GetErrorString(errorCode),
             };
 
             elementStatus.Add(chainStatus);
@@ -1165,6 +1169,13 @@ namespace Internal.Cryptography.Pal
                 // Ownership was transferred to the cert stack.
                 tmp.SetHandleAsInvalid();
             }
+        }
+
+        private static string GetErrorString(Interop.Crypto.X509VerifyStatusCode code)
+        {
+            return s_errorStrings.GetOrAdd(
+                code,
+                c => Interop.Crypto.GetX509VerifyCertErrorString(c));
         }
 
         private sealed class WorkingChain : IDisposable
