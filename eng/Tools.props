@@ -1,11 +1,10 @@
 <Project>
   <PropertyGroup>
     <MSBuildTreatWarningsAsErrors>false</MSBuildTreatWarningsAsErrors>
-    <Language>C#</Language>
-    <!-- Need to keep in sync with CodeAnalysis.targets file. -->
-    <AnalyzerPropsFile>$(ArtifactsToolsetDir)Common\Tools.Analyzers.props</AnalyzerPropsFile>
   </PropertyGroup>
 
+  <!-- We need to import this props file which contains PackageReferences to analyzers so that
+       analyzer build assets are imported via the Tools generated props and targets -->
   <Import Project="Analyzers.props" Condition="'$(DotNetBuildFromSource)' != 'true'" />
 
   <!-- source-built packages -->
@@ -37,23 +36,7 @@
     <!-- SourceLink -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="$(MicrosoftSourceLinkVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
     <PackageReference Include="Microsoft.SourceLink.Vsts.Git" Version="$(MicrosoftSourceLinkVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
-
-    <!-- UWP test tools -->
-    <PackageReference Include="Microsoft.DotNet.UAP.TestTools" Version="$(MicrosoftDotNetUapTestToolsPackageVersion)" Condition="$(TargetGroup.StartsWith('uap'))" PrivateAssets="all" IsImplicitlyDefined="true" />
   </ItemGroup>
-
-  <UsingTask TaskName="Microsoft.DotNet.Arcade.Sdk.SaveItems" AssemblyFile="$(ArcadeSdkBuildTasksAssembly)" />
-
-  <Target Name="GenerateAnalyzersPropsFile"
-          AfterTargets="Restore"
-          DependsOnTargets="ResolveLockFileAnalyzers">
-
-    <SaveItems Condition="'@(Analyzer)' != ''"
-               ItemName="ResolvedAnalyzer"
-               Items="@(Analyzer)"
-               File="$(AnalyzerPropsFile)" />
-
-  </Target>
 
   <Import Project="$(RepositoryEngineeringDir)restore\docs.targets" Condition="'$(DotNetBuildFromSource)' != 'true'" />
   <Import Project="$(RepositoryEngineeringDir)restore\optimizationData.targets" Condition="'$(DotNetBuildFromSource)' != 'true' and '$(EnableNgenOptimization)' == 'true'" />
