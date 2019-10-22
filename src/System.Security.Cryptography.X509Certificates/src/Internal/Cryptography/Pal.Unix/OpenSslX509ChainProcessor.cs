@@ -373,13 +373,9 @@ namespace Internal.Cryptography.Pal
 
             // If anything is wrong, move see if we need to try OCSP,
             // or clearing an unwanted root revocation flag.
-            if (Interop.Crypto.X509StoreCtxGetError(_storeCtx) !=
-                Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
+            if (Interop.Crypto.X509StoreCtxGetError(_storeCtx) != Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
             {
-                FinishRevocation(
-                    revocationMode,
-                    revocationFlag,
-                    chainSize);
+                FinishRevocation(revocationMode, revocationFlag, chainSize);
             }
         }
 
@@ -607,13 +603,9 @@ namespace Internal.Cryptography.Pal
 
             // If the chain had any errors during the previous build we need to walk it again with
             // the error collector running.
-            if (Interop.Crypto.X509StoreCtxGetError(_storeCtx) !=
-                Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
+            if (Interop.Crypto.X509StoreCtxGetError(_storeCtx) != Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
             {
-                if (workingChain == null)
-                {
-                    workingChain = _workingChain = BuildWorkingChain();
-                }
+                workingChain ??= BuildWorkingChain();
             }
 
             X509ChainElement[] elements = BuildChainElements(
@@ -1264,20 +1256,6 @@ namespace Internal.Cryptography.Pal
                                 ArrayPool<ErrorCollection>.Shared.Return(toReturn);
                             }
 
-                            //if (MapVerifyErrorToChainStatus(errorCode) == X509ChainStatusFlags.RevocationStatusUnknown)
-                            //{
-                            //    LastUnknownRevocation = Math.Max(LastUnknownRevocation, errorDepth);
-                            //}
-                            //else if (errorCode == Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_REVOKED)
-                            //{
-                            //    LastRevoked = Math.Max(LastUnknownRevocation, errorDepth);
-                            //}
-                            //else if (errorCode == Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CRL_HAS_EXPIRED)
-                            //{
-                            //    // Co-assert no CRL with CRL expired.
-                            //    _errors[errorDepth].Add(Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_CRL);
-                            //}
-
                             LastError = Math.Max(errorDepth, LastError);
                             _errors[errorDepth].Add(errorCode);
                         }
@@ -1322,7 +1300,6 @@ namespace Internal.Cryptography.Pal
                 int bucket = FindBucket(statusCode, out int bitValue);
                 return (_codes[bucket] & bitValue) != 0;
             }
-
 
             internal void ClearRevoked()
             {

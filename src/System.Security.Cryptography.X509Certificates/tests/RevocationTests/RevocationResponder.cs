@@ -199,7 +199,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                         if (authority.HasOcspDelegation)
                         {
                             Trace($"OCSP Response: {ocspResponse.Length} bytes from {authority.SubjectName} delegated to {authority.OcspResponderSubjectName}");
-
                         }
                         else
                         {

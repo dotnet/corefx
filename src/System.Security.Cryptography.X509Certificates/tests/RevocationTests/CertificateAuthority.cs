@@ -153,7 +153,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 ocspResponder: true);
         }
 
-
         internal void RebuildRootWithRevocation()
         {
             if (_cdpExtension == null && CdpUri != null)
@@ -639,6 +638,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             reader.ThrowIfNotEmpty();
 
             AsnReader algIdReader = idReader.ReadSequence();
+
             if (algIdReader.ReadObjectIdentifierAsString() != "1.3.14.3.2.26")
             {
                 return CertStatus.Unknown;
@@ -708,6 +708,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     writer.PushSequence();
                     {
                         writer.WriteObjectIdentifier("1.3.6.1.5.5.7.48.1");
+
                         writer.WriteCharacterString(
                             new Asn1Tag(TagClass.ContextSpecific, 6),
                             UniversalTagNumber.IA5String,
