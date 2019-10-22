@@ -69,8 +69,8 @@
     </BinPlaceConfiguration>
 
     <!-- binplace targeting packs which may be different from BuildConfiguration -->
-    <BinPlaceConfiguration Include="netstandard">
-      <RefPath>$(NetStandardRefPath)</RefPath>
+    <BinPlaceConfiguration Include="netstandard2.0">
+      <RefPath>$(NetStandard20RefPath)</RefPath>
     </BinPlaceConfiguration>
     <BinPlaceConfiguration Include="netstandard2.1">
       <RefPath>$(NetStandard21RefPath)</RefPath>
