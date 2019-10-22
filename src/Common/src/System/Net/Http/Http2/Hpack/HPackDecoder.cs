@@ -25,7 +25,7 @@ namespace System.Net.Http.HPack
 
         public const int DefaultHeaderTableSize = 4096;
         public const int DefaultStringOctetsSize = 4096;
-        public const int DefaultMaxResponseHeadersLength = HttpHandlerDefaults.DefaultMaxResponseHeadersLength * 1024;
+        public const int DefaultMaxResponseHeadersLength = 64 * 1024; // HttpHandlerDefaults.DefaultMaxResponseHeadersLength * 1024;
 
         // http://httpwg.org/specs/rfc7541.html#rfc.section.6.1
         //   0   1   2   3   4   5   6   7
@@ -349,7 +349,7 @@ namespace System.Net.Http.HPack
                     default:
                         // Can't happen
                         Debug.Fail("HPACK decoder reach an invalid state");
-                        throw new InternalException(_state);
+                        throw new NotImplementedException(_state.ToString());
                 }
             }
         }
