@@ -10,6 +10,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 {
+    [ActiveIssue(41974, TestPlatforms.OSX)]
     public static class DynamicRevocationTests
     {
         private static readonly TimeSpan s_urlRetrievalLimit = TimeSpan.FromSeconds(5);
