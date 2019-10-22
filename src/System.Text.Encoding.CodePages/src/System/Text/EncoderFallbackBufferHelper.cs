@@ -36,7 +36,7 @@ namespace System.Text
             charStart = null;
             bFallingBack = false;
             iRecursionCount = 0;
-            _fallbackBuffer.Reset();
+            _fallbackBuffer!.Reset();
         }
 
         // Set the above values
@@ -55,7 +55,7 @@ namespace System.Text
         internal char InternalGetNextChar()
         {
             Debug.Assert(_fallbackBuffer != null);
-            char ch = _fallbackBuffer.GetNextChar();
+            char ch = _fallbackBuffer!.GetNextChar();
             bFallingBack = (ch != 0);
             if (ch == 0) iRecursionCount = 0;
             return ch;
@@ -110,7 +110,7 @@ namespace System.Text
 
                         // Next is a surrogate, add it as surrogate pair, and increment chars
                         chars++;
-                        bFallingBack = _fallbackBuffer.Fallback(ch, cNext, index);
+                        bFallingBack = _fallbackBuffer!.Fallback(ch, cNext, index);
                         return bFallingBack;
                     }
                     // Next isn't a low surrogate, just fallback the high surrogate
@@ -122,7 +122,7 @@ namespace System.Text
                 ThrowLastCharRecursive((int)ch);
 
             // Fall back our char
-            bFallingBack = _fallbackBuffer.Fallback(ch, index);
+            bFallingBack = _fallbackBuffer!.Fallback(ch, index);
 
             return bFallingBack;
         }

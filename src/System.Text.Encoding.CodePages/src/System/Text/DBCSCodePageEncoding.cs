@@ -74,7 +74,7 @@ namespace System.Text
         {
             Debug.Assert(m_codePageHeader?.Length > 0);
 
-            fixed (byte* pBytes = &m_codePageHeader[0])
+            fixed (byte* pBytes = &m_codePageHeader![0])
             {
                 CodePageHeader* pCodePage = (CodePageHeader*)pBytes;
 
@@ -545,7 +545,7 @@ namespace System.Text
 
                 // Since left over char was a surrogate, it'll have to be fallen back.
                 // Get Fallback
-                fallbackBuffer = encoder.FallbackBuffer;
+                fallbackBuffer = encoder!.FallbackBuffer;
                 fallbackHelper = new EncoderFallbackBufferHelper(fallbackBuffer);
                 fallbackHelper.InternalInitialize(chars, charEnd, encoder, false);
                 // This will fallback a pair if *chars is a low surrogate
@@ -577,7 +577,7 @@ namespace System.Text
                     {
                         // Initialize the buffer
                         if (encoder == null)
-                            fallbackBuffer = EncoderFallback.CreateFallbackBuffer();
+                            fallbackBuffer = EncoderFallback!.CreateFallbackBuffer();
                         else
                             fallbackBuffer = encoder.FallbackBuffer;
 
@@ -680,7 +680,7 @@ namespace System.Text
                         // Initialize the buffer
                         Debug.Assert(encoder == null,
                             "[DBCSCodePageEncoding.GetBytes]Expected delayed create fallback only if no encoder.");
-                        fallbackBuffer = EncoderFallback.CreateFallbackBuffer();
+                        fallbackBuffer = EncoderFallback!.CreateFallbackBuffer();
                         fallbackHelper = new EncoderFallbackBufferHelper(fallbackBuffer);
                         fallbackHelper.InternalInitialize(charEnd - charCount, charEnd, encoder, true);
                     }

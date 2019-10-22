@@ -217,7 +217,7 @@ namespace System.Text
                             // Found it!
                             long position = s_codePagesEncodingDataStream.Position;
                             s_codePagesEncodingDataStream.Seek((long)pCodePageIndex->Offset, SeekOrigin.Begin);
-                            s_codePagesEncodingDataStream.Read(m_codePageHeader, 0, m_codePageHeader.Length);
+                            s_codePagesEncodingDataStream.Read(m_codePageHeader, 0, m_codePageHeader!.Length);
                             m_firstDataWordOffset = (int)s_codePagesEncodingDataStream.Position; // stream now pointing to the codepage data
 
                             if (i == codePagesCount - 1) // last codepage
@@ -310,7 +310,7 @@ namespace System.Text
             Debug.Assert(arrayUnicodeBestFit != null, "[BaseCodePageEncoding.GetBestFitUnicodeToBytesData]Expected non-null arrayUnicodeBestFit");
 
             // Normally we don't have any best fit data.
-            return arrayUnicodeBestFit;
+            return arrayUnicodeBestFit!;
         }
 
         internal char[] GetBestFitBytesToUnicodeData()
@@ -321,7 +321,7 @@ namespace System.Text
             Debug.Assert(arrayBytesBestFit != null, "[BaseCodePageEncoding.GetBestFitBytesToUnicodeData]Expected non-null arrayBytesBestFit");
 
             // Normally we don't have any best fit data.
-            return arrayBytesBestFit;
+            return arrayBytesBestFit!;
         }
 
         // During the AppDomain shutdown the Encoding class may have already finalized, making the memory section

@@ -25,7 +25,7 @@ namespace System.Text
         {
             Debug.Assert(_fallbackBuffer != null);
             byteStart = null;
-            _fallbackBuffer.Reset();
+            _fallbackBuffer!.Reset();
         }
 
         internal void InternalInitialize(byte* _byteStart, char* _charEnd)
@@ -48,7 +48,7 @@ namespace System.Text
             Debug.Assert(_fallbackBuffer != null);
 
             // See if there's a fallback character and we have an output buffer then copy our string.
-            if (_fallbackBuffer.Fallback(bytes, (int)(pBytes - byteStart - bytes.Length)))
+            if (_fallbackBuffer!.Fallback(bytes, (int)(pBytes - byteStart - bytes.Length)))
             {
                 // Copy the chars to our output
                 char ch;
@@ -104,7 +104,7 @@ namespace System.Text
             Debug.Assert(_fallbackBuffer != null);
 
             // See if there's a fallback character and we have an output buffer then copy our string.
-            if (_fallbackBuffer.Fallback(bytes, (int)(pBytes - byteStart - bytes.Length)))
+            if (_fallbackBuffer!.Fallback(bytes, (int)(pBytes - byteStart - bytes.Length)))
             {
                 int count = 0;
 

@@ -49,7 +49,7 @@ namespace System.Text
         {
             Debug.Assert(m_codePageHeader?.Length > 0);
 
-            fixed (byte* pBytes = &m_codePageHeader[0])
+            fixed (byte* pBytes = &m_codePageHeader![0])
             {
                 CodePageHeader* pCodePage = (CodePageHeader*)pBytes;
                 // Should be loading OUR code page
@@ -347,7 +347,7 @@ namespace System.Text
                 // Since leftover char was a surrogate, it'll have to be fallen back.
                 // Get fallback
                 Debug.Assert(encoder != null, "[SBCSCodePageEncoding.GetByteCount]Expect to have encoder if we have a charLeftOver");
-                fallbackBuffer = encoder.FallbackBuffer;
+                fallbackBuffer = encoder!.FallbackBuffer;
                 fallbackHelper = new EncoderFallbackBufferHelper(fallbackBuffer);
                 fallbackHelper.InternalInitialize(chars, charEnd, encoder, false);
 
@@ -379,7 +379,7 @@ namespace System.Text
                     {
                         // Create & init fallback buffer
                         if (encoder == null)
-                            fallbackBuffer = EncoderFallback.CreateFallbackBuffer();
+                            fallbackBuffer = EncoderFallback!.CreateFallbackBuffer();
                         else
                             fallbackBuffer = encoder.FallbackBuffer;
 
@@ -532,7 +532,7 @@ namespace System.Text
                 // Since left over char was a surrogate, it'll have to be fallen back.
                 // Get Fallback
                 Debug.Assert(encoder != null, "[SBCSCodePageEncoding.GetBytes]Expect to have encoder if we have a charLeftOver");
-                fallbackBuffer = encoder.FallbackBuffer;
+                fallbackBuffer = encoder!.FallbackBuffer;
                 fallbackHelper = new EncoderFallbackBufferHelper(fallbackBuffer);
 
 
@@ -573,7 +573,7 @@ namespace System.Text
                     {
                         // Create & init fallback buffer
                         if (encoder == null)
-                            fallbackBuffer = EncoderFallback.CreateFallbackBuffer();
+                            fallbackBuffer = EncoderFallback!.CreateFallbackBuffer();
                         else
                             fallbackBuffer = encoder.FallbackBuffer;
 
