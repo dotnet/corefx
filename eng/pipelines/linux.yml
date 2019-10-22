@@ -140,18 +140,15 @@ stages:
           displayName: Build
           strategy:
             matrix:
-              # Run these legs on PRs and official builds, but not on CI builds
-              ${{ if or(eq(parameters.fullMatrix, 'false'), eq(parameters.isOfficialBuild, 'true')) }}:
-                wasm_Release:
-                  _BuildConfig: Release
-                  _architecture: wasm
-                  _framework: netcoreapp
-                  _helixQueues: $(linuxDefaultQueues)
-                  _dockerContainer: ubuntu_1604
-                  _emsdkPath: $(Build.BinariesDirectory)/emsdk
-                  _buildScriptPrefix: 'EMSDK_PATH=$(_emsdkPath) '
-                  _buildExtraArguments: -os WebAssembly -warnAsError false
-                  _installEmscripten: true
+              wasm_Release:
+                _BuildConfig: Release
+                _architecture: wasm
+                _framework: netcoreapp
+                _dockerContainer: ubuntu_1604
+                _emsdkPath: $(Build.BinariesDirectory)/emsdk
+                _buildScriptPrefix: 'EMSDK_PATH=$(_emsdkPath) '
+                _buildExtraArguments: -os WebAssembly -warnAsError false
+                _installEmscripten: true
 
               # Only run these legs in PRs.
               ${{ if eq(parameters.fullMatrix, 'false') }}:
