@@ -5,8 +5,11 @@
 using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;  // Do not remove. Needed for Int32LsbToHexDigit when !BUILDING_INBOX_LIBRARY
 using System.Text.Encodings.Web;
+
+#if !BUILDING_INBOX_LIBRARY
+using System.Runtime.CompilerServices;
+#endif
 
 namespace System.Text.Json
 {
