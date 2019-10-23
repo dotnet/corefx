@@ -11,7 +11,13 @@ trigger:
   paths:
     exclude:
     - Documentation/*
-    - /*.md
+    - CODE-OF-CONDUCT.md
+    - CONTRIBUTING.md
+    - LICENSE.TXT
+    - PATENTS.TXT
+    - README.md
+    - SECURITY.md
+    - THIRD-PARTY-NOTICES.TXT
 
 pr:
   branches:
@@ -21,7 +27,13 @@ pr:
   paths:
     exclude:
     - Documentation/*
-    - /*.md
+    - CODE-OF-CONDUCT.md
+    - CONTRIBUTING.md
+    - LICENSE.TXT
+    - PATENTS.TXT
+    - README.md
+    - SECURITY.md
+    - THIRD-PARTY-NOTICES.TXT
 
 resources:
   containers:
@@ -103,7 +115,7 @@ stages:
           -TsaProjectName "DEVDIV"
           -TsaNotificationEmail "$(TsaNotificationEmail)"
           -TsaCodebaseAdmin "$(TsaCodebaseAdmin)"
-          -TsaBugAreaPath "DevDiv\NET\NET Core"
+          -TsaBugAreaPath "DevDiv\NET Core"
           -TsaIterationPath "DevDiv"
           -TsaRepositoryName "CoreFX"
           -TsaCodebaseName "CoreFX"

@@ -2,7 +2,7 @@
 Param(
   [switch][Alias('b')]$build,
   [switch][Alias('t')]$test,
-  [switch] $buildtests,
+  [switch]$buildtests,
   [string][Alias('c')]$configuration = "Debug",
   [string][Alias('f')]$framework,
   [string]$vs,
@@ -11,7 +11,6 @@ Param(
   [switch]$coverage,
   [string]$testscope,
   [string]$arch,
-  [switch]$clean,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
@@ -56,21 +55,10 @@ if ($MyInvocation.InvocationName -eq ".") {
 }
 
 # Check if an action is passed in
-$actions = "r","restore","b","build","rebuild","deploy","deployDeps","test","integrationTest","sign","publish","buildtests"
+$actions = "r","restore","b","build","rebuild","deploy","deployDeps","test","integrationTest","sign","publish","buildtests","clean"
 $actionPassedIn = @(Compare-Object -ReferenceObject @($PSBoundParameters.Keys) -DifferenceObject $actions -ExcludeDifferent -IncludeEqual).Length -ne 0
 if ($null -ne $properties -and $actionPassedIn -ne $true) {
   $actionPassedIn = @(Compare-Object -ReferenceObject $properties -DifferenceObject $actions.ForEach({ "-" + $_ }) -ExcludeDifferent -IncludeEqual).Length -ne 0
-}
-
-if ($clean) {
-  $artifactsPath = "$PSScriptRoot\..\artifacts"
-  if(Test-Path $artifactsPath) {
-    Remove-Item -Recurse -Force $artifactsPath
-    Write-Host "Artifacts directory deleted."
-  }
-  if (!$actionPassedIn) {
-    exit 0
-  }
 }
 
 # VS Test Explorer support
@@ -120,9 +108,8 @@ foreach ($argument in $PSBoundParameters.Keys)
   switch($argument)
   {
     "build"             { $arguments += " -build" }
+    "buildtests"        { if ($build -eq $true) { $arguments += " /p:BuildTests=true" } else { $arguments += " -build /p:BuildTests=only" } }
     "test"              { $arguments += " -test" }
-    "buildtests"        { $arguments += " /p:BuildTests=true" }
-    "clean"             { }
     "configuration"     { $configuration = (Get-Culture).TextInfo.ToTitleCase($($PSBoundParameters[$argument])); $arguments += " /p:ConfigurationGroup=$configuration -configuration $configuration" }
     "framework"         { $arguments += " /p:TargetGroup=$($PSBoundParameters[$argument].ToLowerInvariant())"}
     "os"                { $arguments += " /p:OSGroup=$($PSBoundParameters[$argument])" }
