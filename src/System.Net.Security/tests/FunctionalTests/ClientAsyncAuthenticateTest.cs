@@ -43,7 +43,8 @@ namespace System.Net.Security.Tests
         [Fact]
         public async Task ClientAsyncAuthenticate_ServerNoEncryption_NoConnect()
         {
-            await Assert.ThrowsAsync(TestConfiguration.SupportsHandshakeAlerts ? typeof(AuthenticationException) : typeof(IOException),() => ClientAsyncSslHelper(EncryptionPolicy.NoEncryption));
+            // Don't use Tls13  since we are trying to use NullEncryption
+            await Assert.ThrowsAsync(TestConfiguration.SupportsHandshakeAlerts && TestConfiguration.SupportsNullEncryption ? typeof(AuthenticationException) : typeof(IOException),() => ClientAsyncSslHelper(EncryptionPolicy.NoEncryption, SslProtocolSupport.DefaultSslProtocols,  SslProtocols.Tls | SslProtocols.Tls11 |  SslProtocols.Tls12 ));
         }
 
         [Theory]
