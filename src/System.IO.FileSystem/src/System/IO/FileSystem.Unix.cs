@@ -169,6 +169,7 @@ namespace System.IO
                     if (errorInfo.Error == Interop.Error.EXDEV) // rename fails across devices / mount points
                     {
                         CopyFile(sourceFullPath, destFullPath, overwrite);
+                        DeleteFile(sourceFullPath);
                     }
                     else
                     {
@@ -286,7 +287,7 @@ namespace System.IO
             int count = stackDir.Count;
             if (count == 0 && !somepathexists)
             {
-                string root = Directory.InternalGetDirectoryRoot(fullPath);
+                string root = Path.GetPathRoot(fullPath);
                 if (!DirectoryExists(root))
                 {
                     throw Interop.GetExceptionForIoErrno(Interop.Error.ENOENT.Info(), fullPath, isDirectory: true);

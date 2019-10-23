@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,15 +16,15 @@ namespace System.IO.Pipelines
 
         private readonly int _minimumBufferSize;
 
-        private BufferSegment _head;
-        private BufferSegment _tail;
+        private BufferSegment? _head;
+        private BufferSegment? _tail;
         private Memory<byte> _tailMemory;
         private int _tailBytesBuffered;
         private int _bytesBuffered;
 
-        private readonly MemoryPool<byte> _pool;
+        private readonly MemoryPool<byte>? _pool;
 
-        private CancellationTokenSource _internalTokenSource;
+        private CancellationTokenSource? _internalTokenSource;
         private bool _isCompleted;
         private readonly object _lockObject = new object();
 
@@ -127,6 +128,7 @@ namespace System.IO.Pipelines
             }
             else
             {
+                Debug.Assert(_tail != null);
                 int bytesLeftInBuffer = _tailMemory.Length;
 
                 if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint)
@@ -178,7 +180,7 @@ namespace System.IO.Pipelines
 
         private BufferSegment CreateSegmentUnsynchronized()
         {
-            if (_bufferSegmentPool.TryPop(out BufferSegment segment))
+            if (_bufferSegmentPool.TryPop(out BufferSegment? segment))
             {
                 return segment;
             }
@@ -201,7 +203,7 @@ namespace System.IO.Pipelines
         }
 
         /// <inheritdoc />
-        public override void Complete(Exception exception = null)
+        public override void Complete(Exception? exception = null)
         {
             if (_isCompleted)
             {
@@ -210,7 +212,7 @@ namespace System.IO.Pipelines
 
             _isCompleted = true;
 
-            FlushInternal();
+            FlushInternal(writeToStream: exception == null);
 
             _internalTokenSource?.Dispose();
 
@@ -220,7 +222,7 @@ namespace System.IO.Pipelines
             }
         }
 
-        public override async ValueTask CompleteAsync(Exception exception = null)
+        public override async ValueTask CompleteAsync(Exception? exception = null)
         {
             if (_isCompleted)
             {
@@ -229,13 +231,13 @@ namespace System.IO.Pipelines
 
             _isCompleted = true;
 
-            await FlushAsyncInternal().ConfigureAwait(false);
+            await FlushAsyncInternal(writeToStream: exception == null).ConfigureAwait(false);
 
             _internalTokenSource?.Dispose();
 
             if (!_leaveOpen)
             {
-#if !netstandard
+#if !NETSTANDARD2_0
                 await InnerStream.DisposeAsync().ConfigureAwait(false);
 #else
                 InnerStream.Dispose();
@@ -251,7 +253,7 @@ namespace System.IO.Pipelines
                 return new ValueTask<FlushResult>(new FlushResult(isCanceled: false, isCompleted: false));
             }
 
-            return FlushAsyncInternal(cancellationToken);
+            return FlushAsyncInternal(writeToStream: true, cancellationToken);
         }
 
         private void Cancel()
@@ -259,18 +261,20 @@ namespace System.IO.Pipelines
             InternalTokenSource.Cancel();
         }
 
-        private async ValueTask<FlushResult> FlushAsyncInternal(CancellationToken cancellationToken = default)
+        private async ValueTask<FlushResult> FlushAsyncInternal(bool writeToStream, CancellationToken cancellationToken = default)
         {
             // Write all completed segments and whatever remains in the current segment
             // and flush the result.
             var reg = new CancellationTokenRegistration();
             if (cancellationToken.CanBeCanceled)
             {
-                reg = cancellationToken.UnsafeRegister(state => ((StreamPipeWriter)state).Cancel(), this);
+                reg = cancellationToken.UnsafeRegister(state => ((StreamPipeWriter)state!).Cancel(), this);
             }
 
             if (_tailBytesBuffered > 0)
             {
+                Debug.Assert(_tail != null);
+
                 // Update any buffered data
                 _tail.End += _tailBytesBuffered;
                 _tailBytesBuffered = 0;
@@ -281,13 +285,13 @@ namespace System.IO.Pipelines
                 CancellationToken localToken = InternalTokenSource.Token;
                 try
                 {
-                    BufferSegment segment = _head;
+                    BufferSegment? segment = _head;
                     while (segment != null)
                     {
                         BufferSegment returnSegment = segment;
                         segment = segment.NextSegment;
 
-                        if (returnSegment.Length > 0)
+                        if (returnSegment.Length > 0 && writeToStream)
                         {
                             await InnerStream.WriteAsync(returnSegment.Memory, localToken).ConfigureAwait(false);
                         }
@@ -299,7 +303,7 @@ namespace System.IO.Pipelines
                         _head = segment;
                     }
 
-                    if (_bytesBuffered > 0)
+                    if (_bytesBuffered > 0 && writeToStream)
                     {
                         await InnerStream.FlushAsync(localToken).ConfigureAwait(false);
                     }
@@ -331,26 +335,28 @@ namespace System.IO.Pipelines
             }
         }
 
-        private void FlushInternal()
+        private void FlushInternal(bool writeToStream)
         {
             // Write all completed segments and whatever remains in the current segment
             // and flush the result.
             if (_tailBytesBuffered > 0)
             {
+                Debug.Assert(_tail != null);
+
                 // Update any buffered data
                 _tail.End += _tailBytesBuffered;
                 _tailBytesBuffered = 0;
             }
 
-            BufferSegment segment = _head;
+            BufferSegment? segment = _head;
             while (segment != null)
             {
                 BufferSegment returnSegment = segment;
                 segment = segment.NextSegment;
 
-                if (returnSegment.Length > 0)
+                if (returnSegment.Length > 0 && writeToStream)
                 {
-#if !netstandard
+#if !NETSTANDARD2_0
                     InnerStream.Write(returnSegment.Memory.Span);
 #else
                     InnerStream.Write(returnSegment.Memory);
@@ -364,7 +370,7 @@ namespace System.IO.Pipelines
                 _head = segment;
             }
 
-            if (_bytesBuffered > 0)
+            if (_bytesBuffered > 0 && writeToStream)
             {
                 InnerStream.Flush();
             }

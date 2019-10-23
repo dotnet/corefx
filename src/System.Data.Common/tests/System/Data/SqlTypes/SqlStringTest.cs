@@ -34,6 +34,7 @@ using System.Text;
 using System.Diagnostics;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using System.Tests;
 
 namespace System.Data.Tests.SqlTypes
 {
@@ -173,9 +174,8 @@ namespace System.Data.Tests.SqlTypes
         [Fact]
         public void Properties()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("en-AU"))
             {
-                CultureInfo.CurrentCulture = new CultureInfo("en-AU");
                 var one = new SqlString("First TestString");
 
                 // CompareInfo
@@ -196,9 +196,7 @@ namespace System.Data.Tests.SqlTypes
 
                 // Value
                 Assert.Equal("First TestString", one.Value);
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         // PUBLIC METHODS

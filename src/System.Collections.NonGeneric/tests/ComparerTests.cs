@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Tests;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -39,43 +40,38 @@ namespace System.Collections.Tests
         [Fact]
         public void DefaultInvariant_Compare()
         {
-            RemoteExecutor.Invoke(() =>
+            var cultureNames = new string[]
             {
-                var cultureNames = new string[]
-{
-                    "cs-CZ","da-DK","de-DE","el-GR","en-US",
-                    "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
-                    "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
-                    "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
-                    "zh-CN","zh-HK","zh-TW"
-};
+                "cs-CZ","da-DK","de-DE","el-GR","en-US",
+                "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
+                "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
+                "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
+                "zh-CN","zh-HK","zh-TW"
+            };
 
-                var string1 = new string[] { "Apple", "abc", };
-                var string2 = new string[] { "\u00C6ble", "ABC" };
+            var string1 = new string[] { "Apple", "abc", };
+            var string2 = new string[] { "\u00C6ble", "ABC" };
 
-                foreach (string cultureName in cultureNames)
+            foreach (string cultureName in cultureNames)
+            {
+                CultureInfo culture;
+                try
                 {
-                    CultureInfo culture;
-                    try
-                    {
-                        culture = new CultureInfo(cultureName);
-                    }
-                    catch (CultureNotFoundException)
-                    {
-                        continue;
-                    }
+                    culture = new CultureInfo(cultureName);
+                }
+                catch (CultureNotFoundException)
+                {
+                    continue;
+                }
 
-                    // Set current culture
-                    CultureInfo.CurrentCulture = culture;
-                    CultureInfo.CurrentUICulture = culture;
-
-                    // All cultures should sort the same way, irrespective of the thread's culture
+                // All cultures should sort the same way, irrespective of the thread's culture
+                using (new ThreadCultureChange(culture, culture))
+                {
                     Comparer comp = Comparer.DefaultInvariant;
                     Assert.Equal(1, comp.Compare(string1[0], string2[0]));
                     Assert.Equal(-1, comp.Compare(string1[1], string2[1]));
                 }
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]

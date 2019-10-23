@@ -57,7 +57,7 @@ namespace System.IO.Pipelines
 
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 
-        public sealed override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) =>
+        public sealed override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state) =>
             TaskToApm.Begin(ReadAsync(buffer, offset, count, default), callback, state);
 
         public sealed override int EndRead(IAsyncResult asyncResult) =>
@@ -68,7 +68,7 @@ namespace System.IO.Pipelines
             return ReadAsyncInternal(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
         }
 
-#if !netstandard
+#if !NETSTANDARD2_0
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
             return ReadAsyncInternal(buffer, cancellationToken);
