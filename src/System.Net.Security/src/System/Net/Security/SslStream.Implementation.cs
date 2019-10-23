@@ -501,7 +501,6 @@ namespace System.Net.Security
             if (message.Failed)
             {
                 StartSendAuthResetSignal(null, asyncRequest, ExceptionDispatchInfo.Capture(new AuthenticationException(SR.net_auth_SSPI, message.GetException())));
-                //throw new AuthenticationException(SR.net_auth_SSPI, message.GetException());
                 return;
             }
             else if (message.Done && !_pendingReHandshake)
