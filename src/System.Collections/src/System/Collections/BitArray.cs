@@ -130,6 +130,10 @@ namespace System.Collections
                 goto LessThan32;
             }
 
+            // Comparing with 1s would get rid of the final negation, however this would not work for some CLR bools
+            // (true for any non-zero values, false for 0) - any values between 2-255 will be interpreted as false.
+            // Instead, We compare with zeroes then negate the result to ensure compatibility.
+
             if (Avx2.IsSupported)
             {
                 fixed (bool* ptr = values)
@@ -151,8 +155,8 @@ namespace System.Collections
                     {
                         Vector128<byte> lowerVector = Sse2.LoadVector128((byte*)ptr + i);
                         Vector128<byte> lowerIsFalse = Sse2.CompareEqual(lowerVector, Vector128<byte>.Zero);
-                        int lower = Sse2.MoveMask(lowerIsFalse) ^ 0xFFFF; // We can't negate the upper 16 bits, since that'll affect the result of OR
-
+                        int lower = Sse2.MoveMask(lowerIsFalse) ^ 0xFFFF; // Negate only the lower 16 bits to leave the upper bits zeroed.
+                                                                          // Otherwise, the OR'ed end result will be affected.
                         Vector128<byte> upperVector = Sse2.LoadVector128((byte*)ptr + i + Vector128<byte>.Count);
                         Vector128<byte> upperIsFalse = Sse2.CompareEqual(upperVector, Vector128<byte>.Zero);
                         int upper = ~Sse2.MoveMask(upperIsFalse);
@@ -733,16 +737,8 @@ namespace System.Collections
         // The mask used when shuffling a single int into Vector128/256.
         // On little endian machines, the lower 8 bits of int belong in the first byte, next lower 8 in the second and so on.
         // We place the bytes that contain the bits to its respective byte so that we can mask out only the relevant bits later.
-        private static ReadOnlySpan<byte> ShuffleMask_CopyToBoolArray => new byte[] { 0, 0, 0, 0, 0, 0, 0, 0,
-                                                                                      1, 1, 1, 1, 1, 1, 1, 1,
-                                                                                      2, 2, 2, 2, 2, 2, 2, 2,
-                                                                                      3, 3, 3, 3, 3, 3, 3, 3 };
-
-        // The mask used when masking out the relevant bits of a byte, so that each byte only contains the relevant bit.
-        private static ReadOnlySpan<byte> BitMask_CopyToBoolArray => new byte[] { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
-                                                                                  0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
-                                                                                  0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
-                                                                                  0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
+        private static readonly Vector128<byte> s_lowerShuffleMask_CopyToBoolArray = Vector128.Create(0, 0x01010101_01010101).AsByte();
+        private static readonly Vector128<byte> s_upperShuffleMask_CopyToBoolArray = Vector128.Create(0x_02020202_02020202, 0x03030303_03030303).AsByte();
 
         public unsafe void CopyTo(Array array, int index)
         {
@@ -836,17 +832,9 @@ namespace System.Collections
 
                 if (Avx2.IsSupported)
                 {
-                    Vector256<byte> shuffleMask;
-                    Vector256<byte> bitMask;
+                    Vector256<byte> shuffleMask = Vector256.Create(s_lowerShuffleMask_CopyToBoolArray, s_upperShuffleMask_CopyToBoolArray);
+                    Vector256<byte> bitMask = Vector256.Create(0x80402010_08040201).AsByte();
                     Vector256<byte> ones = Vector256.Create((byte)1);
-                    fixed (byte* ptr = ShuffleMask_CopyToBoolArray)
-                    {
-                        shuffleMask = Avx.LoadVector256(ptr);
-                    }
-                    fixed (byte* ptr = BitMask_CopyToBoolArray)
-                    {
-                        bitMask = Avx.LoadVector256(ptr);
-                    }
 
                     fixed (bool* destination = &boolArray[index])
                     {
@@ -866,19 +854,10 @@ namespace System.Collections
                 }
                 else if (Ssse3.IsSupported)
                 {
-                    Vector128<byte> lowerShuffleMask;
-                    Vector128<byte> higherShuffleMask;
-                    Vector128<byte> bitMask;
+                    Vector128<byte> lowerShuffleMask = s_lowerShuffleMask_CopyToBoolArray;
+                    Vector128<byte> upperShuffleMask = s_upperShuffleMask_CopyToBoolArray;
+                    Vector128<byte> bitMask = Vector128.Create(0x80402010_08040201).AsByte(); ;
                     Vector128<byte> ones = Vector128.Create((byte)1);
-                    fixed (byte* ptr = ShuffleMask_CopyToBoolArray)
-                    {
-                        lowerShuffleMask = Sse2.LoadVector128(ptr);
-                        higherShuffleMask = Sse2.LoadVector128(ptr + 16);
-                    }
-                    fixed (byte* ptr = BitMask_CopyToBoolArray)
-                    {
-                        bitMask = Sse2.LoadVector128(ptr);
-                    }
 
                     fixed (bool* destination = &boolArray[index])
                     {
@@ -892,7 +871,7 @@ namespace System.Collections
                             Vector128<byte> normalizedLower = Sse2.Min(extractedLower, ones);
                             Sse2.Store((byte*)destination + i, normalizedLower);
 
-                            Vector128<byte> shuffledHigher = Ssse3.Shuffle(scalar.AsByte(), higherShuffleMask);
+                            Vector128<byte> shuffledHigher = Ssse3.Shuffle(scalar.AsByte(), upperShuffleMask);
                             Vector128<byte> extractedHigher = Sse2.And(shuffledHigher, bitMask);
                             Vector128<byte> normalizedHigher = Sse2.Min(extractedHigher, ones);
                             Sse2.Store((byte*)destination + i + Vector128<byte>.Count, normalizedHigher);
