@@ -394,10 +394,10 @@ namespace System.IO
 
                 for (int i = 0; i < numEvents; i++)
                 {
-                    using (var parsedEvent = ParseEvent(eventPaths[i]))
+                    using (ParsedEvent parsedEvent = ParseEvent(eventPaths[i]))
                     {
-                        var path = parsedEvent.Path;
-                        Debug.Assert(path[path.Length - 1] != '/', "Trailing slashes on events is not supported");
+                        ReadOnlySpan<char> path = parsedEvent.Path;
+                        Debug.Assert(path[^1] != '/', "Trailing slashes on events is not supported");
 
                         // Match Windows and don't notify us about changes to the Root folder
                         if (_fullDirectory.Length >= path.Length && path.Equals(_fullDirectory.AsSpan(0, path.Length), StringComparison.OrdinalIgnoreCase))
@@ -425,7 +425,7 @@ namespace System.IO
                             if (!path.Equals(_fullDirectory, StringComparison.OrdinalIgnoreCase))
                             {
                                 // Remove the root directory to get the relative path
-                                relativePath = path.Slice(_fullDirectory.Length);
+                                relativePath = path[_fullDirectory.Length..];
                             }
 
                             // Raise a notification for the event
@@ -445,7 +445,7 @@ namespace System.IO
                             {
                                 // Find the rename that is paired to this rename, which should be the next rename in the list with id increased by one.
                                 // There is an Radar related to this pairing: http://www.openradar.me/13461247.
-                                var pairedId = FindRenameChangePairedChange(i, eventFlags, eventIds);
+                                int? pairedId = FindRenameChangePairedChange(i, eventFlags, eventIds);
                                 if (!pairedId.HasValue)
                                 {
                                     // Getting here means we have a rename without a pair, meaning it should be a create for the
@@ -468,9 +468,11 @@ namespace System.IO
                                 {
                                     // Remove the base directory prefix and add the paired event to the list of
                                     // events to skip and notify the user of the rename
-                                    ReadOnlySpan<char> newPathRelativeName = ParseEvent(eventPaths[pairedId.GetValueOrDefault()]).Path.Slice(_fullDirectory.Length);
-                                    watcher.NotifyRenameEventArgs(WatcherChangeTypes.Renamed, newPathRelativeName, relativePath);
-
+                                    using (ParsedEvent pairedEvent =  ParseEvent(eventPaths[pairedId.GetValueOrDefault()]))
+                                    {
+                                        ReadOnlySpan<char> newPathRelativeName = pairedEvent.Path[_fullDirectory.Length..];
+                                        watcher.NotifyRenameEventArgs(WatcherChangeTypes.Renamed, newPathRelativeName, relativePath);
+                                    }
                                     handledRenameEvents = pairedId.GetValueOrDefault();
                                 }
                             }
@@ -479,7 +481,7 @@ namespace System.IO
                 }
                 this._context = ExecutionContext.Capture();
 
-                __ParsedEvent ParseEvent(byte* nativeEventPath)
+                ParsedEvent ParseEvent(byte* nativeEventPath)
                 {
                     int byteCount = 0;
                     Debug.Assert(nativeEventPath != null);
@@ -493,31 +495,29 @@ namespace System.IO
                     }
 
                     Debug.Assert(byteCount > 0, "Empty events are not supported");
-                    var tempBuffer = ArrayPool<char>.Shared.Rent(Encoding.UTF8.GetMaxCharCount(byteCount));
-                    Span<char> eventPath = tempBuffer.AsSpan(); ;
+                    char[] tempBuffer = ArrayPool<char>.Shared.Rent(Encoding.UTF8.GetMaxCharCount(byteCount));
 
                     // Converting an array of bytes to UTF-8 char array
-                    int charCount;
-                    charCount = Encoding.UTF8.GetChars(new ReadOnlySpan<byte>(nativeEventPath, byteCount), eventPath);
-                    return new __ParsedEvent(eventPath.Slice(0, charCount), tempBuffer);
+                    int charCount = Encoding.UTF8.GetChars(new ReadOnlySpan<byte>(nativeEventPath, byteCount), tempBuffer);
+                    return new ParsedEvent(tempBuffer.AsSpan()[..charCount], tempBuffer);
                 }
 
             }
 
-            private readonly ref struct __ParsedEvent
+            private readonly ref struct ParsedEvent
             {
 
-                public __ParsedEvent(ReadOnlySpan<char> path, char[] tempBuffer)
+                public ParsedEvent(ReadOnlySpan<char> path, char[] tempBuffer)
                 {
                     TempBuffer = tempBuffer;
                     Path = path;
                 }
 
-                public readonly ReadOnlySpan<char> Path { get; }
+                public readonly ReadOnlySpan<char> Path;
 
                 public readonly char[] TempBuffer;
 
-                public void Dispose() => ArrayPool<char>.Shared.Return(this.TempBuffer);
+                public void Dispose() => ArrayPool<char>.Shared.Return(TempBuffer);
 
             }
 
@@ -589,16 +589,16 @@ namespace System.IO
                 int currentIndex,
                 Span<FSEventStreamEventFlags> flags, Span<FSEventStreamEventId> ids)
             {
-                var nextIndex = currentIndex + 1;
+                int nextIndex = currentIndex + 1;
 
                 if (nextIndex >= flags.Length)
                     return null;
 
-                var currentEvent = (flags: flags[currentIndex], id: ids[currentIndex]);
-                var nextEvent = (flags: flags[nextIndex], id: ids[nextIndex]);
-
-                if (currentEvent.id + 1 == nextEvent.id && IsFlagSet(nextEvent.flags, FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
+                if (ids[currentIndex] + 1 == ids[nextIndex] &&
+                    IsFlagSet(flags[nextIndex], FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
+                {
                     return nextIndex;
+                }
 
                 return null;
             }

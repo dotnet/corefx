@@ -492,17 +492,17 @@ namespace System.IO.Tests
             return newWatcher;
         }
 
-        internal readonly struct __FiredEvent
+        internal readonly struct FiredEvent
         {
-            public __FiredEvent(WatcherChangeTypes eventType, string dir1, string dir2 = "") => (EventType, Dir1, Dir2) = (eventType, dir1, dir2);
+            public FiredEvent(WatcherChangeTypes eventType, string dir1, string dir2 = "") => (EventType, Dir1, Dir2) = (eventType, dir1, dir2);
 
             public readonly WatcherChangeTypes EventType;
             public readonly string Dir1;
             public readonly string Dir2;
 
-            public override bool Equals(Object obj) => obj is __FiredEvent ? this.Equals((__FiredEvent)obj) : false;
+            public override bool Equals(Object obj) => obj is FiredEvent ? this.Equals((FiredEvent)obj) : false;
 
-            public bool Equals(__FiredEvent other) => this.EventType == other.EventType &&
+            public bool Equals(FiredEvent other) => this.EventType == other.EventType &&
                 this.Dir1 == other.Dir1 &&
                 this.Dir2 == other.Dir2;
 
@@ -514,12 +514,12 @@ namespace System.IO.Tests
         }
 
         // Observe until an expected count of events is triggered, otherwise fail. Return all collected events.
-        internal static List<__FiredEvent> ExpectEvents(FileSystemWatcher watcher, int expectedEvents, Action action)
+        internal static List<FiredEvent> ExpectEvents(FileSystemWatcher watcher, int expectedEvents, Action action)
         {
             var eventsOccured = new AutoResetEvent(false);
             var eventsOrrures = 0;
 
-            var events = new List<__FiredEvent>();
+            var events = new List<FiredEvent>();
 
             ErrorEventArgs error = null;
 
@@ -561,7 +561,7 @@ namespace System.IO.Tests
 
             void addEvent(WatcherChangeTypes eventType, string dir1, string dir2 = "")
             {
-                events.Add(new __FiredEvent(eventType, dir1, dir2));
+                events.Add(new FiredEvent(eventType, dir1, dir2));
                 if (Interlocked.Increment(ref eventsOrrures) == expectedEvents)
                 {
                     eventsOccured.Set();

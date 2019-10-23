@@ -38,7 +38,7 @@ namespace System.IO.Tests
         [InlineData(3)]
         public void File_Move_Multiple_From_Watched_To_Unwatched_Mac(int filesCount)
         {
-            FileMove_Multiple_FromWatchedToUnwatched(filesCount, true);
+            FileMove_Multiple_FromWatchedToUnwatched(filesCount, skipOldEvents: true);
         }
 
         [Theory]
@@ -48,7 +48,7 @@ namespace System.IO.Tests
         [InlineData(3)]
         public void File_Move_From_Watched_To_Unwatched(int filesCount)
         {
-            FileMove_Multiple_FromWatchedToUnwatched(filesCount, false);
+            FileMove_Multiple_FromWatchedToUnwatched(filesCount, skipOldEvents: false);
         }
 
         [Theory]
@@ -207,13 +207,13 @@ namespace System.IO.Tests
 
 
                     // On macOS, for each file we receive two events as describe in comment below.
-                    var expectEvents = filesCount;
+                    int expectEvents = filesCount;
                     if (skipOldEvents)
                     {
                         expectEvents = expectEvents * 3;
                     }
 
-                    IEnumerable<__FiredEvent> events = ExpectEvents(watcher, expectEvents, action);
+                    IEnumerable<FiredEvent> events = ExpectEvents(watcher, expectEvents, action);
 
                     // Remove Created and Changed events as there is racecondition when create file and then observe parent folder. It receives Create and Changed event altought Watcher is not registered yet.
                     if (skipOldEvents)
@@ -221,7 +221,7 @@ namespace System.IO.Tests
                         events = events.Where(x => (x.EventType & (WatcherChangeTypes.Created | WatcherChangeTypes.Changed)) == 0);
                     }
 
-                    var expectedEvents = files.Select(file => new __FiredEvent(WatcherChangeTypes.Deleted, file.FileInWatchedDir));
+                    var expectedEvents = files.Select(file => new FiredEvent(WatcherChangeTypes.Deleted, file.FileInWatchedDir));
 
                     Assert.Equal(expectedEvents, events);
                 }
@@ -251,7 +251,7 @@ namespace System.IO.Tests
                     Action action = () => Array.ForEach(files, file => File.Move(file.FileInUnwatchedDir, file.FileInWatchedDir));
 
                     var events = ExpectEvents(watcher, filesCount, action);
-                    var expectedEvents = files.Select(file => new __FiredEvent(WatcherChangeTypes.Created, file.FileInWatchedDir));
+                    var expectedEvents = files.Select(file => new FiredEvent(WatcherChangeTypes.Created, file.FileInWatchedDir));
 
                     Assert.Equal(expectedEvents, events);
                 }
