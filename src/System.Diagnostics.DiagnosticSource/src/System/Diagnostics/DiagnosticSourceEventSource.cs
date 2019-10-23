@@ -824,6 +824,9 @@ namespace System.Diagnostics
             /// </summary>
             internal class PropertySpec
             {
+                private const string CurrentActivityPropertyName = "*Activity";
+                private const string EnumeratePropertyName = "*Enumerate";
+
                 /// <summary>
                 /// Make a new PropertySpec for a property named 'propertyName'.
                 /// For convenience you can set he 'next' field to form a linked
@@ -835,7 +838,7 @@ namespace System.Diagnostics
                     _propertyName = propertyName;
 
                     // detect well-known names that are static functions
-                    if (_propertyName == "*Activity")
+                    if (_propertyName == CurrentActivityPropertyName)
                     {
                         IsStatic = true;
                     }
@@ -887,21 +890,15 @@ namespace System.Diagnostics
                     /// <summary>
                     /// Create a property fetcher for a propertyName
                     /// </summary>
-                    public static PropertyFetch? FetcherForProperty(Type? type, string propertyName)
+                    public static PropertyFetch FetcherForProperty(Type? type, string propertyName)
                     {
                         if (propertyName == null)
                             return new PropertyFetch(type);     // returns null on any fetch.
-                        if (propertyName == "*Activity")
+                        if (propertyName == CurrentActivityPropertyName)
                             return new CurrentActivityPropertyFetch();
 
-                        if (type == null)
-                        {
-                            // if we get here it is a bug, type should only be null for the well-known
-                            // static fetchers that were already checked above
-                            Debug.Assert(type != null);
-                            return new PropertyFetch(type);     // returns null on any fetch.
-                        }
-                        else if (propertyName == "*Enumerate")
+                        Debug.Assert(type != null, "Type should only be null for the well-known static fetchers already checked");
+                        if (propertyName == EnumeratePropertyName)
                         {
                             // If there are multiple implementations of IEnumerable<T>, this arbitrarily uses the first one
                             foreach (Type iFaceType in type.GetInterfaces())
@@ -911,13 +908,15 @@ namespace System.Diagnostics
                                 {
                                     continue;
                                 }
+
                                 Type elemType = iFaceType.GetGenericArguments()[0];
-                                var instantiatedTypedPropertyFetcher = typeof(EnumeratePropertyFetch<>)
+                                Type instantiatedTypedPropertyFetcher = typeof(EnumeratePropertyFetch<>)
                                     .GetTypeInfo().MakeGenericType(elemType);
-                                return (PropertyFetch?)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type);
+                                return (PropertyFetch)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type)!;
                             }
 
                             // no implemenation of IEnumerable<T> found, return a null fetcher
+                            Logger.Message($"*Enumerate applied to non-enumerable type {type}");
                             return new PropertyFetch(type);
                         }
                         else
@@ -925,13 +924,14 @@ namespace System.Diagnostics
                             PropertyInfo? propertyInfo = type.GetTypeInfo().GetDeclaredProperty(propertyName);
                             if (propertyInfo == null)
                             {
+                                Logger.Message($"Property {propertyName} not found on {type}");
                                 return new PropertyFetch(type);
                             }
-                            var typedPropertyFetcher = type.IsValueType ?
+                            Type typedPropertyFetcher = type.IsValueType ?
                                 typeof(ValueTypedFetchProperty<,>) : typeof(RefTypedFetchProperty<,>);
-                            var instantiatedTypedPropertyFetcher = typedPropertyFetcher.GetTypeInfo().MakeGenericType(
+                            Type instantiatedTypedPropertyFetcher = typedPropertyFetcher.GetTypeInfo().MakeGenericType(
                                 propertyInfo.DeclaringType!, propertyInfo.PropertyType);
-                            return (PropertyFetch?)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type, propertyInfo);
+                            return (PropertyFetch)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type, propertyInfo)!;
                         }
                     }
 

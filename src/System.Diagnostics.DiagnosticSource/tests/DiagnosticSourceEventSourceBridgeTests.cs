@@ -801,7 +801,6 @@ namespace System.Diagnostics.Tests
                         );
 
                     Activity activity1 = new Activity("TestActivity1");
-                    //activity1.SetParentId("|foo123");
                     activity1.SetIdFormat(ActivityIdFormat.W3C);
                     activity1.TraceStateString = "hi_there";
                     activity1.AddTag("one", "1");
