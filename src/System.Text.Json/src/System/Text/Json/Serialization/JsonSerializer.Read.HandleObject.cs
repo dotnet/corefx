@@ -52,6 +52,8 @@ namespace System.Text.Json
                     state.Current.ReturnValue = value;
                     state.Current.DetermineIfDictionaryCanBePopulated(state.Current.ReturnValue);
                 }
+
+                state.Current.CollectionPropertyInitialized = true;
             }
             else
             {
@@ -68,6 +70,12 @@ namespace System.Text.Json
             if (state.Current.PropertyRefCache != null)
             {
                 state.Current.JsonClassInfo.UpdateSortedPropertyCache(ref state.Current);
+            }
+
+            if (state.Current.JsonClassInfo.ClassType == ClassType.Value)
+            {
+                // We should be in a converter, thus we must have bad JSON.
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonPropertyInfo.RuntimePropertyType);
             }
 
             object value = state.Current.ReturnValue;
