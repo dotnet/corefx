@@ -10,6 +10,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 {
+    [OuterLoop("These tests run serially at about 1 second each, and the code shouldn't change that often.")]
     [ActiveIssue(41974, TestPlatforms.OSX)]
     public static class DynamicRevocationTests
     {
