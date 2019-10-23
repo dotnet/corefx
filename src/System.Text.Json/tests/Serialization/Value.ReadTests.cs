@@ -392,13 +392,7 @@ namespace System.Text.Json.Serialization.Tests
         //       time the memory is accessed which triggers the full memory allocation.
         [ConditionalTheory(nameof(IsX64))]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
-        [InlineData(MaxInt - 3)]
-        [InlineData(MaxInt - 2)]
-        [InlineData(MaxInt - 1)]
         [InlineData(MaxInt)]
-        [InlineData(MaxInt + 1)]
-        [InlineData(MaxInt + 2)]
-        [InlineData(MaxInt + 3)]
         [InlineData(MaximumPossibleStringLength)]
         [OuterLoop]
         public static void VeryLongInputString(int length)
