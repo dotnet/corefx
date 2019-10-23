@@ -352,59 +352,117 @@ namespace System.Collections.Generic
         /// <returns>true if removed; false if not (i.e. if the item wasn't in the HashSet)</returns>
         public bool Remove(T item)
         {
+            int hashCode;
+            int bucket;
+            int last = -1;
+            int collisionCount = 0;
+            int i;
+            Slot[] slots;
+            IEqualityComparer<T>? comparer = _comparer;
+            
             if (_buckets != null)
             {
-                IEqualityComparer<T>? comparer = _comparer;
-                int hashCode = InternalGetHashCode(item, comparer);
-                int bucket = hashCode % _buckets.Length;
-                int last = -1;
-                int collisionCount = 0;
-                Slot[] slots = _slots;
-                for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = slots[i].next)
+                slots = _slots;
+                
+                if (comparer == null)
                 {
-                    if (slots[i].hashCode == hashCode && InternalEquals(slots[i].value, item, comparer))
+                    hashCode = item == null ? 0 : InternalGetHashCode(item.GetHashCode());
+                    bucket = hashCode % _buckets!.Length;
+                    
+                    if (default(T)! != null) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                     {
-                        if (last < 0)
+                        for (i = _buckets[bucket] - 1; i >= 0; last = i, i = slots[i].next)
                         {
-                            // first iteration; update buckets
-                            _buckets[bucket] = slots[i].next + 1;
-                        }
-                        else
-                        {
-                            // subsequent iterations; update 'next' pointers
-                            slots[last].next = slots[i].next;
-                        }
-                        slots[i].hashCode = -1;
-                        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-                        {
-                            slots[i].value = default!;
-                        }
-                        slots[i].next = _freeList;
+                            if (slots[i].hashCode == hashCode && EqualityComparer<T>.Default.Equals(slots[i].value, item))
+                            {
+                                goto ReturnFound;
+                            }
 
-                        _count--;
-                        _version++;
-                        if (_count == 0)
-                        {
-                            _lastIndex = 0;
-                            _freeList = -1;
+                            if (collisionCount >= slots.Length)
+                            {
+                                // The chain of entries forms a loop, which means a concurrent update has happened.
+                                throw new InvalidOperationException("SR.InvalidOperation_ConcurrentOperationsNotSupported");
+                            }
+                            collisionCount++;
                         }
-                        else
-                        {
-                            _freeList = i;
-                        }
-                        return true;
                     }
-
-                    if (collisionCount >= slots.Length)
+                    else
                     {
-                        // The chain of entries forms a loop, which means a concurrent update has happened.
-                        throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                        // Object type: Shared Generic, EqualityComparer<TValue>.Default won't devirtualize
+                        // https://github.com/dotnet/coreclr/issues/17273
+                        // So cache in a local rather than get EqualityComparer per loop iteration
+                        EqualityComparer<T> defaultComparer = EqualityComparer<T>.Default;
+                        
+                        for (i = _buckets[bucket] - 1; i >= 0; last = i, i = slots[i].next)
+                        {
+                            if (slots[i].hashCode == hashCode && defaultComparer.Equals(slots[i].value, item))
+                            {
+                                goto ReturnFound;
+                            }
+
+                            if (collisionCount >= slots.Length)
+                            {
+                                // The chain of entries forms a loop, which means a concurrent update has happened.
+                                throw new InvalidOperationException("SR.InvalidOperation_ConcurrentOperationsNotSupported");
+                            }
+                            collisionCount++;
+                        }
                     }
-                    collisionCount++;
+                }
+                else
+                {
+                    hashCode = item == null ? 0 : InternalGetHashCode(comparer.GetHashCode(item));
+                    bucket = hashCode % _buckets!.Length;
+                    
+                    for (i = _buckets[bucket] - 1; i >= 0; last = i, i = slots[i].next)
+                    {
+                        if (slots[i].hashCode == hashCode && EqualityComparer<T>.Default.Equals(slots[i].value, item))
+                        {
+                            goto ReturnFound;
+                        }
+
+                        if (collisionCount >= slots.Length)
+                        {
+                            // The chain of entries forms a loop, which means a concurrent update has happened.
+                            throw new InvalidOperationException("SR.InvalidOperation_ConcurrentOperationsNotSupported");
+                        }
+                        collisionCount++;
+                    }
                 }
             }
             // either _buckets is null or wasn't found
             return false;
+            
+        ReturnFound:
+            if (last < 0)
+            {
+                // first iteration; update buckets
+                _buckets[bucket] = slots[i].next + 1;
+            }
+            else
+            {
+                // subsequent iterations; update 'next' pointers
+                slots[last].next = slots[i].next;
+            }
+            slots[i].hashCode = -1;
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                slots[i].value = default!;
+            }
+            slots[i].next = _freeList;
+
+            _count--;
+            _version++;
+            if (_count == 0)
+            {
+                _lastIndex = 0;
+                _freeList = -1;
+            }
+            else
+            {
+                _freeList = i;
+            }
+            return true;
         }
 
         /// <summary>
@@ -1507,23 +1565,76 @@ namespace System.Collections.Generic
         {
             Debug.Assert(_buckets != null, "_buckets was null; callers should check first");
 
+            int[]? buckets = _buckets;
             int collisionCount = 0;
-            IEqualityComparer<T>? comparer = _comparer;
-            int hashCode = InternalGetHashCode(item, comparer);
             Slot[] slots = _slots;
-            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = slots[i].next)
-            {
-                if ((slots[i].hashCode) == hashCode && InternalEquals(slots[i].value, item, comparer))
-                {
-                    return i;
-                }
+            IEqualityComparer<T>? comparer = _comparer;
 
-                if (collisionCount >= slots.Length)
+            if (comparer == null)
+            {
+                int hashCode = item == null ? 0 : InternalGetHashCode(item.GetHashCode());
+
+                if (default(T)! != null) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 {
-                    // The chain of entries forms a loop, which means a concurrent update has happened.
-                    throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                    // see note at "HashSet" level describing why "- 1" appears in for loop
+                    for (int i = buckets[hashCode % buckets.Length] - 1; i >= 0; i = slots[i].next)
+                    {
+                        if (slots[i].hashCode == hashCode && EqualityComparer<T>.Default.Equals(slots[i].value, item))
+                        {
+                            return i;
+                        }
+
+                        if (collisionCount >= slots.Length)
+                        {
+                            // The chain of entries forms a loop, which means a concurrent update has happened.
+                            throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                        }
+                        collisionCount++;
+                    }
                 }
-                collisionCount++;
+                else
+                {
+                    // Object type: Shared Generic, EqualityComparer<TValue>.Default won't devirtualize
+                    // https://github.com/dotnet/coreclr/issues/17273
+                    // So cache in a local rather than get EqualityComparer per loop iteration
+                    EqualityComparer<T> defaultComparer = EqualityComparer<T>.Default;
+
+                    // see note at "HashSet" level describing why "- 1" appears in for loop
+                    for (int i = buckets[hashCode % buckets.Length] - 1; i >= 0; i = slots[i].next)
+                    {
+                        if (slots[i].hashCode == hashCode && defaultComparer.Equals(slots[i].value, item))
+                        {
+                            return i;
+                        }
+
+                        if (collisionCount >= slots.Length)
+                        {
+                            // The chain of entries forms a loop, which means a concurrent update has happened.
+                            throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                        }
+                        collisionCount++;
+                    }
+                }
+            }
+            else
+            {
+                int hashCode = item == null ? 0 : InternalGetHashCode(comparer.GetHashCode(item));
+
+                // see note at "HashSet" level describing why "- 1" appears in for loop
+                for (int i = buckets[hashCode % buckets.Length] - 1; i >= 0; i = slots[i].next)
+                {
+                    if (slots[i].hashCode == hashCode && comparer.Equals(slots[i].value, item))
+                    {
+                        return i;
+                    }
+
+                    if (collisionCount >= slots.Length)
+                    {
+                        // The chain of entries forms a loop, which means a concurrent update has happened.
+                        throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                    }
+                    collisionCount++;
+                }
             }
             // wasn't found
             return -1;
