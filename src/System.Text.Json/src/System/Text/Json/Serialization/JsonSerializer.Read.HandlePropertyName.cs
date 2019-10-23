@@ -39,7 +39,7 @@ namespace System.Text.Json
             }
             else if (state.Current.JsonClassInfo.ClassType == ClassType.Value)
             {
-                // We should already be in a converter, thus we must have bad JSON.
+                // We should be in a converter, thus we must have bad JSON.
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonPropertyInfo.RuntimePropertyType);
             }
             else

@@ -97,7 +97,6 @@ namespace System.Text.Json
         public override void SetValueAsObject(object obj, object value)
         {
             Debug.Assert(HasSetter);
-
             TDeclaredProperty typedValue = (TDeclaredProperty)value;
 
             if (typedValue != null || !IgnoreNullValues)
