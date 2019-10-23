@@ -45,10 +45,16 @@ namespace System.Text.Json
             if (state.Current.IsProcessingIDictionaryConstructible())
             {
                 state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
+                state.Current.CollectionPropertyInitialized = true;
             }
             else
             {
                 state.Current.ReturnValue = classInfo.CreateObject();
+
+                if (state.Current.IsProcessingDictionary())
+                {
+                    state.Current.CollectionPropertyInitialized = true;
+                }
             }
         }
 
@@ -58,6 +64,12 @@ namespace System.Text.Json
             Debug.Assert(
                 (!state.Current.IsProcessingDictionary() || state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo) &&
                 !state.Current.IsProcessingIDictionaryConstructible());
+
+            if (state.Current.JsonClassInfo.ClassType == ClassType.Value)
+            {
+                // We should be in a converter, thus we must have bad JSON.
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonPropertyInfo.RuntimePropertyType);
+            }
 
             // Check if we are trying to build the sorted cache.
             if (state.Current.PropertyRefCache != null)
