@@ -322,16 +322,17 @@ namespace System.Text.Json
             fixed (char* pValue = value)
             {
                 int idx = 0;
+                uint length = (uint)value.Length;
 
                 // Some implementations of JavascriptEncoder.FindFirstCharacterToEncode may not accept
                 // null pointers and gaurd against that. Hence, check up-front and fall down to return -1.
-                if (encoder == null || value.IsEmpty)
+                if (encoder == null || length == 0)
                 {
                     short* ptr = (short*)pValue;
-                    short* end = ptr + value.Length;
+                    short* end = ptr + length;
 
 #if BUILDING_INBOX_LIBRARY
-                    if (Sse2.IsSupported && value.Length >= 8)
+                    if (Sse2.IsSupported && length >= 8)
                     {
                         short* vectorizedEnd = end - 2 * Vector128<short>.Count;
                         int index;
@@ -391,9 +392,10 @@ namespace System.Text.Json
                         // Process the remaining characters.
                         Debug.Assert(end - ptr < Vector128<short>.Count);
 
-                        const int thresholdForRemainingVectorized = 4;
+                        const int thresholdForRemainingVectorized = 5;
                         // Process the remaining elements vectorized, only if the remaining count
                         // is above thresholdForRemainingVectorized, otherwise process them sequential.
+                        // Threshold found by testing.
                         if (ptr < end - thresholdForRemainingVectorized)
                         {
                             ptr = vectorizedEnd;
