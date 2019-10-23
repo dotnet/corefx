@@ -100,7 +100,7 @@ namespace System.Text.Json
             0b_00000111,        // low-nibble 2
             0b_00000011,        // low-nibble 3
             0b_00000011,        // low-nibble 4
-            0b_00000111,        // low-nibble 5
+            0b_00000011,        // low-nibble 5
             0b_00000111,        // low-nibble 6
             0b_00000111,        // low-nibble 7
             0b_00000011,        // low-nibble 8
@@ -176,7 +176,10 @@ namespace System.Text.Json
             Vector128<sbyte> bitPositions = Ssse3.Shuffle(s_bitPosLookup, highNibbles);
 
             Vector128<sbyte> mask = Sse2.And(bitPositions, bitMask);
-            mask = Sse2.CompareGreaterThan(mask, s_zero128);
+
+            Vector128<sbyte> ne0Gt = Sse2.CompareGreaterThan(mask, s_zero128);
+            Vector128<sbyte> ne0Lt = Sse2.CompareLessThan(mask, s_zero128);
+            mask = Sse2.Or(ne0Gt, ne0Lt);
 
             return mask;
         }
