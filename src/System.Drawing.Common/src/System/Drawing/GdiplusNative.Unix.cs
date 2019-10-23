@@ -215,7 +215,7 @@ namespace System.Drawing
             [DllImport(LibraryName, ExactSpelling = true)]
             internal static extern int GdipFillRectanglesI(IntPtr graphics, IntPtr brush, Rectangle[] rects, int count);
 
-            [DllImport(LibraryName, ExactSpelling = true)]
+            [DllImport(LibraryName, ExactSpelling = true, CharSet = CharSet.Unicode)]
             internal static extern int GdipDrawString(IntPtr graphics, string text, int len, IntPtr font, ref RectangleF rc, IntPtr format, IntPtr brush);
 
             [DllImport(LibraryName, ExactSpelling = true)]
