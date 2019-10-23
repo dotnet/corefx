@@ -46,8 +46,6 @@
     <PrereleaseLibraryPackage Include="System.Reflection.Emit.ILGeneration" />
     <PrereleaseLibraryPackage Include="System.Reflection.Emit.Lightweight" />
     <PrereleaseLibraryPackage Include="System.Runtime.Caching" />
-    <PrereleaseLibraryPackage Include="System.Runtime.WindowsRuntime" />
-    <PrereleaseLibraryPackage Include="System.Runtime.WindowsRuntime.UI.Xaml" />
     <PrereleaseLibraryPackage Include="System.Security.AccessControl" />
     <PrereleaseLibraryPackage Include="System.Security.Cryptography.Cng" />
     <PrereleaseLibraryPackage Include="System.Security.Cryptography.Pkcs" />
