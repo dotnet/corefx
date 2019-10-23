@@ -40,7 +40,7 @@ internal static partial class Interop
             public byte NumAddressBytes;
             public fixed byte AddressBytes[8];
             public byte SupportsMulticast;
-             private fixed byte __padding[3];
+            private fixed byte __padding[3];
         }
 
         public unsafe delegate void IPv4AddressDiscoveredCallback(string ifaceName, IpAddressInfo* ipAddressInfo);

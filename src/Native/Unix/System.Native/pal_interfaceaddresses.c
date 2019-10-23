@@ -44,10 +44,14 @@
 #include <net/route.h>
 #endif
 
-static inline uint8_t mask2prefix(uint8_t * mask, int length)
+// Convert mask to prefix length e.g. 255.255.255.0 -> 24
+// mask parameter is pointer to buffer where address starts and length is
+// buffer length e.g. 4 for IPv4 and 16 for IPv6.
+// Code bellow counts consecutive number of 1 bits.
+static inline uint8_t mask2prefix(uint8_t* mask, int length)
 {
     uint8_t len = 0;
-    uint8_t *end = mask + length;
+    uint8_t* end = mask + length;
 
     if (mask == NULL)
     {
@@ -59,7 +63,7 @@ static inline uint8_t mask2prefix(uint8_t * mask, int length)
     while ((mask < end) && (*mask == 0xff))
     {
         len += 8;
-        mask ++;
+        mask++;
     }
 
     // Get last incomplete byte
@@ -143,7 +147,7 @@ int32_t SystemNative_EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
                 uint32_t scopeId = sain6->sin6_scope_id;
 
                 struct sockaddr_in6* mask_sain6 = (struct sockaddr_in6*)current->ifa_netmask;
-                iai.PrefixLength = mask_sain6 != NULL ? mask2prefix((uint8_t *)&mask_sain6->sin6_addr.s6_addr, NUM_BYTES_IN_IPV6_ADDRESS) : NUM_BYTES_IN_IPV6_ADDRESS * 8;
+                iai.PrefixLength = mask_sain6 != NULL ? mask2prefix((uint8_t*)&mask_sain6->sin6_addr.s6_addr, NUM_BYTES_IN_IPV6_ADDRESS) : NUM_BYTES_IN_IPV6_ADDRESS * 8;
                 onIpv6Found(actualName, &iai, &scopeId);
             }
         }
@@ -233,6 +237,9 @@ int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInter
     }
 
     // Allocate estimated space. It can be little bit more than we need.
+    // To save allocation need for separate free() we will allocate one memory chunk
+    // where we first write out NetworkInterfaceInfo entries immediately followed by
+    // IpAddressInfo list.
     void * memoryBlock = calloc((size_t)count, sizeof(NetworkInterfaceInfo));
     if (memoryBlock == NULL)
     {
@@ -242,6 +249,7 @@ int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInter
     // Reset head pointers again.
     ifaddrsEntry = head;
     *interfaceList = nii = (NetworkInterfaceInfo*)memoryBlock;
+    // address of first IpAddressInfo after all NetworkInterfaceInfo entries.
     *addressList = ai = (IpAddressInfo*)(nii + (count - ip4count - ip6count));
 
     while (ifaddrsEntry != NULL)
@@ -251,10 +259,8 @@ int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInter
         uint ifindex = if_nametoindex(ifaddrsEntry->ifa_name);
         for (index = 0; index < (int)ifcount; index ++)
         {
-            //if (strcmp(ni[index].Name, entry->ifa_name) == 0)
             if (((NetworkInterfaceInfo*)memoryBlock)[index].InterfaceIndex == ifindex)
             {
-                //current = &ni[index];
                 nii = &((NetworkInterfaceInfo*)memoryBlock)[index];
                 break;
             }
@@ -367,7 +373,12 @@ int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInter
                         ecmd.cmd = ETHTOOL_GSET;
                         if (ioctl(socketfd, SIOCETHTOOL, &ifr) == 0)
                         {
-                            nii->Speed = (int)ethtool_cmd_speed(&ecmd) * 1000000; // convert from mbits
+                            nii->Speed = (int)ethtool_cmd_speed(&ecmd);
+                            if (nii->Speed > 0)
+                            {
+                                // If we did not get -1
+                                nii->Speed *= 1000000; // convert from mbits
+                            }
                         }
                     }
                 }

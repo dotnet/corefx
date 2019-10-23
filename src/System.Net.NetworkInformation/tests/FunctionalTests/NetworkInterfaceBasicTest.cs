@@ -15,9 +15,9 @@ namespace System.Net.NetworkInformation.Tests
     {
         private readonly ITestOutputHelper _log;
 
-        public NetworkInterfaceBasicTest()
+        public NetworkInterfaceBasicTest(ITestOutputHelper output)
         {
-            _log = TestLogging.GetInstance();
+            _log = output;
         }
 
         [Fact]
