@@ -53,9 +53,7 @@ namespace System.Text.Json
 
         public static int NeedsEscaping(ReadOnlySpan<byte> value, JavaScriptEncoder encoder)
         {
-            return encoder == null ?
-                JavaScriptEncoder.Default.FindFirstCharacterToEncodeUtf8(value) :
-                encoder.FindFirstCharacterToEncodeUtf8(value);
+            return (encoder ?? JavaScriptEncoder.Default).FindFirstCharacterToEncodeUtf8(value);
         }
 
         public static unsafe int NeedsEscaping(ReadOnlySpan<char> value, JavaScriptEncoder encoder)
@@ -72,9 +70,7 @@ namespace System.Text.Json
                     goto Return;
                 }
 
-                idx = encoder == null ?
-                    JavaScriptEncoder.Default.FindFirstCharacterToEncode(ptr, value.Length) :
-                    encoder.FindFirstCharacterToEncode(ptr, value.Length);
+                idx = (encoder ?? JavaScriptEncoder.Default).FindFirstCharacterToEncode(ptr, value.Length);
 
             Return:
                 return idx;
