@@ -5,9 +5,48 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+using System.Threading;
+
 namespace System.Net.Quic
 {
-    public sealed class QuicConnection
+    public sealed class QuicConnection : System.IDisposable
     {
+        public QuicConnection(IPEndPoint remoteEndPoint, System.Net.Security.SslClientAuthenticationOptions sslClientAuthenticationOptions, IPEndPoint localEndPoint = null, bool mock = false) { }
+        public System.Threading.Tasks.ValueTask ConnectAsync(System.Threading.CancellationToken cancellationToken = default) { throw null; }
+        public bool Connected => throw null;
+        public IPEndPoint LocalEndPoint => throw null;
+        public IPEndPoint RemoteEndPoint => throw null;
+        public QuicStream CreateUnidirectionalStream() => throw null;
+        public QuicStream CreateBidirectionalStream() => throw null;
+        public System.Threading.Tasks.ValueTask<QuicStream> AcceptStreamAsync(System.Threading.CancellationToken cancellationToken = default) => throw null;
+        public void Close() => throw null;
+        public void Dispose() => throw null;
+    }
+    public sealed class QuicListener : IDisposable
+    {
+        public QuicListener(IPEndPoint listenEndPoint, System.Net.Security.SslServerAuthenticationOptions sslServerAuthenticationOptions, bool mock = false) { }
+        public IPEndPoint ListenEndPoint => throw null;
+        public System.Threading.Tasks.ValueTask<QuicConnection> AcceptConnectionAsync(System.Threading.CancellationToken cancellationToken = default) => throw null;
+        public void Close() => throw null;
+        public void Dispose() => throw null;
+    }
+    public sealed class QuicStream : System.IO.Stream
+    {
+        internal QuicStream() { }
+        public override bool CanSeek => throw null;
+        public override long Length => throw null;
+        public override long Seek(long offset, System.IO.SeekOrigin origin) => throw null;
+        public override void SetLength(long value) => throw null;
+        public override long Position { get => throw null; set => throw null; }
+        public override bool CanRead => throw null;
+        public override bool CanWrite => throw null;
+        public override void Flush() => throw null;
+        public override int Read(byte[] buffer, int offset, int count) => throw null;
+        public override void Write(byte[] buffer, int offset, int count) => throw null;
+        public System.Threading.Tasks.ValueTask ConnectAsync(System.Threading.CancellationToken cancellationToken = default) => throw null;
+        public bool Connected => throw null;
+        public int StreamId => throw null;
+        public void ShutdownRead() => throw null;
+        public void ShutdownWrite() => throw null;
     }
 }
