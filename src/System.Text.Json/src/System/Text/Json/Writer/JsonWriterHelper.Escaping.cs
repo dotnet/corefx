@@ -62,7 +62,7 @@ namespace System.Text.Json
         public static unsafe int NeedsEscaping(ReadOnlySpan<char> value, JavaScriptEncoder encoder)
         {
             // Some implementations of JavaScriptEncoder.FindFirstCharacterToEncode may not accept
-            // null pointers and gaurd against that. Hence, check up-front to return -1.
+            // null pointers and guard against that. Hence, check up-front to return -1.
             if (value.IsEmpty)
             {
                 return -1;
