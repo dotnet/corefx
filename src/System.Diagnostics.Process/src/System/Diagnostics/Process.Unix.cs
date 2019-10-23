@@ -749,14 +749,14 @@ namespace System.Diagnostics
             return null;
         }
 
-        private static volatile int s_ticksPerSecond;
+        private static long s_ticksPerSecond;
 
         /// <summary>Convert a number of "jiffies", or ticks, to a TimeSpan.</summary>
         /// <param name="ticks">The number of ticks.</param>
         /// <returns>The equivalent TimeSpan.</returns>
         internal static TimeSpan TicksToTimeSpan(double ticks)
         {
-            int ticksPerSecond = s_ticksPerSecond;
+            long ticksPerSecond = Volatile.Read(ref s_ticksPerSecond);
             if (ticksPerSecond == 0)
             {
                 // Look up the number of ticks per second in the system's configuration,
@@ -766,8 +766,8 @@ namespace System.Diagnostics
                 {
                     throw new Win32Exception();
                 }
-                
-                s_ticksPerSecond = ticksPerSecond;
+
+                Volatile.Write(ref s_ticksPerSecond, ticksPerSecond);
             }
 
             return TimeSpan.FromSeconds(ticks / (double)ticksPerSecond);
