@@ -168,8 +168,6 @@ namespace System.Net.Sockets
 #endif
         }
 
-        private new void SetHandle(IntPtr handle) => SetHandleAndValid(handle);
-
         private void SetHandleAndValid(IntPtr handle)
         {
             Debug.Assert(!IsClosed);
