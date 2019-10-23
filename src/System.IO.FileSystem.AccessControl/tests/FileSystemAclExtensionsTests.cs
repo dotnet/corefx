@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.VisualBasic;
 using Xunit;
 
@@ -194,7 +195,7 @@ namespace System.IO
             }
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsFullFramework))]
+        [Fact]
         public void DirectoryInfo_Create_NullDirectoryInfo()
         {
             DirectoryInfo info = null;
@@ -202,7 +203,7 @@ namespace System.IO
 
             if (PlatformDetection.IsFullFramework)
             {
-                Assert.Throws<NullReferenceException>(() => info.Create(security));
+                Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.Create(info, security));
             }
             else
             {
@@ -221,7 +222,14 @@ namespace System.IO
         public void DirectoryInfo_Create_NullDirectorySecurity()
         {
             DirectoryInfo info = new DirectoryInfo("path");
-            Assert.Throws<ArgumentNullException>(() => info.Create(null));
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.Create(info, null));
+            }
+            else
+            {
+                Assert.Throws<ArgumentNullException>(() => info.Create(null));
+            }
         }
 
         [Fact]
