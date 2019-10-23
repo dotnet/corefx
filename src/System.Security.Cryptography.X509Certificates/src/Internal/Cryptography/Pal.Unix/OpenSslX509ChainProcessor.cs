@@ -32,6 +32,9 @@ namespace Internal.Cryptography.Pal
         private static readonly CachedDirectoryStoreProvider s_userPersonalStore =
             new CachedDirectoryStoreProvider(X509Store.MyStoreName);
 
+        // Save the results of GetX509VerifyCertErrorString as we look them up.
+        // On Windows we preload the entire string table, but on Linux we'll delay-load memoize
+        // to avoid needing to know the upper bound of error codes for the particular build of OpenSSL.
         private static readonly ConcurrentDictionary<Interop.Crypto.X509VerifyStatusCode, string> s_errorStrings =
             new ConcurrentDictionary<Interop.Crypto.X509VerifyStatusCode, string>();
 
@@ -464,8 +467,7 @@ namespace Internal.Cryptography.Pal
                         // OCSP_basic_verify can find it.
                         if (chainSize == 1)
                         {
-                            using (SafeSharedX509StackHandle untrusted =
-                                Interop.Crypto.X509StoreCtxGetSharedUntrusted(_storeCtx))
+                            using (SafeSharedX509StackHandle untrusted = Interop.Crypto.X509StoreCtxGetSharedUntrusted(_storeCtx))
                             using (SafeX509Handle upref = Interop.Crypto.X509UpRef(_leafHandle))
                             {
                                 Interop.Crypto.PushX509StackField(untrusted, upref);
@@ -585,6 +587,7 @@ namespace Internal.Cryptography.Pal
                 verify = Interop.Crypto.X509VerifyCert(_storeCtx);
             }
 
+            // Keep the bound delegate alive until X509_verify_cert isn't going to call it any longer.
             GC.KeepAlive(workingCallback);
 
             // Because our callback tells OpenSSL that every problem is ignorable, it should tell us that the
@@ -1381,19 +1384,17 @@ namespace Internal.Cryptography.Pal
             public override string ToString()
             {
                 if (!HasErrors)
+                {
                     return "{}";
+                }
 
                 StringBuilder builder = new StringBuilder("{ ");
-                bool delim = false;
+                string delim = "";
 
-                foreach (var code in this)
+                foreach (Interop.Crypto.X509VerifyStatusCode code in this)
                 {
-                    if (delim)
-                        builder.Append(" | ");
-
-                    builder.Append(code);
-                    delim = true;
-
+                    builder.Append(delim).Append(code);
+                    delim = " | ";
                 }
 
                 builder.Append(" }");
