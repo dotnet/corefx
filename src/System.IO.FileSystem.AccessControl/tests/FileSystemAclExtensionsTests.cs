@@ -196,6 +196,7 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void DirectoryInfo_Create_NullDirectoryInfo()
         {
             DirectoryInfo info = null;
@@ -212,6 +213,7 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void DirectoryInfo_Create_DefaultDirectorySecurity()
         {
             DirectorySecurity security = new DirectorySecurity();
@@ -219,6 +221,7 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void DirectoryInfo_Create_NullDirectorySecurity()
         {
             DirectoryInfo info = new DirectoryInfo("path");
@@ -233,6 +236,7 @@ namespace System.IO
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void DirectoryInfo_Create_NotFound()
         {
             DirectoryInfo info = new DirectoryInfo(@"W:\\I\\Do\\Not\\Exist");
@@ -241,6 +245,7 @@ namespace System.IO
         }
 
         [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Allow)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadData, AccessControlType.Allow)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.Write, AccessControlType.Allow)]
