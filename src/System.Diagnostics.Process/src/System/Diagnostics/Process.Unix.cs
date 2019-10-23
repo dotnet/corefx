@@ -749,22 +749,28 @@ namespace System.Diagnostics
             return null;
         }
 
-        private static Lazy<int> _ticksPerSecond = new Lazy<int>(() => {
-            // Look up the number of ticks per second in the system's configuration
-            return Interop.Sys.SysConf(Interop.Sys.SysConfName._SC_CLK_TCK);
-        });
+        private static volatile int s_ticksPerSecond;
 
         /// <summary>Convert a number of "jiffies", or ticks, to a TimeSpan.</summary>
         /// <param name="ticks">The number of ticks.</param>
         /// <returns>The equivalent TimeSpan.</returns>
         internal static TimeSpan TicksToTimeSpan(double ticks)
         {
-            if (_ticksPerSecond.Value <= 0)
+            int ticksPerSecond = s_ticksPerSecond;
+            if (ticksPerSecond == 0)
             {
-                throw new Win32Exception();
+                // Look up the number of ticks per second in the system's configuration,
+                // then use that to convert to a TimeSpan
+                ticksPerSecond = Interop.Sys.SysConf(Interop.Sys.SysConfName._SC_CLK_TCK);
+                if (ticksPerSecond <= 0)
+                {
+                    throw new Win32Exception();
+                }
+                
+                s_ticksPerSecond = ticksPerSecond;
             }
 
-            return TimeSpan.FromSeconds(ticks / _ticksPerSecond.Value);
+            return TimeSpan.FromSeconds(ticks / (double)ticksPerSecond);
         }
 
         /// <summary>Opens a stream around the specified file descriptor and with the specified access.</summary>
