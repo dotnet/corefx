@@ -477,8 +477,7 @@ namespace System.Reflection
 
                 // packed[PackedArgs.DeclaringTypePosition] = typeof(iface);
                 MethodInfo Type_GetTypeFromHandle = typeof(Type).GetRuntimeMethod("GetTypeFromHandle", new Type[] { typeof(RuntimeTypeHandle) })!;
-                int methodToken;
-                _assembly.GetTokenForMethod(mi, out Type declaringType, out methodToken);
+                _assembly.GetTokenForMethod(mi, out Type declaringType, out int methodToken);
                 packedArr.BeginSet(PackedArgs.DeclaringTypePosition);
                 il.Emit(OpCodes.Ldtoken, declaringType);
                 il.Emit(OpCodes.Call, Type_GetTypeFromHandle);
