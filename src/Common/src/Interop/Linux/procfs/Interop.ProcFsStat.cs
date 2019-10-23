@@ -26,7 +26,7 @@ internal static partial class Interop
         internal const string SelfCmdLineFilePath = RootPath + "self" + CmdLineFileName;
         internal const string ProcStatFilePath = RootPath + "stat";
 
-        private static char[] Delimiters => new char[] { ':', ' ', '\t' };
+        private static char[] Delimiters = { ':', ' ', '\t' };
         internal struct ParsedStat
         {
             // Commented out fields are available in the stat data file but
@@ -323,6 +323,7 @@ internal static partial class Interop
             while (parser.MoveNext())
             {
                 string[] elements = parser.ExtractCurrent().Split(Delimiters, 3, StringSplitOptions.RemoveEmptyEntries);
+                
                 if (elements.Length < 2)
                 {
                     continue;
@@ -331,28 +332,41 @@ internal static partial class Interop
                 switch (elements[0])
                 {
                     case "Pid":
-                        results.Pid = int.Parse(elements[1]);
+                        int.TryParse(elements[1], out results.Pid);
                         break;
+
                     case "VmHWM":
-                        results.VmHWM = ulong.Parse(elements[1]) * 1024;
+                        ulong.TryParse(elements[1], out results.VmHWM);
+                        results.VmHWM *= 1024;
                         break;
+
                     case "VmRSS":
-                        results.VmRSS = ulong.Parse(elements[1]) * 1024;
+                        ulong.TryParse(elements[1], out results.VmRSS);
+                        results.VmRSS *= 1024;
                         break;
+
                     case "VmData":
-                        results.VmData = ulong.Parse(elements[1]) * 1024;
+                        ulong.TryParse(elements[1], out results.VmData);
+                        results.VmData *= 1024;
                         break;
+
                     case "VmSwap":
-                        results.VmSwap = ulong.Parse(elements[1]) * 1024;
+                        ulong.TryParse(elements[1], out results.VmSwap);
+                        results.VmSwap *= 1024;
                         break;
+
                     case "VmSize":
-                        results.VmSize = ulong.Parse(elements[1]) * 1024;
+                        ulong.TryParse(elements[1], out results.VmSize);
+                        results.VmSize *= 1024;
                         break;
+
                     case "VmPeak":
-                        results.VmPeak = ulong.Parse(elements[1]) * 1024;
+                        ulong.TryParse(elements[1], out results.VmPeak);
+                        results.VmPeak *= 1024;
                         break;
                 }
             }
+
             result = results;
             return true;
         }
