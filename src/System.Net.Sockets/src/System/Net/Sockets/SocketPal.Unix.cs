@@ -78,7 +78,7 @@ namespace System.Net.Sockets
                     {
                         Interop.Sys.Close(fd);
                         fd = (IntPtr)(-1);
-                        errorCode = SocketPal.GetSocketErrorForErrorCode(error);
+                        errorCode = GetSocketErrorForErrorCode(error);
                     }
                 }
             }
@@ -86,7 +86,7 @@ namespace System.Net.Sockets
             {
                 Debug.Assert(fd == (IntPtr)(-1), $"Unexpected fd: {fd}");
 
-                errorCode = SocketPal.GetSocketErrorForErrorCode(error);
+                errorCode = GetSocketErrorForErrorCode(error);
             }
 
             socket = new SafeSocketHandle(fd, ownsHandle: true);
@@ -908,7 +908,7 @@ namespace System.Net.Sockets
             }
             else
             {
-                bool completed = SocketPal.TryCompleteAccept(listenSocket, socketAddress, ref socketAddressLen, out acceptedFd, out errorCode);
+                bool completed = TryCompleteAccept(listenSocket, socketAddress, ref socketAddressLen, out acceptedFd, out errorCode);
                 if (!completed)
                 {
                     errorCode = SocketError.WouldBlock;

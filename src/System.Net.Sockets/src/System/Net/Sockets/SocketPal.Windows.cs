@@ -223,7 +223,7 @@ namespace System.Net.Sockets
             fixed (byte* postPinnedBuffer = postBuffer)
             {
                 bool success = TransmitFileHelper(handle, fileHandle, null, preBuffer, postBuffer, flags);
-                return (success ? SocketError.Success : SocketPal.GetLastSocketError());
+                return (success ? SocketError.Success : GetLastSocketError());
             }
         }
 
