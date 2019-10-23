@@ -3,10 +3,10 @@ trigger: none
 pool:
   name: Hosted Ubuntu 1604
 
-container: mcr.microsoft.com/dotnet-buildtools/prereqs:rhel7_prereqs_2
-
 variables:
-  httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress/
+  httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress
+  sdkBaseImage: sdk-corefx-current
+  stressImage: httpstress
 
 steps:
 - checkout: self
@@ -18,8 +18,7 @@ steps:
   displayName: Build Corefx
   inputs:
     script: |
-      git --version
-      ./build.sh -ci -c $(BUILD_CONFIGURATION)
+      docker build -t $(sdkBaseImage) -f $(Build.SourcesDirectory)/$(HttpStressProject)/corefx.Dockerfile .
 
 - task: CmdLine@2
   displayName: Run HttpStress
@@ -27,10 +26,8 @@ steps:
     targetType: 'inline'
     script: |
       cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
-      # Load testhost sdk in environment
-      . ./load-corefx-testhost.sh -c $(BUILD_CONFIGURATION) -b
-      # Run the stress suite
-      dotnet run -c $(BUILD_CONFIGURATION) -- $(HTTPSTRESS_ARGS)
+      docker build -t $(stressImage) --build-arg SDK_BASE_IMAGE=$(sdkBaseImage) .
+      docker run --rm -e STRESS_ARGS=$(HTTPSTRESS_ARGS) $(stressImage)
 
 - task: PublishBuildArtifacts@1
   displayName: Publish Logs

@@ -4,5 +4,5 @@ FROM $SDK_BASE_IMAGE
 WORKDIR /app
 COPY . .
 
-ENV ARGS='-maxExecutionTime 30 -displayInterval 60'
-CMD dotnet run -c Release -- $ARGS
+ENV STRESS_ARGS='-maxExecutionTime 30 -displayInterval 60'
+CMD dotnet run -c Release -- $STRESS_ARGS
