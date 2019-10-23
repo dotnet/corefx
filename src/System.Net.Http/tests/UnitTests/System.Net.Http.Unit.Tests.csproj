@@ -391,11 +391,19 @@
     <Compile Include="Headers\UriHeaderParserTest.cs" />
     <Compile Include="Headers\ViaHeaderValueTest.cs" />
     <Compile Include="Headers\WarningHeaderValueTest.cs" />
-    <Compile Include="HPack\DynamicTableTest.cs" />
-    <Compile Include="HPack\HPackDecoderTest.cs" />
-    <Compile Include="HPack\HPackIntegerTest.cs" />
     <Compile Include="HPack\HPackRoundtripTests.cs" />
-    <Compile Include="HPack\HuffmanDecodingTests.cs" />
+    <Compile Include="$(CommonPath)\..\tests\Tests\System\Net\Http2\DynamicTableTest.cs">
+      <Link>HPack\DynamicTableTest.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\..\tests\Tests\System\Net\Http2\HPackDecoderTest.cs">
+      <Link>HPack\HPackDecoderTest.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\..\tests\Tests\System\Net\Http2\HPackIntegerTest.cs">
+      <Link>HPack\HPackIntegerTest.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\..\tests\Tests\System\Net\Http2\HuffmanDecodingTests.cs">
+      <Link>HPack\HuffmanDecodingTests.cs</Link>
+    </Compile>
     <Compile Include="HttpContentTest.cs" />
     <Compile Include="HttpRuleParserTest.cs" />
     <Compile Include="MockContent.cs" />

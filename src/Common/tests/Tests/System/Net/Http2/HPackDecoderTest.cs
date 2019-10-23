@@ -15,8 +15,6 @@ using System.Net.Http.HPack;
 using Xunit;
 using System.Buffers;
 
-using HPackEncoder = System.Net.Test.Common.HPackEncoder;
-
 namespace System.Net.Http.Unit.Tests.HPack
 {
     public class HPackDecoderTest

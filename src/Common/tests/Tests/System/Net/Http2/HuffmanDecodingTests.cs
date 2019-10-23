@@ -338,8 +338,6 @@ namespace System.Net.Http.Unit.Tests.HPack
             Assert.Equal(input, decoded.Take(decodedByteCount));
         }
 
-        private static readonly Type s_huffmanDecodingExceptionType = typeof(HttpClient).Assembly.GetType("System.Net.Http.HPack.HuffmanDecodingException");
-
         [Theory]
         [MemberData(nameof(InvalidEncodingData))]
         public void HuffmanDecoding_InvalidEncoding_Throws(byte[] encoded)
@@ -347,7 +345,7 @@ namespace System.Net.Http.Unit.Tests.HPack
             // Worst case decoding is an output byte per 5 input bits, so make the decoded buffer 2 times as big
             byte[] decoded = new byte[encoded.Length * 2];
 
-            Assert.Throws(s_huffmanDecodingExceptionType, () => Huffman.Decode(encoded, ref decoded));
+            Assert.Throws<HuffmanDecodingException>(() => Huffman.Decode(encoded, ref decoded));
         }
 
         // This input sequence will encode to 17 bits, thus offsetting the next character to encode

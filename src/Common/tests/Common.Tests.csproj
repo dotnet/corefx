@@ -123,6 +123,10 @@
     <Compile Include="Tests\System\Collections\Generic\LargeArrayBuilderTests.cs" />
     <Compile Include="Tests\System\IO\RowConfigReaderTests.cs" />
     <Compile Include="Tests\System\Net\HttpKnownHeaderNamesTests.cs" />
+    <Compile Include="Tests\System\Net\Http2\DynamicTableTest.cs" />
+    <Compile Include="Tests\System\Net\Http2\HPackDecoderTest.cs" />
+    <Compile Include="Tests\System\Net\Http2\HPackIntegerTest.cs" />
+    <Compile Include="Tests\System\Net\Http2\HuffmanDecodingTests.cs" />
     <Compile Include="System\Net\Sockets\Fletcher32.cs">
       <Link>System\Net\Sockets\Fletcher32.cs</Link>
     </Compile>
