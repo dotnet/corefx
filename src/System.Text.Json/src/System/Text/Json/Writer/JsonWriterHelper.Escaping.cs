@@ -58,22 +58,16 @@ namespace System.Text.Json
 
         public static unsafe int NeedsEscaping(ReadOnlySpan<char> value, JavaScriptEncoder encoder)
         {
+            // Some implementations of JavaScriptEncoder.FindFirstCharacterToEncode may not accept
+            // null pointers and gaurd against that. Hence, check up-front to return -1.
+            if (value.IsEmpty)
+            {
+                return -1;
+            }
+
             fixed (char* ptr = value)
             {
-                int idx = 0;
-
-                // Some implementations of JavascriptEncoder.FindFirstCharacterToEncode may not accept
-                // null pointers and gaurd against that. Hence, check up-front and fall down to return -1.
-                if (value.IsEmpty)
-                {
-                    idx = -1; // All characters are allowed.
-                    goto Return;
-                }
-
-                idx = (encoder ?? JavaScriptEncoder.Default).FindFirstCharacterToEncode(ptr, value.Length);
-
-            Return:
-                return idx;
+                return (encoder ?? JavaScriptEncoder.Default).FindFirstCharacterToEncode(ptr, value.Length);
             }
         }
 
