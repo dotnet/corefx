@@ -28,6 +28,8 @@ namespace System.Text.Json
         private JsonClassInfo _runtimeClassInfo;
         private JsonClassInfo _declaredTypeClassInfo;
 
+        private JsonPropertyInfo _dictionaryValuePropertyPolicy;
+
         public bool CanBeNull { get; private set; }
 
         public ClassType ClassType;
@@ -217,6 +219,39 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        /// Return the JsonPropertyInfo for the TValue in IDictionary{string, TValue} when deserializing.
+        /// </summary>
+        /// <remarks>
+        /// This should not be called during warm-up (initial creation of JsonPropertyInfos) to avoid recursive behavior
+        /// which could result in a StackOverflowException.
+        /// </remarks>
+        public JsonPropertyInfo DictionaryValuePropertyPolicy
+        {
+            get
+            {
+                // Use the existing PolicyProperty if there is one.
+                if ((_dictionaryValuePropertyPolicy = ElementClassInfo.PolicyProperty) == null)
+                {
+                    Debug.Assert(ClassType == ClassType.Dictionary || ClassType == ClassType.IDictionaryConstructible);
+
+                    Type dictionaryValueType = ElementType;
+                    Debug.Assert(ElementType != null);
+
+                    _dictionaryValuePropertyPolicy = JsonClassInfo.CreateProperty(
+                        declaredPropertyType: dictionaryValueType,
+                        runtimePropertyType: dictionaryValueType,
+                        implementedPropertyType: dictionaryValueType,
+                        propertyInfo: null,
+                        parentClassType: dictionaryValueType,
+                        converter: null,
+                        options: Options);
+                }
+
+                return _dictionaryValuePropertyPolicy;
+            }
+        }
+
+        /// <summary>
         /// Return the JsonClassInfo for the element type, or null if the property is not an enumerable or dictionary.
         /// </summary>
         /// <remarks>
@@ -254,9 +289,39 @@ namespace System.Text.Json
             return (TAttribute)propertyInfo?.GetCustomAttribute(typeof(TAttribute), inherit: false);
         }
 
+        public abstract Type GetConcreteType(Type type);
+
         public abstract Type GetDictionaryConcreteType();
 
-        public abstract Type GetConcreteType(Type type);
+        public void GetDictionaryKeyAndValue(ref WriteStackFrame writeStackFrame, out string key, out object value)
+        {
+            Debug.Assert(ClassType == ClassType.Dictionary ||
+                ClassType == ClassType.IDictionaryConstructible);
+
+            if (writeStackFrame.CollectionEnumerator is IDictionaryEnumerator iDictionaryEnumerator)
+            {
+                if (iDictionaryEnumerator.Key is string keyAsString)
+                {
+                    // Since IDictionaryEnumerator is not based on generics we can obtain the value directly. 
+                    key = keyAsString;
+                    value = iDictionaryEnumerator.Value;
+                }
+                else
+                {
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                        writeStackFrame.JsonPropertyInfo.DeclaredPropertyType,
+                        writeStackFrame.JsonPropertyInfo.ParentClassType,
+                        writeStackFrame.JsonPropertyInfo.PropertyInfo);
+                }
+            }
+            else
+            {
+                // Forward to the generic dictionary.
+                DictionaryValuePropertyPolicy.GetDictionaryKeyAndValueFromGenericDictionary(ref writeStackFrame, out key, out value);
+            }
+        }
+
+        public abstract void GetDictionaryKeyAndValueFromGenericDictionary(ref WriteStackFrame writeStackFrame, out string key, out object value);
 
         public virtual void GetPolicies()
         {
