@@ -5,7 +5,7 @@
 using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;  // Do not remove. Needed for Int32LsbToHexDigit when !BUILDING_INBOX_LIBRARY
 using System.Text.Encodings.Web;
 
 namespace System.Text.Json
@@ -51,7 +51,7 @@ namespace System.Text.Json
 
         private static bool NeedsEscapingNoBoundsCheck(char value) => AllowList[value] == 0;
 
-        public static unsafe int NeedsEscaping(ReadOnlySpan<byte> value, JavaScriptEncoder encoder)
+        public static int NeedsEscaping(ReadOnlySpan<byte> value, JavaScriptEncoder encoder)
         {
             return encoder == null ?
                 JavaScriptEncoder.Default.FindFirstCharacterToEncodeUtf8(value) :
