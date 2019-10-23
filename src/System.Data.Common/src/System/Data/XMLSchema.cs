@@ -783,6 +783,8 @@ namespace System.Data
                     continue;
                 }
 
+                _ = HandleTable(element);
+
             }
 
             if (_dsElement != null)
