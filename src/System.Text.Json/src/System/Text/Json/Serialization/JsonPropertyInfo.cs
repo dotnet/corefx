@@ -263,6 +263,7 @@ namespace System.Text.Json
             DetermineSerializationCapabilities();
             DeterminePropertyName();
             IgnoreNullValues = Options.IgnoreNullValues;
+            IgnoreDefaultValues = Options.IgnoreDefaultValues;
         }
 
         public abstract object GetValueAsObject(object obj);
@@ -318,6 +319,8 @@ namespace System.Text.Json
                 ClassType = JsonClassInfo.GetClassType(runtimePropertyType, options);
             }
         }
+
+        public bool IgnoreDefaultValues { get; private set; }
 
         public bool IgnoreNullValues { get; private set; }
 
