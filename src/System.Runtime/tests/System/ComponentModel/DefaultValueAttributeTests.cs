@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.ComponentModel.Tests
 {
-    public partial class DefaultValueAttributeTests
+    public class DefaultValueAttributeTests
     {
         [Fact]
         public static void Ctor()
@@ -124,6 +124,15 @@ namespace System.ComponentModel.Tests
             {
                 Assert.Equal(expected, attr1.GetHashCode() == attr2.GetHashCode());
             }
+        }
+
+        [Fact]
+        public static void Ctor_netcoreapp11()
+        {
+            Assert.Equal((sbyte)42, new DefaultValueAttribute((sbyte)42).Value);
+            Assert.Equal((ushort)42, new DefaultValueAttribute((ushort)42).Value);
+            Assert.Equal((uint)42, new DefaultValueAttribute((uint)42).Value);
+            Assert.Equal((ulong)42, new DefaultValueAttribute((ulong)42).Value);
         }
     }
 

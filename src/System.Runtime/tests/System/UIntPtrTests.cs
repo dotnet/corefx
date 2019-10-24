@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static partial class UIntPtrTests
+    public static class UIntPtrTests
     {
         private static unsafe bool Is64Bit => sizeof(void*) == 8;
 
@@ -168,6 +168,19 @@ namespace System.Tests
             Assert.NotEqual(ptr, new UIntPtr(expected + 1));
             Assert.False(ptr == new UIntPtr(expected + 1));
             Assert.True(ptr != new UIntPtr(expected + 1));
+        }
+
+        [Theory]
+        [MemberData(nameof(Equals_TestData))]
+        public static void Equals_NetCoreApp11(UIntPtr ptr, object obj, bool expected)
+        {
+            if (!(obj is UIntPtr))
+            {
+                return;
+            }
+
+            IEquatable<UIntPtr> iEquatable = ptr;
+            Assert.Equal(expected, iEquatable.Equals((UIntPtr)obj));
         }
     }
 }

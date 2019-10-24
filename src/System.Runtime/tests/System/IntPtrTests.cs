@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static partial class IntPtrTests
+    public static class IntPtrTests
     {
         private static unsafe bool Is64Bit => sizeof(void*) == 8;
 
@@ -119,6 +119,19 @@ namespace System.Tests
             }
             Assert.Equal(expected, ptr1.Equals(obj));
             Assert.Equal(ptr1.GetHashCode(), ptr1.GetHashCode());
+        }
+
+        [Theory]
+        [MemberData(nameof(Equals_TestData))]
+        public static void Equals_NetCoreApp11(IntPtr ptr, object obj, bool expected)
+        {
+            if (!(obj is IntPtr))
+            {
+                return;
+            }
+
+            IEquatable<IntPtr> iEquatable = ptr;
+            Assert.Equal(expected, iEquatable.Equals((IntPtr)obj));
         }
 
         [ConditionalFact(nameof(Is64Bit))]
