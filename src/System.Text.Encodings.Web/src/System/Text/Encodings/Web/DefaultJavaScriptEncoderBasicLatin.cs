@@ -197,7 +197,7 @@ namespace System.Text.Encodings.Web
                 byte* end = ptr + utf8Text.Length;
 
 #if NETCOREAPP
-                if (Sse2.IsSupported)
+                if (Sse2.IsSupported && ptr != null)
                 {
                     byte* vectorizedEnd = end - Vector128<byte>.Count;
 
