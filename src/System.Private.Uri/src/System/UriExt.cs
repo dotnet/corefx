@@ -565,7 +565,7 @@ namespace System
                         c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
 
                     ReadOnlySpan<char> resultSpan = vsb.AsSpan(0, position);
-                    string result = stringToUnescape.Length == position && resultSpan.SequenceEqual(new ReadOnlySpan<char>(pStr, position)) ? stringToUnescape : resultSpan.ToString();
+                    string result = resultSpan.SequenceEqual(stringToUnescape) ? stringToUnescape : resultSpan.ToString();
                     vsb.Dispose();
                     return result;
                 }
