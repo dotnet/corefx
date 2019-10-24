@@ -162,9 +162,9 @@ namespace System.Text.Encodings.Web
                 idx = GetIndexOfFirstNeedToEscape(index);
                 goto EscapeFound;
             }
-#endif
 
         Sequential:
+#endif
             while (ptr < end)
             {
                 Debug.Assert(text <= ptr && ptr < (text + textLength));
@@ -258,9 +258,9 @@ namespace System.Text.Encodings.Web
                         goto EscapeFound;
                     }
                 }
-#endif
 
             Sequential:
+#endif
                 while (ptr < end)
                 {
                     Debug.Assert(pValue <= ptr && ptr < (pValue + utf8Text.Length));
@@ -273,7 +273,9 @@ namespace System.Text.Encodings.Web
                     ptr++;
                 }
 
+#if NETCOREAPP
             NothingFound:
+#endif
                 idx = -1; // all characters allowed
                 goto Return;
 
@@ -379,9 +381,12 @@ namespace System.Text.Encodings.Web
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool NeedsEscaping(char value) => value > LastAsciiCharacter || AllowList[value] == 0;
 
+#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int NeedsEscaping(Vector128<sbyte> sourceValue)
         {
+            Debug.Assert(Sse2.IsSupported);
+
             // Check if any of the 16 bytes need to be escaped.
             Vector128<sbyte> mask = Ssse3.IsSupported
                 ? Ssse3Helper.CreateEscapingMask_DefaultJavaScriptEncoderBasicLatin(sourceValue)
@@ -391,7 +396,7 @@ namespace System.Text.Encodings.Web
             return index;
         }
 
-        // PERF: don't manually inline or call this method in NeedsEscapingCore
+        // PERF: don't manually inline or call this method in NeedsEscaping
         // as the resulting asm won't be great
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetIndexOfFirstNeedToEscape(int index)
@@ -404,5 +409,6 @@ namespace System.Text.Encodings.Web
 
             return tzc;
         }
+#endif
     }
 }
