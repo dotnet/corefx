@@ -24,7 +24,7 @@ namespace System.Net.NetworkInformation.Tests
 
         public IPGlobalPropertiesTest(ITestOutputHelper output)
         {
-            _log = output
+            _log = output;
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
