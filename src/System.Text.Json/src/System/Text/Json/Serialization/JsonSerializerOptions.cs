@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -31,6 +31,7 @@ namespace System.Text.Json
         private int _maxDepth;
         private bool _allowTrailingCommas;
         private bool _haveTypesBeenCreated;
+        private bool _ignoreDefaultValues;
         private bool _ignoreNullValues;
         private bool _ignoreReadOnlyProperties;
         private bool _propertyNameCaseInsensitive;
@@ -128,6 +129,26 @@ namespace System.Text.Json
             {
                 VerifyMutable();
                 _dictionayKeyPolicy = value;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether default values are ignored during serialization and deserialization.
+        /// The default value is false.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this property is set after serialization or deserialization has occurred.
+        /// </exception>
+        public bool IgnoreDefaultValues
+        {
+            get
+            {
+                return _ignoreDefaultValues;
+            }
+            set
+            {
+                VerifyMutable();
+                _ignoreDefaultValues = value;
             }
         }
 
