@@ -898,18 +898,20 @@ namespace System.Diagnostics
                             return new CurrentActivityPropertyFetch();
 
                         Debug.Assert(type != null, "Type should only be null for the well-known static fetchers already checked");
+                        TypeInfo typeInfo = type.GetTypeInfo();
                         if (propertyName == EnumeratePropertyName)
                         {
                             // If there are multiple implementations of IEnumerable<T>, this arbitrarily uses the first one
-                            foreach (Type iFaceType in type.GetInterfaces())
+                            foreach (Type iFaceType in typeInfo.GetInterfaces())
                             {
-                                if (!iFaceType.IsGenericType ||
-                                    iFaceType.GetGenericTypeDefinition() != typeof(IEnumerable<>))
+                                TypeInfo iFaceTypeInfo = iFaceType.GetTypeInfo();
+                                if (!iFaceTypeInfo.IsGenericType ||
+                                    iFaceTypeInfo.GetGenericTypeDefinition() != typeof(IEnumerable<>))
                                 {
                                     continue;
                                 }
 
-                                Type elemType = iFaceType.GetGenericArguments()[0];
+                                Type elemType = iFaceTypeInfo.GetGenericArguments()[0];
                                 Type instantiatedTypedPropertyFetcher = typeof(EnumeratePropertyFetch<>)
                                     .GetTypeInfo().MakeGenericType(elemType);
                                 return (PropertyFetch)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type)!;
@@ -921,13 +923,13 @@ namespace System.Diagnostics
                         }
                         else
                         {
-                            PropertyInfo? propertyInfo = type.GetTypeInfo().GetDeclaredProperty(propertyName);
+                            PropertyInfo? propertyInfo = typeInfo.GetDeclaredProperty(propertyName);
                             if (propertyInfo == null)
                             {
                                 Logger.Message($"Property {propertyName} not found on {type}");
                                 return new PropertyFetch(type);
                             }
-                            Type typedPropertyFetcher = type.IsValueType ?
+                            Type typedPropertyFetcher = typeInfo.IsValueType ?
                                 typeof(ValueTypedFetchProperty<,>) : typeof(RefTypedFetchProperty<,>);
                             Type instantiatedTypedPropertyFetcher = typedPropertyFetcher.GetTypeInfo().MakeGenericType(
                                 propertyInfo.DeclaringType!, propertyInfo.PropertyType);
@@ -946,7 +948,7 @@ namespace System.Diagnostics
                     {
                         public RefTypedFetchProperty(Type type, PropertyInfo property) : base(type)
                         {
-                            Debug.Assert(typeof(TObject).IsAssignableFrom(type));
+                            Debug.Assert(typeof(TObject).GetTypeInfo().IsAssignableFrom(type));
                             _propertyFetch = (Func<TObject, TProperty>)property.GetMethod!.CreateDelegate(typeof(Func<TObject, TProperty>));
                         }
                         public override object? Fetch(object? obj)
