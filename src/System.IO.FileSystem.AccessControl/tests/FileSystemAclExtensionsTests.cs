@@ -196,6 +196,110 @@ namespace System.IO
         }
 
         [Fact]
+        public void FileInfo_Create_NullFileInfo()
+        {
+            FileInfo info = null;
+            FileSecurity security = new FileSecurity();
+            Assert.Throws<ArgumentNullException>(() => CreateFileWithDefaults(info, security));
+        }
+
+        [Fact]
+        public void FileInfo_Create_NullFileSecurity()
+        {
+            FileInfo info = new FileInfo("path");
+            Assert.Throws<ArgumentNullException>(() => CreateFileWithDefaults(info, null));
+        }
+
+        [Fact]
+        public void FileInfo_Create_NotFound()
+        {
+            FileInfo info = new FileInfo(@"W:\\I\\Do\\Not\\Exist");
+            FileSecurity security = new FileSecurity();
+            Assert.Throws<FileNotFoundException>(() => CreateFileWithDefaults(info, security));
+        }
+
+        [Fact]
+        public void FileInfo_Create_AccessDenied()
+        {
+            FileInfo info = new FileInfo(@"C:\\Windows\\System32\\deniedaccess");
+            FileSecurity security = new FileSecurity();
+            Assert.Throws<UnauthorizedAccessException>(() => CreateFileWithDefaults(info, security));
+        }
+
+        [Fact]
+        public void FileInfo_Create_DefaultFileSecurity()
+        {
+            FileSecurity security = new FileSecurity();
+            CreateAndVerifyFileWithSecurity(security);
+        }
+
+        [Theory]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Allow)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Allow)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.Write, AccessControlType.Allow)]
+        public void FileInfo_Create_FileSecurityWithSpecificAccessRule(WellKnownSidType sid, FileSystemRights rights, AccessControlType controlType)
+        {
+            FileSecurity security = new FileSecurity();
+            SecurityIdentifier identity = new SecurityIdentifier(sid, null);
+            FileSystemAccessRule accessRule = new FileSystemAccessRule(identity, rights, controlType);
+
+            security.AddAccessRule(accessRule);
+
+            CreateAndVerifyFileWithSecurity(security);
+        }
+
+        private void CreateAndVerifyFileWithSecurity(FileSecurity security)
+        {
+            using var directory = new TempDirectory();
+
+            string path = Path.Combine(directory.Path, "file.txt");
+            FileInfo info = new FileInfo(path);
+
+            CreateFileWithDefaults(info, security);
+
+            Assert.True(File.Exists(path));
+            Assert.Equal(typeof(FileSystemRights), security.AccessRightType);
+
+            FileInfo actualInfo = new FileInfo(info.FullName);
+
+            FileSecurity actualSecurity = actualInfo.GetAccessControl();
+            Assert.Equal(typeof(FileSystemRights), actualSecurity.AccessRightType);
+
+            List<FileSystemAccessRule> expectedRules = security.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
+                .Cast<FileSystemAccessRule>().ToList();
+
+            List<FileSystemAccessRule> actualRules = actualSecurity.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
+                .Cast<FileSystemAccessRule>().ToList();
+
+            // If FileSecurity is created without arguments, GetAccessRules will return zero rules
+            Assert.Equal(expectedRules.Count, actualRules.Count);
+            if (expectedRules.Count > 0)
+            {
+                Assert.True(actualRules.Count > 0);
+
+                Assert.All(expectedRules, actualRule =>
+                {
+                    int count = expectedRules.Count(expectedRule => AreRulesEqual(expectedRule, actualRule));
+                    Assert.True(count > 0);
+                });
+            }
+        }
+
+        private FileStream CreateFileWithDefaults(FileInfo fileInfo, FileSecurity security)
+        {
+            return fileInfo.Create(FileMode.Create, FileSystemRights.FullControl, FileShare.ReadWrite, 4096, FileOptions.None, security);
+        }
+
+        private bool AreRulesEqual(FileSystemAccessRule expectedRule, FileSystemAccessRule actualRule)
+        {
+            return
+                expectedRule.AccessControlType == actualRule.AccessControlType &&
+                expectedRule.FileSystemRights == actualRule.FileSystemRights &&
+                expectedRule.InheritanceFlags == actualRule.InheritanceFlags &&
+                expectedRule.PropagationFlags == actualRule.PropagationFlags;
+        }
+
+        [Fact]
         public void DirectoryInfo_Create_NullDirectoryInfo()
         {
             DirectoryInfo info = null;

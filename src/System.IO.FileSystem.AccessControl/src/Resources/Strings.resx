@@ -188,4 +188,16 @@
   <data name="Arg_PathEmpty" xml:space="preserve">
     <value>The path is empty.</value>
   </data>
+  <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
+    <value>Positive number required.</value>
+  </data>
+  <data name="Argument_InvalidAppendMode" xml:space="preserve">
+    <value>Append access can be requested only in write-only mode.</value>
+  </data>
+  <data name="Argument_InvalidFileModeAndAccessCombo" xml:space="preserve">
+    <value>Combining FileMode: {0} with FileAccess: {1} is invalid.</value>
+  </data>
+  <data name="NotSupported_FileStreamOnNonFiles" xml:space="preserve">
+    <value>FileStream was asked to open a device that was not a file. For support for devices like 'com1:' or 'lpt1:', call CreateFile, then use the FileStream constructors that take an OS handle as an IntPtr.</value>
+  </data>
 </root>
