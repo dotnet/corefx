@@ -32,12 +32,3 @@ steps:
   inputs:
     script: |
       docker run --rm -e STRESS_ARGS='$(HTTPSTRESS_ARGS)' $(stressImage)
-
-- task: PublishBuildArtifacts@1
-  displayName: Publish Logs
-  inputs:
-    PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BUILD_CONFIGURATION)'
-    PublishLocation: Container
-    ArtifactName: 'httpstress_$(Agent.Os)_$(Agent.JobName)'
-  continueOnError: true
-  condition: always()
