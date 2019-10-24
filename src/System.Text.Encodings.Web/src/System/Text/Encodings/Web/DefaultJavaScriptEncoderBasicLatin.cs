@@ -81,86 +81,16 @@ namespace System.Text.Encodings.Web
                 throw new ArgumentNullException(nameof(text));
             }
 
+            Debug.Assert(textLength >= 0);
+
             int idx = 0;
             short* ptr = (short*)text;
-            short* end = ptr + textLength;
+            short* end = ptr + (uint)textLength;
 
 #if NETCOREAPP
-            if (Sse2.IsSupported && textLength >= 8)
+            if (Sse2.IsSupported && textLength >= Vector128<short>.Count)
             {
-                short* vectorizedEnd = end - 2 * Vector128<short>.Count;
-                int index;
-
-                while (ptr <= vectorizedEnd)
-                {
-                    Debug.Assert(text <= ptr && ptr <= (text + textLength - 2 * Vector128<short>.Count));
-
-                    // Load the next 16 characters, combine them to one byte vector
-                    Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
-                        Sse2.LoadVector128(ptr),
-                        Sse2.LoadVector128(ptr + Vector128<short>.Count));
-
-                    // Check if any of the 16 characters need to be escaped.
-                    index = NeedsEscaping(sourceValue);
-
-                    // If index == 0, that means none of the 16 characters needed to be escaped.
-                    // TrailingZeroCount is relatively expensive, avoid it if possible.
-                    if (index != 0)
-                    {
-                        goto VectorizedFound;
-                    }
-
-                    ptr += 2 * Vector128<short>.Count;
-                }
-
-                vectorizedEnd = end - Vector128<short>.Count;
-
-            Vectorized:
-                // PERF: JIT produces better code for do-while as for a while-loop (no spills)
-                if (ptr <= vectorizedEnd)
-                {
-                    do
-                    {
-                        Debug.Assert(text <= ptr && ptr <= (text + textLength - Vector128<short>.Count));
-
-                        // Load the next 8 characters + a dummy known that it must not be escaped.
-                        // Put the dummy second, so it's easier for GetIndexOfFirstNeedToEscape.
-                        Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
-                            Sse2.LoadVector128(ptr),
-                            Vector128.Create((short)'A'));  // max. one "iteration", so no need to cache this vector
-
-                        index = NeedsEscaping(sourceValue);
-
-                        // If index == 0, that means none of the 16 bytes needed to be escaped.
-                        // TrailingZeroCount is relatively expensive, avoid it if possible.
-                        if (index != 0)
-                        {
-                            goto VectorizedFound;
-                        }
-
-                        ptr += Vector128<short>.Count;
-                    }
-                    while (ptr <= vectorizedEnd);
-                }
-
-                // Process the remaining characters.
-                Debug.Assert(end - ptr < Vector128<short>.Count);
-
-                // Process the remaining elements vectorized, only if the remaining count
-                // is above thresholdForRemainingVectorized, otherwise process them sequential.
-                // Threshold found by testing.
-                const int thresholdForRemainingVectorized = 5;
-                if (ptr < end - thresholdForRemainingVectorized)
-                {
-                    ptr = vectorizedEnd;
-                    goto Vectorized;
-                }
-
-                goto Sequential;
-
-            VectorizedFound:
-                idx = GetIndexOfFirstNeedToEscape(index);
-                goto EscapeFound;
+                goto VectorizedEntry;
             }
 
         Sequential:
@@ -171,20 +101,102 @@ namespace System.Text.Encodings.Web
 
                 if (NeedsEscaping(*(char*)ptr))
                 {
-                    goto EscapeFound;
+                    goto Return;
                 }
 
                 ptr++;
+                idx++;
             }
 
-            idx = -1; // All characters are allowed.
-            goto Return;
+            idx = -1;  // All characters are allowed.
 
-        EscapeFound:
-            // Subtraction with short* results in a idiv, so use byte* and shift
-            idx += (int)(((byte*)ptr - (byte*)text) >> 1);
         Return:
             return idx;
+
+#if NETCOREAPP
+        VectorizedEntry:
+            short* vectorizedEnd = end - 2 * Vector128<short>.Count;
+            int index;
+
+            while (ptr <= vectorizedEnd)
+            {
+                Debug.Assert(text <= ptr && ptr <= (text + textLength - 2 * Vector128<short>.Count));
+
+                // Load the next 16 characters, combine them to one byte vector
+                Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
+                    Sse2.LoadVector128(ptr),
+                    Sse2.LoadVector128(ptr + Vector128<short>.Count));
+
+                // Check if any of the 16 characters need to be escaped.
+                index = NeedsEscaping(sourceValue);
+
+                // If index == 0, that means none of the 16 characters needed to be escaped.
+                // TrailingZeroCount is relatively expensive, avoid it if possible.
+                if (index != 0)
+                {
+                    goto VectorizedFound;
+                }
+
+                ptr += 2 * Vector128<short>.Count;
+            }
+
+            vectorizedEnd = end - Vector128<short>.Count;
+
+        Vectorized:
+            // PERF: JIT produces better code for do-while as for a while-loop (no spills)
+            if (ptr <= vectorizedEnd)
+            {
+                do
+                {
+                    Debug.Assert(text <= ptr && ptr <= (text + textLength - Vector128<short>.Count));
+
+                    // Load the next 8 characters + a dummy known that it must not be escaped.
+                    // Put the dummy second, so it's easier for GetIndexOfFirstNeedToEscape.
+                    Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
+                        Sse2.LoadVector128(ptr),
+                        Vector128.Create((short)'A'));  // max. one "iteration", so no need to cache this vector
+
+                    index = NeedsEscaping(sourceValue);
+
+                    // If index == 0, that means none of the 16 bytes needed to be escaped.
+                    // TrailingZeroCount is relatively expensive, avoid it if possible.
+                    if (index != 0)
+                    {
+                        goto VectorizedFound;
+                    }
+
+                    ptr += Vector128<short>.Count;
+                }
+                while (ptr <= vectorizedEnd);
+            }
+
+            // Process the remaining characters.
+            Debug.Assert(end - ptr < Vector128<short>.Count);
+
+            // Process the remaining elements vectorized, only if the remaining count
+            // is above thresholdForRemainingVectorized, otherwise process them sequential.
+            // Threshold found by testing.
+            const int thresholdForRemainingVectorized = 5;
+            if (ptr < end - thresholdForRemainingVectorized)
+            {
+                ptr = vectorizedEnd;
+                goto Vectorized;
+            }
+
+            idx = CalculateIndex(ptr, text);
+            goto Sequential;
+
+        VectorizedFound:
+            idx = GetIndexOfFirstNeedToEscape(index);
+            idx += CalculateIndex(ptr, text);
+            return idx;
+
+            static int CalculateIndex(short* ptr, char* text)
+            {
+                // Subtraction with short* results in a idiv, so use byte* and shift
+                return (int)(((byte*)ptr - (byte*)text) >> 1);
+            }
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -194,69 +206,14 @@ namespace System.Text.Encodings.Web
             {
                 int idx = 0;
                 byte* ptr = pValue;
-                byte* end = ptr + utf8Text.Length;
+                uint textLength = (uint)utf8Text.Length;
+                byte* end = ptr + textLength;
 
 #if NETCOREAPP
-                if (Sse2.IsSupported && ptr != null)
+
+                if (Sse2.IsSupported && ptr != null && textLength >= Vector128<sbyte>.Count)
                 {
-                    byte* vectorizedEnd = end - Vector128<byte>.Count;
-
-                    if (ptr <= vectorizedEnd)
-                    {
-                        int index;
-
-                        do
-                        {
-                            Debug.Assert(pValue <= ptr && ptr <= (pValue + utf8Text.Length - Vector128<byte>.Count));
-                            // Load the next 16 bytes
-                            Vector128<sbyte> sourceValue = Sse2.LoadVector128((sbyte*)ptr);
-
-                            index = NeedsEscaping(sourceValue);
-
-                            // If index == 0, that means none of the 16 bytes needed to be escaped.
-                            // TrailingZeroCount is relatively expensive, avoid it if possible.
-                            if (index != 0)
-                            {
-                                goto VectorizedFound;
-                            }
-
-                            ptr += Vector128<sbyte>.Count;
-                        }
-                        while (ptr <= vectorizedEnd);
-
-                        // Process the remaining elements.
-                        Debug.Assert(end - ptr < Vector128<byte>.Count);
-
-                        const int thresholdForRemainingVectorized = 4;
-                        // Process the remaining elements vectorized, only if the remaining count
-                        // is above thresholdForRemainingVectorized, otherwise process them sequential.
-                        if (ptr < end - thresholdForRemainingVectorized)
-                        {
-                            // PERF: duplicate instead of jumping at the beginning of the previous loop
-                            // otherwise all the static data (vectors) will be re-assigned to registers,
-                            // so they are re-used.
-
-                            Debug.Assert(pValue <= vectorizedEnd && vectorizedEnd <= (pValue + utf8Text.Length - Vector128<byte>.Count));
-
-                            // Load the last 16 bytes
-                            Vector128<sbyte> sourceValue = Sse2.LoadVector128((sbyte*)vectorizedEnd);
-
-                            index = NeedsEscaping(sourceValue);
-                            if (index != 0)
-                            {
-                                ptr = vectorizedEnd;
-                                goto VectorizedFound;
-                            }
-
-                            goto NothingFound;
-                        }
-
-                        goto Sequential;
-
-                    VectorizedFound:
-                        idx = GetIndexOfFirstNeedToEscape(index);
-                        goto EscapeFound;
-                    }
+                    goto Vectorized;
                 }
 
             Sequential:
@@ -267,23 +224,80 @@ namespace System.Text.Encodings.Web
 
                     if (NeedsEscaping(*ptr))
                     {
-                        goto EscapeFound;
+                        goto Return;
                     }
 
                     ptr++;
+                    idx++;
                 }
 
-#if NETCOREAPP
-            NothingFound:
-#endif
                 idx = -1; // all characters allowed
-                goto Return;
-
-            EscapeFound:
-                idx += (int)(ptr - pValue);
 
             Return:
                 return idx;
+
+#if NETCOREAPP
+            Vectorized:
+                byte* vectorizedEnd = end - Vector128<byte>.Count;
+                int index;
+
+                do
+                {
+                    Debug.Assert(pValue <= ptr && ptr <= (pValue + utf8Text.Length - Vector128<byte>.Count));
+                    // Load the next 16 bytes
+                    Vector128<sbyte> sourceValue = Sse2.LoadVector128((sbyte*)ptr);
+
+                    index = NeedsEscaping(sourceValue);
+
+                    // If index == 0, that means none of the 16 bytes needed to be escaped.
+                    // TrailingZeroCount is relatively expensive, avoid it if possible.
+                    if (index != 0)
+                    {
+                        goto VectorizedFound;
+                    }
+
+                    ptr += Vector128<sbyte>.Count;
+                }
+                while (ptr <= vectorizedEnd);
+
+                // Process the remaining elements.
+                Debug.Assert(end - ptr < Vector128<byte>.Count);
+
+                // Process the remaining elements vectorized, only if the remaining count
+                // is above thresholdForRemainingVectorized, otherwise process them sequential.
+                const int thresholdForRemainingVectorized = 4;
+                if (ptr < end - thresholdForRemainingVectorized)
+                {
+                    // PERF: duplicate instead of jumping at the beginning of the previous loop
+                    // otherwise all the static data (vectors) will be re-assigned to registers,
+                    // so they are re-used.
+
+                    Debug.Assert(pValue <= vectorizedEnd && vectorizedEnd <= (pValue + utf8Text.Length - Vector128<byte>.Count));
+
+                    // Load the last 16 bytes
+                    Vector128<sbyte> sourceValue = Sse2.LoadVector128((sbyte*)vectorizedEnd);
+
+                    index = NeedsEscaping(sourceValue);
+                    if (index != 0)
+                    {
+                        ptr = vectorizedEnd;
+                        goto VectorizedFound;
+                    }
+
+                    idx = -1;
+                    goto Return;
+                }
+
+                idx = CalculateIndex(ptr, pValue);
+                goto Sequential;
+
+            VectorizedFound:
+                idx = GetIndexOfFirstNeedToEscape(index);
+                idx += CalculateIndex(ptr, pValue);
+                return idx;
+
+                static int CalculateIndex(byte* ptr, byte* pValue) => (int)(ptr - pValue);
+#endif
             }
         }
 
