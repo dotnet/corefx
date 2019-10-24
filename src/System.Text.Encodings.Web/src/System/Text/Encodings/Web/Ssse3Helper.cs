@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
@@ -89,16 +88,16 @@ namespace System.Text.Encodings.Web
 
         // To check if a bit in a bitmask from the Bitmask is set, in a sequential code
         // we would do ((1 << bitIndex) & bitmask) != 0
-        // As there is no hardware instrinic for such a shift, we use lookup that
+        // As there is no hardware instrinic for such a shift, we use a lookup that
         // stores the shifted bitpositions.
         // So (1 << bitIndex) becomes BitPosLook[bitIndex], which is simd-friendly.
+        //
+        // A bitmask from the Bitmask (above) is created only for values 0..7 (one byte),
+        // so to avoid a explicit check for values outside 0..7, i.e.
+        // high nibbles 8..F, we use a bitpos that always results in escaping.
         private static readonly Vector128<sbyte> s_bitPosLookup = Vector128.Create(
-            0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
-
-            // A bitmask from the Bitmask (above) is created only for value 0..7 (one byte)
-            // so to avoid a explicit check for values outside 0..7, i.e.
-            // high nibbles 8..F, we use a bitpos that always results in escaping.
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+            0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,     // high-nibble 0..7
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF      // high-nibble 8..F
         ).AsSByte();
     }
 }
