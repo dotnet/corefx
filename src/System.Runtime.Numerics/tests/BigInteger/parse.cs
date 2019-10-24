@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Tests;
 using System.Threading;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
@@ -36,12 +37,9 @@ namespace System.Numerics.Tests
         [OuterLoop]
         public static void RunParseToStringTests(CultureInfo culture)
         {
-            RemoteExecutor.Invoke((cultureName) =>
+            byte[] tempByteArray1 = new byte[0];
+            using (new ThreadCultureChange(culture))
             {
-                byte[] tempByteArray1 = new byte[0];
-
-                Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo(cultureName);
-
                 //default style
                 VerifyDefaultParse(s_random);
 
@@ -82,8 +80,7 @@ namespace System.Numerics.Tests
 
                 //FormatProvider tests
                 RunFormatProviderParseStrings();
-
-            }, culture.ToString()).Dispose();
+            }
         }
 
         private static void RunFormatProviderParseStrings()
