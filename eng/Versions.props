@@ -7,7 +7,8 @@
     <PatchVersion>0</PatchVersion>
     <!-- Always use shipping version instead of dummy version -->
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
-    <PreReleaseVersionLabel>alpha1</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>alpha</PreReleaseVersionLabel>
+    <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
     <!-- Opt-in repo features -->
     <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
