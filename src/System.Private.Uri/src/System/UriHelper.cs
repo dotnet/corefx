@@ -316,6 +316,7 @@ namespace System
             vsb.Append(dest.AsSpan(0, destPosition));
             UnescapeString(pStr, start, end, ref vsb, rsvd1, rsvd2, rsvd3, unescapeMode,
                     syntax, isQuery);
+
             if (vsb.Length > dest.Length)
             {
                 dest = vsb.AsSpan().ToArray();
@@ -365,8 +366,8 @@ namespace System
             {
                 if ((unescapeMode & UnescapeMode.EscapeUnescape) == UnescapeMode.CopyOnly)
                 {
-                    if (start < end)
-                        dest.Append(new ReadOnlySpan<char>(pStr + start, end - start));
+                    while (start < end)
+                        dest.Append(pStr[start++]);
                     return;
                 }
 
@@ -478,11 +479,8 @@ namespace System
                     }
 
                     //copy off previous characters from input
-                    if (start < next)
-                    {
-                        dest.Append(new ReadOnlySpan<char>(pStr + start, next - start));
-                        start = next;
-                    }
+                    while (start < next)
+                        dest.Append(pStr[start++]);
 
                     if (next != end)
                     {
