@@ -231,6 +231,8 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
+    public class WrapperForWrapperForIList : WrapperForIList { }
+
     public class WrapperForIDictionary : IDictionary
     {
         private readonly Dictionary<string, object> _dictionary = new Dictionary<string, object>();
@@ -286,6 +288,8 @@ namespace System.Text.Json.Serialization.Tests
             return ((IDictionary)_dictionary).GetEnumerator();
         }
     }
+
+    public class WrapperForWrapperForIDictionary : WrapperForIDictionary { }
 
     public class StackWrapper : Stack
     {

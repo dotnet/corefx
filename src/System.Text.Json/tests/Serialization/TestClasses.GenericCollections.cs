@@ -782,6 +782,8 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
+    public class WrapperForStringToStringIDictionaryWrapper : StringToStringIDictionaryWrapper { };
+
     public class ReadOnlyStringToStringIDictionaryWrapper : StringToStringIDictionaryWrapper
     {
         public override bool IsReadOnly => true;
@@ -976,6 +978,10 @@ namespace System.Text.Json.Serialization.Tests
 
     public class StringListWrapper : List<string> { }
 
+    public class WrapperForGenericListWrapper<T> : GenericListWrapper<T> { }
+
+    public class WrapperForGenericListWrapper : GenericListWrapper<string> { }
+
     public class GenericListWrapper<T> : List<T> { }
 
     public class StringStackWrapper : Stack<string>
@@ -1005,6 +1011,8 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
     }
+
+    public class WrapperForGenericStackWrapper<T> : GenericStackWrapper<T> { }
 
     public class StringQueueWrapper : Queue<string>
     {
