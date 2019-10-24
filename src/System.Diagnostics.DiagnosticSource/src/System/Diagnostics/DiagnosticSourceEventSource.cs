@@ -895,12 +895,26 @@ namespace System.Diagnostics
                         if (propertyName == null)
                             return new PropertyFetch(type);     // returns null on any fetch.
                         if (propertyName == CurrentActivityPropertyName)
+                        {
+#if EVENTSOURCE_ACTIVITY_SUPPORT
                             return new CurrentActivityPropertyFetch();
+#else
+                            // In netstandard1.1 the Activity.Current API doesn't exist
+                            Logger.Message($"{CurrentActivityPropertyName} not supported for this TFM");
+                            return new PropertyFetch(type);
+#endif
+                        }
 
                         Debug.Assert(type != null, "Type should only be null for the well-known static fetchers already checked");
                         TypeInfo typeInfo = type.GetTypeInfo();
                         if (propertyName == EnumeratePropertyName)
                         {
+#if !EVENTSOURCE_ENUMERATE_SUPPORT
+                            // In netstandard1.1 and 1.3 the reflection APIs needed to implement Enumerate support aren't
+                            // available
+                            Logger.Message($"{EnumeratePropertyName} not supported for this TFM");
+                            return new PropertyFetch(type);
+#else
                             // If there are multiple implementations of IEnumerable<T>, this arbitrarily uses the first one
                             foreach (Type iFaceType in typeInfo.GetInterfaces())
                             {
@@ -920,6 +934,7 @@ namespace System.Diagnostics
                             // no implemenation of IEnumerable<T> found, return a null fetcher
                             Logger.Message($"*Enumerate applied to non-enumerable type {type}");
                             return new PropertyFetch(type);
+#endif
                         }
                         else
                         {
@@ -948,7 +963,7 @@ namespace System.Diagnostics
                     {
                         public RefTypedFetchProperty(Type type, PropertyInfo property) : base(type)
                         {
-                            Debug.Assert(typeof(TObject).GetTypeInfo().IsAssignableFrom(type));
+                            Debug.Assert(typeof(TObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
                             _propertyFetch = (Func<TObject, TProperty>)property.GetMethod!.CreateDelegate(typeof(Func<TObject, TProperty>));
                         }
                         public override object? Fetch(object? obj)
@@ -981,6 +996,8 @@ namespace System.Diagnostics
                         private readonly StructFunc<TStruct, TProperty> _propertyFetch;
                     }
 
+
+#if EVENTSOURCE_ACTIVITY_SUPPORT
                     /// <summary>
                     /// A fetcher that returns the result of Activity.Current
                     /// </summary>
@@ -992,6 +1009,7 @@ namespace System.Diagnostics
                             return Activity.Current;
                         }
                     }
+#endif
 
                     /// <summary>
                     /// A fetcher that enumerates and formats an IEnumerable
