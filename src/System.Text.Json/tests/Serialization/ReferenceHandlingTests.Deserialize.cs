@@ -503,7 +503,7 @@ namespace System.Text.Json.Tests
                 ""$ref"": ""1""
             }";
 
-            Employee[] array = JsonSerializer.Deserialize<Employee[]>(json, _deserializeOptions);
+            List<Employee> array = JsonSerializer.Deserialize<List<Employee>>(json, _deserializeOptions);
             Assert.Null(array);
         }
 
@@ -749,6 +749,92 @@ namespace System.Text.Json.Tests
             JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<int>>(json, _deserializeOptions));
 
             Assert.Equal("$", ex.Path);
+        }
+        #endregion
+
+        #region Throw on immutables
+        private class EmployeeWithImmutable
+        {
+            public ImmutableList<EmployeeWithImmutable> Subordinates { get; set; }
+            public EmployeeWithImmutable[] SubordinatesArray { get; set; }
+            public ImmutableDictionary<string, EmployeeWithImmutable> Contacts { get; set; }
+        }
+
+        [Fact]
+        public static void ImmutableEnumerableAsRoot()
+        {
+            string json =
+            @"{
+                ""$id"": ""1"",
+                ""$values"": []
+            }";
+
+            JsonException ex;
+
+            ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ImmutableList<EmployeeWithImmutable>>(json, _deserializeOptions));
+            Assert.Equal("$", ex.Path);
+
+            ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<EmployeeWithImmutable[]>(json, _deserializeOptions));
+            Assert.Equal("$", ex.Path);
+        }
+
+        [Fact]
+        public static void ImmutableDictionaryAsRoot()
+        {
+            string json =
+            @"{
+                ""$id"": ""1"",
+                ""Employee1"": {}
+            }";
+
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ImmutableDictionary<string, EmployeeWithImmutable>>(json, _deserializeOptions));
+            Assert.Equal("$", ex.Path);
+        }
+
+        [Fact]
+        public static void ImmutableEnumerableAsProperty()
+        {
+            string json =
+            @"{
+                ""$id"": ""1"",
+                ""Subordinates"": {
+                    ""$id"": ""2"",
+                    ""$values"": []
+                }
+            }";
+
+            JsonException ex;
+
+            ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<EmployeeWithImmutable>(json, _deserializeOptions));
+            Assert.Equal("$.Subordinates", ex.Path);
+
+            json =
+            @"{
+                ""$id"": ""1"",
+                ""SubordinatesArray"": {
+                    ""$id"": ""2"",
+                    ""$values"": []
+                }
+            }";
+
+            ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<EmployeeWithImmutable>(json, _deserializeOptions));
+            Assert.Equal("$.SubordinatesArray", ex.Path);
+        }
+
+        [Fact]
+        public static void ImmutableDictionaryAsProperty()
+        {
+            string json =
+            @"{
+                ""$id"": ""1"",
+                ""Contacts"": {
+                    ""$id"": ""2"",
+                    ""Employee1"": {}
+                }
+            }";
+
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<EmployeeWithImmutable>(json, _deserializeOptions));
+            Assert.Equal("$.Contacts", ex.Path);
         }
         #endregion
 

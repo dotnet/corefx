@@ -25,6 +25,12 @@ namespace System.Text.Json
                 // A potential Preserved Array - Hit an StartObject while enumerable has not been initialized.
                 if (options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates && !state.Current.CollectionPropertyInitialized)
                 {
+                    //Check we are not dealing with an immutable collection or fixed size array.
+                    if (state.Current.JsonPropertyInfo.EnumerableConverter != null)
+                    {
+                        throw new JsonException("Immutable types and fixed size arrays cannot be preserved.");
+                    }
+
                     // Is a property.
                     if (state.Current.IsProcessingProperty(ClassType.Enumerable))
                     {
@@ -36,7 +42,6 @@ namespace System.Text.Json
                         Type preservedObjType = typeof(JsonPreservedReference<>).MakeGenericType(state.Current.JsonPropertyInfo.RuntimePropertyType); // is this the right property?
                         state.Push();
                         state.Current.Initialize(preservedObjType, options);
-                        //return;?
 
                     }
                     // Is the current frame object type.

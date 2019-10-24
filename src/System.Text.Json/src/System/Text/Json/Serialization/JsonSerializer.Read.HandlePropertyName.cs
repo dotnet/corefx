@@ -45,6 +45,11 @@ namespace System.Text.Json
 
                     if (meta == MetadataPropertyName.Id)
                     {
+                        if (state.Current.TempDictionaryValues != null)
+                        {
+                            throw new JsonException("Immutable types and fixed size arrays cannot be preserved.");
+                        }
+
                         SetAsPreserved(ref state.Current);
                         state.Current.ReadMetadataValue = true;
                         state.Current.MetadataProperty = meta;
