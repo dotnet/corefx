@@ -26,7 +26,7 @@ internal static partial class Interop
         internal const string SelfCmdLineFilePath = RootPath + "self" + CmdLineFileName;
         internal const string ProcStatFilePath = RootPath + "stat";
 
-        private static char[] Delimiters = { ':', ' ', '\t' };
+        private static readonly char[] s_delimiters = { ':', ' ', '\t' };
         internal struct ParsedStat
         {
             // Commented out fields are available in the stat data file but
@@ -322,8 +322,7 @@ internal static partial class Interop
 
             while (parser.MoveNext())
             {
-                string[] elements = parser.ExtractCurrent().Split(Delimiters, 3, StringSplitOptions.RemoveEmptyEntries);
-                
+                string[] elements = parser.ExtractCurrent().Split(s_delimiters, 3, StringSplitOptions.RemoveEmptyEntries);
                 if (elements.Length < 2)
                 {
                     continue;
