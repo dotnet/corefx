@@ -31,7 +31,7 @@ steps:
   displayName: Run HttpStress
   inputs:
     script: |
-      docker run --rm -e STRESS_ARGS=$(HTTPSTRESS_ARGS) $(stressImage)
+      docker run --rm -e STRESS_ARGS='$(HTTPSTRESS_ARGS)' $(stressImage)
 
 - task: PublishBuildArtifacts@1
   displayName: Publish Logs
