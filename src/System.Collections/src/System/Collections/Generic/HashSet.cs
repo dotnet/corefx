@@ -432,7 +432,7 @@ namespace System.Collections.Generic
             }
             // either _buckets is null or wasn't found
             return false;
-            
+
         ReturnFound:
             if (last < 0)
             {
