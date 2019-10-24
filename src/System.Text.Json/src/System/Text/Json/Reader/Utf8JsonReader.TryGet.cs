@@ -823,7 +823,7 @@ namespace System.Text.Json
             {
                 long sequenceLength = ValueSequence.Length;
 
-                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(sequenceLength))
+                if (!JsonHelpers.IsValidDateTimeOffsetParseLength(sequenceLength))
                 {
                     value = default;
                     return false;
@@ -837,7 +837,7 @@ namespace System.Text.Json
             }
             else
             {
-                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(ValueSpan.Length))
+                if (!JsonHelpers.IsValidDateTimeOffsetParseLength(ValueSpan.Length))
                 {
                     value = default;
                     return false;
@@ -887,7 +887,7 @@ namespace System.Text.Json
             {
                 long sequenceLength = ValueSequence.Length;
 
-                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(sequenceLength))
+                if (!JsonHelpers.IsValidDateTimeOffsetParseLength(sequenceLength))
                 {
                     value = default;
                     return false;
@@ -901,7 +901,7 @@ namespace System.Text.Json
             }
             else
             {
-                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(ValueSpan.Length))
+                if (!JsonHelpers.IsValidDateTimeOffsetParseLength(ValueSpan.Length))
                 {
                     value = default;
                     return false;

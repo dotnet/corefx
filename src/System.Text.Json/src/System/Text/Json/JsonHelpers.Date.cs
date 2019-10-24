@@ -44,7 +44,7 @@ namespace System.Text.Json
 
         public static bool TryParseAsISO(ReadOnlySpan<char> source, out DateTime value)
         {
-            if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(source.Length))
+            if (!IsValidDateTimeOffsetParseLength(source.Length))
             {
                 value = default;
                 return false;
@@ -63,7 +63,7 @@ namespace System.Text.Json
 
         public static bool TryParseAsISO(ReadOnlySpan<char> source, out DateTimeOffset value)
         {
-            if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(source.Length))
+            if (!IsValidDateTimeOffsetParseLength(source.Length))
             {
                 value = default;
                 return false;
@@ -78,6 +78,18 @@ namespace System.Text.Json
             JsonReaderHelper.GetUtf8FromText(source, bytes);
 
             return TryParseAsISO(bytes.Slice(0, length), out value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsValidDateTimeOffsetParseLength(int length)
+        {
+            return IsInRangeInclusive(length, JsonConstants.MinimumDateTimeParseLength, JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsValidDateTimeOffsetParseLength(long length)
+        {
+            return IsInRangeInclusive(length, JsonConstants.MinimumDateTimeParseLength, JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
         }
 
         /// <summary>
