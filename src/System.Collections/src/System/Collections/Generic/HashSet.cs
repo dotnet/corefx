@@ -359,16 +359,16 @@ namespace System.Collections.Generic
             int i;
             Slot[] slots;
             IEqualityComparer<T>? comparer = _comparer;
-            
+
             if (_buckets != null)
             {
                 slots = _slots;
-                
+
                 if (comparer == null)
                 {
                     hashCode = item == null ? 0 : InternalGetHashCode(item.GetHashCode());
                     bucket = hashCode % _buckets!.Length;
-                    
+
                     if (default(T)! != null) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                     {
                         for (i = _buckets[bucket] - 1; i >= 0; last = i, i = slots[i].next)
@@ -392,7 +392,7 @@ namespace System.Collections.Generic
                         // https://github.com/dotnet/coreclr/issues/17273
                         // So cache in a local rather than get EqualityComparer per loop iteration
                         EqualityComparer<T> defaultComparer = EqualityComparer<T>.Default;
-                        
+
                         for (i = _buckets[bucket] - 1; i >= 0; last = i, i = slots[i].next)
                         {
                             if (slots[i].hashCode == hashCode && defaultComparer.Equals(slots[i].value, item))
@@ -413,7 +413,7 @@ namespace System.Collections.Generic
                 {
                     hashCode = item == null ? 0 : InternalGetHashCode(comparer.GetHashCode(item));
                     bucket = hashCode % _buckets!.Length;
-                    
+
                     for (i = _buckets[bucket] - 1; i >= 0; last = i, i = slots[i].next)
                     {
                         if (slots[i].hashCode == hashCode && EqualityComparer<T>.Default.Equals(slots[i].value, item))
