@@ -312,20 +312,21 @@ namespace System
         internal static unsafe char[] UnescapeString(char* pStr, int start, int end, char[] dest, ref int destPosition,
             char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser? syntax, bool isQuery)
         {
-            ValueStringBuilder pooledArray = new ValueStringBuilder(dest.Length);
-            pooledArray.Append(dest.AsSpan(0, destPosition));
-
-            UnescapeString(pStr, start, end, ref pooledArray, rsvd1, rsvd2, rsvd3, unescapeMode,
+            ValueStringBuilder vsb = new ValueStringBuilder(dest.Length);
+            vsb.Append(dest.AsSpan(0, destPosition));
+            UnescapeString(pStr, start, end, ref vsb, rsvd1, rsvd2, rsvd3, unescapeMode,
                     syntax, isQuery);
-            destPosition = pooledArray.Length;
 
-            if (destPosition > dest.Length)
+            if (vsb.Length > dest.Length)
             {
-                dest = new char[destPosition];
+                dest = vsb.AsSpan().ToArray();
             }
-
-            pooledArray.AsSpan().TryCopyTo(dest);
-            pooledArray.Dispose();
+            else
+            {
+                vsb.AsSpan(destPosition).TryCopyTo(dest.AsSpan(destPosition));
+            }
+            destPosition = vsb.Length;
+            vsb.Dispose();
             return dest;
         }
 

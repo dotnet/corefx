@@ -316,7 +316,6 @@ namespace System
             }
 
             string result = dest.ToString();
-            dest.Dispose();
             return result;
         }
     }

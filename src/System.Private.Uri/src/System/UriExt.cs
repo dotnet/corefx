@@ -560,18 +560,13 @@ namespace System
 
                     UnescapeMode unescapeMode = UnescapeMode.Unescape | UnescapeMode.UnescapeAll;
                     position = 0;
-                    ValueStringBuilder pooledArray = new ValueStringBuilder(stringToUnescape.Length);
-                    UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, ref pooledArray, ref position,
+                    ValueStringBuilder vsb = new ValueStringBuilder(stringToUnescape.Length);
+                    UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, ref vsb, ref position,
                         c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
 
-                    if (stringToUnescape.Length == position && pooledArray.AsSpan().SequenceEqual(new ReadOnlySpan<char>(pStr, position)))
-                    {
-                        pooledArray.Dispose();
-                        return stringToUnescape;
-                    }
-
-                    string result = pooledArray.AsSpan(0, position).ToString();
-                    pooledArray.Dispose();
+                    ReadOnlySpan<char> resultSpan = vsb.AsSpan(0, position);
+                    string result = stringToUnescape.Length == position && resultSpan.SequenceEqual(new ReadOnlySpan<char>(pStr, position)) ? stringToUnescape : resultSpan.ToString();
+                    vsb.Dispose();
                     return result;
                 }
             }
