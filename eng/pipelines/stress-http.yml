@@ -21,12 +21,16 @@ steps:
       docker build -t $(sdkBaseImage) -f $(Build.SourcesDirectory)/$(HttpStressProject)/corefx.Dockerfile .
 
 - task: CmdLine@2
-  displayName: Run HttpStress
+  displayName: Build HttpStress
   inputs:
-    targetType: 'inline'
     script: |
       cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
       docker build -t $(stressImage) --build-arg SDK_BASE_IMAGE=$(sdkBaseImage) .
+
+- task: CmdLine@2
+  displayName: Run HttpStress
+  inputs:
+    script: |
       docker run --rm -e STRESS_ARGS=$(HTTPSTRESS_ARGS) $(stressImage)
 
 - task: PublishBuildArtifacts@1
