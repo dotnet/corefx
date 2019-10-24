@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -94,6 +94,15 @@ namespace System.Text.Json
                 currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
                 obtainedValue = true;
                 GetRuntimePropertyInfo(currentValue, state.Current.JsonClassInfo, ref jsonPropertyInfo, options);
+            }
+
+            var defaultValueAttribute = JsonPropertyInfo.GetAttribute<System.ComponentModel.DefaultValueAttribute>(jsonPropertyInfo.PropertyInfo);
+
+            if (options.IgnoreDefaultValues && defaultValueAttribute != null &&
+                (object.Equals(jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue), defaultValueAttribute.Value)))
+            {
+                state.Current.MoveToNextProperty = true;
+                return;
             }
 
             state.Current.JsonPropertyInfo = jsonPropertyInfo;
