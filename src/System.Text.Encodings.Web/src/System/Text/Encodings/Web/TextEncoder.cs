@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Unicode;
 
-#if BUILDING_INBOX_LIBRARY
+#if NETCOREAPP
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 #endif
@@ -711,7 +711,7 @@ namespace System.Text.Encodings.Web
             {
                 int idx = 0;
 
-#if BUILDING_INBOX_LIBRARY
+#if NETCOREAPP
                 if (Sse2.IsSupported)
                 {
                     sbyte* startingAddress = (sbyte*)ptr;
