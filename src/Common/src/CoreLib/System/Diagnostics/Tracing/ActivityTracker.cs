@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
 #if ES_BUILD_STANDALONE
 using System;
 using System.Diagnostics;
@@ -42,7 +41,6 @@ namespace System.Diagnostics.Tracing
     /// </summary>
     internal class ActivityTracker
     {
-
         /// <summary>
         /// Called on work item begins.  The activity name = providerName + activityName without 'Start' suffix.
         /// It updates CurrentActivityId to track.
@@ -69,7 +67,6 @@ namespace System.Diagnostics.Tracing
                 if (m_current == null)
                     return;
             }
-
 
             Debug.Assert((options & EventActivityOptions.Disable) == 0);
 
@@ -242,13 +239,12 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public static ActivityTracker Instance => s_activityTrackerInstance;
 
-
         #region private
 
         /// <summary>
         /// Searched for a active (nonstopped) activity with the given name.  Returns null if not found.
         /// </summary>
-        private ActivityInfo? FindActiveActivity(string name, ActivityInfo? startLocation)
+        private static ActivityInfo? FindActiveActivity(string name, ActivityInfo? startLocation)
         {
             ActivityInfo? activity = startLocation;
             while (activity != null)
@@ -264,7 +260,7 @@ namespace System.Diagnostics.Tracing
         /// Strip out "Start" or "End" suffix from activity name and add providerName prefix.
         /// If 'task'  it does not end in Start or Stop and Task is non-zero use that as the name of the activity
         /// </summary>
-        private string NormalizeActivityName(string providerName, string activityName, int task)
+        private static string NormalizeActivityName(string providerName, string activityName, int task)
         {
             // We use provider name to distinguish between activities from different providers.
 
@@ -392,7 +388,6 @@ namespace System.Diagnostics.Tracing
 
                     activityPathGuidOffset = AddIdToGuid(outPtr, activityPathGuidOffsetStart, (uint)m_uniqueId);
 
-
                     // If the path does not fit, Make a GUID by incrementing rather than as a path, keeping as much of the path as possible
                     if (12 < activityPathGuidOffset)
                         CreateOverflowGuid(outPtr);
@@ -506,7 +501,7 @@ namespace System.Diagnostics.Tracing
                             break;
                         }
                         *ptr++ = (byte)id;
-                        id = (id >> 8);
+                        id >>= 8;
                         --len;
                     }
                 }

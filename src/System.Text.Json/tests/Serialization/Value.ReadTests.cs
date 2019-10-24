@@ -10,6 +10,8 @@ namespace System.Text.Json.Serialization.Tests
 {
     public static partial class ValueTests
     {
+        public static bool IsX64 { get; } = Environment.Is64BitProcess;
+
         [Fact]
         public static void ReadPrimitives()
         {
@@ -361,6 +363,29 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(netcoreExpectedValue, testCode());
             }
+        }
+
+        private const long ArrayPoolMaxSizeBeforeUsingNormalAlloc = 1024 * 1024;
+        private const int MaxExpansionFactorWhileTranscoding = 3;
+        private const long Threshold = ArrayPoolMaxSizeBeforeUsingNormalAlloc / MaxExpansionFactorWhileTranscoding;
+
+        [Theory]
+        [InlineData(Threshold - 3)]
+        [InlineData(Threshold - 2)]
+        [InlineData(Threshold - 1)]
+        [InlineData(Threshold)]
+        [InlineData(Threshold + 1)]
+        [InlineData(Threshold + 2)]
+        [InlineData(Threshold + 3)]
+        public static void LongInputString(int length)
+        {
+            // Verify boundary conditions in Deserialize() that inspect the size to determine allocation strategy.
+            string repeated = new string('x', length - 2);
+            string json = $"\"{repeated}\"";
+            Assert.Equal(length, json.Length);
+
+            string str = JsonSerializer.Deserialize<string>(json);
+            Assert.Equal(repeated, str);
         }
     }
 }

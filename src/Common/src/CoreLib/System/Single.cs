@@ -86,8 +86,12 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsNaN(float f)
         {
-            int bits = BitConverter.SingleToInt32Bits(f);
-            return (bits & 0x7FFFFFFF) > 0x7F800000;
+            // A NaN will never equal itself so this is an
+            // easy and efficient way to check for NaN.
+
+            #pragma warning disable CS1718
+            return f != f;
+            #pragma warning restore CS1718
         }
 
         /// <summary>Determines whether the specified value is negative.</summary>
@@ -103,7 +107,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsNegativeInfinity(float f)
         {
-            return (f == float.NegativeInfinity);
+            return f == float.NegativeInfinity;
         }
 
         /// <summary>Determines whether the specified value is normal.</summary>
@@ -121,7 +125,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsPositiveInfinity(float f)
         {
-            return (f == float.PositiveInfinity);
+            return f == float.PositiveInfinity;
         }
 
         /// <summary>Determines whether the specified value is subnormal.</summary>
@@ -165,14 +169,13 @@ namespace System
 
                 // At least one of the values is NaN.
                 if (IsNaN(m_value))
-                    return (IsNaN(f) ? 0 : -1);
+                    return IsNaN(f) ? 0 : -1;
                 else // f is NaN.
                     return 1;
             }
 
             throw new ArgumentException(SR.Arg_MustBeSingle);
         }
-
 
         public int CompareTo(float value)
         {
@@ -182,7 +185,7 @@ namespace System
 
             // At least one of the values is NaN.
             if (IsNaN(m_value))
-                return (IsNaN(value) ? 0 : -1);
+                return IsNaN(value) ? 0 : -1;
             else // f is NaN.
                 return 1;
         }
@@ -358,7 +361,6 @@ namespace System
         {
             return TypeCode.Single;
         }
-
 
         bool IConvertible.ToBoolean(IFormatProvider? provider)
         {

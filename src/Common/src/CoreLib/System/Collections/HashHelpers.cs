@@ -8,7 +8,7 @@ namespace System.Collections
 {
     internal static partial class HashHelpers
     {
-        public const int HashCollisionThreshold = 100;
+        public const uint HashCollisionThreshold = 100;
 
         // This is the maximum prime smaller than Array.MaxArrayLength
         public const int MaxPrimeArrayLength = 0x7FEFFFFD;
@@ -47,7 +47,7 @@ namespace System.Collections
                 }
                 return true;
             }
-            return (candidate == 2);
+            return candidate == 2;
         }
 
         public static int GetPrime(int min)

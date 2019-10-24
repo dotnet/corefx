@@ -194,11 +194,16 @@ namespace System.Diagnostics
         /// </summary>
         internal string ToString(TraceFormat traceFormat)
         {
+            var sb = new StringBuilder(256);
+            ToString(traceFormat, sb);
+            return sb.ToString();
+        }
+
+        internal void ToString(TraceFormat traceFormat, StringBuilder sb)
+        {
             string word_At = SR.Word_At;
             string inFileLineNum = SR.StackTrace_InFileLineNumber;
-
             bool fFirstFrame = true;
-            StringBuilder sb = new StringBuilder(255);
             for (int iFrameIndex = 0; iFrameIndex < _numOfFrames; iFrameIndex++)
             {
                 StackFrame? sf = GetFrame(iFrameIndex);
@@ -210,7 +215,7 @@ namespace System.Diagnostics
                     if (fFirstFrame)
                         fFirstFrame = false;
                     else
-                        sb.Append(Environment.NewLine);
+                        sb.AppendLine();
 
                     sb.AppendFormat(CultureInfo.InvariantCulture, "   {0} ", word_At);
 
@@ -251,7 +256,7 @@ namespace System.Diagnostics
                         bool fFirstTyParam = true;
                         while (k < typars.Length)
                         {
-                            if (fFirstTyParam == false)
+                            if (!fFirstTyParam)
                                 sb.Append(',');
                             else
                                 fFirstTyParam = false;
@@ -279,7 +284,7 @@ namespace System.Diagnostics
                         bool fFirstParam = true;
                         for (int j = 0; j < pi.Length; j++)
                         {
-                            if (fFirstParam == false)
+                            if (!fFirstParam)
                                 sb.Append(", ");
                             else
                                 fFirstParam = false;
@@ -320,16 +325,14 @@ namespace System.Diagnostics
                     // Skip EDI boundary for async
                     if (sf.IsLastFrameFromForeignExceptionStackTrace && !isAsync)
                     {
-                        sb.Append(Environment.NewLine);
+                        sb.AppendLine();
                         sb.Append(SR.Exception_EndStackTraceFromPreviousThrow);
                     }
                 }
             }
 
             if (traceFormat == TraceFormat.TrailingNewLine)
-                sb.Append(Environment.NewLine);
-
-            return sb.ToString();
+                sb.AppendLine();
         }
 #endif // !CORERT
 

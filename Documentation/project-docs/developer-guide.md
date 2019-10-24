@@ -31,7 +31,7 @@ Calling the script `build` attempts to build both the native and managed code.
 
 The build configurations are generally defaulted based on where you are building (i.e. which OS or which architecture) but we have a few shortcuts for the individual properties that can be passed to the build scripts:
 
-- `-framework|-f` identifies the target framework for the build. It defaults to `netcoreapp` but possible values include `netcoreapp`, `netfx` or `uap`. (msbuild property `TargetGroup`)
+- `-framework|-f` identifies the target framework for the build. It defaults to `netcoreapp` but possible values include `netcoreapp` or `netfx`. (msbuild property `TargetGroup`)
 - `-os` identifies the OS for the build. It defaults to the OS you are running on but possible values include `Windows_NT`, `Unix`, `Linux`, or `OSX`. (msbuild property `OSGroup`)
 - `-configuration|-c Debug|Release` controls the optimization level the compilers use for the build. It defaults to `Debug`. (msbuild property `ConfigurationGroup`)
 - `-arch` identifies the architecture for the build. It defaults to `x64` but possible values include `x64`, `x86`, `arm`, or `arm64`. (msbuild property `ArchGroup`)
@@ -63,7 +63,6 @@ build -restore -build -buildtests -test
 ```
 build -framework netcoreapp
 build -framework netfx
-build -framework uap
 ```
 
 - Build only managed components and skip the native build
@@ -172,11 +171,6 @@ For libraries that have multiple build configurations the configurations will be
 - Build project for Linux for netcoreapp
 ```
 dotnet msbuild System.Net.NetworkInformation.csproj /p:OSGroup=Linux
-```
-
-- Build project for uap (not if trying to build on non-windows you also need to specify OSGroup=Windows_NT)
-```
-dotnet msbuild System.Net.NetworkInformation.csproj /p:TargetGroup=uap
 ```
 
 - Build release version of library
@@ -433,17 +427,6 @@ If coverage succeeds, the individual report can be found at `$(TestPath)\report\
 
 Code coverage reports from the continuous integration system are available from the links on the front page of the corefx repo.
 
-### Building tests with UWP (Windows only)
-
-This will allow you to build and run against `uap`, the managed version of the UWP Framework subset, used when debugging UWP applications in Visual Studio:
-```cmd
-cd src\Microsoft.CSharp\tests
-dotnet msbuild /t:BuildAndTest /p:TargetGroup=uap
-```
-In this case, your test will get executed within the context of a wrapper UWP application, targeting the Managed uap.
-
-The CoreFX build and test suite is a work in progress, as are the [building and testing instructions](../README.md). The .NET Core team and the community are improving Linux and OS X support on a daily basis and are adding more tests for all platforms. See [CoreFX Issues](https://github.com/dotnet/corefx/issues) to find out about specific work items or report issues.
-
 ## Testing with private CoreCLR bits
 
 Generally the CoreFx build system gets the CoreCLR from a NuGet package which gets pulled down and correctly copied to the various output directories by building '\eng\restore\runtime\runtime.depproj' which gets built as part of `build.cmd/sh`. For folks that want to do builds and test runs in corefx with a local private build of coreclr you can follow these steps:
@@ -470,3 +453,22 @@ If you prefer, you can use a Debug build of System.Private.CoreLib, but if you d
 If the test project does not set the property `TestRuntime` to `true` and you want to collect code coverage that includes types in System.Private.CoreLib.dll, you'll need to follow the above steps, then
 
 `dotnet msbuild /t:rebuildandtest /p:Coverage=true /p:TestRuntime=true`
+
+
+## Debugging with Visual Studio Code
+
+- Install [Visual Studio Code](https://code.visualstudio.com/)
+- Install the [C# Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.csharp)
+- Open the folder containing the source you want to debug in VS Code - i.e., if you are debugging a test failure in System.Net.Sockets, open `corefx/src/System.Net.Sockets`
+- Open the debug window: `ctrl-shift-D` or click on the button on the left
+- Click the gear button at the top to create a launch configuration, select `.NET Core` from the selection dropdown
+- In the `.NET Core Launch (console)` configuration do the following
+  - delete the `preLaunchTask` property
+  - set `program` to the full path to `dotnet` in the artifacts/bin/testhost directory.
+    - something like `corefx/artifacts/bin/testhost/netcoreapp-{OS}-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
+  - set `cwd` to the test bin directory.
+    - using the System.Net.Sockets example, it should be something like `corefx/artifacts/bin/System.Net.Sockets.Tests/netcoreapp-{OS}-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
+  - set `args` to the command line arguments to pass to the test
+    - something like: `[ "exec", "--runtimeconfig", "{TestProjectName}.runtimeconfig.json", "xunit.console.dll", "{TestProjectName}.dll", "-notrait", ... ]`, where TestProjectName would be `System.Net.Sockets.Tests`
+    - to run a specific test, you can append something like: `[ "method", "System.Net.Sockets.Tests.{ClassName}.{TestMethodName}", ...]`
+- Set a breakpoint and launch the debugger, inspecting variables and call stacks will now work

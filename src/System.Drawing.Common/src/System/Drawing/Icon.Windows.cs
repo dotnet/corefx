@@ -14,11 +14,11 @@ using System.Runtime.Serialization;
 
 namespace System.Drawing
 {
-    [Serializable]
-    [TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-#if netcoreapp || netcoreapp30
+#if NETCOREAPP
     [TypeConverter("System.Drawing.IconConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #endif
+    [Serializable]
+    [TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public sealed partial class Icon : MarshalByRefObject, ICloneable, IDisposable, ISerializable
     {
 #if FINALIZATION_WATCH
@@ -525,7 +525,7 @@ namespace System.Drawing
                         int thisDelta = Math.Abs(entry.bWidth - width) + Math.Abs(entry.bHeight - height);
 
                         if ((thisDelta < bestDelta) ||
-                            (thisDelta == bestDelta && (0 <= s_bitDepth && 0 > _bestBitDepth || _bestBitDepth > s_bitDepth && 0 < _bestBitDepth)))
+                            (thisDelta == bestDelta && (iconBitDepth <= s_bitDepth && iconBitDepth > _bestBitDepth || _bestBitDepth > s_bitDepth && iconBitDepth < _bestBitDepth)))
                         {
                             fUpdateBestFit = true;
                         }

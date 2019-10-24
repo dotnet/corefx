@@ -319,6 +319,32 @@
     "any",
     "base"
   ],
+  "centos.8": [
+    "centos.8",
+    "centos",
+    "rhel.8",
+    "rhel",
+    "linux",
+    "unix",
+    "any",
+    "base"
+  ],
+  "centos.8-x64": [
+    "centos.8-x64",
+    "centos.8",
+    "centos-x64",
+    "rhel.8-x64",
+    "centos",
+    "rhel.8",
+    "rhel-x64",
+    "rhel",
+    "linux-x64",
+    "linux",
+    "unix-x64",
+    "unix",
+    "any",
+    "base"
+  ],
   "debian": [
     "debian",
     "linux",
@@ -895,6 +921,38 @@
     "any",
     "base"
   ],
+  "fedora.32": [
+    "fedora.32",
+    "fedora",
+    "linux",
+    "unix",
+    "any",
+    "base"
+  ],
+  "fedora.32-arm64": [
+    "fedora.32-arm64",
+    "fedora.32",
+    "fedora-arm64",
+    "fedora",
+    "linux-arm64",
+    "linux",
+    "unix-arm64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "fedora.32-x64": [
+    "fedora.32-x64",
+    "fedora.32",
+    "fedora-x64",
+    "fedora",
+    "linux-x64",
+    "linux",
+    "unix-x64",
+    "unix",
+    "any",
+    "base"
+  ],
   "freebsd": [
     "freebsd",
     "unix",
@@ -926,17 +984,17 @@
     "any",
     "base"
   ],
-  "freebsd.11.0": [
-    "freebsd.11.0",
+  "freebsd.12": [
+    "freebsd.12",
     "freebsd.11",
     "freebsd",
     "unix",
     "any",
     "base"
   ],
-  "freebsd.11.0-x64": [
-    "freebsd.11.0-x64",
-    "freebsd.11.0",
+  "freebsd.12-x64": [
+    "freebsd.12-x64",
+    "freebsd.12",
     "freebsd.11-x64",
     "freebsd.11",
     "freebsd-x64",
@@ -946,75 +1004,20 @@
     "any",
     "base"
   ],
-  "freebsd.11.1": [
-    "freebsd.11.1",
-    "freebsd.11.0",
+  "freebsd.13": [
+    "freebsd.13",
+    "freebsd.12",
     "freebsd.11",
     "freebsd",
     "unix",
     "any",
     "base"
   ],
-  "freebsd.11.1-x64": [
-    "freebsd.11.1-x64",
-    "freebsd.11.1",
-    "freebsd.11.0-x64",
-    "freebsd.11.0",
-    "freebsd.11-x64",
-    "freebsd.11",
-    "freebsd-x64",
-    "freebsd",
-    "unix-x64",
-    "unix",
-    "any",
-    "base"
-  ],
-  "freebsd.11.2": [
-    "freebsd.11.2",
-    "freebsd.11.1",
-    "freebsd.11.0",
-    "freebsd.11",
-    "freebsd",
-    "unix",
-    "any",
-    "base"
-  ],
-  "freebsd.11.2-x64": [
-    "freebsd.11.2-x64",
-    "freebsd.11.2",
-    "freebsd.11.1-x64",
-    "freebsd.11.1",
-    "freebsd.11.0-x64",
-    "freebsd.11.0",
-    "freebsd.11-x64",
-    "freebsd.11",
-    "freebsd-x64",
-    "freebsd",
-    "unix-x64",
-    "unix",
-    "any",
-    "base"
-  ],
-  "freebsd.11.3": [
-    "freebsd.11.3",
-    "freebsd.11.2",
-    "freebsd.11.1",
-    "freebsd.11.0",
-    "freebsd.11",
-    "freebsd",
-    "unix",
-    "any",
-    "base"
-  ],
-  "freebsd.11.3-x64": [
-    "freebsd.11.3-x64",
-    "freebsd.11.3",
-    "freebsd.11.2-x64",
-    "freebsd.11.2",
-    "freebsd.11.1-x64",
-    "freebsd.11.1",
-    "freebsd.11.0-x64",
-    "freebsd.11.0",
+  "freebsd.13-x64": [
+    "freebsd.13-x64",
+    "freebsd.13",
+    "freebsd.12-x64",
+    "freebsd.12",
     "freebsd.11-x64",
     "freebsd.11",
     "freebsd-x64",

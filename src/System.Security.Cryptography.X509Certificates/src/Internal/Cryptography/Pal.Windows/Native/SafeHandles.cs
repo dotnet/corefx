@@ -185,7 +185,7 @@ namespace Internal.Cryptography.Pal.Native
                     {
                         CryptAcquireContextFlags flags = (pProvInfo->dwFlags & CryptAcquireContextFlags.CRYPT_MACHINE_KEYSET) | CryptAcquireContextFlags.CRYPT_DELETEKEYSET;
                         IntPtr hProv;
-                        bool success = Interop.cryptoapi.CryptAcquireContext(out hProv, pProvInfo->pwszContainerName, pProvInfo->pwszProvName, pProvInfo->dwProvType, flags);
+                        _ = Interop.cryptoapi.CryptAcquireContext(out hProv, pProvInfo->pwszContainerName, pProvInfo->pwszProvName, pProvInfo->dwProvType, flags);
 
                         // Called CryptAcquireContext solely for the side effect of deleting the key containers. When called with these flags, no actual
                         // hProv is returned (so there's nothing to clean up.)
@@ -236,6 +236,41 @@ namespace Internal.Cryptography.Pal.Native
         {
             Marshal.FreeHGlobal(handle);
             return true;
+        }
+    }
+
+    internal sealed class SafeChainEngineHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        public SafeChainEngineHandle()
+            : base(true)
+        {
+        }
+
+        private SafeChainEngineHandle(IntPtr handle)
+            : base(true)
+        {
+            SetHandle(handle);
+        }
+
+        public static readonly SafeChainEngineHandle MachineChainEngine =
+            new SafeChainEngineHandle((IntPtr)ChainEngine.HCCE_LOCAL_MACHINE);
+
+        public static readonly SafeChainEngineHandle UserChainEngine =
+            new SafeChainEngineHandle((IntPtr)ChainEngine.HCCE_CURRENT_USER);
+
+        protected sealed override bool ReleaseHandle()
+        {
+            Interop.crypt32.CertFreeCertificateChainEngine(handle);
+            SetHandle(IntPtr.Zero);
+            return true;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (this != UserChainEngine && this != MachineChainEngine)
+            {
+                base.Dispose(disposing);
+            }
         }
     }
 }

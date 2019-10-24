@@ -62,6 +62,9 @@ namespace System.Diagnostics
     ///       * PROPERTY_NAME                  - fetches a property from the DiagnosticSource payload object
     ///       * PROPERTY_NAME . PROPERTY NAME  - fetches a sub-property of the object.
     ///
+    ///       * *Activity                      - fetches Activity.Current
+    ///       * *Enumerate                     - enumerates all the items in an IEnumerable, calls ToString() on them, and joins the
+    ///                                          strings in a comma separated list.
     /// Example1:
     ///
     ///    "BridgeTestSource1/TestEvent1:cls_Point_X=cls.Point.X;cls_Point_Y=cls.Point.Y\r\n" +
@@ -196,7 +199,7 @@ namespace System.Diagnostics
         /// Used to send ad-hoc diagnostics to humans.
         /// </summary>
         [Event(1, Keywords = Keywords.Messages)]
-        public void Message(string Message)
+        public void Message(string? Message)
         {
             WriteEvent(1, Message);
         }
@@ -206,7 +209,7 @@ namespace System.Diagnostics
         /// Events from DiagnosticSource can be forwarded to EventSource using this event.
         /// </summary>
         [Event(2, Keywords = Keywords.Events)]
-        private void Event(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
+        private void Event(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string?>>? Arguments)
         {
             WriteEvent(2, SourceName, EventName, Arguments);
         }
@@ -355,8 +358,8 @@ namespace System.Diagnostics
                 if ((command.Command == EventCommand.Update || command.Command == EventCommand.Enable) &&
                     IsEnabled(EventLevel.Informational, Keywords.Events))
                 {
-                    string filterAndPayloadSpecs;
-                    command.Arguments.TryGetValue("FilterAndPayloadSpecs", out filterAndPayloadSpecs);
+                    string? filterAndPayloadSpecs = null;
+                    command.Arguments!.TryGetValue("FilterAndPayloadSpecs", out filterAndPayloadSpecs);
 
                     if (!IsEnabled(EventLevel.Informational, Keywords.IgnoreShortCutKeywords))
                     {
@@ -375,7 +378,7 @@ namespace System.Diagnostics
         }
 
         // trivial helper to allow you to join two strings the first of which can be null.
-        private static string NewLineSeparate(string str1, string str2)
+        private static string NewLineSeparate(string? str1, string str2)
         {
             Debug.Assert(str2 != null);
             if (string.IsNullOrEmpty(str1))
@@ -432,7 +435,7 @@ namespace System.Diagnostics
             /// in the output payload, however this feature and be tuned off by prefixing the
             /// PAYLOADSPEC with a '-'.
             /// </summary>
-            public static void CreateFilterAndTransformList(ref FilterAndTransform specList, string filterAndPayloadSpecs, DiagnosticSourceEventSource eventSource)
+            public static void CreateFilterAndTransformList(ref FilterAndTransform? specList, string? filterAndPayloadSpecs, DiagnosticSourceEventSource eventSource)
             {
                 DestroyFilterAndTransformList(ref specList);        // Stop anything that was on before.
                 if (filterAndPayloadSpecs == null)
@@ -466,7 +469,7 @@ namespace System.Diagnostics
             /// This destroys (turns off) the FilterAndTransform stopping the forwarding started with CreateFilterAndTransformList
             /// </summary>
             /// <param name="specList"></param>
-            public static void DestroyFilterAndTransformList(ref FilterAndTransform specList)
+            public static void DestroyFilterAndTransformList(ref FilterAndTransform? specList)
             {
                 var curSpec = specList;
                 specList = null;            // Null out the list
@@ -482,15 +485,15 @@ namespace System.Diagnostics
             /// This FilterAndTransform will subscribe to DiagnosticSources specified by the specification and forward them to 'eventSource.
             /// For convenience, the 'Next' field is set to the 'next' parameter, so you can easily form linked lists.
             /// </summary>
-            public FilterAndTransform(string filterAndPayloadSpec, int startIdx, int endIdx, DiagnosticSourceEventSource eventSource, FilterAndTransform next)
+            public FilterAndTransform(string filterAndPayloadSpec, int startIdx, int endIdx, DiagnosticSourceEventSource eventSource, FilterAndTransform? next)
             {
                 Debug.Assert(filterAndPayloadSpec != null && startIdx >= 0 && startIdx <= endIdx && endIdx <= filterAndPayloadSpec.Length);
                 Next = next;
                 _eventSource = eventSource;
 
-                string listenerNameFilter = null;       // Means WildCard.
-                string eventNameFilter = null;          // Means WildCard.
-                string activityName = null;
+                string? listenerNameFilter = null;       // Means WildCard.
+                string? eventNameFilter = null;          // Means WildCard.
+                string? activityName = null;
 
                 var startTransformIdx = startIdx;
                 var endEventNameIdx = endIdx;
@@ -557,10 +560,10 @@ namespace System.Diagnostics
                     }
                 }
 
-                Action<string, string, IEnumerable<KeyValuePair<string, string>>> writeEvent = null;
+                Action<string, string, IEnumerable<KeyValuePair<string, string?>>>? writeEvent = null;
                 if (activityName != null && activityName.Contains("Activity"))
                 {
-                    MethodInfo writeEventMethodInfo = typeof(DiagnosticSourceEventSource).GetTypeInfo().GetDeclaredMethod(activityName);
+                    MethodInfo? writeEventMethodInfo = typeof(DiagnosticSourceEventSource).GetTypeInfo().GetDeclaredMethod(activityName);
                     if (writeEventMethodInfo != null)
                     {
                         // This looks up the activityName (which needs to be a name of an event on DiagnosticSourceEventSource
@@ -568,7 +571,7 @@ namespace System.Diagnostics
                         // just works.
                         try
                         {
-                            writeEvent = (Action<string, string, IEnumerable<KeyValuePair<string, string>>>)
+                            writeEvent = (Action<string?, string?, IEnumerable<KeyValuePair<string, string?>>>)
                                 writeEventMethodInfo.CreateDelegate(typeof(Action<string, string, IEnumerable<KeyValuePair<string, string>>>), _eventSource);
                         }
                         catch (Exception) { }
@@ -596,11 +599,11 @@ namespace System.Diagnostics
                     if (listenerNameFilter == null || listenerNameFilter == newListener.Name)
                     {
                         _eventSource.NewDiagnosticListener(newListener.Name);
-                        Predicate<string> eventNameFilterPredicate = null;
+                        Predicate<string>? eventNameFilterPredicate = null;
                         if (eventNameFilter != null)
                             eventNameFilterPredicate = (string eventName) => eventNameFilter == eventName;
 
-                        var subscription = newListener.Subscribe(new CallbackObserver<KeyValuePair<string, object>>(delegate (KeyValuePair<string, object> evnt)
+                        var subscription = newListener.Subscribe(new CallbackObserver<KeyValuePair<string, object?>>(delegate (KeyValuePair<string, object?> evnt)
                         {
                             // The filter given to the DiagnosticSource may not work if users don't is 'IsEnabled' as expected.
                             // Thus we look for any events that may have snuck through and filter them out before forwarding.
@@ -626,7 +629,7 @@ namespace System.Diagnostics
 
                 if (_liveSubscriptions != null)
                 {
-                    var subscr = _liveSubscriptions;
+                    Subscriptions? subscr = _liveSubscriptions;
                     _liveSubscriptions = null;
                     while (subscr != null)
                     {
@@ -636,20 +639,20 @@ namespace System.Diagnostics
                 }
             }
 
-            public List<KeyValuePair<string, string>> Morph(object args)
+            public List<KeyValuePair<string, string?>> Morph(object? args)
             {
                 // Transform the args into a bag of key-value strings.
-                var outputArgs = new List<KeyValuePair<string, string>>();
+                var outputArgs = new List<KeyValuePair<string, string?>>();
                 if (args != null)
                 {
                     if (!_noImplicitTransforms)
                     {
                         // given the type, fetch the implicit transforms for that type and put it in the implicitTransforms variable.
                         Type argType = args.GetType();
-                        TransformSpec implicitTransforms;
+                        TransformSpec? implicitTransforms;
 
                         // First check the one-element cache _firstImplicitTransformsEntry
-                        ImplicitTransformEntry cacheEntry = _firstImplicitTransformsEntry;
+                        ImplicitTransformEntry? cacheEntry = _firstImplicitTransformsEntry;
                         if (cacheEntry != null && cacheEntry.Type == argType)
                         {
                             implicitTransforms = cacheEntry.Transforms;     // Yeah we hit the cache.
@@ -672,7 +675,7 @@ namespace System.Diagnostics
                             if (_implicitTransformsTable == null)
                             {
                                 Interlocked.CompareExchange(ref _implicitTransformsTable,
-                                    new ConcurrentDictionary<Type, TransformSpec>(1, 8), null);
+                                    new ConcurrentDictionary<Type, TransformSpec?>(1, 8), null);
                             }
                             implicitTransforms = _implicitTransformsTable.GetOrAdd(argType, type => MakeImplicitTransforms(type));
                         }
@@ -680,14 +683,14 @@ namespace System.Diagnostics
                         // implicitTransformas now fetched from cache or constructed, use it to Fetch all the implicit fields.
                         if (implicitTransforms != null)
                         {
-                            for (TransformSpec serializableArg = implicitTransforms; serializableArg != null; serializableArg = serializableArg.Next)
+                            for (TransformSpec? serializableArg = implicitTransforms; serializableArg != null; serializableArg = serializableArg.Next)
                                 outputArgs.Add(serializableArg.Morph(args));
                         }
                     }
 
                     if (_explicitTransforms != null)
                     {
-                        for (var explicitTransform = _explicitTransforms; explicitTransform != null; explicitTransform = explicitTransform.Next)
+                        for (TransformSpec? explicitTransform = _explicitTransforms; explicitTransform != null; explicitTransform = explicitTransform.Next)
                         {
                             var keyValue = explicitTransform.Morph(args);
                             if (keyValue.Value != null)
@@ -698,26 +701,29 @@ namespace System.Diagnostics
                 return outputArgs;
             }
 
-            public FilterAndTransform Next;
+            public FilterAndTransform? Next;
 
             #region private
             // Given a type generate all the implicit transforms for type (that is for every field
             // generate the spec that fetches it).
-            private static TransformSpec MakeImplicitTransforms(Type type)
+            private static TransformSpec? MakeImplicitTransforms(Type type)
             {
-                TransformSpec newSerializableArgs = null;
+                TransformSpec? newSerializableArgs = null;
                 TypeInfo curTypeInfo = type.GetTypeInfo();
                 foreach (PropertyInfo property in curTypeInfo.DeclaredProperties)
                 {
+                    // prevent TransformSpec from attempting to implicitly transform index properties
+                    if (property.GetMethod == null || property.GetMethod!.GetParameters().Length > 0)
+                        continue;
                     newSerializableArgs = new TransformSpec(property.Name, 0, property.Name.Length, newSerializableArgs);
                 }
                 return Reverse(newSerializableArgs);
             }
 
             // Reverses a linked list (of TransformSpecs) in place.
-            private static TransformSpec Reverse(TransformSpec list)
+            private static TransformSpec? Reverse(TransformSpec? list)
             {
-                TransformSpec ret = null;
+                TransformSpec? ret = null;
                 while (list != null)
                 {
                     var next = list.Next;
@@ -728,12 +734,12 @@ namespace System.Diagnostics
                 return ret;
             }
 
-            private IDisposable _diagnosticsListenersSubscription; // This is our subscription that listens for new Diagnostic source to appear.
-            private Subscriptions _liveSubscriptions;              // These are the subscriptions that we are currently forwarding to the EventSource.
+            private IDisposable? _diagnosticsListenersSubscription; // This is our subscription that listens for new Diagnostic source to appear.
+            private Subscriptions? _liveSubscriptions;              // These are the subscriptions that we are currently forwarding to the EventSource.
             private readonly bool _noImplicitTransforms;                    // Listener can say they don't want implicit transforms.
-            private ImplicitTransformEntry _firstImplicitTransformsEntry; // The transform for _firstImplicitFieldsType
-            private ConcurrentDictionary<Type, TransformSpec> _implicitTransformsTable; // If there is more than one object type for an implicit transform, they go here.
-            private readonly TransformSpec _explicitTransforms;             // payload to include because the user explicitly indicated how to fetch the field.
+            private ImplicitTransformEntry? _firstImplicitTransformsEntry; // The transform for _firstImplicitFieldsType
+            private ConcurrentDictionary<Type, TransformSpec?>? _implicitTransformsTable; // If there is more than one object type for an implicit transform, they go here.
+            private readonly TransformSpec? _explicitTransforms;             // payload to include because the user explicitly indicated how to fetch the field.
             private readonly DiagnosticSourceEventSource _eventSource;      // Where the data is written to.
             #endregion
         }
@@ -742,8 +748,8 @@ namespace System.Diagnostics
         // We remember this type-transform pair in the _firstImplicitTransformsEntry cache.
         internal class ImplicitTransformEntry
         {
-            public Type Type;
-            public TransformSpec Transforms;
+            public Type? Type;
+            public TransformSpec? Transforms;
         }
 
         /// <summary>
@@ -757,7 +763,7 @@ namespace System.Diagnostics
             /// parse the strings 'spec' from startIdx to endIdx (points just beyond the last considered char)
             /// The syntax is ID1=ID2.ID3.ID4 ....   Where ID1= is optional.
             /// </summary>
-            public TransformSpec(string transformSpec, int startIdx, int endIdx, TransformSpec next = null)
+            public TransformSpec(string transformSpec, int startIdx, int endIdx, TransformSpec? next = null)
             {
                 Debug.Assert(transformSpec != null && startIdx >= 0 && startIdx < endIdx && endIdx <= transformSpec.Length);
                 Next = next;
@@ -794,21 +800,21 @@ namespace System.Diagnostics
             /// if the spec is OUTSTR=EVENT_VALUE.PROP1.PROP2.PROP3 and the ultimate value of PROP3 is
             /// 10 then the return key value pair is  KeyValuePair("OUTSTR","10")
             /// </summary>
-            public KeyValuePair<string, string> Morph(object obj)
+            public KeyValuePair<string, string?> Morph(object? obj)
             {
-                for (PropertySpec cur = _fetches; cur != null; cur = cur.Next)
+                for (PropertySpec? cur = _fetches; cur != null; cur = cur.Next)
                 {
-                    if (obj != null)
+                    if (obj != null || cur.IsStatic)
                         obj = cur.Fetch(obj);
                 }
 
-                return new KeyValuePair<string, string>(_outputName, obj?.ToString());
+                return new KeyValuePair<string, string?>(_outputName, obj?.ToString());
             }
 
             /// <summary>
             /// A public field that can be used to form a linked list.
             /// </summary>
-            public TransformSpec Next;
+            public TransformSpec? Next;
 
             #region private
             /// <summary>
@@ -818,36 +824,49 @@ namespace System.Diagnostics
             /// </summary>
             internal class PropertySpec
             {
+                private const string CurrentActivityPropertyName = "*Activity";
+                private const string EnumeratePropertyName = "*Enumerate";
+
                 /// <summary>
                 /// Make a new PropertySpec for a property named 'propertyName'.
                 /// For convenience you can set he 'next' field to form a linked
                 /// list of PropertySpecs.
                 /// </summary>
-                public PropertySpec(string propertyName, PropertySpec next = null)
+                public PropertySpec(string propertyName, PropertySpec? next)
                 {
                     Next = next;
                     _propertyName = propertyName;
+
+                    // detect well-known names that are static functions
+                    if (_propertyName == CurrentActivityPropertyName)
+                    {
+                        IsStatic = true;
+                    }
                 }
+
+                public bool IsStatic { get; private set; }
 
                 /// <summary>
                 /// Given an object fetch the property that this PropertySpec represents.
+                /// obj may be null when IsStatic is true, otherwise it must be non-null.
                 /// </summary>
-                public object Fetch(object obj)
+                public object? Fetch(object? obj)
                 {
-                    Type objType = obj.GetType();
-                    PropertyFetch fetch = _fetchForExpectedType;
+                    PropertyFetch? fetch = _fetchForExpectedType;
+                    Debug.Assert(obj != null || IsStatic);
+                    Type? objType = obj?.GetType();
                     if (fetch == null || fetch.Type != objType)
                     {
                         _fetchForExpectedType = fetch = PropertyFetch.FetcherForProperty(
-                            objType, objType.GetTypeInfo().GetDeclaredProperty(_propertyName));
+                            objType, _propertyName);
                     }
-                    return fetch.Fetch(obj);
+                    return fetch!.Fetch(obj);
                 }
 
                 /// <summary>
                 /// A public field that can be used to form a linked list.
                 /// </summary>
-                public PropertySpec Next;
+                public PropertySpec? Next;
 
                 #region private
                 /// <summary>
@@ -857,58 +876,163 @@ namespace System.Diagnostics
                 /// </summary>
                 private class PropertyFetch
                 {
-                    protected PropertyFetch(Type type)
+                    public PropertyFetch(Type? type)
                     {
-                        Debug.Assert(type != null);
                         Type = type;
                     }
 
-                    internal Type Type { get; }
+                    /// <summary>
+                    /// The type of the object that the property is fetched from. For well-known static methods that
+                    /// aren't actually property getters this will return null.
+                    /// </summary>
+                    internal Type? Type { get; }
 
                     /// <summary>
-                    /// Create a property fetcher from a .NET Reflection PropertyInfo class that
-                    /// represents a property of a particular type.
+                    /// Create a property fetcher for a propertyName
                     /// </summary>
-                    public static PropertyFetch FetcherForProperty(Type type, PropertyInfo propertyInfo)
+                    public static PropertyFetch FetcherForProperty(Type? type, string propertyName)
                     {
-                        if (propertyInfo == null)
+                        if (propertyName == null)
                             return new PropertyFetch(type);     // returns null on any fetch.
+                        if (propertyName == CurrentActivityPropertyName)
+                        {
+#if EVENTSOURCE_ACTIVITY_SUPPORT
+                            return new CurrentActivityPropertyFetch();
+#else
+                            // In netstandard1.1 the Activity.Current API doesn't exist
+                            Logger.Message($"{CurrentActivityPropertyName} not supported for this TFM");
+                            return new PropertyFetch(type);
+#endif
+                        }
 
-                        var typedPropertyFetcher = typeof(TypedFetchProperty<,>);
-                        var instantiatedTypedPropertyFetcher = typedPropertyFetcher.GetTypeInfo().MakeGenericType(
-                            propertyInfo.DeclaringType, propertyInfo.PropertyType);
-                        return (PropertyFetch)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type, propertyInfo);
+                        Debug.Assert(type != null, "Type should only be null for the well-known static fetchers already checked");
+                        TypeInfo typeInfo = type.GetTypeInfo();
+                        if (propertyName == EnumeratePropertyName)
+                        {
+#if !EVENTSOURCE_ENUMERATE_SUPPORT
+                            // In netstandard1.1 and 1.3 the reflection APIs needed to implement Enumerate support aren't
+                            // available
+                            Logger.Message($"{EnumeratePropertyName} not supported for this TFM");
+                            return new PropertyFetch(type);
+#else
+                            // If there are multiple implementations of IEnumerable<T>, this arbitrarily uses the first one
+                            foreach (Type iFaceType in typeInfo.GetInterfaces())
+                            {
+                                TypeInfo iFaceTypeInfo = iFaceType.GetTypeInfo();
+                                if (!iFaceTypeInfo.IsGenericType ||
+                                    iFaceTypeInfo.GetGenericTypeDefinition() != typeof(IEnumerable<>))
+                                {
+                                    continue;
+                                }
+
+                                Type elemType = iFaceTypeInfo.GetGenericArguments()[0];
+                                Type instantiatedTypedPropertyFetcher = typeof(EnumeratePropertyFetch<>)
+                                    .GetTypeInfo().MakeGenericType(elemType);
+                                return (PropertyFetch)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type)!;
+                            }
+
+                            // no implemenation of IEnumerable<T> found, return a null fetcher
+                            Logger.Message($"*Enumerate applied to non-enumerable type {type}");
+                            return new PropertyFetch(type);
+#endif
+                        }
+                        else
+                        {
+                            PropertyInfo? propertyInfo = typeInfo.GetDeclaredProperty(propertyName);
+                            if (propertyInfo == null)
+                            {
+                                Logger.Message($"Property {propertyName} not found on {type}");
+                                return new PropertyFetch(type);
+                            }
+                            Type typedPropertyFetcher = typeInfo.IsValueType ?
+                                typeof(ValueTypedFetchProperty<,>) : typeof(RefTypedFetchProperty<,>);
+                            Type instantiatedTypedPropertyFetcher = typedPropertyFetcher.GetTypeInfo().MakeGenericType(
+                                propertyInfo.DeclaringType!, propertyInfo.PropertyType);
+                            return (PropertyFetch)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type, propertyInfo)!;
+                        }
                     }
 
                     /// <summary>
                     /// Given an object, fetch the property that this propertyFech represents.
                     /// </summary>
-                    public virtual object Fetch(object obj) { return null; }
+                    public virtual object? Fetch(object? obj) { return null; }
 
                     #region private
 
-                    private sealed class TypedFetchProperty<TObject, TProperty> : PropertyFetch
+                    private sealed class RefTypedFetchProperty<TObject, TProperty> : PropertyFetch
                     {
-                        public TypedFetchProperty(Type type, PropertyInfo property) : base(type)
+                        public RefTypedFetchProperty(Type type, PropertyInfo property) : base(type)
                         {
-                            _propertyFetch = (Func<TObject, TProperty>)property.GetMethod.CreateDelegate(typeof(Func<TObject, TProperty>));
+                            Debug.Assert(typeof(TObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
+                            _propertyFetch = (Func<TObject, TProperty>)property.GetMethod!.CreateDelegate(typeof(Func<TObject, TProperty>));
                         }
-                        public override object Fetch(object obj)
+                        public override object? Fetch(object? obj)
                         {
+                            Debug.Assert(obj is TObject);
                             return _propertyFetch((TObject)obj);
                         }
                         private readonly Func<TObject, TProperty> _propertyFetch;
+                    }
+
+                    private delegate TProperty StructFunc<TStruct, TProperty>(ref TStruct thisArg);
+
+                    // Value types methods require that the first argument is passed by reference. This requires a different delegate signature
+                    // from the reference type case.
+                    private sealed class ValueTypedFetchProperty<TStruct, TProperty> : PropertyFetch
+                    {
+                        public ValueTypedFetchProperty(Type type, PropertyInfo property) : base(type)
+                        {
+                            Debug.Assert(typeof(TStruct) == type);
+                            _propertyFetch = (StructFunc<TStruct, TProperty>)property.GetMethod!.CreateDelegate(typeof(StructFunc<TStruct, TProperty>));
+                        }
+                        public override object? Fetch(object? obj)
+                        {
+                            Debug.Assert(obj is TStruct);
+                            // It is uncommon for property getters to mutate the struct, but if they do the change will be lost.
+                            // We are calling the getter on an unboxed copy
+                            TStruct structObj = (TStruct)obj;
+                            return _propertyFetch(ref structObj);
+                        }
+                        private readonly StructFunc<TStruct, TProperty> _propertyFetch;
+                    }
+
+
+#if EVENTSOURCE_ACTIVITY_SUPPORT
+                    /// <summary>
+                    /// A fetcher that returns the result of Activity.Current
+                    /// </summary>
+                    private sealed class CurrentActivityPropertyFetch : PropertyFetch
+                    {
+                        public CurrentActivityPropertyFetch() : base(null) { }
+                        public override object? Fetch(object? obj)
+                        {
+                            return Activity.Current;
+                        }
+                    }
+#endif
+
+                    /// <summary>
+                    /// A fetcher that enumerates and formats an IEnumerable
+                    /// </summary>
+                    private sealed class EnumeratePropertyFetch<ElementType> : PropertyFetch
+                    {
+                        public EnumeratePropertyFetch(Type type) : base(type) { }
+                        public override object? Fetch(object? obj)
+                        {
+                            Debug.Assert(obj is IEnumerable<ElementType>);
+                            return string.Join(",", (IEnumerable<ElementType>)obj);
+                        }
                     }
                     #endregion
                 }
 
                 private readonly string _propertyName;
-                private volatile PropertyFetch _fetchForExpectedType;
+                private volatile PropertyFetch? _fetchForExpectedType;
                 #endregion
             }
 
-            private readonly string _outputName;
-            private readonly PropertySpec _fetches;
+            private readonly string _outputName = null!;
+            private readonly PropertySpec? _fetches;
             #endregion
         }
 
@@ -936,18 +1060,18 @@ namespace System.Diagnostics
         // We use this linked list for thread atomicity
         internal class Subscriptions
         {
-            public Subscriptions(IDisposable subscription, Subscriptions next)
+            public Subscriptions(IDisposable subscription, Subscriptions? next)
             {
                 Subscription = subscription;
                 Next = next;
             }
             public IDisposable Subscription;
-            public Subscriptions Next;
+            public Subscriptions? Next;
         }
 
         #endregion
 
-        private FilterAndTransform _specs;      // Transformation specifications that indicate which sources/events are forwarded.
+        private FilterAndTransform? _specs;      // Transformation specifications that indicate which sources/events are forwarded.
         #endregion
     }
 }

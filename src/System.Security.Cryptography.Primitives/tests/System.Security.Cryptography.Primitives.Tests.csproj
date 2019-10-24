@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(CommonTestPath)\Tests.props" />
   <PropertyGroup>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\IO\PositionValueStream.cs">
@@ -11,6 +11,7 @@
     <Compile Include="CryptoConfigTests.cs" />
     <Compile Include="CryptoStream.cs" />
     <Compile Include="CryptographicException.cs" />
+    <Compile Include="HashAlgorithmNameTests.cs" />
     <Compile Include="HmacAlgorithmTest.cs" />
     <Compile Include="KeyedHashAlgorithmTests.cs" />
     <Compile Include="Length32Hash.cs" />

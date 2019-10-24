@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Tests;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -13,34 +14,30 @@ namespace System.Text.RegularExpressions.Tests
         /// <summary>
         /// See https://en.wikipedia.org/wiki/Dotted_and_dotless_I
         /// </summary>
-        [ActiveIssue(38195, TargetFrameworkMonikers.Uap)]
         [Fact]
         public void TurkishI_Is_Differently_LowerUpperCased_In_Turkish_Culture()
         {
-            RemoteExecutor.Invoke(() =>
-            {
-                var turkish = new CultureInfo("tr-TR");
-                string input = "I\u0131\u0130i";
+            var turkish = new CultureInfo("tr-TR");
+            string input = "I\u0131\u0130i";
 
-                Regex[] cultInvariantRegex = Create(input, CultureInfo.InvariantCulture, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-                Regex[] turkishRegex = Create(input, turkish, RegexOptions.IgnoreCase);
+            Regex[] cultInvariantRegex = Create(input, CultureInfo.InvariantCulture, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            Regex[] turkishRegex = Create(input, turkish, RegexOptions.IgnoreCase);
 
-                // same input and regex does match so far so good
-                Assert.All(cultInvariantRegex, rex => Assert.True(rex.IsMatch(input)));
+            // same input and regex does match so far so good
+            Assert.All(cultInvariantRegex, rex => Assert.True(rex.IsMatch(input)));
 
-                // when the Regex was created with a turkish locale the lower cased turkish version will
-                // no longer match the input string which contains upper and lower case iiiis hence even the input string
-                // will no longer match
-                Assert.All(turkishRegex, rex => Assert.False(rex.IsMatch(input)));
+            // when the Regex was created with a turkish locale the lower cased turkish version will
+            // no longer match the input string which contains upper and lower case iiiis hence even the input string
+            // will no longer match
+            Assert.All(turkishRegex, rex => Assert.False(rex.IsMatch(input)));
 
-                // Now comes the tricky part depending on the use locale in ToUpper the results differ
-                // Hence the regular expression will not match if different locales were used
-                Assert.All(cultInvariantRegex, rex => Assert.True(rex.IsMatch(input.ToLowerInvariant())));
-                Assert.All(cultInvariantRegex, rex => Assert.False(rex.IsMatch(input.ToLower(turkish))));
+            // Now comes the tricky part depending on the use locale in ToUpper the results differ
+            // Hence the regular expression will not match if different locales were used
+            Assert.All(cultInvariantRegex, rex => Assert.True(rex.IsMatch(input.ToLowerInvariant())));
+            Assert.All(cultInvariantRegex, rex => Assert.False(rex.IsMatch(input.ToLower(turkish))));
 
-                Assert.All(turkishRegex, rex => Assert.False(rex.IsMatch(input.ToLowerInvariant())));
-                Assert.All(turkishRegex, rex => Assert.True(rex.IsMatch(input.ToLower(turkish))));
-            }).Dispose();
+            Assert.All(turkishRegex, rex => Assert.False(rex.IsMatch(input.ToLowerInvariant())));
+            Assert.All(turkishRegex, rex => Assert.True(rex.IsMatch(input.ToLower(turkish))));
         }
 
         /// <summary>
@@ -52,19 +49,15 @@ namespace System.Text.RegularExpressions.Tests
         /// <returns></returns>
         Regex[] Create(string input, CultureInfo info, RegexOptions additional)
         {
-            CultureInfo current = CultureInfo.CurrentCulture;
-            try
+            using (new ThreadCultureChange(info))
             {
-                CultureInfo.CurrentCulture = info;
-
                 // When RegexOptions.IgnoreCase is supplied the current thread culture is used to lowercase the input string.
                 // Except if RegexOptions.CultureInvariant is additionally added locale dependent effects on the generated code or state machine may happen.
-                var localizedRegex = new Regex[] { new Regex(input, additional), new Regex(input, RegexOptions.Compiled | additional) };
-                return localizedRegex;
-            }
-            finally
-            {
-                CultureInfo.CurrentCulture = current;
+                return new Regex[]
+                {
+                    new Regex(input, additional),
+                    new Regex(input, RegexOptions.Compiled | additional)
+                };
             }
         }
     }

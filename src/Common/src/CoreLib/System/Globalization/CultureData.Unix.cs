@@ -247,11 +247,6 @@ namespace System.Globalization
             return null;
         }
 
-        private static CultureInfo GetUserDefaultCulture()
-        {
-            return CultureInfo.GetUserDefaultCulture();
-        }
-
         private static string ConvertIcuTimeFormatString(ReadOnlySpan<char> icuFormatString)
         {
             Debug.Assert(icuFormatString.Length < ICU_ULOC_FULLNAME_CAPACITY);
@@ -418,8 +413,6 @@ namespace System.Globalization
         {
             return LocaleData.GetConsoleUICulture(cultureName);
         }
-
-        internal bool IsFramework => false;
 
         internal bool IsWin32Installed => false;
 

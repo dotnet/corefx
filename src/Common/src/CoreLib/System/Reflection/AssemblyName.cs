@@ -303,8 +303,7 @@ namespace System.Reflection
                         short maxSize = (short)Math.Min(end - i, (int)c_MaxUnicodeCharsReallocate - 1);
 
                         short count = 1;
-                        for (; count < maxSize && pStr[i + count] > '\x7f'; ++count)
-                            ;
+                        for (; count < maxSize && pStr[i + count] > '\x7f'; ++count) ;
 
                         // Is the last a high surrogate?
                         if (pStr[i + count - 1] >= 0xD800 && pStr[i + count - 1] <= 0xDBFF)
@@ -355,14 +354,7 @@ namespace System.Reflection
                         }
                         prevInputPos = i + 1;
                     }
-                    else if (ch == force1 || ch == force2)
-                    {
-                        dest = EnsureDestinationSize(pStr, dest, i, c_EncodedCharsPerByte,
-                            c_MaxAsciiCharsReallocate * c_EncodedCharsPerByte, ref destPos, prevInputPos);
-                        EscapeAsciiChar(ch, dest, ref destPos);
-                        prevInputPos = i + 1;
-                    }
-                    else if (ch != rsvd && (isUriString ? !IsReservedUnreservedOrHash(ch) : !IsUnreserved(ch)))
+                    else if (ch == force1 || ch == force2 || (ch != rsvd && (isUriString ? !IsReservedUnreservedOrHash(ch) : !IsUnreserved(ch))))
                     {
                         dest = EnsureDestinationSize(pStr, dest, i, c_EncodedCharsPerByte,
                             c_MaxAsciiCharsReallocate * c_EncodedCharsPerByte, ref destPos, prevInputPos);
@@ -448,7 +440,7 @@ namespace System.Reflection
             {
                 return true;
             }
-            return (RFC3986ReservedMarks.Contains(c));
+            return RFC3986ReservedMarks.Contains(c);
         }
 
         internal static bool IsUnreserved(char c)
@@ -457,7 +449,7 @@ namespace System.Reflection
             {
                 return true;
             }
-            return (RFC3986UnreservedMarks.Contains(c));
+            return RFC3986UnreservedMarks.Contains(c);
         }
 
         // Only consider ASCII characters
@@ -480,7 +472,7 @@ namespace System.Reflection
         private const short c_MaxUnicodeCharsReallocate = 40;
         private const short c_MaxUTF_8BytesPerUnicodeChar = 4;
         private const short c_EncodedCharsPerByte = 3;
-        private const string RFC3986ReservedMarks = @":/?#[]@!$&'()*+,;=";
-        private const string RFC3986UnreservedMarks = @"-._~";
+        private const string RFC3986ReservedMarks = ":/?#[]@!$&'()*+,;=";
+        private const string RFC3986UnreservedMarks = "-._~";
     }
 }

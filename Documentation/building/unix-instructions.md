@@ -1,5 +1,6 @@
-Building CoreFX on FreeBSD, Linux and OS X
+Building CoreFX on Linux and OS X
 ==========================================
+
 ## Building
 
 1. Install the prerequisites ([Linux](#user-content-linux), [macOS](#user-content-macos))
@@ -10,6 +11,8 @@ Building CoreFX on FreeBSD, Linux and OS X
 Calling the script `build.sh` builds both the native and managed code.
 
 For more information about the different options when building, run `build.sh --help` and look at examples in the [developer-guide](../project-docs/developer-guide.md).
+
+To build per project, you can use the script `.dotnet/dotnet msbuild` from the root of the repo, e.g. `.dotnet/dotnet msbuild src/System.Console/src /t:rebuild`.
 
 ## Minimum Hardware Requirements
 - 2GB RAM
@@ -128,3 +131,8 @@ If you see errors along the lines of `SendFailure (Error writing headers)` you m
 mozroots --import --sync
 ```
 
+---
+
+## FreeBSD
+
+Build instructions for FreeBSD can be found [here](freebsd-instructions.md).

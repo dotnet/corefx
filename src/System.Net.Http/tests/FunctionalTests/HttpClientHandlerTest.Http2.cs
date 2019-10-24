@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Security;
@@ -1725,17 +1726,18 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [ConditionalTheory(nameof(SupportsAlpn))]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Http2_PendingReceive_SendsReset(bool doRead)
         {
             var cts = new CancellationTokenSource();
-            bool isCanceled = false;
+            var doCancel = new TaskCompletionSource<bool>();
             HttpResponseMessage response = null;
-            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
+
+            using (HttpClient client = CreateHttpClient())
             {
-                using (HttpClient client = CreateHttpClient())
+                await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
                 {
                     var request = new HttpRequestMessage(HttpMethod.Get, url);
                     request.Version = new Version(2,0);
@@ -1743,57 +1745,56 @@ namespace System.Net.Http.Functional.Tests
                     response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
                     using (Stream stream = await response.Content.ReadAsStreamAsync())
                     {
+                        byte[] buffer = new byte[100];
+
+                        if (doRead)
+                        {
+                            // Start reading response as variation.
+                            _ = await stream.ReadAsync(buffer, cts.Token);
+                        }
+
+                        doCancel.SetResult(true);
+                        _output.WriteLine($"{DateTime.Now} cancellation requested.");
+
+                        // Keep reading response.
                         if (doRead)
                         {
                             try
                             {
-                                int readLength;
-                                do {
-                                    byte[] buffer = new byte[100];
-
-                                    readLength = await stream.ReadAsync(buffer, cts.Token);
-                                } while (readLength != 0);
+                                while (true)
+                                {
+                                    _ = await stream.ReadAsync(buffer, cts.Token);
+                                }
                             }
                             catch (OperationCanceledException) { };
                         }
-
-                        isCanceled = true;
                     }
-                }
-            },
-            async server =>
-            {
-                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
-
-                (int streamId, HttpRequestData requestData) = await connection.ReadAndParseRequestHeaderAsync(readBody : false);
-                _output.WriteLine($"{DateTime.Now} Connection established");
-                // Cancel client after receiving Headers.
-                await connection.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.OK);
-
-                // Start streaming response
-                DataFrame dataFrame = new DataFrame(new byte[100], FrameFlags.None, 0, streamId);
-                await connection.WriteFrameAsync(dataFrame);
-
-                // Keep sending data until clients cancels
-                while (!isCanceled)
+                },
+                async server =>
                 {
-                    if (response != null)
-                    {
-                        cts.Cancel();
-                    }
+                    Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
+
+                    (int streamId, HttpRequestData requestData) = await connection.ReadAndParseRequestHeaderAsync(readBody : false);
+                    _output.WriteLine($"{DateTime.Now} Connection established");
+
+                    await connection.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.OK);
+                    // Start streaming response
+                    DataFrame dataFrame = new DataFrame(new byte[100], FrameFlags.None, 0, streamId);
                     await connection.WriteFrameAsync(dataFrame);
-                    await Task.Delay(100);
-                }
+                    // Wait for client to start processing response and cancel it.
+                    await doCancel.Task;
+                    cts.Cancel();
 
-                _output.WriteLine($"{DateTime.Now} HttpRequest was canceled");
-                Frame frame;
-                do
-                {
-                    frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds));
-                    Assert.NotNull(frame); // We should get Rst before closing connection.
-                    Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
-                 } while (frame.Type != FrameType.RstStream);
-            });
+                    _output.WriteLine($"{DateTime.Now} HttpRequest was canceled");
+                    Frame frame;
+                    do
+                    {
+                        frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds));
+                        Assert.NotNull(frame); // We should get Rst before closing connection.
+                        Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
+                    } while (frame.Type != FrameType.RstStream);
+                });
+            }
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
@@ -2816,7 +2817,16 @@ namespace System.Net.Http.Functional.Tests
                 int maxCount = 120;
                 while (!stopSending && maxCount != 0)
                 {
-                    await connection.SendResponseDataAsync(streamId, Encoding.ASCII.GetBytes(responseContent), endStream: false);
+                   try
+                    {
+                        await connection.SendResponseDataAsync(streamId, Encoding.ASCII.GetBytes(responseContent), endStream: false);
+                    }
+                    catch (IOException)
+                    {
+                        // When client sets stopSending, client will be disposed and sending may fail.
+                        Assert.True(stopSending);
+                        break;
+                    }
                     await Task.Delay(500);
                     maxCount --;
                 }
@@ -3157,15 +3167,7 @@ namespace System.Net.Http.Functional.Tests
                     (Http2LoopbackConnection con, SettingsFrame settings) = await server.EstablishConnectionGetSettingsAsync();
                     int streamId = await con.ReadRequestHeaderAsync();
 
-                    int headerTableSize = 4096; // Default per HTTP2 spec.
-
-                    foreach (SettingsEntry setting in settings.Entries)
-                    {
-                        if (setting.SettingId == SettingId.HeaderTableSize)
-                        {
-                            headerTableSize = (int)setting.Value;
-                        }
-                    }
+                    int headerTableSize = settings.GetHeaderTableSize();
 
                     byte[] headerData = new byte[16];
                     int headersLen = HPackEncoder.EncodeDynamicTableSizeUpdate(headerTableSize + 1, headerData);
@@ -3174,6 +3176,221 @@ namespace System.Net.Http.Functional.Tests
                     await con.WriteFrameAsync(frame);
                     await con.ShutdownIgnoringErrorsAsync(streamId);
                 });
+        }
+
+        [Fact]
+        public async Task DynamicTable_Reuse_Concat()
+        {
+            await Http2LoopbackServer.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using HttpClient client = CreateHttpClient();
+                    using HttpResponseMessage response = await client.GetAsync(uri);
+
+                    Assert.True(response.Headers.TryGetValues("my-header", out IEnumerable<string> values));
+                    Assert.True(values.SequenceEqual(new[] { "foo", "bar" }));
+                },
+                async server =>
+                {
+                    byte[] frameData = new byte[16 * 1024];
+
+                    Http2LoopbackConnection con = await server.EstablishConnectionAsync();
+                    int streamId = await con.ReadRequestHeaderAsync();
+
+                    int pos = 0;
+                    pos += HPackEncoder.EncodeHeader(":status", "200", HPackFlags.None, frameData.AsSpan(pos));
+                    pos += HPackEncoder.EncodeHeader("my-header", "foo", HPackFlags.NewIndexed, frameData.AsSpan(pos));
+                    pos += HPackEncoder.EncodeHeader(HPackEncoder.SmallestDynamicIndex, "bar", HPackFlags.None, frameData.AsSpan(pos));
+                    await con.WriteFrameAsync(new HeadersFrame(frameData.AsMemory(0, pos), FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId));
+
+                    // Close out connection.
+                    await con.ShutdownIgnoringErrorsAsync(streamId);
+                });
+        }
+
+        [Fact]
+        public async Task DynamicTable_Resize_Success()
+        {
+            await Http2LoopbackServer.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using HttpClient client = CreateHttpClient();
+
+                    // First request should initialize our dynamic table.
+                    using (HttpResponseMessage response = await client.GetAsync(uri))
+                    {
+                        IEnumerable<string> values;
+
+                        Assert.True(response.Headers.TryGetValues("header-that-gos", out values));
+                        Assert.Equal("bar", Assert.Single(values));
+
+                        Assert.True(response.Headers.TryGetValues("header-that-stays", out values));
+                        Assert.Equal("foo", Assert.Single(values));
+                    }
+
+                    // Second request should reset the dynamic table.
+                    using (HttpResponseMessage response = await client.GetAsync(uri))
+                    {
+                        Assert.True(response.Headers.TryGetValues("new-header", out IEnumerable<string> values));
+                        Assert.Equal("baz", Assert.Single(values));
+                    }
+
+                    // Third request should use the reset values.
+                    using (HttpResponseMessage response = await client.GetAsync(uri))
+                    {
+                        IEnumerable<string> values;
+
+                        Assert.True(response.Headers.TryGetValues("header-that-stays", out values));
+                        Assert.Equal("foo", Assert.Single(values));
+
+                        Assert.True(response.Headers.TryGetValues("new-header", out values));
+                        Assert.Equal("baz", Assert.Single(values));
+                    }
+                },
+                async server =>
+                {
+                    Http2LoopbackConnection con = await server.EstablishConnectionAsync();
+                    byte[] frameData = new byte[16 * 1024];
+
+                    // First stream, create dynamic indexes.
+                    // header-that-goes: 63, header-that-stays: 62
+                    int streamId = await con.ReadRequestHeaderAsync();
+                    int pos = 0;
+                    pos += HPackEncoder.EncodeHeader(":status", "200", HPackFlags.None, frameData.AsSpan(pos));
+                    pos += HPackEncoder.EncodeHeader("header-that-gos", "bar", HPackFlags.NewIndexed, frameData.AsSpan(pos));
+                    pos += HPackEncoder.EncodeHeader("header-that-stays", "foo", HPackFlags.NewIndexed, frameData.AsSpan(pos));
+                    await con.WriteFrameAsync(new HeadersFrame(frameData.AsMemory(0, pos), FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId));
+
+                    // Second stream, resize the table so that the header-that-gos is removed from table, and add a new header.
+                    // 1) resize: header-that-stays: 62
+                    // 2) add new header: header-that-stays:63, new-header:62
+                    streamId = await con.ReadRequestHeaderAsync();
+                    pos = 0;
+                    pos += HPackEncoder.EncodeDynamicTableSizeUpdate("header-that-staysfoo".Length + HttpHeaderData.RfcOverhead, frameData.AsSpan(pos));
+                    pos += HPackEncoder.EncodeDynamicTableSizeUpdate(4096, frameData.AsSpan(pos));
+                    pos += HPackEncoder.EncodeHeader(":status", "200", HPackFlags.None, frameData.AsSpan(pos));
+                    pos += HPackEncoder.EncodeHeader("new-header", "baz", HPackFlags.NewIndexed, frameData.AsSpan(pos));
+                    await con.WriteFrameAsync(new HeadersFrame(frameData.AsMemory(0, pos), FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId));
+
+                    // Third stream, use the dynamic table established in previous stream.
+                    streamId = await con.ReadRequestHeaderAsync();
+                    pos = 0;
+                    pos += HPackEncoder.EncodeHeader(":status", "200", HPackFlags.None, frameData.AsSpan(pos));
+                    pos += HPackEncoder.EncodeHeader(HPackEncoder.SmallestDynamicIndex + 1, frameData.AsSpan(pos)); // header-that-stays:foo
+                    pos += HPackEncoder.EncodeHeader(HPackEncoder.SmallestDynamicIndex, frameData.AsSpan(pos)); // new-header:baz
+                    await con.WriteFrameAsync(new HeadersFrame(frameData.AsMemory(0, pos), FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId));
+
+                    // Close out connection.
+                    await con.ShutdownIgnoringErrorsAsync(streamId);
+                });
+        }
+
+        [Theory]
+        [MemberData(nameof(DynamicTable_Data))]
+        public async Task DynamicTable_Receipt_Success(IEnumerable<HttpHeaderData> headers)
+        {
+            await Http2LoopbackServer.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using HttpClient client = CreateHttpClient();
+
+                    // First request should initialize our dynamic table.
+                    using (HttpResponseMessage response = await client.GetAsync(uri))
+                    {
+                        AssertExpectedHeaders(response);
+                    }
+
+                    // Second request should use the dynamic table.
+                    using (HttpResponseMessage response = await client.GetAsync(uri))
+                    {
+                        AssertExpectedHeaders(response);
+                    }
+                },
+                async server =>
+                {
+                    (Http2LoopbackConnection con, SettingsFrame settings) = await server.EstablishConnectionGetSettingsAsync();
+
+                    Debug.Assert(settings.GetHeaderTableSize() >= 4096, "Data for this theory requires a header table size of at least 4096.");
+
+                    // First stream, create dynamic indexes.
+                    int streamId = await con.ReadRequestHeaderAsync();
+
+                    byte[] frameData = new byte[16 * 1024];
+                    int pos = 0;
+
+                    foreach (HttpHeaderData header in headers)
+                    {
+                        pos += HPackEncoder.EncodeHeader(header.Name, header.Value, HPackFlags.NewIndexed, frameData.AsSpan(pos));
+                    }
+
+                    await con.WriteFrameAsync(new HeadersFrame(frameData.AsMemory(0, pos), FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId));
+
+                    // Second stream, send headers using indexes only.
+                    streamId = await con.ReadRequestHeaderAsync();
+                    pos = 0;
+                    for (int i = HPackEncoder.LargestStaticIndex + headers.Count(); i > HPackEncoder.LargestStaticIndex; --i)
+                    {
+                        pos += HPackEncoder.EncodeHeader(i, frameData.AsSpan(pos));
+                    }
+
+                    await con.WriteFrameAsync(new HeadersFrame(frameData.AsMemory(0, pos), FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId));
+
+                    // Close out connection.
+                    await con.ShutdownIgnoringErrorsAsync(streamId);
+                });
+
+            void AssertExpectedHeaders(HttpResponseMessage response)
+            {
+                var expected = headers.Select(x => (name: x.Name.ToLowerInvariant(), value: x.Value.ToLowerInvariant()));
+                var actual = response.Headers.SelectMany(x => x.Value, (kvp, v) => (name: kvp.Key.ToLowerInvariant(), value: v.ToLowerInvariant()));
+                Assert.Empty(actual.Except(expected));
+            }
+        }
+
+        public static IEnumerable<object[]> DynamicTable_Data()
+        {
+            yield return new object[] { GenerateHeadersWithStatus200(512) };
+            yield return new object[] { GenerateHeadersWithStatus200(4096) };
+        }
+
+        /// <summary>
+        /// Generates headers to an exact dynamic table size.
+        /// </summary>
+        private static IEnumerable<HttpHeaderData> GenerateHeadersWithStatus200(int targetSize)
+        {
+            Debug.Assert(targetSize > 64, $"{nameof(targetSize)} must be more than 64 to account for a status 200 and padding headers.");
+
+            const string NamePrefix = "hn-";
+            const string ValuePrefix = "hv-";
+
+            // Add status 200 and remove its length and overhead.
+            targetSize -= ":status200".Length + HttpHeaderData.RfcOverhead;
+            yield return new HttpHeaderData(":status", "200");
+
+            for (int i = 0; targetSize > 0; ++i)
+            {
+                string s = i.ToString(CultureInfo.InvariantCulture);
+
+                string name = NamePrefix + s;
+                string value;
+
+                int left = targetSize - name.Length - HttpHeaderData.RfcOverhead;
+                if (left < 64)
+                {
+                    // At this point, we pad out to reach the remaining size.
+                    value = ValuePrefix + s.PadLeft(left - ValuePrefix.Length, '0');
+                }
+                else
+                {
+                    value = ValuePrefix + s;
+                }
+
+                yield return new HttpHeaderData(name, value);
+
+                targetSize -= name.Length + value.Length + HttpHeaderData.RfcOverhead;
+            }
+
+            Debug.Assert(targetSize == 0); // Ensure we perfectly filled the target size.
         }
     }
 }

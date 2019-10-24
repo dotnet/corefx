@@ -5,9 +5,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
-using System.Diagnostics;
 
 namespace System.Xml.Schema
 {
@@ -574,35 +574,6 @@ namespace System.Xml.Schema
         }
 
 #if DEBUG
-        internal static void WritePos(BitSet firstpos, BitSet lastpos, BitSet[] followpos)
-        {
-            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "FirstPos:  ");
-            WriteBitSet(firstpos);
-
-            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "LastPos:  ");
-            WriteBitSet(lastpos);
-
-            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "Followpos:  ");
-            for (int i = 0; i < followpos.Length; i++)
-            {
-                WriteBitSet(followpos[i]);
-            }
-        }
-        internal static void WriteBitSet(BitSet curpos)
-        {
-            int[] list = new int[curpos.Count];
-            for (int pos = curpos.NextSet(-1); pos != -1; pos = curpos.NextSet(pos))
-            {
-                list[pos] = 1;
-            }
-            for (int i = 0; i < list.Length; i++)
-            {
-                Debug.WriteIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, list[i] + " ");
-            }
-            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "");
-        }
-
-
         public override void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions)
         {
             Stack<SequenceNode> nodeStack = new Stack<SequenceNode>();
@@ -1080,7 +1051,7 @@ namespace System.Xml.Schema
     {
         private SymbolsDictionary _symbols;
         private Positions _positions;
-        private Stack _stack;                        // parsing context
+        private Stack<SyntaxTreeNode> _stack;                        // parsing context
         private SyntaxTreeNode _contentNode;         // content model points to syntax tree
         private bool _isPartial;                     // whether the closure applies to partial or the whole node that is on top of the stack
         private int _minMaxNodesCount;
@@ -1117,7 +1088,7 @@ namespace System.Xml.Schema
         {
             _symbols = new SymbolsDictionary();
             _positions = new Positions();
-            _stack = new Stack();
+            _stack = new Stack<SyntaxTreeNode>();
         }
 
         public void OpenGroup()
@@ -1127,7 +1098,7 @@ namespace System.Xml.Schema
 
         public void CloseGroup()
         {
-            SyntaxTreeNode node = (SyntaxTreeNode)_stack.Pop();
+            SyntaxTreeNode node = _stack.Pop();
             if (node == null)
             {
                 return;
@@ -1192,7 +1163,7 @@ namespace System.Xml.Schema
 
         public void AddChoice()
         {
-            SyntaxTreeNode node = (SyntaxTreeNode)_stack.Pop();
+            SyntaxTreeNode node = _stack.Pop();
             InteriorNode choice = new ChoiceNode();
             choice.LeftChild = node;
             _stack.Push(choice);
@@ -1200,7 +1171,7 @@ namespace System.Xml.Schema
 
         public void AddSequence()
         {
-            SyntaxTreeNode node = (SyntaxTreeNode)_stack.Pop();
+            SyntaxTreeNode node = _stack.Pop();
             InteriorNode sequence = new SequenceNode();
             sequence.LeftChild = node;
             _stack.Push(sequence);
@@ -1242,7 +1213,7 @@ namespace System.Xml.Schema
         {
             if (_stack.Count > 0)
             {
-                SyntaxTreeNode topNode = (SyntaxTreeNode)_stack.Pop();
+                SyntaxTreeNode topNode = _stack.Pop();
                 InteriorNode inNode = topNode as InteriorNode;
                 if (_isPartial && inNode != null)
                 {
@@ -1275,25 +1246,14 @@ namespace System.Xml.Schema
                 if (ContentType == XmlSchemaContentType.Mixed)
                 {
                     string ctype = IsOpen ? "Any" : "TextOnly";
-                    Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "\t\t\tContentType:  " + ctype);
                     return IsOpen ? ContentValidator.Any : ContentValidator.TextOnly;
                 }
                 else
                 {
-                    Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "\t\t\tContent:   EMPTY");
                     Debug.Assert(!IsOpen);
                     return ContentValidator.Empty;
                 }
             }
-
-#if DEBUG
-            if (DiagnosticsSwitches.XmlSchemaContentModel.Enabled)
-            {
-                var bb = new StringBuilder();
-                _contentNode.Dump(bb, _symbols, _positions);
-                Debug.WriteLine("\t\t\tContent :   " + bb.ToString());
-            }
-#endif
 
             // Add end marker
             InteriorNode contentRoot = new SequenceNode();
@@ -1303,15 +1263,6 @@ namespace System.Xml.Schema
 
             // Eliminate NamespaceListNode(s) and RangeNode(s)
             _contentNode.ExpandTree(contentRoot, _symbols, _positions);
-
-#if DEBUG
-            if (DiagnosticsSwitches.XmlSchemaContentModel.Enabled)
-            {
-                var bb = new StringBuilder();
-                contentRoot.LeftChild.Dump(bb, _symbols, _positions);
-                Debug.WriteLine("\t\t\tExpended:   " + bb.ToString());
-            }
-#endif
 
             // calculate followpos
             int symbolsCount = _symbols.Count;
@@ -1324,13 +1275,7 @@ namespace System.Xml.Schema
                 followpos[i] = new BitSet(positionsCount);
             }
             contentRoot.ConstructPos(firstpos, lastpos, followpos);
-#if DEBUG
-            if (DiagnosticsSwitches.XmlSchemaContentModel.Enabled)
-            {
-                Debug.WriteLine("firstpos, lastpos, followpos");
-                SequenceNode.WritePos(firstpos, lastpos, followpos);
-            }
-#endif
+
             if (_minMaxNodesCount > 0)
             { //If the tree has any terminal range nodes
                 BitSet positionsWithRangeTerminals;
@@ -1363,14 +1308,7 @@ namespace System.Xml.Schema
                     // Can return null if the number of states reaches higher than 8192 / positionsCount
                     transitionTable = BuildTransitionTable(firstpos, followpos, endMarker.Pos);
                 }
-#if DEBUG
-                if (DiagnosticsSwitches.XmlSchemaContentModel.Enabled)
-                {
-                    var bb = new StringBuilder();
-                    Dump(bb, followpos, transitionTable);
-                    Debug.WriteLine(bb.ToString());
-                }
-#endif
+
                 if (transitionTable != null)
                 {
                     return new DfaContentValidator(transitionTable, _symbols, this.ContentType, this.IsOpen, contentRoot.LeftChild.IsNullable);
@@ -1520,7 +1458,7 @@ namespace System.Xml.Schema
             stateTable.Add(new BitSet(positionsCount), -1);
 
             // lists unmarked states
-            Queue unmarked = new Queue();
+            var unmarked = new Queue<BitSet>();
 
             // initially, the only unmarked state in Dstates is firstpo(root)
             int state = 0;
@@ -1531,7 +1469,7 @@ namespace System.Xml.Schema
             // while there is an umnarked state T in Dstates do begin
             while (unmarked.Count > 0)
             {
-                BitSet statePosSet = (BitSet)unmarked.Dequeue(); // all positions that constitute DFA state
+                BitSet statePosSet = unmarked.Dequeue(); // all positions that constitute DFA state
                 Debug.Assert(state == (int)stateTable[statePosSet]); // just make sure that statePosSet is for correct state
                 int[] transition = (int[])transitionTable[state];
                 if (statePosSet[endMarkerPos])
@@ -1954,10 +1892,6 @@ namespace System.Xml.Schema
             int firstMatchedIndex = -1;
             bool matched = false;
 
-#if RANGE_DEBUG
-            WriteRunningPositions("Current running positions to match", runningPositions, name, matchCount);
-#endif
-
             while (k < matchCount)
             { //we are looking for the first match in the list of bitsets
                 rposInfo = runningPositions[k];
@@ -1993,9 +1927,6 @@ namespace System.Xml.Schema
             { //There is a match
                 if (k != 0)
                 { //If the first bitset itself matched, then no need to remove anything
-#if RANGE_DEBUG
-                    WriteRunningPositions("Removing unmatched entries till the first match", runningPositions, XmlQualifiedName.Empty, k);
-#endif
                     runningPositions.RemoveRange(0, k); //Delete entries from 0 to k-1
                 }
                 matchCount = matchCount - k;
@@ -2006,10 +1937,6 @@ namespace System.Xml.Schema
                     matched = rposInfo.curpos.Get(pos); //Look for the bitset that matches the same position as pos
                     if (matched)
                     { //If match found, get the follow positions of the current matched position
-#if RANGE_DEBUG
-                        Debug.WriteIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "Matched position: " + pos + " "); SequenceNode.WriteBitSet(rposInfo.curpos);
-                        Debug.WriteIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "Follow pos of Matched position: "); SequenceNode.WriteBitSet(followpos[pos]);
-#endif
                         rposInfo.curpos = _followpos[pos]; //Note that we are copying the same counters of the current position to that of the follow position
                         runningPositions[k] = rposInfo;
                         k++;
@@ -2039,9 +1966,6 @@ namespace System.Xml.Schema
                     context.TooComplex = true;
                     matchCount /= 2;
                 }
-#if RANGE_DEBUG
-                WriteRunningPositions("Matched positions to expand ", runningPositions, name, matchCount);
-#endif
 
                 for (k = matchCount - 1; k >= 0; k--)
                 {
@@ -2117,24 +2041,6 @@ namespace System.Xml.Schema
             return null;
         }
 
-#if RANGE_DEBUG
-        private void WriteRunningPositions(string text, List<RangePositionInfo> runningPositions, XmlQualifiedName name, int length) {
-            int counter = 0;
-            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "");
-            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "");
-            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, text + name.Name);
-            while (counter < length) {
-                BitSet curpos = runningPositions[counter].curpos;
-                SequenceNode.WriteBitSet(curpos);
-                for (int rcnt = 0; rcnt < runningPositions[counter].rangeCounters.Length; rcnt++) {
-                    Debug.WriteIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "RangeCounter[" + rcnt + "]" + runningPositions[counter].rangeCounters[rcnt] + " ");
-                }
-                Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "");
-                Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "");
-                counter++;
-            }
-        }
-#endif
         public override bool CompleteValidation(ValidationState context)
         {
             return context.HasMatched;

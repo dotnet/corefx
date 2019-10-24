@@ -12,7 +12,7 @@ namespace System.IO
     /// <summary>
     /// Wrapper to help with path normalization.
     /// </summary>
-    internal class PathHelper
+    internal static class PathHelper
     {
         /// <summary>
         /// Normalize the given path.
@@ -26,8 +26,7 @@ namespace System.IO
         /// <returns>Normalized path</returns>
         internal static string Normalize(string path)
         {
-            Span<char> initialBuffer = stackalloc char[PathInternal.MaxShortPath];
-            var builder = new ValueStringBuilder(initialBuffer);
+            var builder = new ValueStringBuilder(stackalloc char[PathInternal.MaxShortPath]);
 
             // Get the full path
             GetFullPathName(path.AsSpan(), ref builder);
@@ -51,8 +50,7 @@ namespace System.IO
         /// </remarks>
         internal static string Normalize(ref ValueStringBuilder path)
         {
-            Span<char> initialBuffer = stackalloc char[PathInternal.MaxShortPath];
-            var builder = new ValueStringBuilder(initialBuffer);
+            var builder = new ValueStringBuilder(stackalloc char[PathInternal.MaxShortPath]);
 
             // Get the full path
             GetFullPathName(path.AsSpan(terminate: true), ref builder);

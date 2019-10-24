@@ -574,6 +574,88 @@ namespace System.Reflection.Tests
             Assert.Equal(expected, type.GetTypeInfo().IsAssignableFrom(c?.GetTypeInfo()));
         }
 
+        class G<T, U> where T : U
+        {
+        }
+
+        static volatile object s_boxedInt32;
+
+        [Fact]
+        public void IsAssignableFromNullable()
+        {
+            Type nubInt = typeof(Nullable<int>);
+            Type intType = typeof(int);
+            Type objType = typeof(object);
+            Type valTypeType = typeof(ValueType);
+
+            // sanity checks
+            // Nullable<T>  is assignable from  int
+            Assert.True(nubInt.IsAssignableFrom(intType));
+            Assert.False(intType.IsAssignableFrom(nubInt));
+
+            Type nubOfT = nubInt.GetGenericTypeDefinition();
+            Type T = nubOfT.GetTypeInfo().GenericTypeParameters[0];
+
+            // should be true
+            Assert.True(T.IsAssignableFrom(T));
+            Assert.True(objType.IsAssignableFrom(T));
+            Assert.True(valTypeType.IsAssignableFrom(T));
+
+            // should be false
+            // Nullable<T> is not assignable from T
+            Assert.False(nubOfT.IsAssignableFrom(T));
+            Assert.False(T.IsAssignableFrom(nubOfT));
+
+            // illegal type construction due to T->T?
+            Assert.Throws<ArgumentException>(() => typeof(G<,>).MakeGenericType(typeof(int), typeof(int?)));
+
+            // Test trivial object casts 
+            s_boxedInt32 = (object)1234;
+            Assert.True((s_boxedInt32 is int?) && (int?)s_boxedInt32 == 1234);
+
+            // test construction again to catch caching issues
+            Assert.Throws<ArgumentException>(() => typeof(G<,>).MakeGenericType(typeof(int), typeof(int?)));
+        }
+
+        interface IFace
+        {
+        }
+
+        class G<T> where T : class, IFace
+        {
+            //void OpenGenericArrays()
+            //{
+            //    // this is valid, reflection checks below should agree 
+            //    IFace[] arr2 = default(T[]);
+            //    IEnumerable<IFace> ie = default(T[]);
+            //}
+        }
+
+        class GG<T, U> where T : class, U
+        {
+            //void OpenGenericArrays()
+            //{
+            //    // this is valid, reflection checks below should agree 
+            //    U[] arr2 = default(T[]);
+            //    IEnumerable<U> ie = default(T[]);
+            //}
+        }
+
+        [Fact]
+        public void OpenGenericArrays()
+        {
+            Type a = typeof(G<>).GetGenericArguments()[0].MakeArrayType();
+            Assert.True(typeof(IFace[]).IsAssignableFrom(a));
+            Assert.True(typeof(IEnumerable<IFace>).IsAssignableFrom(a));
+
+            Type a1 = typeof(GG<,>).GetGenericArguments()[0].MakeArrayType();
+            Type a2 = typeof(GG<,>).GetGenericArguments()[1].MakeArrayType();
+            Assert.True(a2.IsAssignableFrom(a1));
+
+            Type ie = typeof(IEnumerable<>).MakeGenericType(typeof(GG<,>).GetGenericArguments()[1]);
+            Assert.True(ie.IsAssignableFrom(a1));
+        }
+
         public static IEnumerable<object[]> IsEquivilentTo_TestData()
         {
             yield return new object[] { typeof(string), typeof(string), true };

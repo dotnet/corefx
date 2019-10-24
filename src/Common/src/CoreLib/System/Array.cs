@@ -16,7 +16,7 @@ namespace System
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public abstract partial class Array : ICloneable, IList, IStructuralComparable, IStructuralEquatable
     {
-        // We impose limits on maximum array lenght in each dimension to allow efficient
+        // We impose limits on maximum array length in each dimension to allow efficient
         // implementation of advanced range check elimination in future.
         // Keep in sync with vm\gcscan.cpp and HashHelpers.MaxPrimeArrayLength.
         // The constants are defined in this method: inline SIZE_T MaxArrayLength(SIZE_T componentSize) from gcscan
@@ -24,9 +24,8 @@ namespace System
         internal const int MaxArrayLength = 0X7FEFFFFF;
         internal const int MaxByteArrayLength = 0x7FFFFFC7;
 
-        // This ctor exists solely to prevent C# from generating a protected .ctor that violates the surface area. I really want this to be a
-        // "protected-and-internal" rather than "internal" but C# has no keyword for the former.
-        internal Array() { }
+        // This ctor exists solely to prevent C# from generating a protected .ctor that violates the surface area.
+        private protected Array() { }
 
         public static ReadOnlyCollection<T> AsReadOnly<T>(T[] array)
         {
@@ -473,7 +472,7 @@ namespace System
                 ThrowHelper.ThrowRankException(ExceptionResource.Rank_MultiDimNotSupported);
 
             comparer ??= Comparer.Default;
-#if CORECLR
+#if !CORERT
             if (comparer == Comparer.Default)
             {
                 int retval;
@@ -922,7 +921,7 @@ namespace System
             if (count < 0 || count > array.Length - startIndex + lb)
                 ThrowHelper.ThrowCountArgumentOutOfRange_ArgumentOutOfRange_Count();
 
-#if CORECLR
+#if !CORERT
             // Try calling a quick native method to handle primitive types.
             int retVal;
             bool r = TrySZIndexOf(array, startIndex, count, value, out retVal);
@@ -1048,7 +1047,7 @@ namespace System
                 }
             }
 
-#if CORECLR
+#if !CORERT
             return EqualityComparer<T>.Default.IndexOf(array, value, startIndex, count);
 #else
             return IndexOfImpl(array, value, startIndex, count);
@@ -1105,7 +1104,7 @@ namespace System
             if (array.Rank != 1)
                 ThrowHelper.ThrowRankException(ExceptionResource.Rank_MultiDimNotSupported);
 
-#if CORECLR
+#if !CORERT
             // Try calling a quick native method to handle primitive types.
             int retVal;
             bool r = TrySZLastIndexOf(array, startIndex, count, value, out retVal);
@@ -1256,7 +1255,7 @@ namespace System
                 }
             }
 
-#if CORECLR
+#if !CORERT
             return EqualityComparer<T>.Default.LastIndexOf(array, value, startIndex, count);
 #else
             return LastIndexOfImpl(array, value, startIndex, count);
@@ -1299,7 +1298,7 @@ namespace System
             if (length <= 1)
                 return;
 
-#if CORECLR
+#if !CORERT
             bool r = TrySZReverse(array, index, length);
             if (r)
                 return;
@@ -1522,7 +1521,7 @@ namespace System
 
             if (length > 1)
             {
-#if CORECLR
+#if !CORERT
                 if (comparer == null || comparer == Comparer<T>.Default)
                 {
                     if (TrySZSort(array, null, index, index + length - 1))
@@ -1549,7 +1548,7 @@ namespace System
 
             if (length > 1)
             {
-#if CORECLR
+#if !CORERT
                 if (comparer == null || comparer == Comparer<TKey>.Default)
                 {
                     if (TrySZSort(keys, items, index, index + length - 1))
@@ -1744,7 +1743,7 @@ namespace System
                 }
 
                 // Put pivot in the right location.
-                Swap(left, (hi - 1));
+                Swap(left, hi - 1);
                 return left;
             }
 
@@ -1950,7 +1949,7 @@ namespace System
                 }
 
                 // Put pivot in the right location.
-                Swap(left, (hi - 1));
+                Swap(left, hi - 1);
                 return left;
             }
 

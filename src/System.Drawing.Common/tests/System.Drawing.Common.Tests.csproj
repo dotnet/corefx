@@ -51,8 +51,10 @@
     <Compile Include="Imaging\ImageFormatTests.cs" />
     <Compile Include="Imaging\MetaHeaderTests.cs" />
     <Compile Include="Imaging\WmfPlaceableFileHeaderTests.cs" />
+    <Compile Include="Printing\PrintControllerTests.cs" />
     <Compile Include="Printing\PrintDocumentTests.cs" />
     <Compile Include="Printing\PrinterSettingsTests.cs" />
+    <Compile Include="Printing\PreviewPrintControllerTests.cs" />
     <Compile Include="RegionTests.cs" />
     <Compile Include="SolidBrushTests.cs" />
     <Compile Include="StringFormatTests.cs" />
@@ -81,9 +83,6 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Drawing\Helpers.cs">
       <Link>Common\System\Drawing\Helpers.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
-      <Link>Common\System\ThreadCultureChange.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
