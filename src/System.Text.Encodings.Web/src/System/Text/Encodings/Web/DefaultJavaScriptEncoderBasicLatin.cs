@@ -82,7 +82,6 @@ namespace System.Text.Encodings.Web
 
             Debug.Assert(textLength >= 0);
 
-
             if (textLength == 0)
             {
                 goto AllAllowed;
@@ -117,7 +116,7 @@ namespace System.Text.Encodings.Web
             while (ptr < end);
 
         AllAllowed:
-            idx = -1;  // All characters are allowed.
+            idx = -1;
 
         Return:
             return idx;
@@ -255,7 +254,7 @@ namespace System.Text.Encodings.Web
                 while (ptr < end);
 
             AllAllowed:
-                idx = -1; // all characters allowed
+                idx = -1;
 
             Return:
                 return idx;
