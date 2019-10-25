@@ -47,23 +47,23 @@ namespace System.Text.Encodings.Web
 
             Debug.Assert(Ssse3.IsSupported);
 
-            Vector128<sbyte> highNibbles = Sse2.And(Sse2.ShiftRightLogical(sourceValue.AsInt32(), 4).AsSByte(), s_mask_SByte_0xF);
-            Vector128<sbyte> lowNibbles = Sse2.And(sourceValue, s_mask_SByte_0xF);
+            Vector128<sbyte> highNibbles = Sse2.And(Sse2.ShiftRightLogical(sourceValue.AsInt32(), 4).AsSByte(), s_nibbleMaskSByte);
+            Vector128<sbyte> lowNibbles = Sse2.And(sourceValue, s_nibbleMaskSByte);
 
             Vector128<sbyte> bitMask = Ssse3.Shuffle(s_bitMask, lowNibbles);
             Vector128<sbyte> bitPositions = Ssse3.Shuffle(s_bitPosLookup, highNibbles);
 
             Vector128<sbyte> mask = Sse2.And(bitPositions, bitMask);
 
-            Vector128<sbyte> ne0Gt = Sse2.CompareGreaterThan(mask, s_zero128);
-            Vector128<sbyte> ne0Lt = Sse2.CompareLessThan(mask, s_zero128);
+            Vector128<sbyte> ne0Gt = Sse2.CompareGreaterThan(mask, s_nullMaskSByte);
+            Vector128<sbyte> ne0Lt = Sse2.CompareLessThan(mask, s_nullMaskSByte);
             mask = Sse2.Or(ne0Gt, ne0Lt);
 
             return mask;
         }
 
-        private static readonly Vector128<sbyte> s_mask_SByte_0xF = Vector128.Create((sbyte)0xF);
-        private static readonly Vector128<sbyte> s_zero128 = Vector128<sbyte>.Zero;
+        private static readonly Vector128<sbyte> s_nibbleMaskSByte = Vector128.Create((sbyte)0xF);
+        private static readonly Vector128<sbyte> s_nullMaskSByte = Vector128<sbyte>.Zero;
 
         // See comment above in method CreateEscapingMask_DefaultJavaScriptEncoderBasicLatin
         // for description of the bit-mask.
