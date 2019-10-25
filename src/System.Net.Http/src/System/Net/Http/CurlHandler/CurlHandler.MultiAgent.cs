@@ -964,7 +964,7 @@ namespace System.Net.Http
                         if (headerBytesReceived > (ulong)(easy._handler.MaxResponseHeadersLength * 1024))
                         {
                             throw new HttpRequestException(
-                                SR.Format(SR.net_http_response_headers_exceeded_length, easy._handler.MaxResponseHeadersLength));
+                                SR.Format(SR.net_http_headers_exceeded_length, easy._handler.MaxResponseHeadersLength));
                         }
                         response._headerBytesReceived = (uint)headerBytesReceived;
 
