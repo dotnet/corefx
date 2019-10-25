@@ -400,14 +400,19 @@ namespace System.IO
 
         private void VerifyFileSecurity(FileSecurity expectedSecurity)
         {
+            VerifyFileSecurity(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, expectedSecurity);
+        }
+
+        private void VerifyFileSecurity(FileMode mode, FileSystemRights rights, FileShare share, int bufferSize, FileOptions options, FileSecurity expectedSecurity)
+        {
             using var directory = new TempDirectory();
 
             string path = Path.Combine(directory.Path, "file.txt");
             FileInfo info = new FileInfo(path);
 
-            info.Create(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, expectedSecurity);
+            info.Create(mode, rights, share, bufferSize, options, expectedSecurity);
 
-            Assert.True(Directory.Exists(path));
+            Assert.True(File.Exists(path));
 
             FileInfo actualInfo = new FileInfo(info.FullName);
 
