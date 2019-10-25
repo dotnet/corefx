@@ -56,16 +56,16 @@ namespace System.Resources.Extensions
                 Type type = null;
 
                 // determine if we have a mangled generic type name
-                if (!AreBracketsBalanced(typeName))
+                if (typeName != null && assemblyName != null && !AreBracketsBalanced(typeName))
                 {
-                    // undo the mangling that may have happened with Desktop's bad
-                    // ResXSerialization binder.
+                    // undo the mangling that may have happened with .NETFramework's
+                    // incorrect ResXSerialization binder.
                     typeName = typeName + ", " + assemblyName;
 
-                    type = Type.GetType(typeName);
+                    type = Type.GetType(typeName, throwOnError: false, ignoreCase:false);
                 }
 
-                // if type is null we'll fall back to the default type binder which is preferrable
+                // if type is null we'll fall back to the default type binder which is preferable
                 // since it is backed by a cache
                 return type;
             }
@@ -87,8 +87,7 @@ namespace System.Resources.Extensions
                     {
                         brackets++;
                     }
-
-                    if (typeName[i] == ']')
+                    else if (typeName[i] == ']')
                     {
                         brackets--;
 
