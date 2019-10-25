@@ -56,19 +56,19 @@ Namespace Microsoft.VisualBasic
             Return Information.Err().Description
         End Function
 
-        Public Function ErrorToString(ByVal ErrorNumber As Integer) As String
-            If ErrorNumber >= MAX_ERR_NUMBER Then
+        Public Function ErrorToString(ByVal errorNumber As Integer) As String
+            If errorNumber >= MAX_ERR_NUMBER Then
                 Throw New ArgumentException(GetResourceString(SR.MaxErrNumber))
             End If
 
-            If ErrorNumber > 0 Then
-                ErrorNumber = (SEVERITY_ERROR Or FACILITY_CONTROL Or ErrorNumber)
+            If errorNumber > 0 Then
+                errorNumber = (SEVERITY_ERROR Or FACILITY_CONTROL Or errorNumber)
             End If
 
-            If (ErrorNumber And SCODE_FACILITY) = FACILITY_CONTROL Then
-                ErrorNumber = ErrorNumber And &HFFFFI
-                Return GetResourceString(CType(ErrorNumber, vbErrors))
-            ElseIf ErrorNumber <> 0 Then
+            If (errorNumber And SCODE_FACILITY) = FACILITY_CONTROL Then
+                errorNumber = errorNumber And &HFFFFI
+                Return GetResourceString(CType(errorNumber, vbErrors))
+            ElseIf errorNumber <> 0 Then
                 Return GetResourceString(vbErrors.UserDefined)
             Else
                 Return ""
@@ -79,50 +79,50 @@ Namespace Microsoft.VisualBasic
         ' Numeric functions.
         '============================================================================
 
-        Public Function Fix(ByVal Number As Short) As Short
-            Return Number
+        Public Function Fix(ByVal number As Short) As Short
+            Return number
         End Function
 
-        Public Function Fix(ByVal Number As Integer) As Integer
-            Return Number
+        Public Function Fix(ByVal number As Integer) As Integer
+            Return number
         End Function
 
-        Public Function Fix(ByVal Number As Long) As Long
-            Return Number
+        Public Function Fix(ByVal number As Long) As Long
+            Return number
         End Function
 
-        Public Function Fix(ByVal Number As Double) As Double
-            If Number >= 0 Then
-                Return System.Math.Floor(Number)
+        Public Function Fix(ByVal number As Double) As Double
+            If number >= 0 Then
+                Return System.Math.Floor(number)
             Else
-                Return -System.Math.Floor(-Number)
+                Return -System.Math.Floor(-number)
             End If
         End Function
 
-        Public Function Fix(ByVal Number As Single) As Single
-            If Number >= 0 Then
-                Return CSng(System.Math.Floor(CDbl(Number)))
+        Public Function Fix(ByVal number As Single) As Single
+            If number >= 0 Then
+                Return CSng(System.Math.Floor(CDbl(number)))
             Else
-                Return CSng(-System.Math.Floor(CDbl(-Number)))
+                Return CSng(-System.Math.Floor(CDbl(-number)))
             End If
         End Function
 
-        Public Function Fix(ByVal Number As Decimal) As Decimal
-            If System.Decimal.op_LessThan(Number, System.Decimal.Zero) Then
-                Return System.Decimal.Negate(System.Decimal.Floor(System.Decimal.Negate(Number)))
+        Public Function Fix(ByVal number As Decimal) As Decimal
+            If System.Decimal.op_LessThan(number, System.Decimal.Zero) Then
+                Return System.Decimal.Negate(System.Decimal.Floor(System.Decimal.Negate(number)))
             Else
-                Return System.Decimal.Floor(Number)
+                Return System.Decimal.Floor(number)
             End If
         End Function
 
-        Public Function Fix(ByVal Number As Object) As Object
-            If Number Is Nothing Then
-                Throw New ArgumentNullException(GetResourceString(SR.Argument_InvalidNullValue1, "Number"))
+        Public Function Fix(ByVal number As Object) As Object
+            If number Is Nothing Then
+                Throw New ArgumentNullException(GetResourceString(SR.Argument_InvalidNullValue1, NameOf(number)))
             End If
 
             Dim ValueInterface As IConvertible
 
-            ValueInterface = TryCast(Number, IConvertible)
+            ValueInterface = TryCast(number, IConvertible)
 
             If Not ValueInterface Is Nothing Then
 
@@ -137,7 +137,7 @@ Namespace Microsoft.VisualBasic
                          TypeCode.Int64,
                          TypeCode.UInt64
 
-                        Return Number
+                        Return number
 
                     Case TypeCode.Single
                         Return Fix(ValueInterface.ToSingle(Nothing))
@@ -163,41 +163,41 @@ Namespace Microsoft.VisualBasic
 
             End If
 
-            Throw VbMakeException(New ArgumentException(GetResourceString(SR.Argument_NotNumericType2, "Number", Number.GetType().FullName)), vbErrors.TypeMismatch)
+            Throw VbMakeException(New ArgumentException(GetResourceString(SR.Argument_NotNumericType2, NameOf(number), number.GetType().FullName)), vbErrors.TypeMismatch)
         End Function
 
-        Public Function Int(ByVal Number As Short) As Short
-            Return Number
+        Public Function Int(ByVal number As Short) As Short
+            Return number
         End Function
 
-        Public Function Int(ByVal Number As Integer) As Integer
-            Return Number
+        Public Function Int(ByVal number As Integer) As Integer
+            Return number
         End Function
 
-        Public Function Int(ByVal Number As Long) As Long
-            Return Number
+        Public Function Int(ByVal number As Long) As Long
+            Return number
         End Function
 
-        Public Function Int(ByVal Number As Double) As Double
-            Return System.Math.Floor(Number)
+        Public Function Int(ByVal number As Double) As Double
+            Return System.Math.Floor(number)
         End Function
 
-        Public Function Int(ByVal Number As Single) As Single
-            Return CSng(System.Math.Floor(CDbl(Number)))
+        Public Function Int(ByVal number As Single) As Single
+            Return CSng(System.Math.Floor(CDbl(number)))
         End Function
 
-        Public Function Int(ByVal Number As Decimal) As Decimal
-            Return System.Decimal.Floor(Number)
+        Public Function Int(ByVal number As Decimal) As Decimal
+            Return System.Decimal.Floor(number)
         End Function
 
-        Public Function Int(ByVal Number As Object) As Object
-            If Number Is Nothing Then
-                Throw New ArgumentNullException(GetResourceString(SR.Argument_InvalidNullValue1, "Number"))
+        Public Function Int(ByVal number As Object) As Object
+            If number Is Nothing Then
+                Throw New ArgumentNullException(GetResourceString(SR.Argument_InvalidNullValue1, NameOf(number)))
             End If
 
             Dim ValueInterface As IConvertible
 
-            ValueInterface = TryCast(Number, IConvertible)
+            ValueInterface = TryCast(number, IConvertible)
 
             If Not ValueInterface Is Nothing Then
 
@@ -212,7 +212,7 @@ Namespace Microsoft.VisualBasic
                          TypeCode.Int64,
                          TypeCode.UInt64
 
-                        Return Number
+                        Return number
 
                     Case TypeCode.Single
                         Return Int(ValueInterface.ToSingle(Nothing))
@@ -236,58 +236,58 @@ Namespace Microsoft.VisualBasic
                 End Select
             End If
 
-            Throw VbMakeException(New ArgumentException(GetResourceString(SR.Argument_NotNumericType2, "Number", Number.GetType().FullName)), vbErrors.TypeMismatch)
+            Throw VbMakeException(New ArgumentException(GetResourceString(SR.Argument_NotNumericType2, NameOf(number), number.GetType().FullName)), vbErrors.TypeMismatch)
         End Function
 
         '============================================================================
         ' Number to string conversion
         '============================================================================
         <CLSCompliant(False)>
-        Public Function Hex(ByVal Number As SByte) As String
-            Return Number.ToString("X")
+        Public Function Hex(ByVal number As SByte) As String
+            Return number.ToString("X")
         End Function
 
-        Public Function Hex(ByVal Number As Byte) As String
-            Return Number.ToString("X")
+        Public Function Hex(ByVal number As Byte) As String
+            Return number.ToString("X")
         End Function
 
-        Public Function Hex(ByVal Number As Short) As String
-            Return Number.ToString("X")
-        End Function
-
-        <CLSCompliant(False)>
-        Public Function Hex(ByVal Number As UShort) As String
-            Return Number.ToString("X")
-        End Function
-
-        Public Function Hex(ByVal Number As Integer) As String
-            Return Number.ToString("X")
+        Public Function Hex(ByVal number As Short) As String
+            Return number.ToString("X")
         End Function
 
         <CLSCompliant(False)>
-        Public Function Hex(ByVal Number As UInteger) As String
-            Return Number.ToString("X")
+        Public Function Hex(ByVal number As UShort) As String
+            Return number.ToString("X")
         End Function
 
-        Public Function Hex(ByVal Number As Long) As String
-            Return Number.ToString("X")
+        Public Function Hex(ByVal number As Integer) As String
+            Return number.ToString("X")
         End Function
 
         <CLSCompliant(False)>
-        Public Function Hex(ByVal Number As ULong) As String
-            Return Number.ToString("X")
+        Public Function Hex(ByVal number As UInteger) As String
+            Return number.ToString("X")
         End Function
 
-        Public Function Hex(ByVal Number As Object) As String
+        Public Function Hex(ByVal number As Long) As String
+            Return number.ToString("X")
+        End Function
+
+        <CLSCompliant(False)>
+        Public Function Hex(ByVal number As ULong) As String
+            Return number.ToString("X")
+        End Function
+
+        Public Function Hex(ByVal number As Object) As String
             Dim LongValue As Long
 
-            If Number Is Nothing Then
-                Throw New ArgumentNullException(GetResourceString(SR.Argument_InvalidNullValue1, "Number"))
+            If number Is Nothing Then
+                Throw New ArgumentNullException(GetResourceString(SR.Argument_InvalidNullValue1, NameOf(number)))
             End If
 
             Dim ValueInterface As IConvertible
 
-            ValueInterface = TryCast(Number, IConvertible)
+            ValueInterface = TryCast(number, IConvertible)
 
             If Not ValueInterface Is Nothing Then
 
@@ -355,55 +355,55 @@ RangeCheck:
                 End Select
             End If
 
-            Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValueType2, "Number", VBFriendlyName(Number)))
+            Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValueType2, NameOf(number), VBFriendlyName(number)))
         End Function
 
         <CLSCompliant(False)>
-        Public Function Oct(ByVal Number As SByte) As String
-            Return OctFromLong(CLng(Number) And &HFFL)
+        Public Function Oct(ByVal number As SByte) As String
+            Return OctFromLong(CLng(number) And &HFFL)
         End Function
 
-        Public Function Oct(ByVal Number As Byte) As String
-            Return OctFromULong(CULng(Number))
+        Public Function Oct(ByVal number As Byte) As String
+            Return OctFromULong(CULng(number))
         End Function
 
-        Public Function Oct(ByVal Number As Short) As String
-            Return OctFromLong(CLng(Number) And &HFFFFL)
-        End Function
-
-        <CLSCompliant(False)>
-        Public Function Oct(ByVal Number As UShort) As String
-            Return OctFromULong(CULng(Number))
-        End Function
-
-        Public Function Oct(ByVal Number As Integer) As String
-            Return OctFromLong(CLng(Number) And &HFFFFFFFFL)
+        Public Function Oct(ByVal number As Short) As String
+            Return OctFromLong(CLng(number) And &HFFFFL)
         End Function
 
         <CLSCompliant(False)>
-        Public Function Oct(ByVal Number As UInteger) As String
-            Return OctFromULong(CULng(Number))
+        Public Function Oct(ByVal number As UShort) As String
+            Return OctFromULong(CULng(number))
         End Function
 
-        Public Function Oct(ByVal Number As Long) As String
-            Return OctFromLong(Number)
+        Public Function Oct(ByVal number As Integer) As String
+            Return OctFromLong(CLng(number) And &HFFFFFFFFL)
         End Function
 
         <CLSCompliant(False)>
-        Public Function Oct(ByVal Number As ULong) As String
-            Return OctFromULong(Number)
+        Public Function Oct(ByVal number As UInteger) As String
+            Return OctFromULong(CULng(number))
         End Function
 
-        Public Function Oct(ByVal Number As Object) As String
+        Public Function Oct(ByVal number As Long) As String
+            Return OctFromLong(number)
+        End Function
+
+        <CLSCompliant(False)>
+        Public Function Oct(ByVal number As ULong) As String
+            Return OctFromULong(number)
+        End Function
+
+        Public Function Oct(ByVal number As Object) As String
             Dim LongValue As Long
 
-            If Number Is Nothing Then
-                Throw New ArgumentNullException(GetResourceString(SR.Argument_InvalidNullValue1, "Number"))
+            If number Is Nothing Then
+                Throw New ArgumentNullException(GetResourceString(SR.Argument_InvalidNullValue1, NameOf(number)))
             End If
 
             Dim ValueInterface As IConvertible
 
-            ValueInterface = TryCast(Number, IConvertible)
+            ValueInterface = TryCast(number, IConvertible)
 
             If Not ValueInterface Is Nothing Then
 
@@ -466,23 +466,23 @@ RangeCheck:
                 End Select
             End If
 
-            Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValueType2, "Number", VBFriendlyName(Number)))
+            Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValueType2, NameOf(number), VBFriendlyName(number)))
         End Function
 
-        Public Function Str(ByVal Number As Object) As String
+        Public Function Str(ByVal number As Object) As String
             Dim s As String
 
-            If Number Is Nothing Then
-                Throw New ArgumentNullException(GetResourceString(SR.Argument_InvalidNullValue1, "Number"))
+            If number Is Nothing Then
+                Throw New ArgumentNullException(GetResourceString(SR.Argument_InvalidNullValue1, NameOf(number)))
             End If
 
             Dim ValueInterface As IConvertible
             Dim ValueTypeCode As TypeCode
 
-            ValueInterface = TryCast(Number, IConvertible)
+            ValueInterface = TryCast(number, IConvertible)
 
             If ValueInterface Is Nothing Then
-                Throw New InvalidCastException(GetResourceString(SR.ArgumentNotNumeric1, "Number"))
+                Throw New InvalidCastException(GetResourceString(SR.ArgumentNotNumeric1, NameOf(number)))
             End If
 
             ValueTypeCode = ValueInterface.GetTypeCode()
@@ -509,7 +509,7 @@ RangeCheck:
                      TypeCode.Single,
                      TypeCode.Double,
                      TypeCode.Decimal
-                    s = CStr(Number)
+                    s = CStr(number)
 
                 Case Else
                     If ValueTypeCode = TypeCode.String Then
@@ -526,7 +526,7 @@ RangeCheck:
                             'Throw our own exception below
                         End Try
                     End If
-                    Throw New InvalidCastException(GetResourceString(SR.ArgumentNotNumeric1, "Number"))
+                    Throw New InvalidCastException(GetResourceString(SR.ArgumentNotNumeric1, NameOf(number)))
             End Select
 
 FormatAndExit:
@@ -537,7 +537,7 @@ FormatAndExit:
             End If
         End Function
 
-        Private Function HexOrOctValue(ByVal InputStr As String, ByVal i As Integer) As Double
+        Private Function HexOrOctValue(ByVal inputStr As String, ByVal i As Integer) As Double
             Dim digits As Integer = 0
             Dim ch As Char
             Dim iLen As Integer
@@ -548,15 +548,15 @@ FormatAndExit:
             Const ascUpperAoffset As Integer = AscW("A"c) - 10
             Const ascLowerAoffset As Integer = AscW("a"c) - 10
 
-            iLen = InputStr.Length
+            iLen = inputStr.Length
 
-            ch = InputStr.Chars(i)
+            ch = inputStr.Chars(i)
             i += 1
 
             If ch = "H"c OrElse ch = "h"c Then
                 'Loop for octal
                 Do While (i < iLen AndAlso digits < 17)
-                    ch = InputStr.Chars(i)
+                    ch = inputStr.Chars(i)
                     i += 1
                     Select Case ch
                         Case ControlChars.Tab, ControlChars.Lf, ControlChars.Cr, ChrW(32), ChrW(&H3000S)
@@ -601,7 +601,7 @@ NextHexCharacter:
                     i += 1
                     If i < iLen Then
                         'We fell out of the loop before getting the typechar
-                        ch = InputStr.Chars(i)
+                        ch = inputStr.Chars(i)
                     End If
                 End If
 
@@ -631,7 +631,7 @@ NextHexCharacter:
 
                 'Loop for octal
                 Do While (i < iLen AndAlso digits < 22)
-                    ch = InputStr.Chars(i)
+                    ch = inputStr.Chars(i)
                     i += 1
 
                     Select Case ch
@@ -672,7 +672,7 @@ NextOctCharacter:
                     i += 1
                     If i < iLen Then
                         'We fell out of the loop before getting the typechar
-                        ch = InputStr.Chars(i)
+                        ch = inputStr.Chars(i)
                     End If
                 End If
 
@@ -704,7 +704,7 @@ NextOctCharacter:
 
         End Function
 
-        Public Function Val(ByVal InputStr As String) As Double
+        Public Function Val(ByVal inputStr As String) As Double
 
             Dim ch As Char
             Dim i As Integer
@@ -714,16 +714,16 @@ NextOctCharacter:
 
             Const asc0 As Integer = AscW("0"c)
 
-            If InputStr Is Nothing Then
+            If inputStr Is Nothing Then
                 iLen = 0
             Else
-                iLen = InputStr.Length
+                iLen = inputStr.Length
             End If
 
             i = 0
             'Skip over leading whitespace
             Do While (i < iLen)
-                ch = InputStr.Chars(i)
+                ch = inputStr.Chars(i)
                 Select Case ch
                     Case ControlChars.Tab, ControlChars.Lf, ControlChars.Cr, ChrW(32), ChrW(&H3000S)
                         i += 1
@@ -736,9 +736,9 @@ NextOctCharacter:
                 Return 0
             End If
 
-            ch = InputStr.Chars(i)
+            ch = inputStr.Chars(i)
             If ch = "&"c Then 'We are dealing with hex or octal numbers
-                Return HexOrOctValue(InputStr, i + 1)
+                Return HexOrOctValue(inputStr, i + 1)
 
             Else 'we are dealing with base 10 decimal
                 Dim value As Double
@@ -748,7 +748,7 @@ NextOctCharacter:
                 Dim eval As Double = 0
 
                 'Check for negative
-                ch = InputStr.Chars(i)
+                ch = inputStr.Chars(i)
                 If ch = "-"c Then
                     negative = True
                     i += 1
@@ -758,7 +758,7 @@ NextOctCharacter:
 
                 'check for numbers before a decimal or E
                 Do While (i < iLen)
-                    ch = InputStr.Chars(i)
+                    ch = inputStr.Chars(i)
                     Select Case ch
                         Case ControlChars.Tab, ControlChars.Lf, ControlChars.Cr, ChrW(32), ChrW(&H3000S)
                             i += 1
@@ -806,7 +806,7 @@ NextOctCharacter:
                     Dim afterplusminus As Boolean = False
                     Dim enegative As Boolean = False
                     Do While (i < iLen)
-                        ch = InputStr.Chars(i)
+                        ch = inputStr.Chars(i)
                         Select Case ch
                             Case ControlChars.Tab, ControlChars.Lf, ControlChars.Cr, ChrW(32), ChrW(&H3000S)
                                 i += 1
@@ -887,34 +887,34 @@ NextOctCharacter:
             End If
         End Function
 
-        Public Function Val(ByVal Expression As Char) As Integer
-            'Val only handles Ascii decimal chars '0' to '9'
+        Public Function Val(ByVal expression As Char) As Integer
+            ' Val only handles Ascii decimal chars '0' to '9'
             Dim CharValue As Integer
 
-            CharValue = AscW(Expression) 'CType(Expression, IConvertible).ToInt32(Nothing)
+            CharValue = AscW(expression) 'CType(expression, IConvertible).ToInt32(Nothing)
             If CharValue >= AscW("1"c) AndAlso CharValue <= AscW("9"c) Then
                 Return CharValue - AscW("0")
             End If
             Return 0
         End Function
 
-        Public Function Val(ByVal Expression As Object) As Double
+        Public Function Val(ByVal expression As Object) As Double
 
-            Dim StringExpression As String = TryCast(Expression, String)
+            Dim StringExpression As String = TryCast(expression, String)
 
             If StringExpression IsNot Nothing Then
                 Return Val(StringExpression)
 
-            ElseIf TypeOf Expression Is Char Then
-                Return Val(DirectCast(Expression, Char))
+            ElseIf TypeOf expression Is Char Then
+                Return Val(DirectCast(expression, Char))
 
-            ElseIf CompilerServices.Versioned.IsNumeric(Expression) Then
-                Return CDbl(Expression)
+            ElseIf CompilerServices.Versioned.IsNumeric(expression) Then
+                Return CDbl(expression)
 
             Else
                 Dim sValue As String
                 Try
-                    sValue = CStr(Expression)
+                    sValue = CStr(expression)
                 Catch ex As StackOverflowException
                     Throw ex
                 Catch ex As OutOfMemoryException
@@ -922,7 +922,7 @@ NextOctCharacter:
                 Catch ex As System.Threading.ThreadAbortException
                     Throw ex
                 Catch
-                    Throw VbMakeException(New ArgumentException(GetResourceString(SR.Argument_InvalidValueType2, "Expression", VBFriendlyName(Expression))), vbErrors.OLENoPropOrMethod)
+                    Throw VbMakeException(New ArgumentException(GetResourceString(SR.Argument_InvalidValueType2, NameOf(expression), VBFriendlyName(expression))), vbErrors.OLENoPropOrMethod)
                 End Try
 
                 Return Val(sValue)
@@ -1099,12 +1099,12 @@ NextOctCharacter:
             End Select
         End Function
 
-        Public Function CTypeDynamic(ByVal Expression As Object, ByVal TargetType As System.Type) As Object
-            Return Conversions.ChangeType(Expression, TargetType, True)
+        Public Function CTypeDynamic(ByVal expression As Object, ByVal TargetType As System.Type) As Object
+            Return Conversions.ChangeType(expression, TargetType, True)
         End Function
 
-        Public Function CTypeDynamic(Of TargetType)(ByVal Expression As Object) As TargetType
-            return DirectCast(Conversions.ChangeType(Expression, GetType(TargetType), True), TargetType)
+        Public Function CTypeDynamic(Of TargetType)(ByVal expression As Object) As TargetType
+            return DirectCast(Conversions.ChangeType(expression, GetType(TargetType), True), TargetType)
         End Function
     End Module
 End Namespace
