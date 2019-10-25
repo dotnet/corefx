@@ -19,6 +19,12 @@
   <PropertyGroup Condition="'$(TargetGroup)' == 'net45' OR '$(TargetGroup)' == 'net46' OR '$(TargetGroup)' == 'netfx'">
     <DefineConstants>$(DefineConstants);ALLOW_PARTIALLY_TRUSTED_CALLERS;ENABLE_HTTP_HANDLER</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetGroup)' != 'netstandard1.1'">
+    <DefineConstants>$(DefineConstants);EVENTSOURCE_ACTIVITY_SUPPORT</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetGroup)' != 'netstandard1.1' AND '$(TargetGroup)' != 'netstandard1.3'">
+    <DefineConstants>$(DefineConstants);EVENTSOURCE_ENUMERATE_SUPPORT</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Diagnostics\DiagnosticSource.cs" />
     <Compile Include="System\Diagnostics\DiagnosticListener.cs" />
