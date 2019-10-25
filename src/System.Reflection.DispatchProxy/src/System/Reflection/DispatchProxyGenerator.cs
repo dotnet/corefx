@@ -68,7 +68,7 @@ namespace System.Reflection
             Debug.Assert(baseType != null);
             Debug.Assert(interfaceType != null);
 
-            Type proxiedType = GetProxyType(baseType, interfaceType);
+            Type proxiedType = GetProxyType(baseType!, interfaceType!);
             return Activator.CreateInstance(proxiedType, (Action<object[]>)DispatchProxyGenerator.Invoke)!;
         }
 
@@ -151,7 +151,7 @@ namespace System.Reflection
             try
             {
                 Debug.Assert(s_dispatchProxyInvokeMethod != null);
-                object? returnValue = s_dispatchProxyInvokeMethod.Invoke(packed.DispatchProxy,
+                object? returnValue = s_dispatchProxyInvokeMethod!.Invoke(packed.DispatchProxy,
                                                                        new object?[] { method, packed.Args });
                 packed.ReturnValue = returnValue;
             }
@@ -311,7 +311,7 @@ namespace System.Reflection
                 Debug.Assert(baseCtor != null);
 
                 il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Call, baseCtor);
+                il.Emit(OpCodes.Call, baseCtor!);
 
                 // store all the fields
                 for (int i = 0; i < args.Length; i++)
@@ -416,7 +416,7 @@ namespace System.Reflection
                         continue;
 
                     Debug.Assert(ei.EventHandlerType != null);
-                    EventBuilder eb = _tb.DefineEvent(ei.Name, ei.Attributes, ei.EventHandlerType);
+                    EventBuilder eb = _tb.DefineEvent(ei.Name, ei.Attributes, ei.EventHandlerType!);
                     if (ai.AddMethodBuilder != null)
                         eb.SetAddOnMethod(ai.AddMethodBuilder);
                     if (ai.RemoveMethodBuilder != null)
