@@ -97,7 +97,7 @@ namespace System.Linq.Parallel
                 leftChildResults.GivePartitionedStream(merger);
                 Debug.Assert(merger.MergeExecutor != null);
                 leftChildResults = new ListQueryResults<TLeftInput>(
-                    merger.MergeExecutor.GetResultsAsArray(), partitionCount, preferStriping);
+                    merger.MergeExecutor.GetResultsAsArray()!, partitionCount, preferStriping);
             }
 
             if (_prematureMergeRight)
@@ -108,7 +108,7 @@ namespace System.Linq.Parallel
                 rightChildResults.GivePartitionedStream(merger);
                 Debug.Assert(merger.MergeExecutor != null);
                 rightChildResults = new ListQueryResults<TRightInput>(
-                    merger.MergeExecutor.GetResultsAsArray(), partitionCount, preferStriping);
+                    merger.MergeExecutor.GetResultsAsArray()!, partitionCount, preferStriping);
             }
 
             return new ZipQueryOperatorResults(leftChildResults, rightChildResults, _resultSelector, partitionCount, preferStriping);

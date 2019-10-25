@@ -245,8 +245,9 @@ namespace System.Linq.Parallel
                             OutputOrdered, querySettings.CancellationState, querySettings.QueryId);
                     results.GivePartitionedStream(merger);
                     Debug.Assert(merger.MergeExecutor != null);
-                    TOutput[] output = merger.MergeExecutor.GetResultsAsArray();
+                    TOutput[]? output = merger.MergeExecutor.GetResultsAsArray();
                     querySettings.CleanStateAtQueryEnd();
+                    Debug.Assert(output != null);
                     return output;
                 }
             }
@@ -297,7 +298,7 @@ namespace System.Linq.Parallel
             MergeExecutor<TOutput> executor = MergeExecutor<TOutput>.Execute<TKey>(
                 openedChild, false, ParallelMergeOptions.FullyBuffered, taskScheduler, outputOrdered,
                 settings.CancellationState, settings.QueryId);
-            return new ListQueryResults<TOutput>(executor.GetResultsAsArray(), partitionCount, useStriping);
+            return new ListQueryResults<TOutput>(executor.GetResultsAsArray()!, partitionCount, useStriping);
         }
 
 

@@ -270,8 +270,7 @@ namespace System.Linq
             if (source == null) throw new ArgumentNullException(nameof(source));
 
             // Ditch the wrapper, if there is one.
-            ParallelEnumerableWrapper<TSource>? wrapper = source as ParallelEnumerableWrapper<TSource>;
-            if (wrapper != null)
+            if (source is ParallelEnumerableWrapper<TSource> wrapper)
             {
                 return wrapper.WrappedEnumerable;
             }

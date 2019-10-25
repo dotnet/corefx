@@ -165,23 +165,22 @@ namespace System.Linq.Parallel
             // See QueryTaskGroupState.WaitAll for the main plinq exception handling logic.
 
             // check for co-operative cancellation.
-            OperationCanceledException? cancelEx = ex as OperationCanceledException;
-            if (cancelEx != null &&
-                cancelEx.CancellationToken == cancellationState.ExternalCancellationToken
-                && cancellationState.ExternalCancellationToken.IsCancellationRequested)
+            if (ex is OperationCanceledException cancelEx)
             {
-                return true;  // let the OCE(extCT) be rethrown.
-            }
+                if (cancelEx.CancellationToken == cancellationState.ExternalCancellationToken
+                    && cancellationState.ExternalCancellationToken.IsCancellationRequested)
+                {
+                    return true;  // let the OCE(extCT) be rethrown.
+                }
 
-            // check for external cancellation which triggered the mergedToken.
-            if (cancelEx != null &&
-                cancelEx.CancellationToken == cancellationState.MergedCancellationToken
-                && cancellationState.MergedCancellationToken.IsCancellationRequested
-                && cancellationState.ExternalCancellationToken.IsCancellationRequested)
-            {
-                return true;  // convert internal cancellation back to OCE(extCT).
+                // check for external cancellation which triggered the mergedToken.
+                if (cancelEx.CancellationToken == cancellationState.MergedCancellationToken
+                    && cancellationState.MergedCancellationToken.IsCancellationRequested
+                    && cancellationState.ExternalCancellationToken.IsCancellationRequested)
+                {
+                    return true;  // convert internal cancellation back to OCE(extCT).
+                }
             }
-
             return false;
         }
     }

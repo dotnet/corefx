@@ -123,7 +123,7 @@ namespace System.Linq.Parallel
         // Returns the merged results as an array.
         //
 
-        internal TInputOutput[] GetResultsAsArray()
+        internal TInputOutput[]? GetResultsAsArray()
         {
             Debug.Assert(_mergeHelper != null);
             return _mergeHelper.GetResultsAsArray();

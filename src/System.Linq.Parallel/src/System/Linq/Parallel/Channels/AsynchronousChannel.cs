@@ -65,7 +65,7 @@ namespace System.Linq.Parallel
         //   1 consumer thread to access this thing concurrently. It's been carefully designed
         //   to avoid locking, but only because of this restriction...
 
-        private readonly T[][] _buffer;              // The buffer of chunks.
+        private readonly T[]?[] _buffer;              // The buffer of chunks.
         private readonly int _index;            // Index of this channel
         private volatile int _producerBufferIndex;   // Producer's current index, i.e. where to put the next chunk.
         private volatile int _consumerBufferIndex;   // Consumer's current index, i.e. where to get the next chunk.
@@ -609,11 +609,11 @@ namespace System.Linq.Parallel
             // We can safely read from the consumer index because we know no producers
             // will write concurrently.
             int consumerBufferIndex = _consumerBufferIndex;
-            T[] chunk = _buffer[consumerBufferIndex];
+            T[] chunk = _buffer[consumerBufferIndex]!;
 
             // Zero out contents to avoid holding on to memory for longer than necessary. This
             // ensures the entire chunk is eligible for GC sooner. (More important for big chunks.)
-            _buffer[consumerBufferIndex] = null!;
+            _buffer[consumerBufferIndex] = null;
 
             // Increment the consumer index, taking into count wrapping back to 0. This is a shared
             // write; the CLR 2.0 memory model ensures the write won't move before the write to the
