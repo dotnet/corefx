@@ -107,21 +107,16 @@ namespace System.IO
                 throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
             }
 
-            SafeFileHandle handle = null;
+            SafeFileHandle handle = CreateFileOpenHandle(fileInfo.FullName, mode, rights, share, options, fileSecurity);
+
             try
             {
-                handle = CreateFileOpenHandle(fileInfo.FullName, mode, rights, share, options, fileSecurity);
                 return new FileStream(handle, GetFileStreamFileAccess(rights), bufferSize, (options & FileOptions.Asynchronous) != 0);
             }
             catch
             {
                 // If anything goes wrong while setting up the stream, make sure we deterministically dispose of the opened handle.
-                if (handle != null)
-                {
-                    handle.Dispose();
-                    handle = null;
-                }
-
+                handle.Dispose();
                 throw;
             }
         }
@@ -187,7 +182,7 @@ namespace System.IO
             {
                 // Return a meaningful exception with the full path.
 
-                // NT5 oddity - when trying to open "C:\" as a Win32FileStream,
+                // NT5 oddity - when trying to open "C:\" as a FileStream,
                 // we usually get ERROR_PATH_NOT_FOUND from the OS.  We should
                 // probably be consistent w/ every other directory.
                 int errorCode = Marshal.GetLastWin32Error();
