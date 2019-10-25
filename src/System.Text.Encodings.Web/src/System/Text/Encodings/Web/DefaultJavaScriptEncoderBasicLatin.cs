@@ -82,6 +82,12 @@ namespace System.Text.Encodings.Web
 
             Debug.Assert(textLength >= 0);
 
+
+            if (textLength == 0)
+            {
+                goto AllAllowed;
+            }
+
             int idx = 0;
             short* ptr = (short*)text;
             short* end = ptr + (uint)textLength;
@@ -94,7 +100,9 @@ namespace System.Text.Encodings.Web
 
         Sequential:
 #endif
-            while (ptr < end)
+            Debug.Assert(textLength > 0 && ptr < end);
+
+            do
             {
                 Debug.Assert(text <= ptr && ptr < (text + textLength));
 
@@ -106,7 +114,9 @@ namespace System.Text.Encodings.Web
                 ptr++;
                 idx++;
             }
+            while (ptr < end);
 
+        AllAllowed:
             idx = -1;  // All characters are allowed.
 
         Return:
@@ -183,7 +193,13 @@ namespace System.Text.Encodings.Web
             }
 
             idx = CalculateIndex(ptr, text);
-            goto Sequential;
+
+            if (idx < textLength)
+            {
+                goto Sequential;
+            }
+
+            goto AllAllowed;
 
         VectorizedFound:
             idx = GetIndexOfFirstNeedToEscape(index);
@@ -202,21 +218,29 @@ namespace System.Text.Encodings.Web
         {
             fixed (byte* pValue = utf8Text)
             {
+                uint textLength = (uint)utf8Text.Length;
+
+                if (textLength == 0)
+                {
+                    goto AllAllowed;
+                }
+
                 int idx = 0;
                 byte* ptr = pValue;
-                uint textLength = (uint)utf8Text.Length;
                 byte* end = ptr + textLength;
 
 #if NETCOREAPP
 
-                if (Sse2.IsSupported && ptr != null && textLength >= Vector128<sbyte>.Count)
+                if (Sse2.IsSupported && textLength >= Vector128<sbyte>.Count)
                 {
                     goto Vectorized;
                 }
 
             Sequential:
 #endif
-                while (ptr < end)
+                Debug.Assert(textLength > 0 && ptr < end);
+
+                do
                 {
                     Debug.Assert(pValue <= ptr && ptr < (pValue + utf8Text.Length));
 
@@ -228,7 +252,9 @@ namespace System.Text.Encodings.Web
                     ptr++;
                     idx++;
                 }
+                while (ptr < end);
 
+            AllAllowed:
                 idx = -1; // all characters allowed
 
             Return:
@@ -287,7 +313,13 @@ namespace System.Text.Encodings.Web
                 }
 
                 idx = CalculateIndex(ptr, pValue);
-                goto Sequential;
+
+                if (idx < textLength)
+                {
+                    goto Sequential;
+                }
+
+                goto AllAllowed;
 
             VectorizedFound:
                 idx = GetIndexOfFirstNeedToEscape(index);
