@@ -45,14 +45,16 @@ namespace System.Runtime.CompilerServices
             AssemblyName = assemblyName;
         }
 
-        /// <summary>Gets or sets the signature of the member depended on.</summary>
-        public string MemberSignature { get; set; }
-        /// <summary>Gets or sets the full name of the type containing the specified member.</summary>
+        /// <summary>Gets the signature of the member depended on.</summary>
+        public string MemberSignature { get; }
+
+        /// <summary>Gets the full name of the type containing the specified member.</summary>
         /// <remarks>If no type name is specified, the type of the consumer is assumed.</remarks>
-        public string? TypeName { get; set; }
-        /// <summary>Gets or sets the assembly name of the specified type.</summary>
+        public string? TypeName { get; }
+
+        /// <summary>Gets the assembly name of the specified type.</summary>
         /// <remarks>If no assembly name is specified, the assembly of the consumer is assumed.</remarks>
-        public string? AssemblyName { get; set; }
+        public string? AssemblyName { get; }
 
         /// <summary>Gets or sets the condition in which the dependency is applicable, e.g. "DEBUG".</summary>
         public string? Condition { get; set; }
