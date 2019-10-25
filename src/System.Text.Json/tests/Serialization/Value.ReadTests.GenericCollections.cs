@@ -1161,22 +1161,22 @@ namespace System.Text.Json.Serialization.Tests
         {
             static void RunTest<T>(T instance)
             {
-                string JSON;
+                string expectedJson;
 
                 if (instance is IEnumerable<string> || instance is IList)
                 {
-                    JSON = @"[""item""]";
+                    expectedJson = @"[""item""]";
                 }
                 else
                 {
-                    JSON = @"{""key"":""item""}";
+                    expectedJson = @"{""key"":""item""}";
                 }
 
-                string json = JsonSerializer.Serialize(instance);
-                Assert.Equal(JSON, json);
+                string outputJson = JsonSerializer.Serialize(instance);
+                Assert.Equal(expectedJson, outputJson);
 
-                T result = JsonSerializer.Deserialize<T>(json);
-                IEnumerator enumerator = ((IEnumerable)result).GetEnumerator();
+                T deserializedObject = JsonSerializer.Deserialize<T>(outputJson);
+                IEnumerator enumerator = ((IEnumerable)deserializedObject).GetEnumerator();
                 enumerator.MoveNext();
 
                 if (enumerator.Current is KeyValuePair<string, string> pair)
@@ -1199,7 +1199,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
 
                 // Ensure roundtrip.
-                Assert.Equal(json, JsonSerializer.Serialize(result));
+                Assert.Equal(outputJson, JsonSerializer.Serialize(deserializedObject));
             }
 
             // List<string>
@@ -1228,7 +1228,7 @@ namespace System.Text.Json.Serialization.Tests
             // Type that implements a type that implements IDictionary<string, string>
             RunTest(new WrapperForStringToStringIDictionaryWrapper { ["key"] = "item" });
 
-            // Type that implements a type that implements IDictionary<string, string>
+            // Type that implements a type that implements IDictionary
             RunTest(new WrapperForWrapperForIDictionary { ["key"] = "item" });
         }
     }
