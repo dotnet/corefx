@@ -26,6 +26,10 @@ namespace System.IO
         /// <exception cref="ArgumentNullException"><paramref name="directoryInfo" /> or <paramref name="directorySecurity" /> is <see langword="null" />.</exception>
         /// <exception cref="DirectoryNotFoundException">Could not find a part of the path.</exception>
         /// <exception cref="UnauthorizedAccessException">Access to the path is denied.</exception>
+        /// <remarks><format type="text/markdown"><![CDATA[
+        ///## Remarks
+        ///This extension method was added to .NET Core to bring the functionality that was provided by the <xref:System.IO.DirectoryInfo.Create(System.Security.AccessControl.DirectorySecurity)> .NET Framework method.
+        /// ]]></format></remarks>
         public static void Create(this DirectoryInfo directoryInfo, DirectorySecurity directorySecurity)
         {
             if (directoryInfo == null)
@@ -55,11 +59,12 @@ namespace System.IO
         ///-or-
         /// <paramref name="bufferSize" /> is not a positive number.</exception>
         /// <exception cref="UnauthorizedAccessException">Access to the path is denied.</exception>
-        /// <exception cref="ArgumentException">Invalid handle.
-        ///-or-
-        /// Handle does not support asynchronous operations. The parameters to the <see cref="FileStream" /> constructor may need to be changed to indicate that the handle was opened synchronously (that is, it was not opened for overlapped I/O).
-        /// </exception>
+        /// <exception cref="ArgumentException">Invalid handle.</exception>
         /// <exception cref="ObjectDisposedException">Cannot access a closed file.</exception>
+        /// <remarks><format type="text/markdown"><![CDATA[
+        ///## Remarks
+        ///This extension method was added to .NET Core to bring the functionality that was provided by the <xref:System.IO.FileStream.#ctor(System.String,System.IO.FileMode,System.Security.AccessControl.FileSystemRights,System.IO.FileShare,System.Int32,System.IO.FileOptions,System.Security.AccessControl.FileSecurity)> .NET Framework constructor.
+        /// ]]></format></remarks>
         public static FileStream Create(this FileInfo fileInfo, FileMode mode, FileSystemRights rights, FileShare share, int bufferSize, FileOptions options, FileSecurity fileSecurity)
         {
             if (fileInfo == null)
