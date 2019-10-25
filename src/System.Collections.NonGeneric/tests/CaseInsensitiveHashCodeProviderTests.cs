@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Diagnostics;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using System.Tests;
 
 #pragma warning disable 618 // obsolete types
 
@@ -39,39 +40,35 @@ namespace System.Collections.Tests
         [InlineData(5, 10, false)]
         public void Ctor_Empty_ChangeCurrentCulture_GetHashCodeCompare(object a, object b, bool expected)
         {
-            RemoteExecutor.Invoke((ra, rb, rexpected) =>
+            var cultureNames = new string[]
             {
-                var cultureNames = new string[]
+                "cs-CZ","da-DK","de-DE","el-GR","en-US",
+                "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
+                "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
+                "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
+                "zh-CN","zh-HK","zh-TW"
+            };
+
+            foreach (string cultureName in cultureNames)
+            {
+                CultureInfo newCulture;
+                try
                 {
-                    "cs-CZ","da-DK","de-DE","el-GR","en-US",
-                    "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
-                    "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
-                    "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
-                    "zh-CN","zh-HK","zh-TW"
-                };
-
-                bool.TryParse(rexpected, out bool expectedResult);
-
-                foreach (string cultureName in cultureNames)
-                {
-                    CultureInfo newCulture;
-                    try
-                    {
-                        newCulture = new CultureInfo(cultureName);
-                    }
-                    catch (CultureNotFoundException)
-                    {
-                        continue;
-                    }
-
-                    CultureInfo.CurrentCulture = newCulture;
-                    var provider = new CaseInsensitiveHashCodeProvider();
-                    Assert.Equal(provider.GetHashCode(ra), provider.GetHashCode(ra));
-                    Assert.Equal(provider.GetHashCode(rb), provider.GetHashCode(rb));
-                    Assert.Equal(expectedResult, provider.GetHashCode(ra) == provider.GetHashCode(rb));
+                    newCulture = new CultureInfo(cultureName);
                 }
-                return RemoteExecutor.SuccessExitCode;
-            }, a.ToString(), b.ToString(), expected.ToString()).Dispose();
+                catch (CultureNotFoundException)
+                {
+                    continue;
+                }
+
+                using (new ThreadCultureChange(newCulture))
+                {
+                    var provider = new CaseInsensitiveHashCodeProvider();
+                    Assert.Equal(provider.GetHashCode(a), provider.GetHashCode(a));
+                    Assert.Equal(provider.GetHashCode(b), provider.GetHashCode(b));
+                    Assert.Equal(expected, provider.GetHashCode(a) == provider.GetHashCode(b));
+                }
+            }
         }
 
         [Theory]
@@ -179,16 +176,16 @@ namespace System.Collections.Tests
         {
             // Turkish has lower-case and upper-case version of the dotted "i", so the upper case of "i" (U+0069) isn't "I" (U+0049)
             // but rather U+0130.
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("tr-TR"))
             {
-                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
                 Assert.False(CaseInsensitiveHashCodeProvider.Default.GetHashCode("file") == CaseInsensitiveHashCodeProvider.Default.GetHashCode("FILE"));
                 Assert.True(CaseInsensitiveHashCodeProvider.DefaultInvariant.GetHashCode("file") == CaseInsensitiveHashCodeProvider.DefaultInvariant.GetHashCode("FILE"));
+            }
 
-                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+            using (new ThreadCultureChange("en-US"))
+            {
                 Assert.True(CaseInsensitiveHashCodeProvider.Default.GetHashCode("file") == CaseInsensitiveHashCodeProvider.Default.GetHashCode("FILE"));
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
     }
 }

@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace System.Net.NetworkInformation
 {
@@ -54,7 +52,7 @@ namespace System.Net.NetworkInformation
             HashSet<string> interfaceSet = new HashSet<string>();
             int numIPAddresses = 0;
             Interop.Sys.EnumerateInterfaceAddresses(
-                (name, addressInfo, netmaskInfo) =>
+                (name, addressInfo) =>
                 {
                     interfaceSet.Add(name);
                     numIPAddresses++;

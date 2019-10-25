@@ -19,7 +19,6 @@ namespace System.Buffers.ArrayPool.Tests
         [Theory,
             InlineData(true),
             InlineData(false)]
-        [ActiveIssue(29866, TargetFrameworkMonikers.Uap)]
         public void BuffersAreCollectedWhenStale(bool trim)
         {
             RemoteInvokeWithTrimming((trimString) =>
@@ -74,7 +73,6 @@ namespace System.Buffers.ArrayPool.Tests
 
                 // Should only have found a new buffer if we're trimming
                 Assert.Equal(parsedTrim, foundNewBuffer);
-                return RemoteExecutor.SuccessExitCode;
             }, trim, 3 * 60 * 1000); // This test has to wait for the buffers to go stale (give it three minutes)
         }
 
@@ -130,8 +128,6 @@ namespace System.Buffers.ArrayPool.Tests
                     // Disabled, should not have trimmed buffer
                     Assert.Same(buffer, pool.Rent(BufferSize));
                 }
-
-                return RemoteExecutor.SuccessExitCode;
             }, trim);
         }
 
@@ -147,7 +143,6 @@ namespace System.Buffers.ArrayPool.Tests
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         [InlineData(true)]
         [InlineData(false)]
-        [ActiveIssue(29866, TargetFrameworkMonikers.Uap)]
         public void PollingEventFires(bool trim)
         {
             RemoteInvokeWithTrimming((trimString) =>
@@ -189,7 +184,6 @@ namespace System.Buffers.ArrayPool.Tests
 
                 // Polling events should only fire when trimming is enabled
                 Assert.Equal(parsedTrim, pollEventFired);
-                return RemoteExecutor.SuccessExitCode;
             }, trim);
         }
     }

@@ -4265,12 +4265,8 @@ new DS[] { DS.ERROR,  DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR, 
                     // with this issue.
                     if ((result.flags & ParseFlags.CaptureOffset) != 0)
                     {
-                        if ((result.flags & ParseFlags.Rfc1123Pattern) != 0 && quotedStr == GMTName)
-                        {
-                            result.flags |= ParseFlags.TimeZoneUsed;
-                            result.timeZoneOffset = TimeSpan.Zero;
-                        }
-                        else if ((result.flags & ParseFlags.UtcSortPattern) != 0 && quotedStr == ZuluName)
+                        if (((result.flags & ParseFlags.Rfc1123Pattern) != 0 && quotedStr == GMTName) ||
+                            ((result.flags & ParseFlags.UtcSortPattern) != 0 && quotedStr == ZuluName))
                         {
                             result.flags |= ParseFlags.TimeZoneUsed;
                             result.timeZoneOffset = TimeSpan.Zero;
@@ -5185,7 +5181,7 @@ new DS[] { DS.ERROR,  DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR, 
                 if (s.Length > MaxLineLength || (curLineLength + s.Length + 2) > MaxLineLength)
                 {
                     buffer.Append(',');
-                    buffer.Append(Environment.NewLine);
+                    buffer.Append(Environment.NewLineConst);
                     buffer.Append(' ', NewLinePadding);
                     curLineLength = 0;
                 }
@@ -5202,7 +5198,7 @@ new DS[] { DS.ERROR,  DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR, 
             s = Hex(strs[strs.Length - 1]);
             if (s.Length > MaxLineLength || (curLineLength + s.Length + 6) > MaxLineLength)
             {
-                buffer.Append(Environment.NewLine);
+                buffer.Append(Environment.NewLineConst);
                 buffer.Append(' ', NewLinePadding);
             }
             else

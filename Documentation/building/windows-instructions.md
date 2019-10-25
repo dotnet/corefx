@@ -4,7 +4,7 @@ Building CoreFX on Windows
 ## Required Software
 
 1. **[Visual Studio 2019](https://visualstudio.microsoft.com/vs/preview/)** (Community, Professional, Enterprise) with the latest update must be installed. The Community version is completely free.
-2. **[CMake](https://cmake.org/)** must be installed from [the CMake download page](https://cmake.org/download/#latest) and added to your path. CMake 3.14.3 or later is required to build with VS 2019.
+2. **[CMake](https://cmake.org/)** must be installed from [the CMake download page](https://cmake.org/download/#latest) and added to your path. CMake 3.16.0-RC1 or later is required.
 
 ## Recommended Software
 **[.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0)** >= v3.0.100 should be installed, which will add the `dotnet` toolchain to your path.
@@ -16,12 +16,16 @@ Building CoreFX on Windows
 The following are the minimum requirements:
   * .NET desktop development
     * All Required Components
-    * .NET Framework 4.7.2 Development Tools
+    * .NET Framework 4.7.2 SDK
+    * Verify the required components include:
+      * .NET Framework 4.7.2 targeting pack
   * Desktop development with C++
     * All Required Components
-    * VC++ 2019 v142 Toolset (x86, x64)
-    * Windows 8.1 SDK and UCRT SDK
-    * VC++ 2017 v141 Toolset (x86, x64)
+    * Windows Universal CRT SDK
+    * MSVC v142 - VS 2019 C++ x64/x86 build tools (latest - for example - v14.24)
+    * MSVC v141 - VS 2017 C++ x64/x86 build tools (latest - for example - v14.16)
+    * Verify the required components include:
+      * Windows 10 SDK (latest - for example - 10.0.18362.0)
   * .NET Core cross-platform development
     * All Required Components
 
@@ -29,13 +33,13 @@ The following are the minimum requirements:
 
 The following are the minimum requirements:
   * C# and Visual Basic Roslyn Compilers
-  * Static Analysis Tools
   * .NET Portable Library Targeting Pack
-  * Windows 10 SDK or Windows 8.1 SDK
-  * Visual Studio C++ Core Features
-  * VC++ 2019 v142 Toolset (x86, x64)
-  * VC++ 2017 v141 Toolset (x86, x64)
+  * Windows 10 SDK
+  * C++ core features
+  * MSVC v142 - VS 2019 C++ x64/x86 build tools (latest - for example - v14.24)
+  * MSVC v141 - VS 2017 C++ x64/x86 build tools (latest - for example - v14.16)
   * MSBuild
+  * .NET Framework 4.7.2 SDK
   * .NET Framework 4.7.2 Targeting Pack
   * Windows Universal CRT SDK
 

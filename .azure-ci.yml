@@ -11,7 +11,13 @@ trigger:
   paths:
     exclude:
     - Documentation/*
-    - /*.md
+    - CODE-OF-CONDUCT.md
+    - CONTRIBUTING.md
+    - LICENSE.TXT
+    - PATENTS.TXT
+    - README.md
+    - SECURITY.md
+    - THIRD-PARTY-NOTICES.TXT
 
 pr:
   branches:
@@ -21,7 +27,13 @@ pr:
   paths:
     exclude:
     - Documentation/*
-    - /*.md
+    - CODE-OF-CONDUCT.md
+    - CONTRIBUTING.md
+    - LICENSE.TXT
+    - PATENTS.TXT
+    - README.md
+    - SECURITY.md
+    - THIRD-PARTY-NOTICES.TXT
 
 resources:
   containers:
@@ -99,12 +111,12 @@ stages:
         SDLValidationParameters:
           enable: true
           params: ' -SourceToolsList @("policheck","credscan")
-          -TsaInstanceURL "https://devdiv.visualstudio.com/"
-          -TsaProjectName "DEVDIV"
+          -TsaInstanceURL "$(TsaInstanceURL)"
+          -TsaProjectName "$(TsaProjectName)"
           -TsaNotificationEmail "$(TsaNotificationEmail)"
           -TsaCodebaseAdmin "$(TsaCodebaseAdmin)"
-          -TsaBugAreaPath "DevDiv\NET\NET Core"
-          -TsaIterationPath "DevDiv"
+          -TsaBugAreaPath "$(TsaBugAreaPath)"
+          -TsaIterationPath "$(TsaIterationPath)"
           -TsaRepositoryName "CoreFX"
           -TsaCodebaseName "CoreFX"
           -TsaPublish $True'

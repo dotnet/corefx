@@ -12,7 +12,7 @@ namespace System.Drawing.Primitives.Tests
 {
     public partial class ColorTests
     {
-        public static bool SupportsReadingUpdatedSystemColors => PlatformDetection.IsWindows && !PlatformDetection.IsUap && PlatformDetection.IsNotWindowsNanoServer;
+        public static bool SupportsReadingUpdatedSystemColors => PlatformDetection.IsWindows && !PlatformDetection.IsInAppContainer && PlatformDetection.IsNotWindowsNanoServer;
 
         public static readonly IEnumerable<object[]> NamedArgbValues =
             new[]
@@ -51,7 +51,7 @@ namespace System.Drawing.Primitives.Tests
                 new object[] {"DarkOrchid", 255, 153, 50, 204},
                 new object[] {"DarkRed", 255, 139, 0, 0},
                 new object[] {"DarkSalmon", 255, 233, 150, 122},
-                new object[] {"DarkSeaGreen", 255, 143, 188, 139},
+                new object[] {"DarkSeaGreen", 255, 143, 188, 143},
                 new object[] {"DarkSlateBlue", 255, 72, 61, 139},
                 new object[] {"DarkSlateGray", 255, 47, 79, 79},
                 new object[] {"DarkTurquoise", 255, 0, 206, 209},

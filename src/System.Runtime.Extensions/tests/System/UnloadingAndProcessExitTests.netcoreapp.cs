@@ -12,7 +12,6 @@ namespace System.Tests
 {
     public class UnloadingAndProcessExitTests : FileCleanupTestBase
     {
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/23307", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void UnloadingEventMustHappenBeforeProcessExitEvent()
         {
@@ -20,7 +19,7 @@ namespace System.Tests
 
             File.WriteAllText(fileName, string.Empty);
 
-            Func<string, int> otherProcess = f =>
+            Action<string> otherProcess = f =>
             {
                 Action<int> OnUnloading = i => File.AppendAllText(f, string.Format("u{0}", i));
                 Action<int> OnProcessExit = i => File.AppendAllText(f, string.Format("e{0}", i));
@@ -31,8 +30,6 @@ namespace System.Tests
                 AppDomain.CurrentDomain.ProcessExit += (sender, e) => OnProcessExit(1);
                 System.Runtime.Loader.AssemblyLoadContext.Default.Unloading += acl => OnUnloading(1);
                 File.AppendAllText(f, "h");
-
-                return RemoteExecutor.SuccessExitCode;
             };
 
             using (var remote = RemoteExecutor.Invoke(otherProcess, fileName))
