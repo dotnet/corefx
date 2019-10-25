@@ -73,7 +73,6 @@ namespace System.Text.Encodings.Web
             return NeedsEscaping((char)unicodeScalar);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override unsafe int FindFirstCharacterToEncode(char* text, int textLength)
         {
             if (text == null)
@@ -199,7 +198,6 @@ namespace System.Text.Encodings.Web
 #endif
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override unsafe int FindFirstCharacterToEncodeUtf8(ReadOnlySpan<byte> utf8Text)
         {
             fixed (byte* pValue = utf8Text)
