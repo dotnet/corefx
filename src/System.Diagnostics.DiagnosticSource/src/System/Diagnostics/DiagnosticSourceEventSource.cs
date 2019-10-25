@@ -838,7 +838,7 @@ namespace System.Diagnostics
                 /// For convenience you can set he 'next' field to form a linked
                 /// list of PropertySpecs. 
                 /// </summary>
-                public PropertySpec(string propertyName, PropertySpec? next)
+                public PropertySpec(string propertyName, PropertySpec next)
                 {
                     Next = next;
                     _propertyName = propertyName;
@@ -856,11 +856,11 @@ namespace System.Diagnostics
                 /// Given an object fetch the property that this PropertySpec represents.
                 /// obj may be null when IsStatic is true, otherwise it must be non-null.
                 /// </summary>
-                public object? Fetch(object? obj)
+                public object Fetch(object obj)
                 {
-                    PropertyFetch? fetch = _fetchForExpectedType;
+                    PropertyFetch fetch = _fetchForExpectedType;
                     Debug.Assert(obj != null || IsStatic);
-                    Type? objType = obj?.GetType();
+                    Type objType = obj.GetType();
                     if (fetch == null || fetch.Type != objType)
                     {
                         _fetchForExpectedType = fetch = PropertyFetch.FetcherForProperty(
@@ -882,7 +882,7 @@ namespace System.Diagnostics
                 /// </summary>
                 private class PropertyFetch
                 {
-                    public PropertyFetch(Type? type)
+                    public PropertyFetch(Type type)
                     {
                         Type = type;
                     }
@@ -891,12 +891,12 @@ namespace System.Diagnostics
                     /// The type of the object that the property is fetched from. For well-known static methods that
                     /// aren't actually property getters this will return null.
                     /// </summary>
-                    internal Type? Type { get; }
+                    internal Type Type { get; }
 
                     /// <summary>
                     /// Create a property fetcher for a propertyName
                     /// </summary>
-                    public static PropertyFetch FetcherForProperty(Type? type, string propertyName)
+                    public static PropertyFetch FetcherForProperty(Type type, string propertyName)
                     {
                         if (propertyName == null)
                             return new PropertyFetch(type);     // returns null on any fetch.
@@ -944,7 +944,7 @@ namespace System.Diagnostics
                         }
                         else
                         {
-                            PropertyInfo? propertyInfo = typeInfo.GetDeclaredProperty(propertyName);
+                            PropertyInfo propertyInfo = typeInfo.GetDeclaredProperty(propertyName);
                             if (propertyInfo == null)
                             {
                                 Logger.Message($"Property {propertyName} not found on {type}");
@@ -961,7 +961,7 @@ namespace System.Diagnostics
                     /// <summary>
                     /// Given an object, fetch the property that this propertyFech represents. 
                     /// </summary>
-                    public virtual object? Fetch(object? obj) { return null; }
+                    public virtual object Fetch(object obj) { return null; }
 
                     #region private 
 
@@ -972,7 +972,7 @@ namespace System.Diagnostics
                             Debug.Assert(typeof(TObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
                             _propertyFetch = (Func<TObject, TProperty>)property.GetMethod!.CreateDelegate(typeof(Func<TObject, TProperty>));
                         }
-                        public override object? Fetch(object? obj)
+                        public override object Fetch(object obj)
                         {
                             Debug.Assert(obj is TObject);
                             return _propertyFetch((TObject)obj);
@@ -991,7 +991,7 @@ namespace System.Diagnostics
                             Debug.Assert(typeof(TStruct) == type);
                             _propertyFetch = (StructFunc<TStruct, TProperty>)property.GetMethod!.CreateDelegate(typeof(StructFunc<TStruct, TProperty>));
                         }
-                        public override object? Fetch(object? obj)
+                        public override object Fetch(object obj)
                         {
                             Debug.Assert(obj is TStruct);
                             // It is uncommon for property getters to mutate the struct, but if they do the change will be lost.
@@ -1010,7 +1010,7 @@ namespace System.Diagnostics
                     private sealed class CurrentActivityPropertyFetch : PropertyFetch
                     {
                         public CurrentActivityPropertyFetch() : base(null) { }
-                        public override object? Fetch(object? obj)
+                        public override object Fetch(object obj)
                         {
                             return Activity.Current;
                         }
@@ -1023,7 +1023,7 @@ namespace System.Diagnostics
                     private sealed class EnumeratePropertyFetch<ElementType> : PropertyFetch
                     {
                         public EnumeratePropertyFetch(Type type) : base(type) { }
-                        public override object? Fetch(object? obj)
+                        public override object Fetch(object obj)
                         {
                             Debug.Assert(obj is IEnumerable<ElementType>);
                             return string.Join(",", (IEnumerable<ElementType>)obj);
