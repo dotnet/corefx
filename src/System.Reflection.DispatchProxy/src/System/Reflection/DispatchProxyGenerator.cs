@@ -259,7 +259,7 @@ namespace System.Reflection
             internal void GetTokenForMethod(MethodBase method, out Type type, out int token)
             {
                 Debug.Assert(method.DeclaringType != null);
-                type = method.DeclaringType;
+                type = method.DeclaringType!;
                 token = 0;
                 if (!_methodToToken.TryGetValue(method, out token))
                 {
@@ -921,7 +921,7 @@ namespace System.Reflection
                         return 0;
 
                     Debug.Assert(obj.DeclaringType != null);
-                    int hashCode = obj.DeclaringType.GetHashCode();
+                    int hashCode = obj.DeclaringType!.GetHashCode();
                     hashCode ^= obj.Name.GetHashCode();
                     foreach (ParameterInfo parameter in obj.GetParameters())
                     {
