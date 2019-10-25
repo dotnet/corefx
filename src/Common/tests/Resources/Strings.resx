@@ -159,8 +159,14 @@
   <data name="Arg_InvalidSearchPattern" xml:space="preserve">
     <value>Arg_InvalidSearchPattern {0}</value>
   </data>
+  <data name="net_http_headers_exceeded_length" xml:space="preserve">
+    <value>The HTTP headers length exceeded the set limit of {0} bytes.</value>
+  </data>
   <data name="net_http_hpack_bad_integer" xml:space="preserve">
     <value>HPACK integer exceeds limits or has an overlong encoding.</value>
+  </data>
+  <data name="net_http_hpack_encode_failure" xml:space="preserve">
+    <value>Failed to HPACK encode the headers.</value>
   </data>
   <data name="net_http_hpack_huffman_decode_failed" xml:space="preserve">
     <value>Huffman-coded literal string failed to decode.</value>
@@ -185,8 +191,5 @@
   </data>
   <data name="net_http_request_invalid_char_encoding" xml:space="preserve">
     <value>Request headers must contain only ASCII characters.</value>
-  </data>
-  <data name="net_http_response_headers_exceeded_length" xml:space="preserve">
-    <value>The HTTP response headers length exceeded the set limit of {0} bytes.</value>
   </data>
 </root>

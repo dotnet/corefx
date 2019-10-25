@@ -1243,7 +1243,7 @@ namespace System.Net.Http
             {
                 if (_allowedReadLineBytes < buffer.Length)
                 {
-                    throw new HttpRequestException(SR.Format(SR.net_http_response_headers_exceeded_length, _pool.Settings._maxResponseHeadersLength * 1024L));
+                    throw new HttpRequestException(SR.Format(SR.net_http_headers_exceeded_length, _pool.Settings._maxResponseHeadersLength * 1024L));
                 }
 
                 line = default;
@@ -1354,7 +1354,7 @@ namespace System.Net.Http
         {
             if (_allowedReadLineBytes < 0)
             {
-                throw new HttpRequestException(SR.Format(SR.net_http_response_headers_exceeded_length, _pool.Settings._maxResponseHeadersLength * 1024L));
+                throw new HttpRequestException(SR.Format(SR.net_http_headers_exceeded_length, _pool.Settings._maxResponseHeadersLength * 1024L));
             }
         }
 
