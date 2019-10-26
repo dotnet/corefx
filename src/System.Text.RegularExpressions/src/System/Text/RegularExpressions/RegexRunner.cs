@@ -240,7 +240,7 @@ namespace System.Text.RegularExpressions
             }
 #endif
 
-            throw new RegexMatchTimeoutException(runtext!, runregex.pattern!, TimeSpan.FromMilliseconds(_timeout));
+            throw new RegexMatchTimeoutException(runtext!, runregex!.pattern!, TimeSpan.FromMilliseconds(_timeout));
         }
 
         /// <summary>

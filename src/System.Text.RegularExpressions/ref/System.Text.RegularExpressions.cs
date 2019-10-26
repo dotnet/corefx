@@ -237,7 +237,6 @@ namespace System.Text.RegularExpressions
         Singleline = 16,
         IgnorePatternWhitespace = 32,
         RightToLeft = 64,
-        Debug = 128,
         ECMAScript = 256,
         CultureInvariant = 512,
     }
