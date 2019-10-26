@@ -8,6 +8,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Text.RegularExpressions
 {
@@ -20,12 +21,12 @@ namespace System.Text.RegularExpressions
     public class GroupCollection : IList<Group>, IReadOnlyList<Group>, IList, IReadOnlyDictionary<string, Group>
     {
         private readonly Match _match;
-        private readonly Hashtable _captureMap;
+        private readonly Hashtable? _captureMap;
 
         // cache of Group objects fed to the user
-        private Group[] _groups;
+        private Group[]? _groups;
 
-        internal GroupCollection(Match match, Hashtable caps)
+        internal GroupCollection(Match match, Hashtable? caps)
         {
             _match = match;
             _captureMap = caps;
@@ -83,7 +84,7 @@ namespace System.Text.RegularExpressions
                 _groups = new Group[_match._matchcount.Length - 1];
                 for (int i = 0; i < _groups.Length; i++)
                 {
-                    string groupname = _match._regex.GroupNameFromNumber(i + 1);
+                    string groupname = _match._regex!.GroupNameFromNumber(i + 1);
                     _groups[i] = new Group(_match.Text, _match._matches[i + 1], _match._matchcount[i + 1], groupname);
                 }
             }
@@ -166,7 +167,7 @@ namespace System.Text.RegularExpressions
             throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
-        int IList.Add(object value)
+        int IList.Add(object? value)
         {
             throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
@@ -176,20 +177,20 @@ namespace System.Text.RegularExpressions
             throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
-        bool IList.Contains(object value) =>
+        bool IList.Contains(object? value) =>
             value is Group && ((ICollection<Group>)this).Contains((Group)value);
 
-        int IList.IndexOf(object value) =>
+        int IList.IndexOf(object? value) =>
             value is Group ? ((IList<Group>)this).IndexOf((Group)value) : -1;
 
-        void IList.Insert(int index, object value)
+        void IList.Insert(int index, object? value)
         {
             throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
         bool IList.IsFixedSize => true;
 
-        void IList.Remove(object value)
+        void IList.Remove(object? value)
         {
             throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
@@ -199,7 +200,7 @@ namespace System.Text.RegularExpressions
             throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection);
         }
 
-        object IList.this[int index]
+        object? IList.this[int index]
         {
             get { return this[index]; }
             set { throw new NotSupportedException(SR.NotSupported_ReadOnlyCollection); }
@@ -210,12 +211,12 @@ namespace System.Text.RegularExpressions
             return new Enumerator(this);
         }
 
-        public bool TryGetValue(string key, out Group value)
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out Group value)
         {
             Group group = this[key];
             if (group == Group.s_emptyGroup)
             {
-                value = null;
+                value = null!;
                 return false;
             }
             value = group;
@@ -224,7 +225,7 @@ namespace System.Text.RegularExpressions
 
         public bool ContainsKey(string key)
         {
-            return _match._regex.GroupNumberFromName(key) >= 0;
+            return _match._regex!.GroupNumberFromName(key) >= 0;
         }
 
         public IEnumerable<string> Keys
