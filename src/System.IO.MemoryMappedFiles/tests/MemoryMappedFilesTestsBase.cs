@@ -23,7 +23,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         protected static string CreateUniqueWhitespaceMapName()
         {
             var data = Guid.NewGuid().ToByteArray();
-            var s = stackalloc char[data.Length * 4];
+            Span<char> s = stackalloc char[data.Length * 4];
             for (int i = 0; i < data.Length; i++)
             {
                 byte b = data[i];
