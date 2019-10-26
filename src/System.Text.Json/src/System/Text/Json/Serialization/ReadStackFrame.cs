@@ -187,6 +187,12 @@ namespace System.Text.Json
         {
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
+            if (jsonPropertyInfo == null)
+            {
+                Debug.Assert(state.Current.JsonClassInfo.ClassType == ClassType.Object);
+                throw ThrowHelper.GetJsonElementWrongTypeException(JsonTokenType.StartObject, JsonTokenType.StartArray);
+            }
+
             // If the property has an EnumerableConverter, then we use tempEnumerableValues.
             if (jsonPropertyInfo.EnumerableConverter != null)
             {

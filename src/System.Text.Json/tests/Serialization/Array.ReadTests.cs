@@ -201,6 +201,13 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<int[,]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]")));
         }
 
+        [Fact]
+        public static void ReadArrayDeclaredAsObjectFail()
+        {
+            // JSON type is Dictionary<string, List<SimpleTestClass>>
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Dictionary<string, SimpleTestClass>>(Encoding.UTF8.GetBytes(@"{""MyList"":[{""MyString"":""name""}]}")));
+        }
+
         public static IEnumerable<object[]> ReadNullJson
         {
             get
