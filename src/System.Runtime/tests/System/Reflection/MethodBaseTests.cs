@@ -78,6 +78,12 @@ namespace System.Reflection.Tests
 #endif
         }
 
+        public static MethodBase MyFakeGenericMethod<T>()
+        {
+            MethodBase m = MethodBase.GetCurrentMethod();
+            return m;
+        }
+
         private static int MyAnotherMethod(int x)
         {
             return x+1;
@@ -128,10 +134,6 @@ namespace System.Reflection.Tests
             Assert.False(m.IsConstructedGenericMethod);
             Assert.Equal(1, m.GetGenericArguments().Length);
             Assert.Equal("T", m.GetGenericArguments()[0].Name);
-        }
-
-        private static void MyFakeGenericMethod<T>()
-        {
         }
     }
 }
