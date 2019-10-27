@@ -15,7 +15,7 @@ namespace System.Reflection
     }
     public static partial class EventInfoExtensions
     {
-        public static System.Reflection.MethodInfo?  GetAddMethod(this System.Reflection.EventInfo eventInfo) { throw null; }
+        public static System.Reflection.MethodInfo? GetAddMethod(this System.Reflection.EventInfo eventInfo) { throw null; }
         public static System.Reflection.MethodInfo? GetAddMethod(this System.Reflection.EventInfo eventInfo, bool nonPublic) { throw null; }
         public static System.Reflection.MethodInfo? GetRaiseMethod(this System.Reflection.EventInfo eventInfo) { throw null; }
         public static System.Reflection.MethodInfo? GetRaiseMethod(this System.Reflection.EventInfo eventInfo, bool nonPublic) { throw null; }
