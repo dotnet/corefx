@@ -6,7 +6,5 @@
       <method name="MakeSignature" />
       <method name="VerifySignature" />
     </type>
-    <!-- required by tests -->
-    <type fullname="System.Net.NetEventSource" />
   </assembly>
 </linker>
