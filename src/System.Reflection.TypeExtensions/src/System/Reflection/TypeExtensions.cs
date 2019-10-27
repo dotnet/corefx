@@ -189,25 +189,25 @@ namespace System.Reflection
             return type.GetProperty(name, bindingAttr);
         }
 
-        public static PropertyInfo? GetProperty(Type type, string name, Type returnType)
+        public static PropertyInfo? GetProperty(Type type, string name, Type? returnType)
         {
             Requires.NotNull(type, nameof(type));
             return type.GetProperty(name, returnType);
         }
 
-        public static PropertyInfo? GetProperty(Type type, string name, Type returnType, Type[] types)
+        public static PropertyInfo? GetProperty(Type type, string name, Type? returnType, Type[] types)
         {
             Requires.NotNull(type, nameof(type));
             return type.GetProperty(name, returnType, types);
         }
 
-        public static bool IsAssignableFrom(Type type, Type c)
+        public static bool IsAssignableFrom(Type type, Type? c)
         {
             Requires.NotNull(type, nameof(type));
             return type.IsAssignableFrom(c);
         }
 
-        public static bool IsInstanceOfType(Type type, object o)
+        public static bool IsInstanceOfType(Type type, object? o)
         {
             Requires.NotNull(type, nameof(type));
             return type.IsInstanceOfType(o);
