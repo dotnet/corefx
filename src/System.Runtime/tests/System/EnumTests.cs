@@ -131,12 +131,14 @@ namespace System.Tests
                 Assert.Equal(expected, result);
 
                 Assert.Equal(expected, Enum.Parse(expected.GetType(), value));
+                Assert.Equal(expected, Enum.Parse<T>(value));
             }
 
             Assert.True(Enum.TryParse(value, ignoreCase, out result));
             Assert.Equal(expected, result);
 
             Assert.Equal(expected, Enum.Parse(expected.GetType(), value, ignoreCase));
+            Assert.Equal(expected, Enum.Parse<T>(value, ignoreCase));
         }
 
         public static IEnumerable<object[]> Parse_Invalid_TestData()
@@ -227,19 +229,35 @@ namespace System.Tests
 
         private static void Parse_Generic_Invalid<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
         {
-            T result;
+            object result = null;
             if (!ignoreCase)
             {
-                Assert.False(Enum.TryParse(value, out result));
-                Assert.Equal(default(T), result);
+                if (enumType != null && enumType.IsEnum)
+                {
+                    Assert.False(Enum.TryParse(enumType, value, out result));
+                    Assert.Equal(default(object), result);
 
-                Assert.Throws(exceptionType, () => Enum.Parse(enumType, value));
+                    Assert.Throws(exceptionType, () => Enum.Parse<T>(value));
+                }
+                else
+                {
+                    Assert.Throws(exceptionType, () => Enum.TryParse(enumType, value, out result));
+                    Assert.Equal(default(object), result);
+                }
             }
 
-            Assert.False(Enum.TryParse(value, ignoreCase, out result));
-            Assert.Equal(default(T), result);
+            if (enumType != null && enumType.IsEnum)
+            {
+                Assert.False(Enum.TryParse(enumType, value, ignoreCase, out result));
+                Assert.Equal(default(object), result);
 
-            Assert.Throws(exceptionType, () => Enum.Parse(enumType, value, ignoreCase));
+                Assert.Throws(exceptionType, () => Enum.Parse<T>(value, ignoreCase));
+            }
+            else
+            {
+                Assert.Throws(exceptionType, () => Enum.TryParse(enumType, value, ignoreCase, out result));
+                Assert.Equal(default(object), result);
+            }
         }
 
         public static IEnumerable<object[]> GetName_TestData()
@@ -1591,67 +1609,6 @@ namespace System.Tests
             Assert.Throws<FormatException>(() => Enum.Format(typeof(SimpleEnum), SimpleEnum.Red, "t")); // No such format
         }
 
-        [Theory]
-        [MemberData(nameof(Parse_TestData))]
-        public static void Parse_NetCoreApp11<T>(string value, bool ignoreCase, T expected) where T : struct
-        {
-            object result;
-            if (!ignoreCase)
-            {
-                Assert.True(Enum.TryParse(expected.GetType(), value, out result));
-                Assert.Equal(expected, result);
-
-                Assert.Equal(expected, Enum.Parse<T>(value));
-            }
-
-            Assert.True(Enum.TryParse(expected.GetType(), value, ignoreCase, out result));
-            Assert.Equal(expected, result);
-
-            Assert.Equal(expected, Enum.Parse<T>(value, ignoreCase));
-        }
-
-        [Theory]
-        [MemberData(nameof(Parse_Invalid_TestData))]
-        public static void Parse_Invalid_NetCoreApp11(Type enumType, string value, bool ignoreCase, Type exceptionType)
-        {
-            Type typeArgument = enumType == null || !enumType.IsValueType ? typeof(SimpleEnum) : enumType;
-            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid_NetCoreApp11), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeArgument);
-            parseMethod.Invoke(null, new object[] { enumType, value, ignoreCase, exceptionType });
-        }
-
-        private static void Parse_Generic_Invalid_NetCoreApp11<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
-        {
-            object result = null;
-            if (!ignoreCase)
-            {
-                if (enumType != null && enumType.IsEnum)
-                {
-                    Assert.False(Enum.TryParse(enumType, value, out result));
-                    Assert.Equal(default(object), result);
-
-                    Assert.Throws(exceptionType, () => Enum.Parse<T>(value));
-                }
-                else
-                {
-                    Assert.Throws(exceptionType, () => Enum.TryParse(enumType, value, out result));
-                    Assert.Equal(default(object), result);
-                }
-            }
-
-            if (enumType != null && enumType.IsEnum)
-            {
-                Assert.False(Enum.TryParse(enumType, value, ignoreCase, out result));
-                Assert.Equal(default(object), result);
-
-                Assert.Throws(exceptionType, () => Enum.Parse<T>(value, ignoreCase));
-            }
-            else
-            {
-                Assert.Throws(exceptionType, () => Enum.TryParse(enumType, value, ignoreCase, out result));
-                Assert.Equal(default(object), result);
-            }
-        }
-
         public static IEnumerable<object[]> UnsupportedEnumType_TestData()
         {
 #if NETCOREAPP
@@ -1682,14 +1639,10 @@ namespace System.Tests
 
         public static IEnumerable<object[]> UnsupportedEnum_TestData()
         {
-#if NETCOREAPP
             yield return new object[] { Enum.ToObject(s_floatEnumType, 1) };
             yield return new object[] { Enum.ToObject(s_doubleEnumType, 2) };
             yield return new object[] { Enum.ToObject(s_intPtrEnumType, 1) };
             yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 2) };
-#else
-            return Array.Empty<object[]>();
-#endif
         }
 
         [Theory]

@@ -242,7 +242,6 @@
     <Compile Include="System\ExitCodeTests.Unix.cs" />
   </ItemGroup>
   <ItemGroup>
-    <!-- missing method 'AssemblyLoadContext..ctor(bool) -->
     <Compile Include="System\Reflection\SignatureTypes.cs" />
     <Compile Include="System\Runtime\CompilerServices\CallerArgumentExpressionAttributeTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\MethodImplAttributeTests.cs" />

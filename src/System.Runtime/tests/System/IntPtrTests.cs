@@ -116,22 +116,12 @@ namespace System.Tests
                 Assert.Equal(expected, ptr1 == ptr2);
                 Assert.Equal(!expected, ptr1 != ptr2);
                 Assert.Equal(expected, ptr1.GetHashCode().Equals(ptr2.GetHashCode()));
+
+                IEquatable<IntPtr> iEquatable = ptr1;
+                Assert.Equal(expected, iEquatable.Equals((IntPtr)obj));
             }
             Assert.Equal(expected, ptr1.Equals(obj));
             Assert.Equal(ptr1.GetHashCode(), ptr1.GetHashCode());
-        }
-
-        [Theory]
-        [MemberData(nameof(Equals_TestData))]
-        public static void Equals_NetCoreApp11(IntPtr ptr, object obj, bool expected)
-        {
-            if (!(obj is IntPtr))
-            {
-                return;
-            }
-
-            IEquatable<IntPtr> iEquatable = ptr;
-            Assert.Equal(expected, iEquatable.Equals((IntPtr)obj));
         }
 
         [ConditionalFact(nameof(Is64Bit))]

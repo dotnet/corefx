@@ -113,6 +113,9 @@ namespace System.Tests
                 Assert.Equal(expected, ptr1 == ptr2);
                 Assert.Equal(!expected, ptr1 != ptr2);
                 Assert.Equal(expected, ptr1.GetHashCode().Equals(ptr2.GetHashCode()));
+
+                IEquatable<UIntPtr> iEquatable = ptr1;
+                Assert.Equal(expected, iEquatable.Equals((UIntPtr)obj));
             }
             Assert.Equal(expected, ptr1.Equals(obj));
             Assert.Equal(ptr1.GetHashCode(), ptr1.GetHashCode());
@@ -168,19 +171,6 @@ namespace System.Tests
             Assert.NotEqual(ptr, new UIntPtr(expected + 1));
             Assert.False(ptr == new UIntPtr(expected + 1));
             Assert.True(ptr != new UIntPtr(expected + 1));
-        }
-
-        [Theory]
-        [MemberData(nameof(Equals_TestData))]
-        public static void Equals_NetCoreApp11(UIntPtr ptr, object obj, bool expected)
-        {
-            if (!(obj is UIntPtr))
-            {
-                return;
-            }
-
-            IEquatable<UIntPtr> iEquatable = ptr;
-            Assert.Equal(expected, iEquatable.Equals((UIntPtr)obj));
         }
     }
 }
