@@ -318,9 +318,18 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        public void LoadFile_NoSuchPath_ThrowsArgumentException()
+        public void LoadFile_NoSuchPath_ThrowsFileNotFoundException()
         {
-            AssertExtensions.Throws<ArgumentException>("path", null, () => Assembly.LoadFile("System.Runtime.Tests.dll"));
+            string path = @"c:\foo\bar";
+            AssertExtensions.ThrowsContains<FileNotFoundException>(() => Assembly.LoadFile(path), path);
+        }
+
+        [Fact]
+        public void LoadFile_PartiallyQualifiedPath_ThrowsArgumentException()
+        {
+            string path = "System.Runtime.Tests.dll";
+            ArgumentException ex = AssertExtensions.Throws<ArgumentException>("path", () => Assembly.LoadFile(path));
+            Assert.Contains(path, ex.Message);
         }
 
         [Fact]

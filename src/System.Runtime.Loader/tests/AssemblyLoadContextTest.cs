@@ -45,6 +45,30 @@ namespace System.Runtime.Loader.Tests
         }
 
         [Fact]
+        public static void LoadFromAssemblyPath_PartiallyQualifiedPath_ThrowsArgumentException()
+        {
+            string path = @"foo\bar.dll";
+            ArgumentException ex = AssertExtensions.Throws<ArgumentException>("assemblyPath", () => (new AssemblyLoadContext("alc")).LoadFromAssemblyPath(path));
+            Assert.Contains(path, ex.Message);
+        }
+
+        [Fact]
+        public static void LoadFromNativeImagePath_PartiallyQualifiedPath_ThrowsArgumentException()
+        {
+            string path = @"foo\bar.dll";
+            ArgumentException ex = AssertExtensions.Throws<ArgumentException>("nativeImagePath", () => (new AssemblyLoadContext("alc")).LoadFromNativeImagePath(path, null));
+            Assert.Contains(path, ex.Message);
+        }
+
+        [Fact]
+        public static void LoadFromNativeImagePath_PartiallyQualifiedPath_ThrowsArgumentException2()
+        {
+            string path = @"foo\bar.dll";
+            ArgumentException ex = AssertExtensions.Throws<ArgumentException>("assemblyPath", () => (new AssemblyLoadContext("alc")).LoadFromNativeImagePath(@"c:\baz\boz", path));
+            Assert.Contains(path, ex.Message);
+        }
+
+        [Fact]
         public static void LoadAssemblyByPath_ValidUserAssembly()
         {
             var asmName = new AssemblyName(TestAssembly);
