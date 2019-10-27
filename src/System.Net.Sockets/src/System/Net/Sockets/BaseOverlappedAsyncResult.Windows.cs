@@ -71,7 +71,17 @@ namespace System.Net.Sockets
                 {
                     NetEventSource.Fail(null, $"asyncResult.IsCompleted: {asyncResult}");
                 }
-                if (NetEventSource.IsEnabled) NetEventSource.Info(null, $"errorCode:{errorCode} numBytes:{numBytes} nativeOverlapped:{(IntPtr)nativeOverlapped}");
+                if (NetEventSource.IsEnabled)
+                {
+                    try
+                    {
+                        NetEventSource.Info(null, $"errorCode:{errorCode} numBytes:{numBytes} nativeOverlapped:{(IntPtr)nativeOverlapped}");
+                    }
+                    catch
+                    {
+                        // Do nothing. If NetEventSource fails, we must continue to avoid a deadlock. Completion port handlers must not fail.
+                    }
+                }
 
                 // Complete the IO and invoke the user's callback.
                 SocketError socketError = (SocketError)errorCode;
