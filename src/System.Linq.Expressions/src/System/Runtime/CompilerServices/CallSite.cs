@@ -277,6 +277,7 @@ namespace System.Runtime.CompilerServices
             }
         }
 
+#if FEATURE_COMPILE
         // TODO https://github.com/mono/linker/issues/799: Consolidate these attributes when possible.
         [PreserveDependency("NoMatch1`2", "System.Dynamic.UpdateDelegates")]
         [PreserveDependency("NoMatch2`3", "System.Dynamic.UpdateDelegates")]
@@ -318,6 +319,7 @@ namespace System.Runtime.CompilerServices
         [PreserveDependency("UpdateAndExecuteVoid8`8", "System.Dynamic.UpdateDelegates")]
         [PreserveDependency("UpdateAndExecuteVoid9`9", "System.Dynamic.UpdateDelegates")]
         [PreserveDependency("UpdateAndExecuteVoid10`10", "System.Dynamic.UpdateDelegates")]
+#endif
         internal T MakeUpdateDelegate()
         {
 #if !FEATURE_COMPILE
