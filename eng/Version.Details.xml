@@ -26,13 +26,13 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>452fc211978be1672e98d811e9f97eeecf27a1c0</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="5.0.0-alpha.1.19525.6">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="5.0.0-alpha.1.19526.6">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>8245ee1e8f6063ccc7a3a60cafe821d29e85b02f</Sha>
+      <Sha>0d0336cc9c3a04d7e23af38698b215a2955e965f</Sha>
     </Dependency>
-    <Dependency Name="runtime.native.System.IO.Ports" Version="5.0.0-alpha.1.19525.6">
+    <Dependency Name="runtime.native.System.IO.Ports" Version="5.0.0-alpha.1.19526.6">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>8245ee1e8f6063ccc7a3a60cafe821d29e85b02f</Sha>
+      <Sha>0d0336cc9c3a04d7e23af38698b215a2955e965f</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.19526.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
