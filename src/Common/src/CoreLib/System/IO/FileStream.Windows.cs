@@ -1153,9 +1153,6 @@ namespace System.IO
 
         // Windows API definitions, from winbase.h and others
 
-        internal const int GENERIC_READ = unchecked((int)0x80000000);
-        private const int GENERIC_WRITE = 0x40000000;
-
         // Error codes (not HRESULTS), from winerror.h
         internal const int ERROR_BROKEN_PIPE = 109;
         internal const int ERROR_NO_DATA = 232;

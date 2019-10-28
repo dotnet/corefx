@@ -11,13 +11,6 @@ namespace System.IO
 {
     public static partial class FileSystemAclExtensions
     {
-        #region Private members
-
-        private const int GENERIC_READ = unchecked((int)0x80000000);
-        private const int GENERIC_WRITE = 0x40000000;
-
-        #endregion
-
         #region Public methods
 
         /// <summary>Creates a new directory, ensuring it is created with the specified directory security. If the directory already exists, nothing is done.</summary>
@@ -26,10 +19,7 @@ namespace System.IO
         /// <exception cref="ArgumentNullException"><paramref name="directoryInfo" /> or <paramref name="directorySecurity" /> is <see langword="null" />.</exception>
         /// <exception cref="DirectoryNotFoundException">Could not find a part of the path.</exception>
         /// <exception cref="UnauthorizedAccessException">Access to the path is denied.</exception>
-        /// <remarks><format type="text/markdown"><![CDATA[
-        ///## Remarks
-        ///This extension method was added to .NET Core to bring the functionality that was provided by the <xref:System.IO.DirectoryInfo.Create(System.Security.AccessControl.DirectorySecurity)> .NET Framework method.
-        /// ]]></format></remarks>
+        /// <remarks>This extension method was added to .NET Core to bring the functionality that was provided by the `System.IO.DirectoryInfo.Create(System.Security.AccessControl.DirectorySecurity)` .NET Framework method.</remarks>
         public static void Create(this DirectoryInfo directoryInfo, DirectorySecurity directorySecurity)
         {
             if (directoryInfo == null)
@@ -61,10 +51,7 @@ namespace System.IO
         /// <exception cref="UnauthorizedAccessException">Access to the path is denied.</exception>
         /// <exception cref="ArgumentException">Invalid handle.</exception>
         /// <exception cref="ObjectDisposedException">Cannot access a closed file.</exception>
-        /// <remarks><format type="text/markdown"><![CDATA[
-        ///## Remarks
-        ///This extension method was added to .NET Core to bring the functionality that was provided by the <xref:System.IO.FileStream.#ctor(System.String,System.IO.FileMode,System.Security.AccessControl.FileSystemRights,System.IO.FileShare,System.Int32,System.IO.FileOptions,System.Security.AccessControl.FileSecurity)> .NET Framework constructor.
-        /// ]]></format></remarks>
+        /// <remarks>This extension method was added to .NET Core to bring the functionality that was provided by the `System.IO.FileStream.#ctor(System.String,System.IO.FileMode,System.Security.AccessControl.FileSystemRights,System.IO.FileShare,System.Int32,System.IO.FileOptions,System.Security.AccessControl.FileSecurity)` .NET Framework constructor.</remarks>
         public static FileStream Create(this FileInfo fileInfo, FileMode mode, FileSystemRights rights, FileShare share, int bufferSize, FileOptions options, FileSecurity fileSecurity)
         {
             if (fileInfo == null)
@@ -80,26 +67,14 @@ namespace System.IO
             // don't include inheritable in our bounds check for share
             FileShare tempshare = share & ~FileShare.Inheritable;
 
-            string badArg = null;
             if (mode < FileMode.CreateNew || mode > FileMode.Append)
             {
-                badArg = nameof(mode);
-            }
-            else if (tempshare < FileShare.None || tempshare > (FileShare.ReadWrite | FileShare.Delete))
-            {
-                badArg = nameof(share);
-            }
-            if (badArg != null)
-            {
-                throw new ArgumentOutOfRangeException(badArg, SR.ArgumentOutOfRange_Enum);
+                throw new ArgumentOutOfRangeException(nameof(mode), SR.ArgumentOutOfRange_Enum);
             }
 
-            // We need to check only the supported attributes
-            // NOTE: any change to FileOptions enum needs to be matched here in the error validation
-            if (options != FileOptions.None &&
-                (options & ~(FileOptions.WriteThrough | FileOptions.Asynchronous | FileOptions.RandomAccess | FileOptions.DeleteOnClose | FileOptions.SequentialScan | FileOptions.Encrypted | (FileOptions)0x20000000 /* NoBuffering */)) != 0)
+            if (tempshare < FileShare.None || tempshare > (FileShare.ReadWrite | FileShare.Delete))
             {
-                throw new ArgumentOutOfRangeException(nameof(options), SR.ArgumentOutOfRange_Enum);
+                throw new ArgumentOutOfRangeException(nameof(tempshare), SR.ArgumentOutOfRange_Enum);
             }
 
             if (bufferSize <= 0)
@@ -130,11 +105,11 @@ namespace System.IO
         private static FileAccess GetFileStreamFileAccess(FileSystemRights rights)
         {
             FileAccess access = 0;
-            if ((rights & FileSystemRights.ReadData) != 0 || ((int)rights & GENERIC_READ) != 0)
+            if ((rights & FileSystemRights.ReadData) != 0 || ((int)rights & Interop.Kernel32.GenericOperations.GENERIC_READ) != 0)
             {
                 access = FileAccess.Read;
             }
-            if ((rights & FileSystemRights.WriteData) != 0 || ((int)rights & GENERIC_WRITE) != 0)
+            if ((rights & FileSystemRights.WriteData) != 0 || ((int)rights & Interop.Kernel32.GenericOperations.GENERIC_WRITE) != 0)
             {
                 access = access == FileAccess.Read ? FileAccess.ReadWrite : FileAccess.Write;
             }
@@ -146,7 +121,10 @@ namespace System.IO
             Debug.Assert(fullPath != null);
 
             // Must use a valid Win32 constant
-            mode = (mode == FileMode.Append) ? FileMode.OpenOrCreate : mode;
+            if (mode == FileMode.Append)
+            {
+                mode = FileMode.OpenOrCreate;
+            }
 
             // For mitigating local elevation of privilege attack through named pipes
             // make sure we always call CreateFile with SECURITY_ANONYMOUS so that the
@@ -158,7 +136,7 @@ namespace System.IO
 
             fixed (byte* pSecurityDescriptor = security.GetSecurityDescriptorBinaryForm())
             {
-                Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES
+                var secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES
                 {
                     nLength = (uint)sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES),
                     bInheritHandle = ((share & FileShare.Inheritable) != 0) ? Interop.BOOL.TRUE : Interop.BOOL.FALSE,
@@ -168,10 +146,9 @@ namespace System.IO
                 using (DisableMediaInsertionPrompt.Create())
                 {
                     handle = Interop.Kernel32.CreateFile(fullPath, (int)rights, share, ref secAttrs, mode, flagsAndAttributes, IntPtr.Zero);
+                    ValidateFileHandle(handle, fullPath);
                 }
             }
-
-            ValidateFileHandle(handle, fullPath);
 
             return handle;
         }

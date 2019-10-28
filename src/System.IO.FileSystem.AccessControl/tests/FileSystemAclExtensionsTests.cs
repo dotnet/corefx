@@ -220,11 +220,15 @@ namespace System.IO
 
             if (PlatformDetection.IsFullFramework)
             {
-                Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.Create(info, security));
+                AssertExtensions.Throws<ArgumentNullException>(() =>
+                    FileSystemAclExtensions.Create(info, security),
+                    "Value cannot be null.\r\nParameter name: directoryInfo");
             }
             else
             {
-                Assert.Throws<ArgumentNullException>(() => info.Create(security));
+                AssertExtensions.Throws<ArgumentNullException>(() =>
+                    info.Create(security),
+                    "Value cannot be null. (Parameter 'directoryInfo')");
             }
         }
 
@@ -241,11 +245,15 @@ namespace System.IO
             DirectoryInfo info = new DirectoryInfo("path");
             if (PlatformDetection.IsFullFramework)
             {
-                Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.Create(info, null));
+                AssertExtensions.Throws<ArgumentNullException>(() =>
+                    FileSystemAclExtensions.Create(info, null),
+                    "Value cannot be null.\r\nParameter name: directorySecurity");
             }
             else
             {
-                Assert.Throws<ArgumentNullException>(() => info.Create(null));
+                AssertExtensions.Throws<ArgumentNullException>(() =>
+                    info.Create(null),
+                    "Value cannot be null. (Parameter 'directorySecurity')");
             }
         }
 
@@ -256,11 +264,15 @@ namespace System.IO
             DirectorySecurity security = new DirectorySecurity();
             if (PlatformDetection.IsFullFramework)
             {
-                Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.Create(info, security));
+                AssertExtensions.Throws<ArgumentNullException>(() =>
+                    FileSystemAclExtensions.Create(info, security),
+                    "");
             }
             else
             {
-                Assert.Throws<DirectoryNotFoundException>(() => info.Create(security));
+                AssertExtensions.Throws<DirectoryNotFoundException>(() =>
+                    info.Create(security),
+                    $"Could not find a part of the path '{info.FullName}'.");
             }
         }
 
@@ -291,11 +303,15 @@ namespace System.IO
 
             if (PlatformDetection.IsFullFramework)
             {
-                Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security));
+                AssertExtensions.Throws<ArgumentNullException>(() =>
+                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
+                    "Value cannot be null.\r\nParameter name: fileInfo");
             }
             else
             {
-                Assert.Throws<ArgumentNullException>(() => info.Create(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security));
+                AssertExtensions.Throws<ArgumentNullException>(() =>
+                    info.Create(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
+                    "Value cannot be null. (Parameter 'fileInfo')");
             }
         }
 
@@ -312,11 +328,15 @@ namespace System.IO
             FileInfo info = new FileInfo("path");
             if (PlatformDetection.IsFullFramework)
             {
-                Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, null));
+                AssertExtensions.Throws<ArgumentNullException>(() =>
+                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, null),
+                    "Value cannot be null.\r\nParameter name: fileSecurity");
             }
             else
             {
-                Assert.Throws<ArgumentNullException>(() => info.Create(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, null));
+                AssertExtensions.Throws<ArgumentNullException>(() =>
+                    info.Create(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, null),
+                    "Value cannot be null. (Parameter 'fileSecurity')");
             }
         }
 
@@ -327,11 +347,15 @@ namespace System.IO
             FileSecurity security = new FileSecurity();
             if (PlatformDetection.IsFullFramework)
             {
-                Assert.Throws<ArgumentNullException>(() => FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security));
+                AssertExtensions.Throws<ArgumentNullException>(() =>
+                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
+                    "");
             }
             else
             {
-                Assert.Throws<DirectoryNotFoundException>(() => info.Create(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security));
+                AssertExtensions.Throws<DirectoryNotFoundException>(() =>
+                    info.Create(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
+                    $"Could not find a part of the path '{info.FullName}'.");
             }
         }
 
