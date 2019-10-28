@@ -4,5 +4,7 @@ FROM $SDK_BASE_IMAGE
 WORKDIR /app
 COPY . .
 
+EXPOSE 5001
+
 ENV HTTPSTRESS_ARGS='-maxExecutionTime 30 -displayInterval 60'
 CMD dotnet run -c Release -- $HTTPSTRESS_ARGS

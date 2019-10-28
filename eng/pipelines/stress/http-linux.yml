@@ -24,5 +24,6 @@ steps:
   displayName: Build HttpStress
 
 - bash: |
-    docker run --rm -e HTTPSTRESS_ARGS='$(HTTPSTRESS_ARGS)' $(httpStressImage)
+    export HTTPSTRESS_ARGS=$(HTTPSTRESS_ARGS)
+    docker-compose up --up --abort-on-container-exit
   displayName: Run HttpStress
