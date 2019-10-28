@@ -235,7 +235,9 @@ internal static partial class Interop
         internal static bool TryReadStatusFile(int pid, out ParsedStatus result, ReusableTextReader reusableReader)
         {
             bool b = TryParseStatusFile(GetStatusFilePathForProcess(pid), out result, reusableReader);
+#if DEBUG
             Debug.Assert(!b || result.Pid == pid, "Expected process ID from status file to match supplied pid");
+#endif
             return b;
         }
 
