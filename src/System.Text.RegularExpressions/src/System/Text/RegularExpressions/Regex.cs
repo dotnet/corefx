@@ -183,12 +183,12 @@ namespace System.Text.RegularExpressions
         void ISerializable.GetObjectData(SerializationInfo si, StreamingContext context) =>
             throw new PlatformNotSupportedException();
 
-        [CLSCompliant(false)]
-        protected IDictionary Caps
+        [CLSCompliant(false), DisallowNull]
+        protected IDictionary? Caps
         {
             get
             {
-                return caps!;
+                return caps;
             }
             set
             {
@@ -199,12 +199,12 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        [CLSCompliant(false)]
-        protected IDictionary CapNames
+        [CLSCompliant(false), DisallowNull]
+        protected IDictionary? CapNames
         {
             get
             {
-                return capnames!;
+                return capnames;
             }
             set
             {
