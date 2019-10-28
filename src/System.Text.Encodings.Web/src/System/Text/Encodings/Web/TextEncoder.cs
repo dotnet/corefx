@@ -913,7 +913,7 @@ namespace System.Text.Encodings.Web
             return encoding;
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureAsciiCacheInitialized()
         {
             // After initialization the ASCII-cache only has values -1 or 1,
@@ -922,6 +922,14 @@ namespace System.Text.Encodings.Web
             {
                 return;
             }
+
+            InitializeAsciiCache();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void InitializeAsciiCache()
+        {
+            Debug.Assert(_asciiNeedsEscaping[0] == 0);
 
             for (int i = 0; i < _asciiNeedsEscaping.Length; i++)
             {
