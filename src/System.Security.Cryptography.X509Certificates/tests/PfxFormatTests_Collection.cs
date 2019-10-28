@@ -12,7 +12,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         protected override void ReadPfx(
             byte[] pfxBytes,
             string correctPassword,
-            X509Certificate2 expectedCert)
+            X509Certificate2 expectedCert,
+            Action<X509Certificate2> otherWork)
         {
             using (ImportedCollection imported = Cert.Import(pfxBytes, correctPassword, s_importFlags))
             {
@@ -20,6 +21,25 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(1, coll.Count);
 
                 AssertCertEquals(expectedCert, coll[0]);
+                otherWork?.Invoke(coll[0]);
+            }
+        }
+
+        protected override void ReadMultiPfx(
+            byte[] pfxBytes,
+            string correctPassword,
+            X509Certificate2 expectedSingleCert,
+            X509Certificate2[] expectedOrder)
+        {
+            using (ImportedCollection imported = Cert.Import(pfxBytes, correctPassword, s_importFlags))
+            {
+                X509Certificate2Collection coll = imported.Collection;
+                Assert.Equal(expectedOrder.Length, coll.Count);
+
+                for (int i = 0; i < coll.Count; i++)
+                {
+                    AssertCertEquals(expectedOrder[i], coll[i]);
+                }
             }
         }
 
@@ -40,7 +60,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             AssertMessageContains("password", ex);
         }
 
-        protected override void ReadUnreadablePfx(byte[] pfxBytes, string bestPassword)
+        protected override void ReadUnreadablePfx(byte[] pfxBytes, string bestPassword, int win32Error)
         {
             X509Certificate2Collection coll = new X509Certificate2Collection();
 
@@ -49,8 +69,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // NTE_FAIL
-                Assert.Equal(-2146893792, ex.HResult);
+                Assert.Equal(win32Error, ex.HResult);
             }
             else
             {

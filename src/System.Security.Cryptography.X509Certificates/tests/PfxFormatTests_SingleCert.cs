@@ -12,11 +12,25 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         protected override void ReadPfx(
             byte[] pfxBytes,
             string correctPassword,
-            X509Certificate2 expectedCert)
+            X509Certificate2 expectedCert,
+            Action<X509Certificate2> otherWork)
         {
             using (X509Certificate2 cert = new X509Certificate2(pfxBytes, correctPassword, s_importFlags))
             {
                 AssertCertEquals(expectedCert, cert);
+                otherWork?.Invoke(cert);
+            }
+        }
+
+        protected override void ReadMultiPfx(
+            byte[] pfxBytes,
+            string correctPassword,
+            X509Certificate2 expectedSingleCert,
+            X509Certificate2[] expectedOrder)
+        {
+            using (X509Certificate2 cert = new X509Certificate2(pfxBytes, correctPassword, s_importFlags))
+            {
+                AssertCertEquals(expectedSingleCert, cert);
             }
         }
 
@@ -36,15 +50,14 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             AssertMessageContains("password", ex);
         }
 
-        protected override void ReadUnreadablePfx(byte[] pfxBytes, string bestPassword)
+        protected override void ReadUnreadablePfx(byte[] pfxBytes, string bestPassword, int win32Error)
         {
             CryptographicException ex = Assert.ThrowsAny<CryptographicException>(
                 () => new X509Certificate2(pfxBytes, bestPassword, s_importFlags));
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // NTE_FAIL
-                Assert.Equal(-2146893792, ex.HResult);
+                Assert.Equal(win32Error, ex.HResult);
             }
             else
             {
