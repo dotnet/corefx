@@ -99,6 +99,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Pkcs12Builder builder = new Pkcs12Builder();
             builder.SealWithMac("correct password", s_digestAlgorithm, MacCount);
             ReadWrongPassword(builder.Encode(), "wrong password");
+            ReadWrongPassword(builder.Encode(), string.Empty);
+            ReadWrongPassword(builder.Encode(), null);
         }
 
         [Fact]
@@ -404,6 +406,115 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     pfxBytes,
                     pw,
                     expectedWin32Error);
+            }
+        }
+
+        [Fact]
+        public void OneCert_NoKey_WithLocalKeyId()
+        {
+            string pw = nameof(OneCert_NoKey_WithLocalKeyId);
+
+            using (var cert = new X509Certificate2(TestData.MsCertificate))
+            {
+                Pkcs12Builder builder = new Pkcs12Builder();
+                Pkcs12SafeContents certContents = new Pkcs12SafeContents();
+                Pkcs12SafeContents keyContents = new Pkcs12SafeContents();
+
+                Pkcs12CertBag certBag = certContents.AddCertificate(cert);
+                certBag.Attributes.Add(s_keyIdOne);
+
+                AddContents(certContents, builder, pw, encrypt: true);
+                builder.SealWithMac(pw, s_digestAlgorithm, MacCount);
+                byte[] pfxBytes = builder.Encode();
+
+                ReadPfx(pfxBytes, pw, cert);
+            }
+        }
+
+        [Fact]
+        public void OneCert_TwentyKeys_NoMatches()
+        {
+            string pw = nameof(OneCert_NoKey_WithLocalKeyId);
+
+            using (var cert = new X509Certificate2(TestData.MsCertificate))
+            using (RSA rsa = RSA.Create())
+            {
+                Pkcs12Builder builder = new Pkcs12Builder();
+                Pkcs12SafeContents certContents = new Pkcs12SafeContents();
+                Pkcs12SafeContents keyContents = new Pkcs12SafeContents();
+
+                Pkcs12CertBag certBag = certContents.AddCertificate(cert);
+                certBag.Attributes.Add(s_keyIdOne);
+
+                for (int i = 0; i < 20; i++)
+                {
+                    Pkcs12SafeBag keyBag = keyContents.AddShroudedKey(rsa, pw, s_windowsPbe);
+
+                    // Even with i=1 this won't match, because { 0x01 } != { 0x01, 0x00, 0x00, 0x00 } and
+                    // { 0x01 } != { 0x00, 0x00, 0x00, 0x01 } (binary comparison, not "equivalence" comparison).
+                    keyBag.Attributes.Add(new Pkcs9LocalKeyId(BitConverter.GetBytes(i)));
+                }
+
+                AddContents(keyContents, builder, pw, encrypt: false);
+                AddContents(certContents, builder, pw, encrypt: true);
+                builder.SealWithMac(pw, s_digestAlgorithm, MacCount);
+                byte[] pfxBytes = builder.Encode();
+
+                ReadPfx(pfxBytes, pw, cert);
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TwoCerts_TwentyKeys_NoMatches(bool msCertFirst)
+        {
+            string pw = nameof(OneCert_NoKey_WithLocalKeyId);
+
+            using (var certWithKey = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
+            using (var cert = new X509Certificate2(certWithKey.RawData))
+            using (var cert2 = new X509Certificate2(TestData.MsCertificate))
+            using (RSA rsa = RSA.Create())
+            {
+                Pkcs12Builder builder = new Pkcs12Builder();
+                Pkcs12SafeContents certContents = new Pkcs12SafeContents();
+                Pkcs12SafeContents keyContents = new Pkcs12SafeContents();
+                Pkcs12CertBag certBag;
+
+                if (msCertFirst)
+                {
+                    certBag = certContents.AddCertificate(cert2);
+                    certBag.Attributes.Add(s_keyIdOne);
+                }
+
+                certBag = certContents.AddCertificate(cert);
+                certBag.Attributes.Add(new Pkcs9LocalKeyId(cert.GetCertHash()));
+
+                if (!msCertFirst)
+                {
+                    certBag = certContents.AddCertificate(cert2);
+                    certBag.Attributes.Add(s_keyIdOne);
+                }
+
+                for (int i = 0; i < 20; i++)
+                {
+                    Pkcs12SafeBag keyBag = keyContents.AddShroudedKey(rsa, pw, s_windowsPbe);
+
+                    // Even with i=1 this won't match, because { 0x01 } != { 0x01, 0x00, 0x00, 0x00 } and
+                    // { 0x01 } != { 0x00, 0x00, 0x00, 0x01 } (binary comparison, not "equivalence" comparison).
+                    keyBag.Attributes.Add(new Pkcs9LocalKeyId(BitConverter.GetBytes(i)));
+                }
+
+                AddContents(keyContents, builder, pw, encrypt: false);
+                AddContents(certContents, builder, pw, encrypt: true);
+                builder.SealWithMac(pw, s_digestAlgorithm, MacCount);
+                byte[] pfxBytes = builder.Encode();
+
+                ReadMultiPfx(
+                    pfxBytes,
+                    pw,
+                    msCertFirst ? cert : cert2,
+                    msCertFirst ? new[] { cert, cert2 } : new[] { cert2, cert });
             }
         }
 
