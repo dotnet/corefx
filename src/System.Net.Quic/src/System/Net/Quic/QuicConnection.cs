@@ -148,7 +148,14 @@ namespace System.Net.Quic
         {
             if (_mock)
             {
-                return new QuicStream(this, false);
+                int streamId;
+                lock (_syncObject)
+                {
+                    streamId = _nextOutboundUnidirectionalStream;
+                    _nextOutboundUnidirectionalStream += 4;
+                }
+
+                return new QuicStream(this, streamId, false);
             }
             else
             {
@@ -164,7 +171,14 @@ namespace System.Net.Quic
         {
             if (_mock)
             {
-                return new QuicStream(this, true);
+                int streamId;
+                lock (_syncObject)
+                {
+                    streamId = _nextOutboundBidirectionalStream;
+                    _nextOutboundBidirectionalStream += 4;
+                }
+
+                return new QuicStream(this, streamId, true);
             }
             else
             {
@@ -173,25 +187,9 @@ namespace System.Net.Quic
         }
 
         // !!! TEMPORARY FOR QUIC MOCK SUPPORT
-        internal async Task<(Socket socket, int streamId)> CreateOutboundMockStreamAsync(bool bidirectional)
+        internal async Task<Socket> CreateOutboundMockStreamAsync(int streamId)
         {
             Debug.Assert(_mock);
-
-            int streamId;
-            lock (_syncObject)
-            {
-                if (bidirectional)
-                {
-                    streamId = _nextOutboundBidirectionalStream;
-                    _nextOutboundBidirectionalStream += 4;
-                }
-                else
-                {
-                    streamId = _nextOutboundUnidirectionalStream;
-                    _nextOutboundUnidirectionalStream += 4;
-                }
-            }
-
             Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
             await socket.ConnectAsync(_peerListenEndPoint).ConfigureAwait(false);
             socket.NoDelay = true;
@@ -201,7 +199,7 @@ namespace System.Net.Quic
             BinaryPrimitives.WriteInt32LittleEndian(buffer, streamId);
             await socket.SendAsync(buffer, SocketFlags.None).ConfigureAwait(false);
 
-            return (socket, streamId);
+            return socket;
         }
 
         /// <summary>
@@ -265,7 +263,11 @@ namespace System.Net.Quic
                 {
                     if (_mock)
                     {
-                        _inboundListener.Stop();
+                        _socket?.Dispose();
+                        _socket = null;
+
+                        _inboundListener?.Stop();
+                        _inboundListener = null;
                     }
                 }
 
