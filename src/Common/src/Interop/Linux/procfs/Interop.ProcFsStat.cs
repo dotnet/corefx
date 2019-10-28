@@ -26,7 +26,6 @@ internal static partial class Interop
         internal const string SelfCmdLineFilePath = RootPath + "self" + CmdLineFileName;
         internal const string ProcStatFilePath = RootPath + "stat";
 
-        private static readonly char[] s_delimiters = { ':', ' ', '\t' };
         internal struct ParsedStat
         {
             // Commented out fields are available in the stat data file but
@@ -313,7 +312,7 @@ internal static partial class Interop
 
         internal static bool TryParseStatusFile(string statusFilePath, out ParsedStatus result, ReusableTextReader reusableReader)
         {
-            if (!TryReadFile(statusFilePath, reusableReader, out string statusFileContents))
+            if (!TryReadFileAsSpan(statusFilePath, reusableReader, out ReadOnlySpan<char> statusFileContents))
             {
                 // Between the time that we get an ID and the time that we try to read the associated stat
                 // file(s), the process could be gone.
@@ -321,56 +320,80 @@ internal static partial class Interop
                 return false;
             }
 
-            var parser = new StringParser(statusFileContents, '\n');
             var results = default(ParsedStatus);
-
-            while (parser.MoveNext())
+            while (!statusFileContents.IsEmpty)
             {
-                string[] elements = parser.ExtractCurrent().Split(s_delimiters, 3, StringSplitOptions.RemoveEmptyEntries);
-                if (elements.Length < 2)
+                int startIndex = statusFileContents.IndexOf(':');
+                int endIndex = statusFileContents.IndexOf('\n');
+
+                // Reached end of file
+                if (endIndex == -1)
                 {
-                    continue;
+                    break;
                 }
 
-                switch (elements[0])
+                ReadOnlySpan<char> title = statusFileContents.Slice(0, startIndex);
+                ReadOnlySpan<char> value = default;
+                // endIndex - startIndex - 1 --> To slice till just before '\n'
+                // endIndex - startIndex - 4 --> To slice till just before ' kB\n'
+                switch (title.ToString())
                 {
 #if DEBUG
                     case "Pid":
-                        int.TryParse(elements[1], out results.Pid);
+                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 1);
+                        int.TryParse(value, out results.Pid);
                         break;
 #endif
                     case "VmHWM":
-                        ulong.TryParse(elements[1], out results.VmHWM);
-                        results.VmHWM *= 1024;
+                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
+                        ulong.TryParse(value, out results.VmHWM);
                         break;
 
                     case "VmRSS":
-                        ulong.TryParse(elements[1], out results.VmRSS);
-                        results.VmRSS *= 1024;
+                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
+                        ulong.TryParse(value, out results.VmRSS);
                         break;
 
                     case "VmData":
-                        ulong.TryParse(elements[1], out results.VmData);
-                        results.VmData *= 1024;
+                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
+                        ulong.TryParse(value, out results.VmData);
                         break;
 
                     case "VmSwap":
-                        ulong.TryParse(elements[1], out results.VmSwap);
-                        results.VmSwap *= 1024;
+                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
+                        ulong.TryParse(value, out results.VmSwap);
                         break;
 
                     case "VmSize":
-                        ulong.TryParse(elements[1], out results.VmSize);
-                        results.VmSize *= 1024;
+                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
+                        ulong.TryParse(value, out results.VmSize);
                         break;
 
                     case "VmPeak":
-                        ulong.TryParse(elements[1], out results.VmPeak);
-                        results.VmPeak *= 1024;
+                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
+                        ulong.TryParse(value, out results.VmPeak);
+                        break;
+
+                    case "VmStk":
+                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
+                        ulong.TryParse(value, out ulong VmStk);
+                        // Add stack value to VmData to calculate memory usage
+                        results.VmData += VmStk;
+                        break;
+
+                    default:
+                        endIndex = statusFileContents.IndexOf('\n');
                         break;
                 }
+                // Slice off the parsed part and parse on the rest.
+                statusFileContents = statusFileContents.Slice(endIndex + 1, statusFileContents.Length - endIndex - 1);
             }
-
+            results.VmData *= 1024;
+            results.VmPeak *= 1024;
+            results.VmSize *= 1024;
+            results.VmSwap *= 1024;
+            results.VmRSS  *= 1024;
+            results.VmHWM  *= 1024;
             result = results;
             return true;
         }
@@ -382,6 +405,23 @@ internal static partial class Interop
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, useAsync: false))
                 {
                     fileContents = reusableReader.ReadAllText(fileStream);
+                    return true;
+                }
+            }
+            catch (IOException)
+            {
+                fileContents = null;
+                return false;
+            }
+        }
+
+        private static bool TryReadFileAsSpan(string filePath, ReusableTextReader reusableReader, out ReadOnlySpan<char> fileContents)
+        {
+            try
+            {
+                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, useAsync: false))
+                {
+                    fileContents = reusableReader.ReadAllText(fileStream).AsSpan();
                     return true;
                 }
             }
