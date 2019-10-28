@@ -5,7 +5,7 @@
 
   <!-- We need to import this props file which contains PackageReferences to analyzers so that
        analyzer build assets are imported via the Tools generated props and targets -->
-  <Import Project="Analyzers.props" Condition="'$(DotNetBuildFromSource)' != 'true'" />
+  <Import Project="$(RepositoryEngineeringDir)analyzers.props" Condition="'$(DotNetBuildFromSource)' != 'true'" />
 
   <!-- source-built packages -->
   <ItemGroup>
