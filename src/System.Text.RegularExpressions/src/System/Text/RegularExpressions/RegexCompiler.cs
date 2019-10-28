@@ -26,35 +26,35 @@ namespace System.Text.RegularExpressions
     internal abstract class RegexCompiler
     {
         // fields that never change
-        private static readonly FieldInfo? s_textbegF = RegexRunnerField("runtextbeg");
-        private static readonly FieldInfo? s_textendF = RegexRunnerField("runtextend");
-        private static readonly FieldInfo? s_textstartF = RegexRunnerField("runtextstart");
-        private static readonly FieldInfo? s_textposF = RegexRunnerField("runtextpos");
-        private static readonly FieldInfo? s_textF = RegexRunnerField("runtext");
-        private static readonly FieldInfo? s_trackposF = RegexRunnerField("runtrackpos");
-        private static readonly FieldInfo? s_trackF = RegexRunnerField("runtrack");
-        private static readonly FieldInfo? s_stackposF = RegexRunnerField("runstackpos");
-        private static readonly FieldInfo? s_stackF = RegexRunnerField("runstack");
-        private static readonly FieldInfo? s_trackcountF = RegexRunnerField("runtrackcount");
+        private static readonly FieldInfo s_textbegF = RegexRunnerField("runtextbeg");
+        private static readonly FieldInfo s_textendF = RegexRunnerField("runtextend");
+        private static readonly FieldInfo s_textstartF = RegexRunnerField("runtextstart");
+        private static readonly FieldInfo s_textposF = RegexRunnerField("runtextpos");
+        private static readonly FieldInfo s_textF = RegexRunnerField("runtext");
+        private static readonly FieldInfo s_trackposF = RegexRunnerField("runtrackpos");
+        private static readonly FieldInfo s_trackF = RegexRunnerField("runtrack");
+        private static readonly FieldInfo s_stackposF = RegexRunnerField("runstackpos");
+        private static readonly FieldInfo s_stackF = RegexRunnerField("runstack");
+        private static readonly FieldInfo s_trackcountF = RegexRunnerField("runtrackcount");
 
-        private static readonly MethodInfo? s_ensurestorageM = RegexRunnerMethod("EnsureStorage");
-        private static readonly MethodInfo? s_captureM = RegexRunnerMethod("Capture");
-        private static readonly MethodInfo? s_transferM = RegexRunnerMethod("TransferCapture");
-        private static readonly MethodInfo? s_uncaptureM = RegexRunnerMethod("Uncapture");
-        private static readonly MethodInfo? s_ismatchedM = RegexRunnerMethod("IsMatched");
-        private static readonly MethodInfo? s_matchlengthM = RegexRunnerMethod("MatchLength");
-        private static readonly MethodInfo? s_matchindexM = RegexRunnerMethod("MatchIndex");
-        private static readonly MethodInfo? s_isboundaryM = RegexRunnerMethod("IsBoundary");
-        private static readonly MethodInfo? s_isECMABoundaryM = RegexRunnerMethod("IsECMABoundary");
-        private static readonly MethodInfo? s_chartolowerM = typeof(char).GetMethod("ToLower", new Type[] { typeof(char), typeof(CultureInfo) });
-        private static readonly MethodInfo? s_getcharM = typeof(string).GetMethod("get_Chars", new Type[] { typeof(int) });
-        private static readonly MethodInfo? s_crawlposM = RegexRunnerMethod("Crawlpos");
-        private static readonly MethodInfo? s_charInSetM = RegexRunnerMethod("CharInClass");
-        private static readonly MethodInfo? s_getCurrentCulture = typeof(CultureInfo).GetMethod("get_CurrentCulture");
-        private static readonly MethodInfo? s_getInvariantCulture = typeof(CultureInfo).GetMethod("get_InvariantCulture");
-        private static readonly MethodInfo? s_checkTimeoutM = RegexRunnerMethod("CheckTimeout");
+        private static readonly MethodInfo s_ensurestorageM = RegexRunnerMethod("EnsureStorage");
+        private static readonly MethodInfo s_captureM = RegexRunnerMethod("Capture");
+        private static readonly MethodInfo s_transferM = RegexRunnerMethod("TransferCapture");
+        private static readonly MethodInfo s_uncaptureM = RegexRunnerMethod("Uncapture");
+        private static readonly MethodInfo s_ismatchedM = RegexRunnerMethod("IsMatched");
+        private static readonly MethodInfo s_matchlengthM = RegexRunnerMethod("MatchLength");
+        private static readonly MethodInfo s_matchindexM = RegexRunnerMethod("MatchIndex");
+        private static readonly MethodInfo s_isboundaryM = RegexRunnerMethod("IsBoundary");
+        private static readonly MethodInfo s_isECMABoundaryM = RegexRunnerMethod("IsECMABoundary");
+        private static readonly MethodInfo s_chartolowerM = typeof(char).GetMethod("ToLower", new Type[] { typeof(char), typeof(CultureInfo) })!;
+        private static readonly MethodInfo s_getcharM = typeof(string).GetMethod("get_Chars", new Type[] { typeof(int) })!;
+        private static readonly MethodInfo s_crawlposM = RegexRunnerMethod("Crawlpos");
+        private static readonly MethodInfo s_charInSetM = RegexRunnerMethod("CharInClass");
+        private static readonly MethodInfo s_getCurrentCulture = typeof(CultureInfo).GetMethod("get_CurrentCulture")!;
+        private static readonly MethodInfo s_getInvariantCulture = typeof(CultureInfo).GetMethod("get_InvariantCulture")!;
+        private static readonly MethodInfo s_checkTimeoutM = RegexRunnerMethod("CheckTimeout");
 #if DEBUG
-        private static readonly MethodInfo? s_dumpstateM = RegexRunnerMethod("DumpState");
+        private static readonly MethodInfo s_dumpstateM = RegexRunnerMethod("DumpState");
 #endif
 
         protected ILGenerator? _ilg;
@@ -113,14 +113,14 @@ namespace System.Text.RegularExpressions
         private const int Uniquecount = 10;
         private const int LoopTimeoutCheckCount = 2048; // A conservative value to guarantee the correct timeout handling.
 
-        private static FieldInfo? RegexRunnerField(string fieldname)
+        private static FieldInfo RegexRunnerField(string fieldname)
         {
-            return typeof(RegexRunner).GetField(fieldname, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+            return typeof(RegexRunner).GetField(fieldname, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)!;
         }
 
-        private static MethodInfo? RegexRunnerMethod(string methname)
+        private static MethodInfo RegexRunnerMethod(string methname)
         {
-            return typeof(RegexRunner).GetMethod(methname, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+            return typeof(RegexRunner).GetMethod(methname, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)!;
         }
 
         /*
@@ -638,7 +638,7 @@ namespace System.Text.RegularExpressions
         {
             Ldloc(_textV!);
             Ldloc(_textposV!);
-            Callvirt(s_getcharM!);
+            Callvirt(s_getcharM);
         }
 
         /*
@@ -652,7 +652,7 @@ namespace System.Text.RegularExpressions
             Ldc(1);
             Add();
             Stloc(_textposV!);
-            Callvirt(s_getcharM!);
+            Callvirt(s_getcharM);
         }
 
         /*
@@ -664,7 +664,7 @@ namespace System.Text.RegularExpressions
             Ldloc(_textposV!);
             Ldc(1);
             Sub();
-            Callvirt(s_getcharM!);
+            Callvirt(s_getcharM);
         }
 
         /*
@@ -678,7 +678,7 @@ namespace System.Text.RegularExpressions
             Sub();
             Dup();
             Stloc(_textposV!);
-            Callvirt(s_getcharM!);
+            Callvirt(s_getcharM);
         }
 
         /*
@@ -946,9 +946,9 @@ namespace System.Text.RegularExpressions
         private void InitLocalCultureInfo()
         {
             if ((_options & RegexOptions.CultureInvariant) != 0)
-                Call(s_getInvariantCulture!);
+                Call(s_getInvariantCulture);
             else
-                Call(s_getCurrentCulture!);
+                Call(s_getCurrentCulture);
 
             Stloc(_cultureV!);
         }
@@ -956,7 +956,7 @@ namespace System.Text.RegularExpressions
         private void CallToLower()
         {
             Ldloc(_cultureV!);
-            Call(s_chartolowerM!);
+            Call(s_chartolowerM);
         }
 
         /*
@@ -986,15 +986,15 @@ namespace System.Text.RegularExpressions
 
             // emit variable initializers
 
-            Mvfldloc(s_textF!, _textV!);
-            Mvfldloc(s_textstartF!, _textstartV!);
-            Mvfldloc(s_textbegF!, _textbegV!);
-            Mvfldloc(s_textendF!, _textendV!);
-            Mvfldloc(s_textposF!, _textposV!);
-            Mvfldloc(s_trackF!, _trackV!);
-            Mvfldloc(s_trackposF!, _trackposV!);
-            Mvfldloc(s_stackF!, _stackV!);
-            Mvfldloc(s_stackposF!, _stackposV!);
+            Mvfldloc(s_textF, _textV!);
+            Mvfldloc(s_textstartF, _textstartV!);
+            Mvfldloc(s_textbegF, _textbegV!);
+            Mvfldloc(s_textendF, _textendV!);
+            Mvfldloc(s_textposF, _textposV!);
+            Mvfldloc(s_trackF, _trackV!);
+            Mvfldloc(s_trackposF, _trackposV!);
+            Mvfldloc(s_stackF, _stackV!);
+            Mvfldloc(s_stackposF, _stackposV!);
 
             _backpos = -1;
 
@@ -1022,14 +1022,14 @@ namespace System.Text.RegularExpressions
             MarkLabel(_backtrack);
 
             // first call EnsureStorage
-            Mvlocfld(_trackposV!, s_trackposF!);
-            Mvlocfld(_stackposV!, s_stackposF!);
+            Mvlocfld(_trackposV!, s_trackposF);
+            Mvlocfld(_stackposV!, s_stackposF);
             Ldthis();
-            Callvirt(s_ensurestorageM!);
-            Mvfldloc(s_trackposF!, _trackposV!);
-            Mvfldloc(s_stackposF!, _stackposV!);
-            Mvfldloc(s_trackF!, _trackV!);
-            Mvfldloc(s_stackF!, _stackV!);
+            Callvirt(s_ensurestorageM);
+            Mvfldloc(s_trackposF, _trackposV!);
+            Mvfldloc(s_stackposF, _stackposV!);
+            Mvfldloc(s_trackF, _trackV!);
+            Mvfldloc(s_stackF, _stackV!);
 
 
             PopTrack();
@@ -1087,12 +1087,12 @@ namespace System.Text.RegularExpressions
                     if (0 != (_anchors & RegexFCD.Beginning))
                     {
                         Label l1 = DefineLabel();
-                        Ldthisfld(s_textposF!);
-                        Ldthisfld(s_textbegF!);
+                        Ldthisfld(s_textposF);
+                        Ldthisfld(s_textbegF);
                         Ble(l1);
                         Ldthis();
-                        Ldthisfld(s_textendF!);
-                        Stfld(s_textposF!);
+                        Ldthisfld(s_textendF);
+                        Stfld(s_textposF);
                         Ldc(0);
                         Ret();
                         MarkLabel(l1);
@@ -1101,12 +1101,12 @@ namespace System.Text.RegularExpressions
                     if (0 != (_anchors & RegexFCD.Start))
                     {
                         Label l1 = DefineLabel();
-                        Ldthisfld(s_textposF!);
-                        Ldthisfld(s_textstartF!);
+                        Ldthisfld(s_textposF);
+                        Ldthisfld(s_textstartF);
                         Ble(l1);
                         Ldthis();
-                        Ldthisfld(s_textendF!);
-                        Stfld(s_textposF!);
+                        Ldthisfld(s_textendF);
+                        Stfld(s_textposF);
                         Ldc(0);
                         Ret();
                         MarkLabel(l1);
@@ -1115,28 +1115,28 @@ namespace System.Text.RegularExpressions
                     if (0 != (_anchors & RegexFCD.EndZ))
                     {
                         Label l1 = DefineLabel();
-                        Ldthisfld(s_textposF!);
-                        Ldthisfld(s_textendF!);
+                        Ldthisfld(s_textposF);
+                        Ldthisfld(s_textendF);
                         Ldc(1);
                         Sub();
                         Bge(l1);
                         Ldthis();
-                        Ldthisfld(s_textendF!);
+                        Ldthisfld(s_textendF);
                         Ldc(1);
                         Sub();
-                        Stfld(s_textposF!);
+                        Stfld(s_textposF);
                         MarkLabel(l1);
                     }
 
                     if (0 != (_anchors & RegexFCD.End))
                     {
                         Label l1 = DefineLabel();
-                        Ldthisfld(s_textposF!);
-                        Ldthisfld(s_textendF!);
+                        Ldthisfld(s_textposF);
+                        Ldthisfld(s_textendF);
                         Bge(l1);
                         Ldthis();
-                        Ldthisfld(s_textendF!);
-                        Stfld(s_textposF!);
+                        Ldthisfld(s_textendF);
+                        Stfld(s_textposF);
                         MarkLabel(l1);
                     }
                 }
@@ -1145,12 +1145,12 @@ namespace System.Text.RegularExpressions
                     if (0 != (_anchors & RegexFCD.End))
                     {
                         Label l1 = DefineLabel();
-                        Ldthisfld(s_textposF!);
-                        Ldthisfld(s_textendF!);
+                        Ldthisfld(s_textposF);
+                        Ldthisfld(s_textendF);
                         Bge(l1);
                         Ldthis();
-                        Ldthisfld(s_textbegF!);
-                        Stfld(s_textposF!);
+                        Ldthisfld(s_textbegF);
+                        Stfld(s_textposF);
                         Ldc(0);
                         Ret();
                         MarkLabel(l1);
@@ -1160,23 +1160,23 @@ namespace System.Text.RegularExpressions
                     {
                         Label l1 = DefineLabel();
                         Label l2 = DefineLabel();
-                        Ldthisfld(s_textposF!);
-                        Ldthisfld(s_textendF!);
+                        Ldthisfld(s_textposF);
+                        Ldthisfld(s_textendF);
                         Ldc(1);
                         Sub();
                         Blt(l1);
-                        Ldthisfld(s_textposF!);
-                        Ldthisfld(s_textendF!);
+                        Ldthisfld(s_textposF);
+                        Ldthisfld(s_textendF);
                         Beq(l2);
-                        Ldthisfld(s_textF!);
-                        Ldthisfld(s_textposF!);
-                        Callvirt(s_getcharM!);
+                        Ldthisfld(s_textF);
+                        Ldthisfld(s_textposF);
+                        Callvirt(s_getcharM);
                         Ldc((int)'\n');
                         Beq(l2);
                         MarkLabel(l1);
                         Ldthis();
-                        Ldthisfld(s_textbegF!);
-                        Stfld(s_textposF!);
+                        Ldthisfld(s_textbegF);
+                        Stfld(s_textposF);
                         Ldc(0);
                         Ret();
                         MarkLabel(l2);
@@ -1185,12 +1185,12 @@ namespace System.Text.RegularExpressions
                     if (0 != (_anchors & RegexFCD.Start))
                     {
                         Label l1 = DefineLabel();
-                        Ldthisfld(s_textposF!);
-                        Ldthisfld(s_textstartF!);
+                        Ldthisfld(s_textposF);
+                        Ldthisfld(s_textstartF);
                         Bge(l1);
                         Ldthis();
-                        Ldthisfld(s_textbegF!);
-                        Stfld(s_textposF!);
+                        Ldthisfld(s_textbegF);
+                        Stfld(s_textposF);
                         Ldc(0);
                         Ret();
                         MarkLabel(l1);
@@ -1199,12 +1199,12 @@ namespace System.Text.RegularExpressions
                     if (0 != (_anchors & RegexFCD.Beginning))
                     {
                         Label l1 = DefineLabel();
-                        Ldthisfld(s_textposF!);
-                        Ldthisfld(s_textbegF!);
+                        Ldthisfld(s_textposF);
+                        Ldthisfld(s_textbegF);
                         Ble(l1);
                         Ldthis();
-                        Ldthisfld(s_textbegF!);
-                        Stfld(s_textposF!);
+                        Ldthisfld(s_textbegF);
+                        Stfld(s_textposF);
                         MarkLabel(l1);
                     }
                 }
@@ -1250,14 +1250,14 @@ namespace System.Text.RegularExpressions
 
                 chLast = _bmPrefix.Pattern[last];
 
-                Mvfldloc(s_textF!, _textV);
+                Mvfldloc(s_textF, _textV);
                 if (!_code.RightToLeft)
-                    Ldthisfld(s_textendF!);
+                    Ldthisfld(s_textendF);
                 else
-                    Ldthisfld(s_textbegF!);
+                    Ldthisfld(s_textbegF);
                 Stloc(limitV);
 
-                Ldthisfld(s_textposF!);
+                Ldthisfld(s_textposF);
                 if (!_code.RightToLeft)
                 {
                     Ldc(_bmPrefix.Pattern.Length - 1);
@@ -1355,7 +1355,7 @@ namespace System.Text.RegularExpressions
                     Sub(_code.RightToLeft);
                     Dup();
                     Stloc(testV);
-                    Callvirt(s_getcharM!);
+                    Callvirt(s_getcharM);
                     if (_bmPrefix.CaseInsensitive)
                         CallToLower();
 
@@ -1375,7 +1375,7 @@ namespace System.Text.RegularExpressions
                     Ldc(1);
                     Add();
                 }
-                Stfld(s_textposF!);
+                Stfld(s_textposF);
                 Ldc(1);
                 Ret();
 
@@ -1383,10 +1383,10 @@ namespace System.Text.RegularExpressions
 
                 Ldthis();
                 if (!_code.RightToLeft)
-                    Ldthisfld(s_textendF!);
+                    Ldthisfld(s_textendF);
                 else
-                    Ldthisfld(s_textbegF!);
-                Stfld(s_textposF!);
+                    Ldthisfld(s_textbegF);
+                Stfld(s_textposF);
                 Ldc(0);
                 Ret();
             }
@@ -1404,18 +1404,18 @@ namespace System.Text.RegularExpressions
                 Label l4 = DefineLabel();
                 Label l5 = DefineLabel();
 
-                Mvfldloc(s_textposF!, _textposV);
-                Mvfldloc(s_textF!, _textV);
+                Mvfldloc(s_textposF, _textposV);
+                Mvfldloc(s_textF, _textV);
 
                 if (!_code!.RightToLeft)
                 {
-                    Ldthisfld(s_textendF!);
+                    Ldthisfld(s_textendF);
                     Ldloc(_textposV);
                 }
                 else
                 {
                     Ldloc(_textposV);
-                    Ldthisfld(s_textbegF!);
+                    Ldthisfld(s_textbegF);
                 }
                 Sub();
                 Stloc(cV);
@@ -1442,7 +1442,7 @@ namespace System.Text.RegularExpressions
                 if (!RegexCharClass.IsSingleton(_fcPrefix.GetValueOrDefault().Prefix))
                 {
                     Ldstr(_fcPrefix.GetValueOrDefault().Prefix);
-                    Call(s_charInSetM!);
+                    Call(s_charInSetM);
 
                     BrtrueFar(l2);
                 }
@@ -1511,7 +1511,7 @@ namespace System.Text.RegularExpressions
 
                 MarkLabel(l3);
 
-                Mvlocfld(_textposV, s_textposF!);
+                Mvlocfld(_textposV, s_textposF);
                 Ret();
 
                 MarkLabel(l4);
@@ -1528,7 +1528,7 @@ namespace System.Text.RegularExpressions
         {
             Ldthis();
             Ldc(_trackcount);
-            Stfld(s_trackcountF!);
+            Stfld(s_trackcountF);
             Ret();
         }
 
@@ -1640,11 +1640,11 @@ namespace System.Text.RegularExpressions
 #if DEBUG
             if ((_options & RegexOptions.Debug) != 0)
             {
-                Mvlocfld(_textposV!, s_textposF!);
-                Mvlocfld(_trackposV!, s_trackposF!);
-                Mvlocfld(_stackposV!, s_stackposF!);
+                Mvlocfld(_textposV!, s_textposF);
+                Mvlocfld(_trackposV!, s_trackposF);
+                Mvlocfld(_stackposV!, s_stackposF);
                 Ldthis();
-                Callvirt(s_dumpstateM!);
+                Callvirt(s_dumpstateM);
                 StringBuilder sb = new StringBuilder();
                 if (_backpos > 0)
                     sb.AppendFormat("{0:D6} ", _backpos);
@@ -1663,7 +1663,7 @@ namespace System.Text.RegularExpressions
             // we try checking for the match timeout:
 
             Ldthis();
-            Callvirt(s_checkTimeoutM!);
+            Callvirt(s_checkTimeoutM);
 
             // Now generate the IL for the RegEx code saved in _regexopcode.
             // We unroll the loop done by the RegexCompiler creating as very long method
@@ -1673,7 +1673,7 @@ namespace System.Text.RegularExpressions
             {
                 case RegexCode.Stop:
                     //: return;
-                    Mvlocfld(_textposV!, s_textposF!);       // update _textpos
+                    Mvlocfld(_textposV!, s_textposF);       // update _textpos
                     Ret();
                     break;
 
@@ -1692,7 +1692,7 @@ namespace System.Text.RegularExpressions
                     //:     break Backward;
                     Ldthis();
                     Ldc(Operand(0));
-                    Callvirt(s_ismatchedM!);
+                    Callvirt(s_ismatchedM);
                     BrfalseFar(_backtrack);
                     break;
 
@@ -1776,7 +1776,7 @@ namespace System.Text.RegularExpressions
                     {
                         Ldthis();
                         Ldc(Operand(1));
-                        Callvirt(s_ismatchedM!);
+                        Callvirt(s_ismatchedM);
                         BrfalseFar(_backtrack);
                     }
 
@@ -1790,7 +1790,7 @@ namespace System.Text.RegularExpressions
                         Ldc(Operand(1));
                         Ldloc(_tempV!);
                         Ldloc(_textposV!);
-                        Callvirt(s_transferM!);
+                        Callvirt(s_transferM);
                     }
                     else
                     {
@@ -1798,7 +1798,7 @@ namespace System.Text.RegularExpressions
                         Ldc(Operand(0));
                         Ldloc(_tempV!);
                         Ldloc(_textposV!);
-                        Callvirt(s_captureM!);
+                        Callvirt(s_captureM);
                     }
 
                     PushTrack(_tempV!);
@@ -1822,11 +1822,11 @@ namespace System.Text.RegularExpressions
                     PopTrack();
                     DoPush();
                     Ldthis();
-                    Callvirt(s_uncaptureM!);
+                    Callvirt(s_uncaptureM);
                     if (Operand(0) != -1 && Operand(1) != -1)
                     {
                         Ldthis();
-                        Callvirt(s_uncaptureM!);
+                        Callvirt(s_uncaptureM);
                     }
                     Back();
                     break;
@@ -2245,14 +2245,14 @@ namespace System.Text.RegularExpressions
                     //: Stack(Trackpos(), Crawlpos());
                     //: Track();
                     ReadyPushStack();
-                    Ldthisfld(s_trackF!);
+                    Ldthisfld(s_trackF);
                     Ldlen();
                     Ldloc(_trackposV!);
                     Sub();
                     DoPush();
                     ReadyPushStack();
                     Ldthis();
-                    Callvirt(s_crawlposM!);
+                    Callvirt(s_crawlposM);
                     DoPush();
                     TrackUnique(Stackpop2);
                     break;
@@ -2275,22 +2275,22 @@ namespace System.Text.RegularExpressions
                         Label l2 = DefineLabel();
 
                         PopStack();
-                        Ldthisfld(s_trackF!);
+                        Ldthisfld(s_trackF);
                         Ldlen();
                         PopStack();
                         Sub();
                         Stloc(_trackposV!);
                         Dup();
                         Ldthis();
-                        Callvirt(s_crawlposM!);
+                        Callvirt(s_crawlposM);
                         Beq(l2);
 
                         MarkLabel(l1);
                         Ldthis();
-                        Callvirt(s_uncaptureM!);
+                        Callvirt(s_uncaptureM);
                         Dup();
                         Ldthis();
-                        Callvirt(s_crawlposM!);
+                        Callvirt(s_crawlposM);
                         Bne(l1);
 
                         MarkLabel(l2);
@@ -2305,7 +2305,7 @@ namespace System.Text.RegularExpressions
                     //: Track(Stacked(1));
                     PopStack();
                     Stloc(_tempV!);
-                    Ldthisfld(s_trackF!);
+                    Ldthisfld(s_trackF);
                     Ldlen();
                     PopStack();
                     Sub();
@@ -2327,15 +2327,15 @@ namespace System.Text.RegularExpressions
 
                         Dup();
                         Ldthis();
-                        Callvirt(s_crawlposM!);
+                        Callvirt(s_crawlposM);
                         Beq(l2);
 
                         MarkLabel(l1);
                         Ldthis();
-                        Callvirt(s_uncaptureM!);
+                        Callvirt(s_uncaptureM);
                         Dup();
                         Ldthis();
-                        Callvirt(s_crawlposM!);
+                        Callvirt(s_crawlposM);
                         Bne(l1);
 
                         MarkLabel(l2);
@@ -2380,7 +2380,7 @@ namespace System.Text.RegularExpressions
                     Ldloc(_textposV!);
                     Ldloc(_textbegV!);
                     Ldloc(_textendV!);
-                    Callvirt(s_isboundaryM!);
+                    Callvirt(s_isboundaryM);
                     if (Code() == RegexCode.Boundary)
                         BrfalseFar(_backtrack);
                     else
@@ -2395,7 +2395,7 @@ namespace System.Text.RegularExpressions
                     Ldloc(_textposV!);
                     Ldloc(_textbegV!);
                     Ldloc(_textendV!);
-                    Callvirt(s_isECMABoundaryM!);
+                    Callvirt(s_isECMABoundaryM);
                     if (Code() == RegexCode.ECMABoundary)
                         BrfalseFar(_backtrack);
                     else
@@ -2414,7 +2414,7 @@ namespace System.Text.RegularExpressions
                     //: if (Textpos() != Textstart())
                     //:    break Backward;
                     Ldloc(_textposV!);
-                    Ldthisfld(s_textstartF!);
+                    Ldthisfld(s_textstartF);
                     BneFar(_backtrack);
                     break;
 
@@ -2479,7 +2479,7 @@ namespace System.Text.RegularExpressions
                     {
 
                         Ldstr(_strings![Operand(0)]);
-                        Call(s_charInSetM!);
+                        Call(s_charInSetM);
 
                         BrfalseFar(_backtrack);
                     }
@@ -2526,7 +2526,7 @@ namespace System.Text.RegularExpressions
                                 Ldc(i);
                                 Add();
                             }
-                            Callvirt(s_getcharM!);
+                            Callvirt(s_getcharM);
                             if (IsCi())
                                 CallToLower();
 
@@ -2571,7 +2571,7 @@ namespace System.Text.RegularExpressions
                             Ldloc(_textposV!);
                             Ldc(str.Length - i);
                             Sub();
-                            Callvirt(s_getcharM!);
+                            Callvirt(s_getcharM);
                             if (IsCi())
                             {
                                 CallToLower();
@@ -2611,7 +2611,7 @@ namespace System.Text.RegularExpressions
 
                         Ldthis();
                         Ldc(Operand(0));
-                        Callvirt(s_ismatchedM!);
+                        Callvirt(s_ismatchedM);
                         if ((_options & RegexOptions.ECMAScript) != 0)
                             Brfalse(AdvanceLabel());
                         else
@@ -2619,7 +2619,7 @@ namespace System.Text.RegularExpressions
 
                         Ldthis();
                         Ldc(Operand(0));
-                        Callvirt(s_matchlengthM!);
+                        Callvirt(s_matchlengthM);
                         Dup();
                         Stloc(lenV);
                         if (!IsRtl())
@@ -2637,7 +2637,7 @@ namespace System.Text.RegularExpressions
 
                         Ldthis();
                         Ldc(Operand(0));
-                        Callvirt(s_matchindexM!);
+                        Callvirt(s_matchindexM);
                         if (!IsRtl())
                         {
                             Ldloc(lenV);
@@ -2665,7 +2665,7 @@ namespace System.Text.RegularExpressions
                             Stloc(lenV);
                         }
                         Sub(IsRtl());
-                        Callvirt(s_getcharM!);
+                        Callvirt(s_getcharM);
                         if (IsCi())
                             CallToLower();
 
@@ -2680,7 +2680,7 @@ namespace System.Text.RegularExpressions
                             Stloc(lenV);
                         }
                         Sub(IsRtl());
-                        Callvirt(s_getcharM!);
+                        Callvirt(s_getcharM);
                         if (IsCi())
                             CallToLower();
 
@@ -2760,7 +2760,7 @@ namespace System.Text.RegularExpressions
                             Stloc(lenV);
                             Sub();
                         }
-                        Callvirt(s_getcharM!);
+                        Callvirt(s_getcharM);
                         if (IsCi())
                             CallToLower();
 
@@ -2768,7 +2768,7 @@ namespace System.Text.RegularExpressions
                         {
                             EmitTimeoutCheck();
                             Ldstr(_strings![Operand(0)]);
-                            Call(s_charInSetM!);
+                            Call(s_charInSetM);
 
                             BrfalseFar(_backtrack);
                         }
@@ -2878,7 +2878,7 @@ namespace System.Text.RegularExpressions
                         {
                             EmitTimeoutCheck();
                             Ldstr(_strings![Operand(0)]);
-                            Call(s_charInSetM!);
+                            Call(s_charInSetM);
 
                             BrtrueFar(l1);
                         }
@@ -3056,7 +3056,7 @@ namespace System.Text.RegularExpressions
                     if (Code() == RegexCode.Setlazy)
                     {
                         Ldstr(_strings![Operand(0)]);
-                        Call(s_charInSetM!);
+                        Call(s_charInSetM);
 
                         BrfalseFar(_backtrack);
                     }
@@ -3105,7 +3105,7 @@ namespace System.Text.RegularExpressions
             Ceq();
             Brfalse(label);
             Ldthis();
-            Callvirt(s_checkTimeoutM!);
+            Callvirt(s_checkTimeoutM);
 
             MarkLabel(label);
         }

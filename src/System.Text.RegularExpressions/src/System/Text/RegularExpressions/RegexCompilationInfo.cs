@@ -7,12 +7,10 @@ namespace System.Text.RegularExpressions
 {
     public class RegexCompilationInfo
     {
-        [NotNull]
-        private string? _pattern;
-        [NotNull]
-        private string? _name;
-        [NotNull]
-        private string? _nspace;
+        // initialized by setter called by constructor
+        private string _pattern = null!;
+        private string _name = null!;
+        private string _nspace = null!;
 
         private TimeSpan _matchTimeout;
 

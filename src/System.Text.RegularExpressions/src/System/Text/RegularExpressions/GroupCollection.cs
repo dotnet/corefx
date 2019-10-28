@@ -211,7 +211,7 @@ namespace System.Text.RegularExpressions
             return new Enumerator(this);
         }
 
-        public bool TryGetValue(string key, [MaybeNullWhen(false)] out Group value)
+        public bool TryGetValue(string key, [NotNullWhen(true)] out Group value)
         {
             Group group = this[key];
             if (group == Group.s_emptyGroup)
