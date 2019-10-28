@@ -260,27 +260,30 @@ namespace System.IO
         [Fact]
         public void DirectoryInfo_Create_NotFound()
         {
-            DirectoryInfo info = new DirectoryInfo(@"W:\\I\\Do\\Not\\Exist");
+            DirectoryInfo info = new DirectoryInfo(@"W:\I\Do\Not\Exist");
             DirectorySecurity security = new DirectorySecurity();
+
+            string expectedMessage = $"Could not find a part of the path '{info.FullName}'.";
             if (PlatformDetection.IsFullFramework)
             {
-                AssertExtensions.Throws<ArgumentNullException>(() =>
+                AssertExtensions.Throws<DirectoryNotFoundException>(() =>
                     FileSystemAclExtensions.Create(info, security),
-                    "");
+                    expectedMessage);
             }
             else
             {
                 AssertExtensions.Throws<DirectoryNotFoundException>(() =>
                     info.Create(security),
-                    $"Could not find a part of the path '{info.FullName}'.");
+                    expectedMessage);
             }
         }
 
         [Theory]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Allow)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Deny)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.WriteData, AccessControlType.Allow)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.WriteData, AccessControlType.Deny)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Allow)]
-        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadData, AccessControlType.Allow)]
-        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.Write, AccessControlType.Allow)]
-        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.Write, AccessControlType.Deny)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Deny)]
         public void DirectoryInfo_Create_DirectorySecurityWithSpecificAccessRule(
             WellKnownSidType sid,
@@ -304,13 +307,13 @@ namespace System.IO
             if (PlatformDetection.IsFullFramework)
             {
                 AssertExtensions.Throws<ArgumentNullException>(() =>
-                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
+                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.WriteData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
                     "Value cannot be null.\r\nParameter name: fileInfo");
             }
             else
             {
                 AssertExtensions.Throws<ArgumentNullException>(() =>
-                    info.Create(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
+                    info.Create(FileMode.Create, FileSystemRights.WriteData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
                     "Value cannot be null. (Parameter 'fileInfo')");
             }
         }
@@ -329,13 +332,13 @@ namespace System.IO
             if (PlatformDetection.IsFullFramework)
             {
                 AssertExtensions.Throws<ArgumentNullException>(() =>
-                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, null),
+                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.WriteData, FileShare.Read, DefaultBufferSize, FileOptions.None, null),
                     "Value cannot be null.\r\nParameter name: fileSecurity");
             }
             else
             {
                 AssertExtensions.Throws<ArgumentNullException>(() =>
-                    info.Create(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, null),
+                    info.Create(FileMode.Create, FileSystemRights.WriteData, FileShare.Read, DefaultBufferSize, FileOptions.None, null),
                     "Value cannot be null. (Parameter 'fileSecurity')");
             }
         }
@@ -343,26 +346,31 @@ namespace System.IO
         [Fact]
         public void FileInfo_Create_NotFound()
         {
-            FileInfo info = new FileInfo(@"W:\\I\\Do\\Not\\Exist\file.txt");
+            FileInfo info = new FileInfo(@"W:\I\Do\Not\Exist\file.txt");
             FileSecurity security = new FileSecurity();
+
+            string expectedMessage = $"Could not find a part of the path '{info.FullName}'.";
             if (PlatformDetection.IsFullFramework)
             {
-                AssertExtensions.Throws<ArgumentNullException>(() =>
-                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
-                    "");
+                AssertExtensions.Throws<DirectoryNotFoundException>(() =>
+                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.WriteData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
+                    expectedMessage);
             }
             else
             {
                 AssertExtensions.Throws<DirectoryNotFoundException>(() =>
-                    info.Create(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
-                    $"Could not find a part of the path '{info.FullName}'.");
+                    info.Create(FileMode.Create, FileSystemRights.WriteData, FileShare.Read, DefaultBufferSize, FileOptions.None, security),
+                    expectedMessage);
             }
         }
 
         [Theory]
-        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Allow)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Allow)]
-        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.Write, AccessControlType.Allow)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Deny)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.WriteData, AccessControlType.Allow)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.WriteData, AccessControlType.Deny)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Allow)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Deny)]
         public void FileInfo_Create_FileSecurityWithSpecificAccessRule(WellKnownSidType sid, FileSystemRights rights, AccessControlType controlType)
         {
             FileSecurity security = GetFileSecurity(sid, rights, controlType);
@@ -424,7 +432,7 @@ namespace System.IO
 
         private void VerifyFileSecurity(FileSecurity expectedSecurity)
         {
-            VerifyFileSecurity(FileMode.Create, FileSystemRights.ReadData, FileShare.Read, DefaultBufferSize, FileOptions.None, expectedSecurity);
+            VerifyFileSecurity(FileMode.Create, FileSystemRights.WriteData, FileShare.Read, DefaultBufferSize, FileOptions.None, expectedSecurity);
         }
 
         private void VerifyFileSecurity(FileMode mode, FileSystemRights rights, FileShare share, int bufferSize, FileOptions options, FileSecurity expectedSecurity)
