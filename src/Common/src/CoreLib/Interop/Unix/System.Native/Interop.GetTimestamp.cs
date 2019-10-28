@@ -12,6 +12,7 @@ internal static partial class Interop
         internal static extern ulong GetTimestampResolution();
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetTimestamp", ExactSpelling = true)]
+        // [SuppressGCTransition] // https://github.com/dotnet/coreclr/issues/27465
         internal static extern ulong GetTimestamp();
     }
 }

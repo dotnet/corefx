@@ -57,9 +57,42 @@ namespace System.Net.Sockets
             return new IPPacketInformation(nativePacketInfo.Address.GetIPAddress(), nativePacketInfo.InterfaceIndex);
         }
 
-        public static SocketError CreateSocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType, out SafeSocketHandle socket)
+        public static unsafe SocketError CreateSocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType, out SafeSocketHandle socket)
         {
-            return SafeSocketHandle.CreateSocket(addressFamily, socketType, protocolType, out socket);
+            IntPtr fd;
+            SocketError errorCode;
+            Interop.Error error = Interop.Sys.Socket(addressFamily, socketType, protocolType, &fd);
+            if (error == Interop.Error.SUCCESS)
+            {
+                Debug.Assert(fd != (IntPtr)(-1), "fd should not be -1");
+
+                errorCode = SocketError.Success;
+
+                // The socket was created successfully; enable IPV6_V6ONLY by default for normal AF_INET6 sockets.
+                // This fails on raw sockets so we just let them be in default state.
+                if (addressFamily == AddressFamily.InterNetworkV6 && socketType != SocketType.Raw)
+                {
+                    int on = 1;
+                    error = Interop.Sys.SetSockOpt(fd, SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, (byte*)&on, sizeof(int));
+                    if (error != Interop.Error.SUCCESS)
+                    {
+                        Interop.Sys.Close(fd);
+                        fd = (IntPtr)(-1);
+                        errorCode = GetSocketErrorForErrorCode(error);
+                    }
+                }
+            }
+            else
+            {
+                Debug.Assert(fd == (IntPtr)(-1), $"Unexpected fd: {fd}");
+
+                errorCode = GetSocketErrorForErrorCode(error);
+            }
+
+            socket = new SafeSocketHandle(fd, ownsHandle: true);
+            if (NetEventSource.IsEnabled) NetEventSource.Info(null, socket);
+
+            return errorCode;
         }
 
         private static unsafe int Receive(SafeSocketHandle socket, SocketFlags flags, Span<byte> buffer, byte[] socketAddress, ref int socketAddressLen, out SocketFlags receivedFlags, out Interop.Error errno)
@@ -865,9 +898,27 @@ namespace System.Net.Sockets
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 
-        public static SocketError Accept(SafeSocketHandle handle, byte[] buffer, ref int nameLen, out SafeSocketHandle socket)
+        public static SocketError Accept(SafeSocketHandle listenSocket, byte[] socketAddress, ref int socketAddressLen, out SafeSocketHandle socket)
         {
-            return SafeSocketHandle.Accept(handle, buffer, ref nameLen, out socket);
+            IntPtr acceptedFd;
+            SocketError errorCode;
+            if (!listenSocket.IsNonBlocking)
+            {
+                errorCode = listenSocket.AsyncContext.Accept(socketAddress, ref socketAddressLen, out acceptedFd);
+            }
+            else
+            {
+                bool completed = TryCompleteAccept(listenSocket, socketAddress, ref socketAddressLen, out acceptedFd, out errorCode);
+                if (!completed)
+                {
+                    errorCode = SocketError.WouldBlock;
+                }
+            }
+
+            socket = new SafeSocketHandle(acceptedFd, ownsHandle: true);
+            if (NetEventSource.IsEnabled) NetEventSource.Info(null, socket);
+
+            return errorCode;
         }
 
         public static SocketError Connect(SafeSocketHandle handle, byte[] socketAddress, int socketAddressLen)
@@ -1444,37 +1495,58 @@ namespace System.Net.Sockets
             // Add each of the list's contents to the events array
             Debug.Assert(eventsLength == checkReadInitialCount + checkWriteInitialCount + checkErrorInitialCount, "Invalid eventsLength");
             int offset = 0;
-            AddToPollArray(events, eventsLength, checkRead, ref offset, Interop.Sys.PollEvents.POLLIN | Interop.Sys.PollEvents.POLLHUP);
-            AddToPollArray(events, eventsLength, checkWrite, ref offset, Interop.Sys.PollEvents.POLLOUT);
-            AddToPollArray(events, eventsLength, checkError, ref offset, Interop.Sys.PollEvents.POLLPRI);
-            Debug.Assert(offset == eventsLength, $"Invalid adds. offset={offset}, eventsLength={eventsLength}.");
+            int refsAdded = 0;
+            try
+            {
+                // In case we can't increase the reference count for each Socket,
+                // we'll unref refAdded Sockets in the finally block ordered: [checkRead, checkWrite, checkError].
+                AddToPollArray(events, eventsLength, checkRead, ref offset, Interop.Sys.PollEvents.POLLIN | Interop.Sys.PollEvents.POLLHUP, ref refsAdded);
+                AddToPollArray(events, eventsLength, checkWrite, ref offset, Interop.Sys.PollEvents.POLLOUT, ref refsAdded);
+                AddToPollArray(events, eventsLength, checkError, ref offset, Interop.Sys.PollEvents.POLLPRI, ref refsAdded);
+                Debug.Assert(offset == eventsLength, $"Invalid adds. offset={offset}, eventsLength={eventsLength}.");
+                Debug.Assert(refsAdded == eventsLength, $"Invalid ref adds. refsAdded={refsAdded}, eventsLength={eventsLength}.");
 
-            // Do the poll
-            uint triggered = 0;
-            int milliseconds = microseconds == -1 ? -1 : microseconds / 1000;
-            Interop.Error err = Interop.Sys.Poll(events, (uint)eventsLength, milliseconds, &triggered);
-            if (err != Interop.Error.SUCCESS)
-            {
-                return GetSocketErrorForErrorCode(err);
-            }
+                // Do the poll
+                uint triggered = 0;
+                int milliseconds = microseconds == -1 ? -1 : microseconds / 1000;
+                Interop.Error err = Interop.Sys.Poll(events, (uint)eventsLength, milliseconds, &triggered);
+                if (err != Interop.Error.SUCCESS)
+                {
+                    return GetSocketErrorForErrorCode(err);
+                }
 
-            // Remove from the lists any entries which weren't set
-            if (triggered == 0)
-            {
-                checkRead?.Clear();
-                checkWrite?.Clear();
-                checkError?.Clear();
+                // Remove from the lists any entries which weren't set
+                if (triggered == 0)
+                {
+                    Socket.SocketListDangerousReleaseRefs(checkRead, ref refsAdded);
+                    Socket.SocketListDangerousReleaseRefs(checkWrite, ref refsAdded);
+                    Socket.SocketListDangerousReleaseRefs(checkError, ref refsAdded);
+
+                    checkRead?.Clear();
+                    checkWrite?.Clear();
+                    checkError?.Clear();
+                }
+                else
+                {
+                    FilterPollList(checkRead, events, checkReadInitialCount - 1, Interop.Sys.PollEvents.POLLIN | Interop.Sys.PollEvents.POLLHUP, ref refsAdded);
+                    FilterPollList(checkWrite, events, checkWriteInitialCount + checkReadInitialCount - 1, Interop.Sys.PollEvents.POLLOUT, ref refsAdded);
+                    FilterPollList(checkError, events, checkErrorInitialCount + checkWriteInitialCount + checkReadInitialCount - 1, Interop.Sys.PollEvents.POLLERR | Interop.Sys.PollEvents.POLLPRI, ref refsAdded);
+                }
+
+                return SocketError.Success;
             }
-            else
+            finally
             {
-                FilterPollList(checkRead, events, checkReadInitialCount - 1, Interop.Sys.PollEvents.POLLIN | Interop.Sys.PollEvents.POLLHUP);
-                FilterPollList(checkWrite, events, checkWriteInitialCount + checkReadInitialCount - 1, Interop.Sys.PollEvents.POLLOUT);
-                FilterPollList(checkError, events, checkErrorInitialCount + checkWriteInitialCount + checkReadInitialCount - 1, Interop.Sys.PollEvents.POLLERR | Interop.Sys.PollEvents.POLLPRI);
+                // This order matches with the AddToPollArray calls
+                // to release only the handles that were ref'd.
+                Socket.SocketListDangerousReleaseRefs(checkRead, ref refsAdded);
+                Socket.SocketListDangerousReleaseRefs(checkWrite, ref refsAdded);
+                Socket.SocketListDangerousReleaseRefs(checkError, ref refsAdded);
+                Debug.Assert(refsAdded == 0);
             }
-            return SocketError.Success;
         }
 
-        private static unsafe void AddToPollArray(Interop.Sys.PollEvent* arr, int arrLength, IList socketList, ref int arrOffset, Interop.Sys.PollEvents events)
+        private static unsafe void AddToPollArray(Interop.Sys.PollEvent* arr, int arrLength, IList socketList, ref int arrOffset, Interop.Sys.PollEvents events, ref int refsAdded)
         {
             if (socketList == null)
                 return;
@@ -1494,12 +1566,15 @@ namespace System.Net.Sockets
                     throw new ArgumentException(SR.Format(SR.net_sockets_select, socket?.GetType().FullName ?? "null", typeof(Socket).FullName), nameof(socketList));
                 }
 
+                bool success = false;
+                socket.InternalSafeHandle.DangerousAddRef(ref success);
                 int fd = (int)socket.InternalSafeHandle.DangerousGetHandle();
                 arr[arrOffset++] = new Interop.Sys.PollEvent { Events = events, FileDescriptor = fd };
+                refsAdded++;
             }
         }
 
-        private static unsafe void FilterPollList(IList socketList, Interop.Sys.PollEvent* arr, int arrEndOffset, Interop.Sys.PollEvents desiredEvents)
+        private static unsafe void FilterPollList(IList socketList, Interop.Sys.PollEvent* arr, int arrEndOffset, Interop.Sys.PollEvents desiredEvents, ref int refsAdded)
         {
             if (socketList == null)
                 return;
@@ -1525,6 +1600,9 @@ namespace System.Net.Sockets
 
                 if ((arr[arrEndOffset].TriggeredEvents & desiredEvents) == 0)
                 {
+                    Socket socket = (Socket)socketList[i];
+                    socket.InternalSafeHandle.DangerousRelease();
+                    refsAdded--;
                     socketList.RemoveAt(i);
                 }
             }
@@ -1774,6 +1852,14 @@ namespace System.Net.Sockets
             return reuseSocket ?
                 socket.ReplaceHandle() :
                 SocketError.Success;
+        }
+
+        internal static unsafe SafeSocketHandle CreateSocket(IntPtr fileDescriptor)
+        {
+            var res = new SafeSocketHandle(fileDescriptor, ownsHandle: true);
+
+            if (NetEventSource.IsEnabled) NetEventSource.Info(null, res);
+            return res;
         }
     }
 }

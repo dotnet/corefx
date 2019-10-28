@@ -23,11 +23,11 @@ namespace System.Text.Json
                 return;
             }
 
-            Debug.Assert(state.Current.ReturnValue != default || state.Current.TempDictionaryValues != default);
-            Debug.Assert(state.Current.JsonClassInfo != default);
+            Debug.Assert(state.Current.ReturnValue != null || state.Current.TempDictionaryValues != null);
+            Debug.Assert(state.Current.JsonClassInfo != null);
 
-            bool isProcessingDictObject = state.Current.IsProcessingDictionaryOrIDictionaryConstructibleObject();
-            if ((isProcessingDictObject || state.Current.IsProcessingDictionaryOrIDictionaryConstructibleProperty()) &&
+            bool isProcessingDictObject = state.Current.IsProcessingObject(ClassType.Dictionary);
+            if ((isProcessingDictObject || state.Current.IsProcessingProperty(ClassType.Dictionary)) &&
                 state.Current.JsonClassInfo.DataExtensionProperty != state.Current.JsonPropertyInfo)
             {
                 if (isProcessingDictObject)
@@ -36,6 +36,11 @@ namespace System.Text.Json
                 }
 
                 state.Current.KeyName = reader.GetString();
+            }
+            else if (state.Current.JsonClassInfo.ClassType == ClassType.Value)
+            {
+                // We should be in a converter, thus we must have bad JSON.
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonPropertyInfo.RuntimePropertyType);
             }
             else
             {

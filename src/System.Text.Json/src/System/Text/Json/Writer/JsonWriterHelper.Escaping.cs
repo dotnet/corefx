@@ -5,8 +5,7 @@
 using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;  // Do not remove. Needed for Int32LsbToHexDigit when !BUILDING_INBOX_LIBRARY
 using System.Text.Encodings.Web;
 
 namespace System.Text.Json
@@ -52,60 +51,24 @@ namespace System.Text.Json
 
         private static bool NeedsEscapingNoBoundsCheck(char value) => AllowList[value] == 0;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool NeedsEscaping(char value) => value > LastAsciiCharacter || AllowList[value] == 0;
-
         public static int NeedsEscaping(ReadOnlySpan<byte> value, JavaScriptEncoder encoder)
         {
-            int idx;
-
-            if (encoder != null)
-            {
-                idx = encoder.FindFirstCharacterToEncodeUtf8(value);
-                goto Return;
-            }
-
-            for (idx = 0; idx < value.Length; idx++)
-            {
-                if (NeedsEscaping(value[idx]))
-                {
-                    goto Return;
-                }
-            }
-
-            idx = -1; // all characters allowed
-
-        Return:
-            return idx;
+            return (encoder ?? JavaScriptEncoder.Default).FindFirstCharacterToEncodeUtf8(value);
         }
 
         public static unsafe int NeedsEscaping(ReadOnlySpan<char> value, JavaScriptEncoder encoder)
         {
-            int idx;
-
-            // Some implementations of JavascriptEncoder.FindFirstCharacterToEncode may not accept
-            // null pointers and gaurd against that. Hence, check up-front and fall down to return -1.
-            if (encoder != null && !value.IsEmpty)
+            // Some implementations of JavaScriptEncoder.FindFirstCharacterToEncode may not accept
+            // null pointers and gaurd against that. Hence, check up-front to return -1.
+            if (value.IsEmpty)
             {
-                fixed (char* ptr = value)
-                {
-                    idx = encoder.FindFirstCharacterToEncode(ptr, value.Length);
-                }
-                goto Return;
+                return -1;
             }
 
-            for (idx = 0; idx < value.Length; idx++)
+            fixed (char* ptr = value)
             {
-                if (NeedsEscaping(value[idx]))
-                {
-                    goto Return;
-                }
+                return (encoder ?? JavaScriptEncoder.Default).FindFirstCharacterToEncode(ptr, value.Length);
             }
-
-            idx = -1; // all characters allowed
-
-        Return:
-            return idx;
         }
 
         public static int GetMaxEscapedLength(int textLength, int firstIndexToEscape)

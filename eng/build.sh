@@ -52,7 +52,7 @@ buildtests=false
 checkedPossibleDirectoryToBuild=false
 
 # Check if an action is passed in
-declare -a actions=("r" "restore" "b" "build" "rebuild" "deploy" "deployDeps" "test" "integrationTest" "sign" "publish" "buildtests")
+declare -a actions=("r" "restore" "b" "build" "rebuild" "deploy" "deployDeps" "test" "integrationTest" "sign" "publish" "buildtests" "clean")
 actInt=($(comm -12 <(printf '%s\n' "${actions[@]/#/-}" | sort) <(printf '%s\n' "${@/#--/-}" | sort)))
 if [ ${#actInt[@]} -eq 0 ]; then
     arguments="-restore -build"
@@ -64,17 +64,6 @@ while [[ $# > 0 ]]; do
      -help|-h)
       usage
       exit 0
-      ;;
-     -clean)
-      artifactsPath="$scriptroot/../artifacts"
-      if [ -d "$artifactsPath" ]; then
-        rm -rf $artifactsPath
-        echo "Artifacts directory deleted."
-      fi
-      if [ ${#actInt[@]} -eq 0 ]; then
-        exit 0
-      fi
-      shift 1
       ;;
      -arch)
       arguments="$arguments /p:ArchGroup=$2"

@@ -311,17 +311,7 @@ namespace System.Drawing
             // Now that we know the marshalled size is the same as LOGFONT, copy in the data
             logFont = new SafeNativeMethods.LOGFONT();
 
-            if (!type.IsValueType)
-            {
-                // Only works with non value types
-                Marshal.StructureToPtr(lf, new IntPtr(&logFont), fDeleteOld: false);
-            }
-            else
-            {
-                GCHandle handle = GCHandle.Alloc(lf, GCHandleType.Pinned);
-                Buffer.MemoryCopy((byte*)handle.AddrOfPinnedObject(), &logFont, nativeSize, nativeSize);
-                handle.Free();
-            }
+            Marshal.StructureToPtr(lf, new IntPtr(&logFont), fDeleteOld: false);
 
             return FromLogFontInternal(ref logFont, hdc);
         }
