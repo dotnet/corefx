@@ -764,30 +764,24 @@ namespace System.Text.Encodings.Web
                         }
                         else
                         {
-                            if (DoesAsciiNeedEncoding(ptr[idx]) == 1
+                            if (DoesAsciiNeedEncoding(ptr[idx]) == 1) goto Return;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 1]) == 1) goto Return1;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 2]) == 1) goto Return2;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 3]) == 1) goto Return3;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 4]) == 1) goto Return4;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 5]) == 1) goto Return5;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 6]) == 1) goto Return6;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 7]) == 1) goto Return7;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 8]) == 1) goto Return8;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 9]) == 1) goto Return9;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 10]) == 1) goto Return10;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 11]) == 1) goto Return11;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 12]) == 1) goto Return12;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 13]) == 1) goto Return13;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 14]) == 1) goto Return14;
+                            if (DoesAsciiNeedEncoding(ptr[idx + 15]) == 1) goto Return15;
 
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1
-                                || DoesAsciiNeedEncoding(ptr[++idx]) == 1)
-                            {
-                                goto Return;
-                            }
-                            idx++;
+                            idx += 16;
                         }
                         startingAddress = (sbyte*)ptr + idx;
                     }
@@ -826,7 +820,38 @@ namespace System.Text.Encodings.Web
                 Debug.Assert(idx == utf8Text.Length);
 
                 idx = -1; // All bytes are allowed.
+                goto Return;
 
+            Return15:
+                return idx + 15;
+            Return14:
+                return idx + 14;
+            Return13:
+                return idx + 13;
+            Return12:
+                return idx + 12;
+            Return11:
+                return idx + 11;
+            Return10:
+                return idx + 10;
+            Return9:
+                return idx + 9;
+            Return8:
+                return idx + 8;
+            Return7:
+                return idx + 7;
+            Return6:
+                return idx + 6;
+            Return5:
+                return idx + 5;
+            Return4:
+                return idx + 4;
+            Return3:
+                return idx + 3;
+            Return2:
+                return idx + 2;
+            Return1:
+                return idx + 1;
             Return:
                 return idx;
             }
