@@ -200,7 +200,7 @@ namespace System.Text.Encodings.Web
             goto AllAllowed;
 
         VectorizedFound:
-            idx = GetIndexOfFirstNeedToEscape(index);
+            idx = BitHelper.GetIndexOfFirstNeedToEscape(index);
             idx += CalculateIndex(ptr, text);
             return idx;
 
@@ -320,7 +320,7 @@ namespace System.Text.Encodings.Web
                 goto AllAllowed;
 
             VectorizedFound:
-                idx = GetIndexOfFirstNeedToEscape(index);
+                idx = BitHelper.GetIndexOfFirstNeedToEscape(index);
                 idx += CalculateIndex(ptr, pValue);
                 return idx;
 

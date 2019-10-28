@@ -11,7 +11,6 @@ using System.Runtime.InteropServices;
 using System.Text.Unicode;
 
 #if NETCOREAPP
-using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 #endif
@@ -754,7 +753,7 @@ namespace System.Text.Encodings.Web
 
                                 if (index != 0)
                                 {
-                                    idx += GetIndexOfFirstNeedToEscape(index);
+                                    idx += BitHelper.GetIndexOfFirstNeedToEscape(index);
                                     goto Return;
                                 }
                             }
@@ -1021,20 +1020,6 @@ namespace System.Text.Encodings.Web
 
             return _asciiNeedsEscaping[value];
         }
-
-#if NETCOREAPP
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected static int GetIndexOfFirstNeedToEscape(int index)
-        {
-            // Found at least one byte that needs to be escaped, figure out the index of
-            // the first one found that needed to be escaped within the 16 bytes.
-            Debug.Assert(index > 0 && index <= 65_535);
-            int tzc = BitOperations.TrailingZeroCount(index);
-            Debug.Assert(tzc >= 0 && tzc <= 16);
-
-            return tzc;
-        }
-#endif
 
         private static void ThrowArgumentException_MaxOutputCharsPerInputChar()
         {
