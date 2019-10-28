@@ -337,7 +337,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 // Note that neither the cert nor the key have a LocalKeyId attribute.
                 // The existence of this unknown key is enough to abort the load.
-                keyContents.AddSafeBag(new Pkcs12KeyBag(pk8.Encode()));
+                keyContents.AddSafeBag(new Pkcs12ShroudedKeyBag(pk8.Encrypt(pw, s_windowsPbe)));
                 certContents.AddCertificate(cert);
 
                 AddContents(keyContents, builder, pw, encrypt: false);
@@ -388,7 +388,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 // Note that neither the cert nor the key have a LocalKeyId attribute.
                 // The existence of this unreadable key is enough to abort the load.
-                keyContents.AddSafeBag(new Pkcs12KeyBag(pk8.Encode()));
+                keyContents.AddSafeBag(new Pkcs12ShroudedKeyBag(pk8.Encrypt(pw, s_windowsPbe)));
                 certContents.AddCertificate(cert);
 
                 AddContents(keyContents, builder, pw, encrypt: false);
