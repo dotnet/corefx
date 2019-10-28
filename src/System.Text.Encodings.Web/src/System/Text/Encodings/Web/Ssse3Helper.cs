@@ -13,10 +13,15 @@ namespace System.Text.Encodings.Web
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<sbyte> CreateEscapingMask_DefaultJavaScriptEncoderBasicLatin(Vector128<sbyte> sourceValue)
-            => CreateEscapingMask(sourceValue, s_bitMaskLookupBasicLatin);
+            => CreateEscapingMask(sourceValue, s_bitMaskLookupBasicLatin, s_bitPosLookup, s_nibbleMaskSByte, s_nullMaskSByte);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector128<sbyte> CreateEscapingMask(Vector128<sbyte> sourceValue, Vector128<sbyte> bitMaskLookup)
+        public static Vector128<sbyte> CreateEscapingMask(
+            Vector128<sbyte> sourceValue,
+            Vector128<sbyte> bitMaskLookup,
+            Vector128<sbyte> bitPosLookup,
+            Vector128<sbyte> nibbleMaskSByte,
+            Vector128<sbyte> nullMaskSByte)
         {
             // To check if an input byte needs to be escaped or not, we use a bitmask-lookup.
             // Therefore we split the input byte into the low- and high-nibble, which will get
@@ -51,23 +56,23 @@ namespace System.Text.Encodings.Web
 
             Debug.Assert(Ssse3.IsSupported);
 
-            Vector128<sbyte> highNibbles = Sse2.And(Sse2.ShiftRightLogical(sourceValue.AsInt32(), 4).AsSByte(), s_nibbleMaskSByte);
-            Vector128<sbyte> lowNibbles = Sse2.And(sourceValue, s_nibbleMaskSByte);
+            Vector128<sbyte> highNibbles = Sse2.And(Sse2.ShiftRightLogical(sourceValue.AsInt32(), 4).AsSByte(), nibbleMaskSByte);
+            Vector128<sbyte> lowNibbles = Sse2.And(sourceValue, nibbleMaskSByte);
 
             Vector128<sbyte> bitMask = Ssse3.Shuffle(bitMaskLookup, lowNibbles);
-            Vector128<sbyte> bitPositions = Ssse3.Shuffle(s_bitPosLookup, highNibbles);
+            Vector128<sbyte> bitPositions = Ssse3.Shuffle(bitPosLookup, highNibbles);
 
             Vector128<sbyte> mask = Sse2.And(bitPositions, bitMask);
 
-            Vector128<sbyte> ne0Gt = Sse2.CompareGreaterThan(mask, s_nullMaskSByte);
-            Vector128<sbyte> ne0Lt = Sse2.CompareLessThan(mask, s_nullMaskSByte);
+            Vector128<sbyte> ne0Gt = Sse2.CompareGreaterThan(mask, nullMaskSByte);
+            Vector128<sbyte> ne0Lt = Sse2.CompareLessThan(mask, nullMaskSByte);
             mask = Sse2.Or(ne0Gt, ne0Lt);
 
             return mask;
         }
 
-        private static readonly Vector128<sbyte> s_nibbleMaskSByte = Vector128.Create((sbyte)0xF);
-        private static readonly Vector128<sbyte> s_nullMaskSByte = Vector128<sbyte>.Zero;
+        internal static readonly Vector128<sbyte> s_nibbleMaskSByte = Vector128.Create((sbyte)0xF);
+        internal static readonly Vector128<sbyte> s_nullMaskSByte = Vector128<sbyte>.Zero;
 
         // See comment above in method CreateEscapingMask_DefaultJavaScriptEncoderBasicLatin
         // for description of the bit-mask.
@@ -99,7 +104,7 @@ namespace System.Text.Encodings.Web
         // A bitmask from the Bitmask (above) is created only for values 0..7 (one byte),
         // so to avoid a explicit check for values outside 0..7, i.e.
         // high nibbles 8..F, we use a bitpos that always results in escaping.
-        private static readonly Vector128<sbyte> s_bitPosLookup = Vector128.Create(
+        internal static readonly Vector128<sbyte> s_bitPosLookup = Vector128.Create(
             0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,     // high-nibble 0..7
             0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF      // high-nibble 8..F
         ).AsSByte();

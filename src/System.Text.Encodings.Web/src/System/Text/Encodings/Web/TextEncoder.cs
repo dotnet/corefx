@@ -723,10 +723,16 @@ namespace System.Text.Encodings.Web
                 int idx = 0;
 
 #if NETCOREAPP
-                if (Sse2.IsSupported)
+                if (Sse2.IsSupported && utf8Text.Length - 16 >= idx)
                 {
+                    // Hoist these outside the loop, as the JIT won't do it.
+                    Vector128<sbyte> bitMaskLookupAsciiNeedsEscaping = _bitMaskLookupAsciiNeedsEscaping;
+                    Vector128<sbyte> bitPosLookup = Ssse3Helper.s_bitPosLookup;
+                    Vector128<sbyte> nibbleMaskSByte = Ssse3Helper.s_nibbleMaskSByte;
+                    Vector128<sbyte> nullMaskSByte = Ssse3Helper.s_nullMaskSByte;
+
                     sbyte* startingAddress = (sbyte*)ptr;
-                    while (utf8Text.Length - 16 >= idx)
+                    do
                     {
                         Debug.Assert(startingAddress >= ptr && startingAddress <= (ptr + utf8Text.Length - 16));
 
@@ -737,7 +743,45 @@ namespace System.Text.Encodings.Web
                         // casted to signed byte.
                         int index = Sse2.MoveMask(sourceValue);
 
-                        if (index != 0)
+                        if (index == 0)
+                        {
+                            // All of the following 16 bytes is ASCII.
+
+                            if (Ssse3.IsSupported)
+                            {
+                                Vector128<sbyte> mask = Ssse3Helper.CreateEscapingMask(sourceValue, bitMaskLookupAsciiNeedsEscaping, bitPosLookup, nibbleMaskSByte, nullMaskSByte);
+                                index = Sse2.MoveMask(mask);
+
+                                if (index != 0)
+                                {
+                                    idx += GetIndexOfFirstNeedToEscape(index);
+                                    goto Return;
+                                }
+                            }
+                            else
+                            {
+                                byte* p = (byte*)startingAddress;
+                                if (DoesAsciiNeedEncoding(p[0])) goto Return;
+                                if (DoesAsciiNeedEncoding(p[1])) goto Return1;
+                                if (DoesAsciiNeedEncoding(p[2])) goto Return2;
+                                if (DoesAsciiNeedEncoding(p[3])) goto Return3;
+                                if (DoesAsciiNeedEncoding(p[4])) goto Return4;
+                                if (DoesAsciiNeedEncoding(p[5])) goto Return5;
+                                if (DoesAsciiNeedEncoding(p[6])) goto Return6;
+                                if (DoesAsciiNeedEncoding(p[7])) goto Return7;
+                                if (DoesAsciiNeedEncoding(p[8])) goto Return8;
+                                if (DoesAsciiNeedEncoding(p[9])) goto Return9;
+                                if (DoesAsciiNeedEncoding(p[10])) goto Return10;
+                                if (DoesAsciiNeedEncoding(p[11])) goto Return11;
+                                if (DoesAsciiNeedEncoding(p[12])) goto Return12;
+                                if (DoesAsciiNeedEncoding(p[13])) goto Return13;
+                                if (DoesAsciiNeedEncoding(p[14])) goto Return14;
+                                if (DoesAsciiNeedEncoding(p[15])) goto Return15;
+                            }
+
+                            idx += 16;
+                        }
+                        else
                         {
                             // At least one of the following 16 bytes is non-ASCII.
 
@@ -771,46 +815,9 @@ namespace System.Text.Encodings.Web
                                 }
                             }
                         }
-                        else
-                        {
-                            byte* p = ptr + idx;
-
-                            if (Ssse3.IsSupported)
-                            {
-                                sourceValue = Sse2.LoadVector128((sbyte*)p);
-                                Vector128<sbyte> mask = Ssse3Helper.CreateEscapingMask(sourceValue, _bitMaskLookupAsciiNeedsEscaping);
-                                index = Sse2.MoveMask(mask);
-
-                                if (index != 0)
-                                {
-                                    idx += GetIndexOfFirstNeedToEscape(index);
-                                    goto Return;
-                                }
-                            }
-                            else
-                            {
-                                if (DoesAsciiNeedEncoding(p[0])) goto Return;
-                                if (DoesAsciiNeedEncoding(p[1])) goto Return1;
-                                if (DoesAsciiNeedEncoding(p[2])) goto Return2;
-                                if (DoesAsciiNeedEncoding(p[3])) goto Return3;
-                                if (DoesAsciiNeedEncoding(p[4])) goto Return4;
-                                if (DoesAsciiNeedEncoding(p[5])) goto Return5;
-                                if (DoesAsciiNeedEncoding(p[6])) goto Return6;
-                                if (DoesAsciiNeedEncoding(p[7])) goto Return7;
-                                if (DoesAsciiNeedEncoding(p[8])) goto Return8;
-                                if (DoesAsciiNeedEncoding(p[9])) goto Return9;
-                                if (DoesAsciiNeedEncoding(p[10])) goto Return10;
-                                if (DoesAsciiNeedEncoding(p[11])) goto Return11;
-                                if (DoesAsciiNeedEncoding(p[12])) goto Return12;
-                                if (DoesAsciiNeedEncoding(p[13])) goto Return13;
-                                if (DoesAsciiNeedEncoding(p[14])) goto Return14;
-                                if (DoesAsciiNeedEncoding(p[15])) goto Return15;
-                            }
-
-                            idx += 16;
-                        }
                         startingAddress = (sbyte*)ptr + idx;
                     }
+                    while (utf8Text.Length - 16 >= idx);
 
                     // Process the remaining bytes.
                     Debug.Assert(utf8Text.Length - idx < 16);
