@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #nullable enable
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace System.IO
@@ -25,6 +26,8 @@ namespace System.IO
         /// </summary>
         internal static Exception GetExceptionForWin32Error(int errorCode, string? path = "")
         {
+            Debug.Assert(errorCode != Interop.Errors.ERROR_SUCCESS);
+
             switch (errorCode)
             {
                 case Interop.Errors.ERROR_FILE_NOT_FOUND:

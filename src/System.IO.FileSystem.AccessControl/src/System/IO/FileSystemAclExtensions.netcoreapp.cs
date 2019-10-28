@@ -74,12 +74,19 @@ namespace System.IO
 
             if (tempshare < FileShare.None || tempshare > (FileShare.ReadWrite | FileShare.Delete))
             {
-                throw new ArgumentOutOfRangeException(nameof(tempshare), SR.ArgumentOutOfRange_Enum);
+                throw new ArgumentOutOfRangeException(nameof(share), SR.ArgumentOutOfRange_Enum);
             }
 
             if (bufferSize <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
+            }
+
+            // Do not allow using combinations of non-writing file system rights with writing file modes
+            if ((rights & FileSystemRights.Write) == 0 &&
+                (mode == FileMode.Truncate || mode == FileMode.CreateNew || mode == FileMode.Create || mode == FileMode.Append))
+            {
+                throw new ArgumentException(SR.Format(SR.Argument_InvalidFileModeAndFileSystemRightsCombo, mode, rights));
             }
 
             SafeFileHandle handle = CreateFileOpenHandle(fileInfo.FullName, mode, rights, share, options, fileSecurity);
@@ -126,10 +133,9 @@ namespace System.IO
                 mode = FileMode.OpenOrCreate;
             }
 
-            // For mitigating local elevation of privilege attack through named pipes
-            // make sure we always call CreateFile with SECURITY_ANONYMOUS so that the
-            // named pipe server can't impersonate a high privileged client security context
-            // (note that this is the effective default on CreateFile2)
+            // For mitigating local elevation of privilege attack through named pipes make sure we always call CreateFile with SECURITY_ANONYMOUS so that the
+            // named pipe server can't impersonate a high privileged client security context (note that this is the effective default on CreateFile2)
+            // SECURITY_SQOS_PRESENT flags that a SECURITY_ flag is present. While it seems bizarre at first, this is due to SECURITY_ANONYMOUS being equal to 0
             int flagsAndAttributes = (int)options | Interop.Kernel32.SecurityOptions.SECURITY_SQOS_PRESENT | Interop.Kernel32.SecurityOptions.SECURITY_ANONYMOUS;
 
             SafeFileHandle handle;
