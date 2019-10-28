@@ -123,6 +123,8 @@ namespace System.Text.Json
                 }
                 else if (jsonPropertyInfo.IsMetadata)
                 {
+                    state.Current.JsonPropertyInfo = jsonPropertyInfo;
+
                     if (jsonPropertyInfo.MetadataProperty == MetadataPropertyName.Id)
                     {
                         SetAsPreserved(ref state.Current);
@@ -141,7 +143,6 @@ namespace System.Text.Json
                             throw new JsonException("Preserved arrays canot lack an identifier.");
                         }
                     }
-                    state.Current.JsonPropertyInfo = jsonPropertyInfo;
                 }
                 else
                 {

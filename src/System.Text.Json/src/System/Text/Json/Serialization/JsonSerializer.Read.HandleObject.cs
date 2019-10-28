@@ -114,6 +114,11 @@ namespace System.Text.Json
             {
                 Type referenceType = state.Current.ReturnValue.GetType();
                 value = referenceType.GetProperty("Values").GetValue(state.Current.ReturnValue);
+
+                if (value == null)
+                {
+                    throw new JsonException("Preserved array $values property was not present or its value is not an array.");
+                }
             }
             else
             {

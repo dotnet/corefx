@@ -838,22 +838,8 @@ namespace System.Text.Json.Tests
         }
         #endregion
 
-        #region Ground Rules
-        [Fact]
-        public static void MoreThanOneId()
-        {
-            string json = @"{
-                ""$id"": ""1"",
-                ""$id"": ""2"",
-                ""Name"": ""Angela"",
-                ""Manager"": {
-                    ""$ref"": ""1""
-                }
-            }";
-
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
-        }
-
+        #region Ground Rules/Corner cases
+        #region Reference objects ($ref)
         [Fact]
         public static void ReferenceObjectsShouldNotContainMoreProperties()
         {
@@ -866,7 +852,9 @@ namespace System.Text.Json.Tests
                     ""$ref"": ""1""
                 }
             }";
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
+
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
+            Assert.Equal("Reference objects cannot contain other properties.", ex.Message);
 
             //Regular property after $ref
             json = @"{
@@ -877,7 +865,9 @@ namespace System.Text.Json.Tests
                     ""Name"": ""Bob""
                 }
             }";
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
+
+            ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
+            Assert.Equal("Reference objects cannot contain other properties.", ex.Message);
 
             //Metadata property before $ref
             json = @"{
@@ -888,7 +878,75 @@ namespace System.Text.Json.Tests
                     ""$ref"": ""1""
                 }
             }";
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
+
+            ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
+            Assert.Equal("Reference objects cannot contain other properties.", ex.Message);
+
+            //Metadata property after $ref
+            json = @"{
+                ""$id"": ""1"",
+                ""Name"": ""Angela"",
+                ""Manager"": {
+                    ""$ref"": ""1"",
+                    ""$id"": ""2""
+                }
+            }";
+
+            ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
+            Assert.Equal("Reference objects cannot contain other properties.", ex.Message);
+        }
+
+        [Fact]
+        public static void ReferenceObjectBeforePreservedObject()
+        {
+            string json = @"[
+                {
+                    ""$ref"": ""1""
+                },
+                {
+                    ""$id"": ""1"",
+                    ""Name"": ""Angela""
+                }
+            ]";
+
+            List<Employee> root = JsonSerializer.Deserialize<List<Employee>>(json, _deserializeOptions);
+            Assert.Null(root[0]);
+            Assert.Equal("Angela", root[1].Name);
+        }
+        #endregion
+
+        #region Preserved objects ($id)
+        [Fact]
+        public static void MoreThanOneId()
+        {
+            string json = @"{
+                ""$id"": ""1"",
+                ""$id"": ""2"",
+                ""Name"": ""Angela"",
+                ""Manager"": {
+                    ""$ref"": ""1""
+                }
+            }";
+
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
+
+            Assert.Equal("$.$id", ex.Path);
+            Assert.Equal("Object already defines a reference identifier.", ex.Message);
+        }
+
+        [Fact]
+        public static void IdIsNotFirstProperty()
+        {
+            string json = @"{
+                ""Name"": ""Angela"",
+                ""$id"": ""1"",
+                ""Manager"": {
+                    ""$ref"": ""1""
+                }
+            }";
+
+            Employee angela = JsonSerializer.Deserialize<Employee>(json, _deserializeOptions);
+            Assert.Same(angela, angela.Manager);
         }
 
         [Fact]
@@ -905,16 +963,34 @@ namespace System.Text.Json.Tests
                 }
             ]";
 
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<Employee>>(json, _deserializeOptions));
-        }
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<Employee>>(json, _deserializeOptions));
 
+            Assert.Equal("$[1].$id", ex.Path);
+            Assert.Equal("Duplicated id found while preserving reference.", ex.Message);
+        }
+        #endregion
+
+        #region Preserved arrays ($id and $values)
         [Fact]
         public static void PreservedArrayWithoutMetadata()
         {
             string json = "{}";
-            var list = JsonSerializer.Deserialize<List<int>>(json, _deserializeOptions);
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<int>>(json, _deserializeOptions));
 
-            Assert.Null(list);
+            Assert.Equal("$", ex.Path);
+            Assert.Equal("Preserved array $values property was not present or its value is not an array.", ex.Message);
+        }
+
+        [Fact]
+        public static void PreservedArrayWithoutValues()
+        {
+            string json = @"{
+                ""$id"": ""1""
+            }";
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<int>>(json, _deserializeOptions));
+
+            Assert.Equal("$.$id", ex.Path); // Not sure if is ok for the Path to have this value.
+            Assert.Equal("Preserved array $values property was not present or its value is not an array.", ex.Message);
         }
 
         [Fact]
@@ -924,31 +1000,54 @@ namespace System.Text.Json.Tests
                 ""$values"": []
             }";
 
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<int>>(json, _deserializeOptions));
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<int>>(json, _deserializeOptions));
+
+            Assert.Equal("$.$values", ex.Path);
+            Assert.Equal("Preserved arrays canot lack an identifier.", ex.Message);
         }
 
         [Fact]
-        public static void PreservedArrayValueDoesNotContainArray()
+        public static void PreservedArrayValuesContainsNull()
         {
             string json = @"{
                 ""$id"": ""1"",
                 ""$values"": null
             }";
 
-            var list = JsonSerializer.Deserialize<List<int>>(json, _deserializeOptions);
-            Assert.Null(list);
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<int>>(json, _deserializeOptions));
+
+            //TODO: JsonPath lacks $values due HandleNull token calls EndProperty. either add special case or find a way to make $values not-nullable.
+            //Assert.Equal("$.$values", ex.Path); 
+            Assert.Equal("Preserved array $values property was not present or its value is not an array.", ex.Message);
         }
 
         [Fact]
-        public static void PreservedArrayValueIsPreservedArray()
+        public static void PreservedArrayValuesContainsValue()
         {
             string json = @"{
                 ""$id"": ""1"",
-                ""$values"": { ""$id"": ""2"", ""$values"": [] }
+                ""$values"": 1
             }";
 
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<int>>(json, _deserializeOptions));
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<Employee>>(json, _deserializeOptions));
+
+            Assert.Equal("$.$values", ex.Path);
         }
+
+        [Fact]
+        public static void PreservedArrayValuesContainsObject()
+        {
+            string json = @"{
+                ""$id"": ""1"",
+                ""$values"": {}
+            }";
+
+            JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<Employee>>(json, _deserializeOptions));
+
+            Assert.Equal("$.$values", ex.Path);
+            Assert.Equal("The property is already part of a preserved array object, cannot be read as a preserved array.", ex.Message);
+        }
+        #endregion
         //TODO: Add more tests for dictionaries.
         #endregion
     }
