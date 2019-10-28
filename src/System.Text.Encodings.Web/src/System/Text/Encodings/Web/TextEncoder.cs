@@ -702,6 +702,8 @@ namespace System.Text.Encodings.Web
         [EditorBrowsable(EditorBrowsableState.Never)]
         public virtual unsafe int FindFirstCharacterToEncodeUtf8(ReadOnlySpan<byte> utf8Text)
         {
+            EnsureAsciiCacheInitialized();
+
             // Loop through the input text, terminating when we see ill-formed UTF-8 or when we decode a scalar value
             // that must be encoded. If we see either of these things then we'll return its index in the original
             // input sequence. If we consume the entire text without seeing either of these, return -1 to indicate
@@ -911,6 +913,22 @@ namespace System.Text.Encodings.Web
             return encoding;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void EnsureAsciiCacheInitialized()
+        {
+            // After initialization the ASCII-cache only has values -1 or 1,
+
+            if (_asciiNeedsEscaping[0] != 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _asciiNeedsEscaping.Length; i++)
+            {
+                _asciiNeedsEscaping[i] = WillEncode(i) ? 1 : -1;
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int DoesAsciiNeedEncoding(byte value)
         {
@@ -918,13 +936,8 @@ namespace System.Text.Encodings.Web
 
             int needsEscaping = _asciiNeedsEscaping[value];
 
-            Debug.Assert(needsEscaping == 0 || needsEscaping == 1 || needsEscaping == -1);
+            Debug.Assert(needsEscaping == 1 || needsEscaping == -1);
 
-            if (needsEscaping == 0)
-            {
-                needsEscaping = WillEncode(value) ? 1 : -1;
-                _asciiNeedsEscaping[value] = needsEscaping;
-            }
             return needsEscaping;
         }
 
