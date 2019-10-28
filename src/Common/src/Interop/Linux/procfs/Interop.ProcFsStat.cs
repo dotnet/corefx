@@ -82,7 +82,9 @@ internal static partial class Interop
 
         internal struct ParsedStatus
         {
+#if DEBUG
             internal int Pid;
+#endif
             internal ulong VmHWM;
             internal ulong VmRSS;
             internal ulong VmData;
@@ -234,7 +236,9 @@ internal static partial class Interop
         internal static bool TryReadStatusFile(int pid, out ParsedStatus result, ReusableTextReader reusableReader)
         {
             bool b = TryParseStatusFile(GetStatusFilePathForProcess(pid), out result, reusableReader);
+#if DEBUG
             Debug.Assert(!b || result.Pid == pid, "Expected process ID from status file to match supplied pid");
+#endif
             return b;
         }
 
@@ -330,10 +334,11 @@ internal static partial class Interop
 
                 switch (elements[0])
                 {
+#if DEBUG
                     case "Pid":
                         int.TryParse(elements[1], out results.Pid);
                         break;
-
+#endif
                     case "VmHWM":
                         ulong.TryParse(elements[1], out results.VmHWM);
                         results.VmHWM *= 1024;
