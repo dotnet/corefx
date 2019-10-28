@@ -26,5 +26,5 @@ steps:
 - bash: |
     cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
     export HTTPSTRESS_ARGS='$(HTTPSTRESS_ARGS)'
-    docker-compose up --abort-on-container-exit
+    docker-compose up --abort-on-container-exit --no-color
   displayName: Run HttpStress
