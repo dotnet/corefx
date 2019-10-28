@@ -8,7 +8,6 @@ using System.Text.Internal;
 using System.Text.Unicode;
 
 #if NETCOREAPP
-using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 #endif
@@ -437,20 +436,6 @@ namespace System.Text.Encodings.Web
 
             int index = Sse2.MoveMask(mask.AsByte());
             return index;
-        }
-
-        // PERF: don't manually inline or call this method in NeedsEscaping
-        // as the resulting asm won't be great
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int GetIndexOfFirstNeedToEscape(int index)
-        {
-            // Found at least one byte that needs to be escaped, figure out the index of
-            // the first one found that needed to be escaped within the 16 bytes.
-            Debug.Assert(index > 0 && index <= 65_535);
-            int tzc = BitOperations.TrailingZeroCount(index);
-            Debug.Assert(tzc >= 0 && tzc <= 16);
-
-            return tzc;
         }
 #endif
     }
