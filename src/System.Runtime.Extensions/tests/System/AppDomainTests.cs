@@ -947,6 +947,10 @@ namespace System.Tests
             }).Dispose();
         }
     }
+
+    class AGenericClass<T>
+    {
+    }
 }
 
 namespace FxResources.TestApp
