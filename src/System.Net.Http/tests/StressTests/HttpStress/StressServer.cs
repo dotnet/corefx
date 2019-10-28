@@ -93,7 +93,7 @@ namespace HttpStress
 
                     void ConfigureListenOptions(ListenOptions listenOptions)
                     {
-                        if (configuration.ServerUri.StartsWith("https"))
+                        if (scheme == "https")
                         {
                             // Create self-signed cert for server.
                             using (RSA rsa = RSA.Create())
