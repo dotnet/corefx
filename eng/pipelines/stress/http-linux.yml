@@ -25,5 +25,5 @@ steps:
 
 - bash: |
     export HTTPSTRESS_ARGS='$(HTTPSTRESS_ARGS)'
-    docker-compose up --up --abort-on-container-exit
+    docker-compose up --abort-on-container-exit
   displayName: Run HttpStress
