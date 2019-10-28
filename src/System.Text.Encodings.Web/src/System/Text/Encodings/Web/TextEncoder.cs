@@ -29,7 +29,8 @@ namespace System.Text.Encodings.Web
         // Fast cache for Ascii
         private readonly byte[][] _asciiEscape = new byte[0x80][];
 
-        private readonly int[] _asciiNeedsEscaping = new int[0x80];
+        private readonly bool[] _asciiNeedsEscaping = new bool[0x80];
+        private bool _isAsciiCacheInitialized;
 
         // Keep a reference to Array.Empty<byte> as this is used as a singleton for comparisons
         // and there is no guarantee that Array.Empty<byte>() will always be the same instance.
@@ -702,7 +703,10 @@ namespace System.Text.Encodings.Web
         [EditorBrowsable(EditorBrowsableState.Never)]
         public virtual unsafe int FindFirstCharacterToEncodeUtf8(ReadOnlySpan<byte> utf8Text)
         {
-            EnsureAsciiCacheInitialized();
+            if (!_isAsciiCacheInitialized)
+            {
+                InitializeAsciiCache();
+            }
 
             // Loop through the input text, terminating when we see ill-formed UTF-8 or when we decode a scalar value
             // that must be encoded. If we see either of these things then we'll return its index in the original
@@ -741,7 +745,7 @@ namespace System.Text.Encodings.Web
 
                                 if (UnicodeUtility.IsAsciiCodePoint(ptr[idx]))
                                 {
-                                    if (DoesAsciiNeedEncoding(ptr[idx]) == 1)
+                                    if (DoesAsciiNeedEncoding(ptr[idx]))
                                     {
                                         goto Return;
                                     }
@@ -764,22 +768,24 @@ namespace System.Text.Encodings.Web
                         }
                         else
                         {
-                            if (DoesAsciiNeedEncoding(ptr[idx]) == 1) goto Return;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 1]) == 1) goto Return1;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 2]) == 1) goto Return2;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 3]) == 1) goto Return3;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 4]) == 1) goto Return4;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 5]) == 1) goto Return5;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 6]) == 1) goto Return6;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 7]) == 1) goto Return7;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 8]) == 1) goto Return8;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 9]) == 1) goto Return9;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 10]) == 1) goto Return10;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 11]) == 1) goto Return11;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 12]) == 1) goto Return12;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 13]) == 1) goto Return13;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 14]) == 1) goto Return14;
-                            if (DoesAsciiNeedEncoding(ptr[idx + 15]) == 1) goto Return15;
+                            byte* p = ptr + idx;
+
+                            if (DoesAsciiNeedEncoding(p[0])) goto Return;
+                            if (DoesAsciiNeedEncoding(p[1])) goto Return1;
+                            if (DoesAsciiNeedEncoding(p[2])) goto Return2;
+                            if (DoesAsciiNeedEncoding(p[3])) goto Return3;
+                            if (DoesAsciiNeedEncoding(p[4])) goto Return4;
+                            if (DoesAsciiNeedEncoding(p[5])) goto Return5;
+                            if (DoesAsciiNeedEncoding(p[6])) goto Return6;
+                            if (DoesAsciiNeedEncoding(p[7])) goto Return7;
+                            if (DoesAsciiNeedEncoding(p[8])) goto Return8;
+                            if (DoesAsciiNeedEncoding(p[9])) goto Return9;
+                            if (DoesAsciiNeedEncoding(p[10])) goto Return10;
+                            if (DoesAsciiNeedEncoding(p[11])) goto Return11;
+                            if (DoesAsciiNeedEncoding(p[12])) goto Return12;
+                            if (DoesAsciiNeedEncoding(p[13])) goto Return13;
+                            if (DoesAsciiNeedEncoding(p[14])) goto Return14;
+                            if (DoesAsciiNeedEncoding(p[15])) goto Return15;
 
                             idx += 16;
                         }
@@ -797,7 +803,7 @@ namespace System.Text.Encodings.Web
 
                     if (UnicodeUtility.IsAsciiCodePoint(ptr[idx]))
                     {
-                        if (DoesAsciiNeedEncoding(ptr[idx]) == 1)
+                        if (DoesAsciiNeedEncoding(ptr[idx]))
                         {
                             goto Return;
                         }
@@ -938,40 +944,25 @@ namespace System.Text.Encodings.Web
             return encoding;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void EnsureAsciiCacheInitialized()
-        {
-            // After initialization the ASCII-cache only has values -1 or 1,
-
-            if (_asciiNeedsEscaping[0] != 0)
-            {
-                return;
-            }
-
-            InitializeAsciiCache();
-        }
-
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void InitializeAsciiCache()
         {
-            Debug.Assert(_asciiNeedsEscaping[0] == 0);
+            Debug.Assert(!_isAsciiCacheInitialized);
 
             for (int i = 0; i < _asciiNeedsEscaping.Length; i++)
             {
-                _asciiNeedsEscaping[i] = WillEncode(i) ? 1 : -1;
+                _asciiNeedsEscaping[i] = WillEncode(i);
             }
+
+            _isAsciiCacheInitialized = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int DoesAsciiNeedEncoding(byte value)
+        private bool DoesAsciiNeedEncoding(uint value)
         {
             Debug.Assert(value <= 0x7F);
 
-            int needsEscaping = _asciiNeedsEscaping[value];
-
-            Debug.Assert(needsEscaping == 1 || needsEscaping == -1);
-
-            return needsEscaping;
+            return _asciiNeedsEscaping[value];
         }
 
         private static void ThrowArgumentException_MaxOutputCharsPerInputChar()
