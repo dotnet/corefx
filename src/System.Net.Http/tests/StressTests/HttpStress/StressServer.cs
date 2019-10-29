@@ -331,7 +331,7 @@ namespace HttpStress
             } 
             catch (UriFormatException)
             {
-                // Poor man's uri parser: used to parse values valid in Kestrel
+                // Simple uri parser: used to parse values valid in Kestrel
                 // but not representable by the System.Uri class, e.g. https://+:5050
                 Match m = Regex.Match(serverUri, "^(?<scheme>https?)://(?<host>[^:/]+)(:(?<port>[0-9]+))?");
 
