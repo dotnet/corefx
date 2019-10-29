@@ -467,7 +467,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             string pw = nameof(OneCert_NoKey_WithLocalKeyId);
 
             using (var cert = new X509Certificate2(TestData.MsCertificate))
-            using (RSA rsa = RSA.Create())
+            using (RSA rsa = RSA.Create(TestData.RsaBigExponentParams))
             {
                 Pkcs12Builder builder = new Pkcs12Builder();
                 Pkcs12SafeContents certContents = new Pkcs12SafeContents();
@@ -476,9 +476,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Pkcs12CertBag certBag = certContents.AddCertificate(cert);
                 certBag.Attributes.Add(s_keyIdOne);
 
+                byte[] keyExport = rsa.ExportEncryptedPkcs8PrivateKey(pw, s_windowsPbe);
+
                 for (int i = 0; i < 20; i++)
                 {
-                    Pkcs12SafeBag keyBag = keyContents.AddShroudedKey(rsa, pw, s_windowsPbe);
+                    Pkcs12SafeBag keyBag = new Pkcs12ShroudedKeyBag(keyExport, skipCopy: true);
+                    keyContents.AddSafeBag(keyBag);
 
                     // Even with i=1 this won't match, because { 0x01 } != { 0x01, 0x00, 0x00, 0x00 } and
                     // { 0x01 } != { 0x00, 0x00, 0x00, 0x01 } (binary comparison, not "equivalence" comparison).
@@ -504,7 +507,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (var certWithKey = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword))
             using (var cert = new X509Certificate2(certWithKey.RawData))
             using (var cert2 = new X509Certificate2(TestData.MsCertificate))
-            using (RSA rsa = RSA.Create())
+            using (RSA rsa = RSA.Create(TestData.RsaBigExponentParams))
             {
                 Pkcs12Builder builder = new Pkcs12Builder();
                 Pkcs12SafeContents certContents = new Pkcs12SafeContents();
@@ -526,9 +529,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     certBag.Attributes.Add(s_keyIdOne);
                 }
 
+                byte[] keyExport = rsa.ExportEncryptedPkcs8PrivateKey(pw, s_windowsPbe);
+
                 for (int i = 0; i < 20; i++)
                 {
-                    Pkcs12SafeBag keyBag = keyContents.AddShroudedKey(rsa, pw, s_windowsPbe);
+                    Pkcs12SafeBag keyBag = new Pkcs12ShroudedKeyBag(keyExport, skipCopy: true);
+                    keyContents.AddSafeBag(keyBag);
 
                     // Even with i=1 this won't match, because { 0x01 } != { 0x01, 0x00, 0x00, 0x00 } and
                     // { 0x01 } != { 0x00, 0x00, 0x00, 0x01 } (binary comparison, not "equivalence" comparison).
