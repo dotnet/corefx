@@ -38,6 +38,8 @@ namespace System.IO.Tests
         [InlineData(3)]
         public void File_Move_Multiple_From_Watched_To_Unwatched_Mac(int filesCount)
         {
+            // On Mac, the FSStream aggregate old events caused by the test setup.
+            // There is no option how to get rid of it but skip it.
             FileMove_Multiple_FromWatchedToUnwatched(filesCount, skipOldEvents: true);
         }
 
@@ -185,7 +187,7 @@ namespace System.IO.Tests
 
         private void FileMove_Multiple_FromWatchedToUnwatched(int filesCount, bool skipOldEvents)
         {
-            Assert.True(filesCount > 0);
+            Assert.InRange(filesCount, 0, int.MaxValue);
 
             using var testDirectory = new TempDirectory(GetTestFilePath());
             using var watchedTestDirectory = new TempDirectory(Path.Combine(testDirectory.Path, "dir_watched"));
@@ -226,7 +228,7 @@ namespace System.IO.Tests
 
         private void FileMove_Multiple_FromUnwatchedToWatched(int filesCount)
         {
-            Assert.True(filesCount > 0);
+            Assert.InRange(filesCount, 0, int.MaxValue);
 
             using var testDirectory = new TempDirectory(GetTestFilePath());
             using var watchedTestDirectory = new TempDirectory(Path.Combine(testDirectory.Path, "dir_watched"));
