@@ -976,41 +976,38 @@ namespace System.Text.Encodings.Web
         private unsafe void InitializeAsciiCache()
         {
             Debug.Assert(!_isAsciiCacheInitialized);
+            Debug.Assert(_asciiNeedsEscaping.Length == 0x80);
 
-            for (int i = 0; i < _asciiNeedsEscaping.Length; i++)
-            {
-                _asciiNeedsEscaping[i] = WillEncode(i);
-            }
+            _isAsciiCacheInitialized = true;
+            bool[] asciiNeedsEscaping = _asciiNeedsEscaping;
 
 #if NETCOREAPP
             if (Ssse3.IsSupported)
             {
-                Debug.Assert(_asciiNeedsEscaping.Length == 0x80);
-
                 sbyte* tmp = stackalloc sbyte[Vector128<sbyte>.Count];
 
-                for (int lowNibble = 0; lowNibble <= 0xF; lowNibble++)
+                for (int i = 0; i < asciiNeedsEscaping.Length; i++)
                 {
-                    int bitMask = 0;
+                    bool willEncode = WillEncode(i);
+                    asciiNeedsEscaping[i] = willEncode;
 
-                    for (int highNibble = 0; highNibble <= 0x7; highNibble++)
+                    if (willEncode)
                     {
-                        int value = highNibble << 4 | lowNibble;
+                        int highNibble = i >> 4;
+                        int lowNibble = i & 0xF;
 
-                        if (WillEncode(value))
-                        {
-                            bitMask |= (1 << highNibble);
-                        }
+                        tmp[lowNibble] |= (sbyte)(1 << highNibble);
                     }
-
-                    tmp[lowNibble] = (sbyte)bitMask;
                 }
 
                 _bitMaskLookupAsciiNeedsEscaping = Sse2.LoadVector128(tmp);
+                return;
             }
 #endif
-
-            _isAsciiCacheInitialized = true;
+            for (int i = 0; i < asciiNeedsEscaping.Length; i++)
+            {
+                asciiNeedsEscaping[i] = WillEncode(i);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
