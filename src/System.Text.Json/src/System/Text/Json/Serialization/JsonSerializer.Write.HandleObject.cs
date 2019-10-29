@@ -100,11 +100,13 @@ namespace System.Text.Json
 
             if (jsonPropertyInfo.ClassType == ClassType.Value)
             {
+                currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
                 var defaultValueAttribute = JsonPropertyInfo.GetAttribute<System.ComponentModel.DefaultValueAttribute>(jsonPropertyInfo.PropertyInfo);
+                bool ignoreDefaultProperty = options.IgnoreDefaultValues && (defaultValueAttribute != null) &&
+                    object.Equals(currentValue, defaultValueAttribute.Value);
 
                 // Ignoring Default Values.
-                if (!(options.IgnoreDefaultValues && defaultValueAttribute != null &&
-                (object.Equals(jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue), defaultValueAttribute.Value))))
+                if (!ignoreDefaultProperty)
                 {
                     jsonPropertyInfo.Write(ref state, writer);
                 }
