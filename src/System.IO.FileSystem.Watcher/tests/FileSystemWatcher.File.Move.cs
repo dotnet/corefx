@@ -187,75 +187,68 @@ namespace System.IO.Tests
         {
             Assert.True(filesCount > 0);
 
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var watchedTestDirectory = new TempDirectory(Path.Combine(testDirectory.Path, "dir_watched")))
-            using (var unwatchedTestDirectory = new TempDirectory(Path.Combine(testDirectory.Path, "dir_unwatched")))
+            using var testDirectory = new TempDirectory(GetTestFilePath());
+            using var watchedTestDirectory = new TempDirectory(Path.Combine(testDirectory.Path, "dir_watched"));
+            using var unwatchedTestDirectory = new TempDirectory(Path.Combine(testDirectory.Path, "dir_unwatched"));
+
+            var files = Enumerable.Range(0, filesCount)
+                            .Select(i => new
+                            {
+                                FileInWatchedDir = Path.Combine(watchedTestDirectory.Path, $"file{i}"),
+                                FileInUnwatchedDir = Path.Combine(unwatchedTestDirectory.Path, $"file{i}")
+                            }).ToArray();
+
+            Array.ForEach(files, (file) => File.Create(file.FileInWatchedDir).Dispose());
+
+            using var watcher = new FileSystemWatcher(watchedTestDirectory.Path, "*");
+
+            Action action = () => Array.ForEach(files, file => File.Move(file.FileInWatchedDir, file.FileInUnwatchedDir));
+
+            // On macOS, for each file we receive two events as describe in comment below.
+            int expectEvents = filesCount;
+            if (skipOldEvents)
             {
-
-                var files = Enumerable.Range(0, filesCount)
-                                .Select(i => new
-                                {
-                                    FileInWatchedDir = Path.Combine(watchedTestDirectory.Path, $"file{i}"),
-                                    FileInUnwatchedDir = Path.Combine(unwatchedTestDirectory.Path, $"file{i}")
-                                }).ToArray();
-
-                Array.ForEach(files, (file) => File.Create(file.FileInWatchedDir).Dispose());
-
-                using (var watcher = new FileSystemWatcher(watchedTestDirectory.Path, "*"))
-                {
-                    Action action = () => Array.ForEach(files, file => File.Move(file.FileInWatchedDir, file.FileInUnwatchedDir));
-
-
-                    // On macOS, for each file we receive two events as describe in comment below.
-                    int expectEvents = filesCount;
-                    if (skipOldEvents)
-                    {
-                        expectEvents = expectEvents * 3;
-                    }
-
-                    IEnumerable<FiredEvent> events = ExpectEvents(watcher, expectEvents, action);
-
-                    // Remove Created and Changed events as there is racecondition when create file and then observe parent folder. It receives Create and Changed event altought Watcher is not registered yet.
-                    if (skipOldEvents)
-                    {
-                        events = events.Where(x => (x.EventType & (WatcherChangeTypes.Created | WatcherChangeTypes.Changed)) == 0);
-                    }
-
-                    var expectedEvents = files.Select(file => new FiredEvent(WatcherChangeTypes.Deleted, file.FileInWatchedDir));
-
-                    Assert.Equal(expectedEvents, events);
-                }
+                expectEvents = expectEvents * 3;
             }
+
+            IEnumerable<FiredEvent> events = ExpectEvents(watcher, expectEvents, action);
+
+            // Remove Created and Changed events as there is racecondition when create file and then observe parent folder. It receives Create and Changed event altought Watcher is not registered yet.
+            if (skipOldEvents)
+            {
+                events = events.Where(x => (x.EventType & (WatcherChangeTypes.Created | WatcherChangeTypes.Changed)) == 0);
+            }
+
+            var expectedEvents = files.Select(file => new FiredEvent(WatcherChangeTypes.Deleted, file.FileInWatchedDir));
+
+            Assert.Equal(expectedEvents, events);
         }
 
         private void FileMove_Multiple_FromUnwatchedToWatched(int filesCount)
         {
             Assert.True(filesCount > 0);
 
-            using (var testDirectory = new TempDirectory(GetTestFilePath()))
-            using (var watchedTestDirectory = new TempDirectory(Path.Combine(testDirectory.Path, "dir_watched")))
-            using (var unwatchedTestDirectory = new TempDirectory(Path.Combine(testDirectory.Path, "dir_unwatched")))
-            {
+            using var testDirectory = new TempDirectory(GetTestFilePath());
+            using var watchedTestDirectory = new TempDirectory(Path.Combine(testDirectory.Path, "dir_watched"));
+            using var unwatchedTestDirectory = new TempDirectory(Path.Combine(testDirectory.Path, "dir_unwatched"));
 
-                var files = Enumerable.Range(0, filesCount)
-                                .Select(i => new
-                                {
-                                    FileInWatchedDir = Path.Combine(watchedTestDirectory.Path, $"file{i}"),
-                                    FileInUnwatchedDir = Path.Combine(unwatchedTestDirectory.Path, $"file{i}")
-                                }).ToArray();
+            var files = Enumerable.Range(0, filesCount)
+                            .Select(i => new
+                            {
+                                FileInWatchedDir = Path.Combine(watchedTestDirectory.Path, $"file{i}"),
+                                FileInUnwatchedDir = Path.Combine(unwatchedTestDirectory.Path, $"file{i}")
+                            }).ToArray();
 
-                Array.ForEach(files, (file) => File.Create(file.FileInUnwatchedDir).Dispose());
+            Array.ForEach(files, (file) => File.Create(file.FileInUnwatchedDir).Dispose());
 
-                using (var watcher = new FileSystemWatcher(watchedTestDirectory.Path, "*"))
-                {
-                    Action action = () => Array.ForEach(files, file => File.Move(file.FileInUnwatchedDir, file.FileInWatchedDir));
+            using var watcher = new FileSystemWatcher(watchedTestDirectory.Path, "*");
 
-                    var events = ExpectEvents(watcher, filesCount, action);
-                    var expectedEvents = files.Select(file => new FiredEvent(WatcherChangeTypes.Created, file.FileInWatchedDir));
+            Action action = () => Array.ForEach(files, file => File.Move(file.FileInUnwatchedDir, file.FileInWatchedDir));
 
-                    Assert.Equal(expectedEvents, events);
-                }
-            }
+            List<FiredEvent> events = ExpectEvents(watcher, filesCount, action);
+            var expectedEvents = files.Select(file => new FiredEvent(WatcherChangeTypes.Created, file.FileInWatchedDir));
+
+            Assert.Equal(expectedEvents, events);
         }
 
         private void FileMove_FromUnwatchedToWatched(WatcherChangeTypes eventType)

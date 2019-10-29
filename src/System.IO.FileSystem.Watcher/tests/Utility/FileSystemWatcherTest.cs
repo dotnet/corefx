@@ -516,7 +516,7 @@ namespace System.IO.Tests
         // Observe until an expected count of events is triggered, otherwise fail. Return all collected events.
         internal static List<FiredEvent> ExpectEvents(FileSystemWatcher watcher, int expectedEvents, Action action)
         {
-            var eventsOccured = new AutoResetEvent(false);
+            using var eventsOccured = new AutoResetEvent(false);
             var eventsOrrures = 0;
 
             var events = new List<FiredEvent>();

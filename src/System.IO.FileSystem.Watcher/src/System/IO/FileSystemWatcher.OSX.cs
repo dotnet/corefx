@@ -388,103 +388,103 @@ namespace System.IO
                 Span<FSEventStreamEventId> eventIds,
                 FileSystemWatcher watcher)
             {
-                // Since renames come in pairs, when we find the first we need to search for the next one. Once we find it, we'll store the event id
-                // so when the for-loop comes across it, we'll skip it since it's already been processed as part of the original of the pair.
+                // Since renames come in pairs, when we reach the first we need to test for the next one if it is the case. If the next one belongs into the pair,
+                // we'll store the event id so when the for-loop comes across it, we'll skip it since it's already been processed as part of the original of the pair.
                 int? handledRenameEvents = null;
 
                 for (int i = 0; i < numEvents; i++)
                 {
-                    using (ParsedEvent parsedEvent = ParseEvent(eventPaths[i]))
+                    using ParsedEvent parsedEvent = ParseEvent(eventPaths[i]);
+
+                    ReadOnlySpan<char> path = parsedEvent.Path;
+                    Debug.Assert(path[^1] != '/', "Trailing slashes on events is not supported");
+
+                    // Match Windows and don't notify us about changes to the Root folder
+                    if (_fullDirectory.Length >= path.Length && path.Equals(_fullDirectory.AsSpan(0, path.Length), StringComparison.OrdinalIgnoreCase))
                     {
-                        ReadOnlySpan<char> path = parsedEvent.Path;
-                        Debug.Assert(path[^1] != '/', "Trailing slashes on events is not supported");
+                        continue;
+                    }
 
-                        // Match Windows and don't notify us about changes to the Root folder
-                        if (_fullDirectory.Length >= path.Length && path.Equals(_fullDirectory.AsSpan(0, path.Length), StringComparison.OrdinalIgnoreCase))
+                    WatcherChangeTypes eventType = 0;
+                    // First, we should check if this event should kick off a re-scan since we can't really rely on anything after this point if that is true
+                    if (ShouldRescanOccur(eventFlags[i]))
+                    {
+                        watcher.OnError(new ErrorEventArgs(new IOException(SR.FSW_BufferOverflow, (int)eventFlags[i])));
+                        break;
+                    }
+                    else if (handledRenameEvents == i)
+                    {
+                        // If this event is the second in a rename pair then skip it
+                        continue;
+                    }
+                    else if (CheckIfPathIsNested(path) && ((eventType = FilterEvents(eventFlags[i])) != 0))
+                    {
+                        // The base FileSystemWatcher does a match check against the relative path before combining with
+                        // the root dir; however, null is special cased to signify the root dir, so check if we should use that.
+                        ReadOnlySpan<char> relativePath = ReadOnlySpan<char>.Empty;
+                        if (path.Length > _fullDirectory.Length && path.StartsWith(_fullDirectory, StringComparison.OrdinalIgnoreCase))
                         {
-                            continue;
+                            // Remove the root directory to get the relative path
+                            relativePath = path.Slice(_fullDirectory.Length);
                         }
 
-                        WatcherChangeTypes eventType = 0;
-                        // First, we should check if this event should kick off a re-scan since we can't really rely on anything after this point if that is true
-                        if (ShouldRescanOccur(eventFlags[i]))
+                        // Raise a notification for the event
+                        if (((eventType & WatcherChangeTypes.Changed) > 0))
                         {
-                            watcher.OnError(new ErrorEventArgs(new IOException(SR.FSW_BufferOverflow, (int)eventFlags[i])));
-                            break;
+                            watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Changed, relativePath);
                         }
-                        else if (handledRenameEvents == i)
+                        if (((eventType & WatcherChangeTypes.Created) > 0))
                         {
-                            // If this event is the second in a rename pair then skip it
-                            continue;
+                            watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Created, relativePath);
                         }
-                        else if (CheckIfPathIsNested(path) && ((eventType = FilterEvents(eventFlags[i])) != 0))
+                        if (((eventType & WatcherChangeTypes.Deleted) > 0))
                         {
-                            // The base FileSystemWatcher does a match check against the relative path before combining with
-                            // the root dir; however, null is special cased to signify the root dir, so check if we should use that.
-                            ReadOnlySpan<char> relativePath = ReadOnlySpan<char>.Empty;
-                            if (path.Length > _fullDirectory.Length && path.StartsWith(_fullDirectory, StringComparison.OrdinalIgnoreCase))
+                            watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, relativePath);
+                        }
+                        if (((eventType & WatcherChangeTypes.Renamed) > 0))
+                        {
+                            // Find the rename that is paired to this rename, which should be the next rename in the list with id increased by one.
+                            // There is a Radar related to this pairing: http://www.openradar.me/13461247.
+                            int? pairedId = FindRenameChangePairedChange(i, eventFlags, eventIds);
+                            if (!pairedId.HasValue)
                             {
-                                // Remove the root directory to get the relative path
-                                relativePath = path[_fullDirectory.Length..];
-                            }
-
-                            // Raise a notification for the event
-                            if (((eventType & WatcherChangeTypes.Changed) > 0))
-                            {
-                                watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Changed, relativePath);
-                            }
-                            if (((eventType & WatcherChangeTypes.Created) > 0))
-                            {
-                                watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Created, relativePath);
-                            }
-                            if (((eventType & WatcherChangeTypes.Deleted) > 0))
-                            {
-                                watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, relativePath);
-                            }
-                            if (((eventType & WatcherChangeTypes.Renamed) > 0))
-                            {
-                                // Find the rename that is paired to this rename, which should be the next rename in the list with id increased by one.
-                                // There is an Radar related to this pairing: http://www.openradar.me/13461247.
-                                int? pairedId = FindRenameChangePairedChange(i, eventFlags, eventIds);
-                                if (!pairedId.HasValue)
+                                // Getting here means we have a rename without a pair, meaning it should be a create for the
+                                // move from unwatched folder to watcher folder scenario or a move from the watcher folder out.
+                                // Check if the item exists on disk to check which it is
+                                // Don't send a new notification if we already sent one for this event.
+                                if (DoesItemExist(path, IsFlagSet(eventFlags[i], FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
                                 {
-                                    // Getting here means we have a rename without a pair, meaning it should be a create for the
-                                    // move from unwatched folder to watcher folder scenario or a move from the watcher folder out.
-                                    // Check if the item exists on disk to check which it is
-                                    // Don't send a new notification if we already sent one for this event.
-                                    if (DoesItemExist(path, IsFlagSet(eventFlags[i], FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
+                                    if ((eventType & WatcherChangeTypes.Created) == 0)
                                     {
-                                        if ((eventType & WatcherChangeTypes.Created) == 0)
-                                        {
-                                            watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Created, relativePath);
-                                        }
-                                    }
-                                    else if ((eventType & WatcherChangeTypes.Deleted) == 0)
-                                    {
-                                        watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, relativePath);
+                                        watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Created, relativePath);
                                     }
                                 }
-                                else
+                                else if ((eventType & WatcherChangeTypes.Deleted) == 0)
                                 {
-                                    // Remove the base directory prefix and add the paired event to the list of
-                                    // events to skip and notify the user of the rename
-                                    using (ParsedEvent pairedEvent = ParseEvent(eventPaths[pairedId.GetValueOrDefault()]))
-                                    {
-                                        ReadOnlySpan<char> newPathRelativeName = pairedEvent.Path;
-                                        if (newPathRelativeName.Length >= _fullDirectory.Length &&
-                                            newPathRelativeName.StartsWith(_fullDirectory, StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            newPathRelativeName = newPathRelativeName[_fullDirectory.Length..];
-                                        }
-
-                                        watcher.NotifyRenameEventArgs(WatcherChangeTypes.Renamed, newPathRelativeName, relativePath);
-                                    }
-                                    handledRenameEvents = pairedId.GetValueOrDefault();
+                                    watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, relativePath);
                                 }
+                            }
+                            else
+                            {
+                                // Remove the base directory prefix and add the paired event to the list of
+                                // events to skip and notify the user of the rename
+                                using (ParsedEvent pairedEvent = ParseEvent(eventPaths[pairedId.GetValueOrDefault()]))
+                                {
+                                    ReadOnlySpan<char> newPathRelativeName = pairedEvent.Path;
+                                    if (newPathRelativeName.Length >= _fullDirectory.Length &&
+                                        newPathRelativeName.StartsWith(_fullDirectory, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        newPathRelativeName = newPathRelativeName.Slice(_fullDirectory.Length);
+                                    }
+
+                                    watcher.NotifyRenameEventArgs(WatcherChangeTypes.Renamed, newPathRelativeName, relativePath);
+                                }
+                                handledRenameEvents = pairedId.GetValueOrDefault();
                             }
                         }
                     }
                 }
+
                 this._context = ExecutionContext.Capture();
 
                 ParsedEvent ParseEvent(byte* nativeEventPath)
