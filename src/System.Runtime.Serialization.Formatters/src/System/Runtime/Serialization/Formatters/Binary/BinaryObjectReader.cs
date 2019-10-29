@@ -467,6 +467,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                         }
                     }
                 }
+
                 Debug.Assert(pr._lengthA != null);
                 if (pr._arrayElementType != null)
                 {

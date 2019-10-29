@@ -119,7 +119,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
             int objectId = (int)nameInfo._objectId;
 
             string? objectName = objectId < 0 ?
-                typeNameInfo!.NIname : // Nested Objec
+                typeNameInfo!.NIname : // Nested Object
                 nameInfo.NIname; // Non-Nested
 
             if (_objectMapTable == null)

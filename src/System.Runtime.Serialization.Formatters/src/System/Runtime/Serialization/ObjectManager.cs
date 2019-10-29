@@ -236,6 +236,8 @@ namespace System.Runtime.Serialization
                 do
                 {
                     tempObject = holder.ObjectValue;
+                    Debug.Assert(holder.ObjectValue != null);
+                    holder.SetObjectValue(((IObjectReference)(holder.ObjectValue)).GetRealObject(_context), this);
                     //The object didn't yet have enough information to resolve the reference, so we'll
                     //return false and the graph walker should call us back again after more objects have
                     //been resolved.
@@ -244,7 +246,6 @@ namespace System.Runtime.Serialization
                         holder.SetObjectValue(tempObject, this);
                         return false;
                     }
-                    holder.SetObjectValue(((IObjectReference)(holder.ObjectValue)).GetRealObject(_context), this);
                     if (depthCount++ == MaxReferenceDepth)
                     {
                         throw new SerializationException(SR.Serialization_TooManyReferences);

@@ -231,7 +231,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                 }
             }
 
-            Debug.Assert(memberNameInfo != null); // TODO this is strange, doing null check in above and below statemments and not checking here
+            Debug.Assert(memberNameInfo != null);
             if (memberNameInfo._isParentTypeOnObject)
             {
                 memberNameInfo._transmitTypeOnObject = true;

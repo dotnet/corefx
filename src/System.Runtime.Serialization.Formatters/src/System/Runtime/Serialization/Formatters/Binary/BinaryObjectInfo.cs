@@ -23,7 +23,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
         internal bool _isArray = false;
 
         internal SerializationInfo? _si = null;
-        internal SerObjectInfoCache? _cache = null;
+        internal SerObjectInfoCache _cache = null!; // Initiated before use
 
         internal object?[]? _memberData = null;
         internal ISerializationSurrogate? _serializationSurrogate = null;
@@ -54,7 +54,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
             _isNamed = false;
             _isArray = false;
             _si = null;
-            _cache = null;
+            _cache = null!;
             _memberData = null;
 
             // Writing and Parsing information
@@ -229,7 +229,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
         private void InitNoMembers()
         {
             Debug.Assert(_serObjectInfoInit != null && _objectType != null);
-            if (!_serObjectInfoInit._seenBeforeTable.TryGetValue(_objectType, out _cache))
+            if (!_serObjectInfoInit._seenBeforeTable.TryGetValue(_objectType, out _cache!))
             {
                 _cache = new SerObjectInfoCache(_objectType);
                 _serObjectInfoInit._seenBeforeTable.Add(_objectType, _cache);
@@ -239,7 +239,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
         private void InitMemberInfo()
         {
             Debug.Assert(_serObjectInfoInit != null && _objectType != null);
-            if (!_serObjectInfoInit._seenBeforeTable.TryGetValue(_objectType, out _cache))
+            if (!_serObjectInfoInit._seenBeforeTable.TryGetValue(_objectType, out _cache!))
             {
                 _cache = new SerObjectInfoCache(_objectType);
 
@@ -265,16 +265,15 @@ namespace System.Runtime.Serialization.Formatters.Binary
             _isNamed = true;
         }
 
-        internal string GetTypeFullName() => _binderTypeName ?? _cache!._fullTypeName;
+        internal string GetTypeFullName() => _binderTypeName ?? _cache._fullTypeName;
 
-        internal string GetAssemblyString() => _binderAssemblyString ?? _cache!._assemblyString;
+        internal string GetAssemblyString() => _binderAssemblyString ?? _cache._assemblyString;
 
         private void InvokeSerializationBinder(SerializationBinder? binder) =>
             binder?.BindToName(_objectType, out _binderAssemblyString, out _binderTypeName);
 
         internal void GetMemberInfo(out string[]? outMemberNames, out Type[]? outMemberTypes, out object?[]? outMemberData)
         {
-            Debug.Assert(_cache != null);
             outMemberNames = _cache._memberNames;
             outMemberTypes = _cache._memberTypes;
             outMemberData = _memberData;
