@@ -6,8 +6,8 @@ using System.Reflection;
 
 #if !FEATURE_DYNAMIC_DELEGATE
 using System.Reflection.Emit;
-using System.Threading;
 using System.Text;
+using System.Threading;
 #endif
 
 namespace System.Dynamic.Utils
@@ -29,6 +29,9 @@ namespace System.Dynamic.Utils
         private static readonly CacheDict<Type, MethodInfo> s_thunks = new CacheDict<Type, MethodInfo>(256);
         private static readonly MethodInfo s_FuncInvoke = typeof(Func<object[], object>).GetMethod("Invoke");
         private static readonly MethodInfo s_ArrayEmpty = typeof(Array).GetMethod(nameof(Array.Empty)).MakeGenericMethod(typeof(object));
+        private static readonly MethodInfo[] s_ActionThunks = GetActionThunks();
+        private static readonly MethodInfo[] s_FuncThunks = GetFuncThunks();
+        private static int s_ThunksCreated;
 
         public static void ActionThunk(Func<object[], object> handler)
         {
@@ -60,9 +63,6 @@ namespace System.Dynamic.Utils
             return (TReturn)handler(new object[]{t1, t2});
         }
 
-        private static MethodInfo[] s_ActionThunks = GetActionThunks();
-        private static MethodInfo[] s_FuncThunks = GetFuncThunks();
-
         private static MethodInfo[] GetActionThunks()
         {
             Type delHelpers = typeof(DelegateHelpers);
@@ -79,7 +79,60 @@ namespace System.Dynamic.Utils
                                     delHelpers.GetMethod("FuncThunk2")};
         }
 
-        private static int s_thunksCreated;
+        private static MethodInfo GetCSharpThunk(Type returnType, bool hasReturnValue, ParameterInfo[] parameters)
+        {
+            try
+            {
+                if (parameters.Length > 2)
+                {
+                    return null; // Don't use C# thunks for more than 2 parameters
+                }
+
+                if (returnType.IsByRefLike || returnType.IsByRef || returnType.IsPointer)
+                {
+                    return null; // Don't use C# thunks for types that cannot be generic arguments
+                }
+
+                foreach (ParameterInfo parameter in parameters)
+                {
+                    Type parameterType = parameter.ParameterType;
+                    if  (parameterType.IsByRefLike || parameterType.IsByRef || parameterType.IsPointer)
+                    {
+                        return null; // Don't use C# thunks for types that cannot be generic arguments
+                    }
+                }
+
+                int thunkTypeArgCount = parameters.Length;
+                if (hasReturnValue)
+                    thunkTypeArgCount++;
+
+                Type[] thunkTypeArgs = thunkTypeArgCount == 0 ? Type.EmptyTypes : new Type[thunkTypeArgCount];
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    thunkTypeArgs[i] = parameters[i].ParameterType;
+                }
+
+                MethodInfo uninstantiatedMethod;
+
+                if (hasReturnValue)
+                {
+                    thunkTypeArgs[thunkTypeArgs.Length - 1] = returnType;
+                    uninstantiatedMethod = s_FuncThunks[parameters.Length];
+                }
+                else
+                {
+                    uninstantiatedMethod = s_ActionThunks[parameters.Length];
+                }
+
+                return (thunkTypeArgs.Length > 0) ?
+                    uninstantiatedMethod.MakeGenericMethod(thunkTypeArgs) :
+                    uninstantiatedMethod;
+            }
+            catch
+            {
+                return null; // If unable to instantiate thunk, fall back to dynamic method creation
+            }
+        }
 
         // We will generate the following code:
         //
@@ -107,63 +160,11 @@ namespace System.Dynamic.Utils
 
                 ParameterInfo[] parameters = delegateInvokeMethod.GetParametersCached();
 
-                do
-                {
-                    if (parameters.Length > 2)
-                    {
-                        break; // Don't use C# thunks for more than 2 parameters
-                    }
-
-                    if (returnType.IsByRefLike || returnType.IsByRef || returnType.IsPointer)
-                    {
-                        break; // Don't use C# thunks for types that cannot be generic arguments
-                    }
-
-                    bool invalidParameter = false;
-                    foreach (ParameterInfo parameter in parameters)
-                    {
-                        Type parameterType = parameter.ParameterType;
-                        if  (parameterType.IsByRefLike || parameterType.IsByRef || parameterType.IsPointer)
-                        {
-                            invalidParameter = true;
-                            break; // Don't use C# thunks for types that cannot be generic arguments
-                        }
-                    }
-
-                    if (invalidParameter)
-                        break;
-
-                    int thunkTypeArgCount = parameters.Length;
-                    if (hasReturnValue)
-                        thunkTypeArgCount++;
-
-                    Type[] thunkTypeArgs = new Type[thunkTypeArgCount];
-                    for (int i = 0; i < parameters.Length; i++)
-                    {
-                        thunkTypeArgs[i] = parameters[i].ParameterType;
-                    }
-                    MethodInfo uninstantiatedMethod;
-
-                    if (hasReturnValue)
-                    {
-                        thunkTypeArgs[thunkTypeArgs.Length - 1] = returnType;
-                        uninstantiatedMethod = s_FuncThunks[parameters.Length];
-                    }
-                    else
-                    {
-                        uninstantiatedMethod = s_ActionThunks[parameters.Length];
-                    }
-
-                    if (thunkTypeArgs.Length > 0)
-                        s_thunks[delegateType] = thunkMethod = uninstantiatedMethod.MakeGenericMethod(thunkTypeArgs);
-                    else
-                        s_thunks[delegateType] = thunkMethod = uninstantiatedMethod;
-
-                } while (false);
+                thunkMethod = GetCSharpThunk(returnType, hasReturnValue, parameters);
 
                 if (thunkMethod == null)
                 {
-                    int thunkIndex = Interlocked.Increment(ref s_thunksCreated);
+                    int thunkIndex = Interlocked.Increment(ref s_ThunksCreated);
                     Type[] paramTypes = new Type[parameters.Length + 1];
                     paramTypes[0] = typeof(Func<object[], object>);
 
@@ -178,7 +179,7 @@ namespace System.Dynamic.Utils
 
                     for (int i = 0; i < parameters.Length; i++)
                     {
-                        thunkName.Append("_");
+                        thunkName.Append('_');
                         thunkName.Append(parameters[i].ParameterType.Name);
                         paramTypes[i + 1] = parameters[i].ParameterType;
                     }
@@ -270,9 +271,9 @@ namespace System.Dynamic.Utils
                     }
 
                     ilgen.Emit(OpCodes.Ret);
-
-                    s_thunks[delegateType] = thunkMethod;
                 }
+
+                s_thunks[delegateType] = thunkMethod;
             }
 
             return thunkMethod.CreateDelegate(delegateType, handler);

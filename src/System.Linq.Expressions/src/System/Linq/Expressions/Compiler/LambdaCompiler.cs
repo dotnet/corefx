@@ -8,6 +8,7 @@ using System.Dynamic.Utils;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace System.Linq.Expressions.Compiler
 {
@@ -69,7 +70,8 @@ namespace System.Linq.Expressions.Compiler
         {
             Type[] parameterTypes = GetParameterTypes(lambda, typeof(Closure));
 
-            var method = new DynamicMethod(lambda.Name ?? ("lambda_method" + s_lambdaMethodIndex.ToString()), lambda.ReturnType, parameterTypes, true);
+            int lambdaMethodIndex = Interlocked.Increment(ref s_lambdaMethodIndex);
+            var method = new DynamicMethod(lambda.Name ?? ("lambda_method" + lambdaMethodIndex.ToString()), lambda.ReturnType, parameterTypes, true);
 
             _tree = tree;
             _lambda = lambda;
