@@ -162,7 +162,7 @@ namespace System.IO
                 // probably be consistent w/ every other directory.
                 int errorCode = Marshal.GetLastWin32Error();
 
-                if (errorCode == Interop.Errors.ERROR_PATH_NOT_FOUND && fullPath.Length == PathInternal.GetRootLength(fullPath))
+                if (errorCode == Interop.Errors.ERROR_PATH_NOT_FOUND && fullPath.Length == Path.GetPathRoot(fullPath).Length)
                 {
                     errorCode = Interop.Errors.ERROR_ACCESS_DENIED;
                 }
