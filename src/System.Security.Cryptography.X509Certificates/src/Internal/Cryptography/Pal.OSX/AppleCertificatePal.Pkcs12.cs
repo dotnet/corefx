@@ -68,8 +68,17 @@ namespace Internal.Cryptography.Pal
                 exportable: false,
                 out identityHandle);
 
-            Debug.Assert(!identityHandle.IsInvalid, "Rebuilt PFX did not find a private key");
-            Debug.Assert(certHandle.IsInvalid);
+            // On Windows and Linux if a PFX uses a LocalKeyId to bind the wrong key to a cert, the
+            // nonsensical object of "this cert, that key" is returned.
+            //
+            // On macOS, because we can't forge CFIdentityRefs without the keychain, we're subject to
+            // Apple's more stringent matching of a consistent keypair.
+            if (identityHandle.IsInvalid)
+            {
+                identityHandle.Dispose();
+                return new AppleCertificatePal(certHandle);
+            }
+
             certHandle.Dispose();
             return new AppleCertificatePal(identityHandle);
         }
