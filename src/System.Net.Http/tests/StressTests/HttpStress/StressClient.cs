@@ -180,7 +180,7 @@ namespace HttpStress
             async Task SendTestRequestToServer(int maxRetries)
             {
                 using HttpClient client = CreateHttpClient();
-                for(int remainingRetries = maxRetries; ; remainingRetries--)
+                for (int remainingRetries = maxRetries; ; remainingRetries--)
                 {
                     try
                     {
