@@ -82,7 +82,6 @@ namespace HttpStress
 
         private async Task StartCore()
         {
-
             if (_baseAddress.Scheme == "http")
             {
                 Environment.SetEnvironmentVariable(UNENCRYPTED_HTTP2_ENV_VAR, "1");
