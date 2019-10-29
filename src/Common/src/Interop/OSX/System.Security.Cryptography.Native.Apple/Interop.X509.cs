@@ -128,14 +128,14 @@ internal static partial class Interop
             SafeCreateHandle cfPassphrase = null;
             bool hasRef = false;
 
-            if (!importPassword.IsInvalid)
-            {
-                importPassword.DangerousAddRef(ref hasRef);
-                cfPassphrase = CoreFoundation.CFStringCreateFromSpan(importPassword.DangerousGetSpan());
-            }
-
             try
             {
+                if (!importPassword.IsInvalid)
+                {
+                    importPassword.DangerousAddRef(ref hasRef);
+                    cfPassphrase = CoreFoundation.CFStringCreateFromSpan(importPassword.DangerousGetSpan());
+                }
+
                 return X509ImportCertificate(
                     bytes,
                     contentType,
