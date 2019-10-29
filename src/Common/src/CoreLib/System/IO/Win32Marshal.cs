@@ -26,6 +26,8 @@ namespace System.IO
         /// </summary>
         internal static Exception GetExceptionForWin32Error(int errorCode, string? path = "")
         {
+            // ERROR_SUCCESS gets thrown when another unexpected interop call was made before checking GetLastWin32Error().
+            // Errors have to get retrieved as soon as possible after P/Invoking to avoid this.
             Debug.Assert(errorCode != Interop.Errors.ERROR_SUCCESS);
 
             switch (errorCode)
