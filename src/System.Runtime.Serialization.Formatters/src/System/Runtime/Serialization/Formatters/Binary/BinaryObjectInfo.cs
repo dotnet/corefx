@@ -265,9 +265,9 @@ namespace System.Runtime.Serialization.Formatters.Binary
             _isNamed = true;
         }
 
-        internal string? GetTypeFullName() => _binderTypeName ?? _cache?._fullTypeName;
+        internal string GetTypeFullName() => _binderTypeName ?? _cache!._fullTypeName;
 
-        internal string? GetAssemblyString() => _binderAssemblyString ?? _cache?._assemblyString;
+        internal string GetAssemblyString() => _binderAssemblyString ?? _cache!._assemblyString;
 
         private void InvokeSerializationBinder(SerializationBinder? binder) =>
             binder?.BindToName(_objectType, out _binderAssemblyString, out _binderTypeName);

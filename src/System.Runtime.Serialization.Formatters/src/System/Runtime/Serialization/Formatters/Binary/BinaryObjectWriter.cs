@@ -983,9 +983,8 @@ namespace System.Runtime.Serialization.Formatters.Binary
             }
 
             long assemId = 0;
-            string? assemblyString = objectInfo.GetAssemblyString();
+            string assemblyString = objectInfo.GetAssemblyString();
 
-            Debug.Assert(assemblyString != null);
             string serializedAssemblyString = assemblyString;
             if (assemblyString.Length == 0)
             {

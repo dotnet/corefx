@@ -412,7 +412,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
                     Debug.Assert(_objectInfo!._objectManager != null);
                     if (_objectInfo._isSi)
                     {
-                        _objectInfo._objectManager!.RecordDelayedFixup(parent._objectId, _memberName!, record._objectId);
+                        _objectInfo._objectManager.RecordDelayedFixup(parent._objectId, _memberName!, record._objectId);
                     }
                     else
                     {
