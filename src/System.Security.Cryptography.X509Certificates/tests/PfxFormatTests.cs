@@ -518,6 +518,24 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Fact]
+        public void OneCorruptCert()
+        {
+            string pw = nameof(OneCorruptCert);
+            Pkcs12Builder builder = new Pkcs12Builder();
+            Pkcs12SafeContents contents = new Pkcs12SafeContents();
+            contents.AddSafeBag(new Pkcs12CertBag(new Oid("1.2.840.113549.1.9.22.1"), new byte[] { 0x05, 0x00 }));
+            AddContents(contents, builder, pw, encrypt: true);
+            builder.SealWithMac(pw, s_digestAlgorithm, MacCount);
+            byte[] pfxBytes = builder.Encode();
+
+            ReadUnreadablePfx(
+                pfxBytes,
+                pw,
+                // CRYPT_E_BAD_ENCODE
+                -2146885630);
+        }
+
         private static void AddContents(
             Pkcs12SafeContents contents,
             Pkcs12Builder builder,
