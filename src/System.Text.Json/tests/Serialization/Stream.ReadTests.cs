@@ -139,5 +139,100 @@ namespace System.Text.Json.Serialization.Tests
                     async () => await JsonSerializer.DeserializeAsync<byte>(stream));
             }
         }
+
+        public static IEnumerable<object[]> BOMWithJsonElementTestData
+        {
+            get
+            {
+                yield return CreateStreamArgs(100);
+                yield return CreateStreamArgs(200);
+                yield return CreateStreamArgs(400);
+                yield return CreateStreamArgs(800);
+                yield return CreateStreamArgs(1600);
+
+                static object[] CreateStreamArgs(int count)
+                {
+                    byte[] objBytes = Encoding.UTF8.GetBytes(
+                        @"{""Test"":{},""Test2"":[],""Test3"":{""Value"":{}},""PersonType"":0,""Id"":2}");
+
+                    byte[] comma = Encoding.UTF8.GetBytes(@",");
+
+                    var stream = new MemoryStream();
+
+                    // Write BOM.
+                    stream.Write(Encoding.UTF8.GetPreamble());
+
+                    // Write start array.
+                    stream.Write(Encoding.UTF8.GetBytes(@"["));
+
+                    // Write entries.
+                    for (int i = 1; i <= count; i++)
+                    {
+                        stream.Write(objBytes);
+
+                        if (i < count)
+                        {
+                            stream.Write(comma);
+                        }
+                    }
+
+                    // Write end array.
+                    stream.Write(Encoding.UTF8.GetBytes(@"]"));
+
+                    stream.Position = 0;
+                    return new object[] { stream, count };
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(BOMWithJsonElementTestData))]
+        public static async Task TestBOMWithShortAndLongBuffers(Stream stream, int count)
+        {
+            JsonElement[] value;
+
+            // Try with 16K. This should cause copy of the buffer for remaining bytes.
+            JsonSerializerOptions options16K = new JsonSerializerOptions()
+            {
+                DefaultBufferSize = 16 * 1024
+            };
+            value = await JsonSerializer.DeserializeAsync<JsonElement[]>(stream, options16K);
+            Verify();
+
+            // Try with 1 byte. This should cause a copy and\or re-size of the buffer.
+            stream.Position = 0;
+            JsonSerializerOptions options1Byte = new JsonSerializerOptions()
+            {
+                DefaultBufferSize = 1
+            };
+            value = await JsonSerializer.DeserializeAsync<JsonElement[]>(stream, options1Byte);
+            Verify();
+
+            stream.Dispose();
+
+            void Verify()
+            {
+                // Verify first and last elements.
+                VerifyElement(0);
+                VerifyElement(count - 1);
+
+                // Round trip and verify.
+                stream.Position = 3; // Skip the BOM.
+                string originalString = new StreamReader(stream).ReadToEnd();
+                string roundTrippedString = JsonSerializer.Serialize(value);
+                Assert.Equal(originalString, roundTrippedString);
+
+                void VerifyElement(int index)
+                {
+                    Assert.Equal(JsonValueKind.Object, value[index].GetProperty("Test").ValueKind);
+                    Assert.Equal(JsonValueKind.Array, value[index].GetProperty("Test2").ValueKind);
+                    Assert.Equal(0, value[index].GetProperty("Test2").GetArrayLength());
+                    Assert.Equal(JsonValueKind.Object, value[index].GetProperty("Test3").ValueKind);
+                    Assert.Equal(JsonValueKind.Object, value[index].GetProperty("Test3").GetProperty("Value").ValueKind);
+                    Assert.Equal(0, value[index].GetProperty("PersonType").GetInt32());
+                    Assert.Equal(2, value[index].GetProperty("Id").GetInt32());
+                }
+            }
+        }
     }
 }
