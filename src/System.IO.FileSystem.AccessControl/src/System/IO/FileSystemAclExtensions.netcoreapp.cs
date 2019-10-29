@@ -129,7 +129,7 @@ namespace System.IO
 
             // For mitigating local elevation of privilege attack through named pipes make sure we always call CreateFile with SECURITY_ANONYMOUS so that the
             // named pipe server can't impersonate a high privileged client security context (note that this is the effective default on CreateFile2)
-            // SECURITY_SQOS_PRESENT flags that a SECURITY_ flag is present. While it seems bizarre at first, this is due to SECURITY_ANONYMOUS being equal to 0
+            // SECURITY_SQOS_PRESENT flags that a SECURITY_ flag is present.
             int flagsAndAttributes = (int)options | Interop.Kernel32.SecurityOptions.SECURITY_SQOS_PRESENT | Interop.Kernel32.SecurityOptions.SECURITY_ANONYMOUS;
 
             SafeFileHandle handle;
