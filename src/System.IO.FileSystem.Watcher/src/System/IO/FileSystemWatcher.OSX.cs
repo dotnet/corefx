@@ -505,7 +505,7 @@ namespace System.IO
 
                     // Converting an array of bytes to UTF-8 char array
                     int charCount = Encoding.UTF8.GetChars(new ReadOnlySpan<byte>(nativeEventPath, byteCount), tempBuffer);
-                    return new ParsedEvent(tempBuffer.AsSpan()[..charCount], tempBuffer);
+                    return new ParsedEvent(tempBuffer.AsSpan(0, charCount), tempBuffer);
                 }
 
             }
