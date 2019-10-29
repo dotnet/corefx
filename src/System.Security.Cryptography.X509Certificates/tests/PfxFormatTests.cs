@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.Pkcs;
 using Test.Cryptography;
 using Xunit;
@@ -185,6 +186,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 builder.SealWithoutIntegrity();
                 byte[] pfxBytes = builder.Encode();
 
+                // On macOS the cert will come back with HasPrivateKey being false.
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    using (var publicCert = new X509Certificate2(cert.RawData))
+                    {
+                        ReadPfx(
+                            pfxBytes,
+                            pw,
+                            publicCert);
+                    }
+
+                    return;
+                }
+
                 ReadPfx(
                     pfxBytes,
                     pw,
@@ -247,6 +262,21 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 builder.AddSafeContentsEncrypted(certContents, pw, s_windowsPbe);
                 builder.SealWithoutIntegrity();
                 byte[] pfxBytes = builder.Encode();
+
+                // On macOS the cert will come back with HasPrivateKey being false when the
+                // incorrect key comes first
+                if (!correctKeyFirst && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    using (var publicCert = new X509Certificate2(cert.RawData))
+                    {
+                        ReadPfx(
+                            pfxBytes,
+                            pw,
+                            publicCert);
+                    }
+
+                    return;
+                }
 
                 ReadPfx(
                     pfxBytes,
