@@ -102,11 +102,11 @@ namespace System.Text.Json
             {
                 currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
                 var defaultValueAttribute = JsonPropertyInfo.GetAttribute<System.ComponentModel.DefaultValueAttribute>(jsonPropertyInfo.PropertyInfo);
-                bool ignoreDefaultProperty = options.IgnoreDefaultValues && (defaultValueAttribute != null) &&
+                bool ignoreDefaultValueProperty = options.IgnoreDefaultValues && (defaultValueAttribute != null) &&
                     object.Equals(currentValue, defaultValueAttribute.Value);
 
-                // Ignoring Default Values.
-                if (!ignoreDefaultProperty)
+                // Check default value property.
+                if (!ignoreDefaultValueProperty)
                 {
                     jsonPropertyInfo.Write(ref state, writer);
                 }
