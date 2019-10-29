@@ -158,12 +158,12 @@ namespace System.Text.Json.Tests
         [Fact]
         public void AssertDoesNotDeserializeInterface()
         {
-            const string json = @"{
+            const string json = @"[{
 ""Value"": ""A value"",
 ""Thing"": {
 ""Number"": 123
 }
-}";
+]";
             NotSupportedException e = Assert.Throws<NotSupportedException>(() =>
             {
                 JsonSerializer.Deserialize<List<MyClass>>(json);

@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -187,6 +186,16 @@ namespace System.Text.Json
         {
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
+            if (jsonPropertyInfo == null)
+            {
+                Debug.Assert(state.Current.JsonClassInfo != null);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type);
+            }
+            else if (jsonPropertyInfo.ClassType != ClassType.Enumerable)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(jsonPropertyInfo.RuntimePropertyType);
+            }
+
             // If the property has an EnumerableConverter, then we use tempEnumerableValues.
             if (jsonPropertyInfo.EnumerableConverter != null)
             {
@@ -231,6 +240,16 @@ namespace System.Text.Json
         public static object CreateDictionaryValue(ref ReadStack state)
         {
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+            if (jsonPropertyInfo == null)
+            {
+                Debug.Assert(state.Current.JsonClassInfo != null);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type);
+            }
+            else if (jsonPropertyInfo.ClassType != ClassType.Dictionary)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(jsonPropertyInfo.RuntimePropertyType);
+            }
 
             // If the property has a DictionaryConverter, then we use tempDictionaryValues.
             if (jsonPropertyInfo.DictionaryConverter != null)
@@ -303,11 +322,9 @@ namespace System.Text.Json
 
         public void DetermineEnumerablePopulationStrategy(object targetEnumerable)
         {
-            if (JsonPropertyInfo.ClassType != ClassType.Enumerable)
-            {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(JsonPropertyInfo.RuntimePropertyType);
-            }
-            else if (JsonPropertyInfo.RuntimeClassInfo.AddItemToObject != null)
+            Debug.Assert(JsonPropertyInfo.ClassType == ClassType.Enumerable);
+
+            if (JsonPropertyInfo.RuntimeClassInfo.AddItemToObject != null)
             {
                 if (!JsonPropertyInfo.TryCreateEnumerableAddMethod(targetEnumerable, out object addMethodDelegate))
                 {
@@ -342,6 +359,8 @@ namespace System.Text.Json
 
         public void DetermineIfDictionaryCanBePopulated(object targetDictionary)
         {
+            Debug.Assert(JsonPropertyInfo.ClassType == ClassType.Dictionary);
+
             if (!JsonPropertyInfo.CanPopulateDictionary(targetDictionary))
             {
                 throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(

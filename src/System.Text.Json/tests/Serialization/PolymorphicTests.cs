@@ -448,7 +448,19 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void GenericListOfInterface_WithValidJson_ThrowsNotSupportedException()
         {
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<MyThingCollection>("{}"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<MyThingCollection>("[{}]"));
+        }
+
+        [Fact]
+        public static void GenericDictionaryOfInterface_WithInvalidJson_ThrowsJsonException()
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<MyThingDictionary>(@"{"""":1}"));
+        }
+
+        [Fact]
+        public static void GenericDictionaryOfInterface_WithValidJson_ThrowsNotSupportedException()
+        {
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<MyThingDictionary>(@"{"""":{}}"));
         }
 
         class MyClass
@@ -468,5 +480,7 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         class MyThingCollection : List<IThing> { }
+
+        class MyThingDictionary : Dictionary<string, IThing> { }
     }
 }

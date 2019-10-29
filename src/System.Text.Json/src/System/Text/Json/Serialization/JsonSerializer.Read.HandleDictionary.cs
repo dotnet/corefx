@@ -30,28 +30,9 @@ namespace System.Text.Json
                 state.Current.InitializeJsonPropertyInfo();
                 state.Current.CollectionPropertyInitialized = true;
 
-                ClassType classType = state.Current.JsonClassInfo.ClassType;
-                if (classType == ClassType.Value)
-                {
-                    Type elementClassInfoType = jsonPropertyInfo.ElementClassInfo.Type;
-                    if (elementClassInfoType != typeof(object) && elementClassInfoType != typeof(JsonElement))
-                    {
-                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type);
-                    }
-                }
-
                 JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
-                if (state.Current.IsProcessingEnumerable())
-                {
-                    if (classInfo.CreateObject == null)
-                    {
-                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type);
-                        return;
-                    }
-                    state.Current.ReturnValue = classInfo.CreateObject();
-                }
-                else if (state.Current.IsProcessingDictionary())
+                if (state.Current.IsProcessingDictionary())
                 {
                     object dictValue = ReadStackFrame.CreateDictionaryValue(ref state);
 
@@ -62,9 +43,25 @@ namespace System.Text.Json
                         state.Current.DetermineIfDictionaryCanBePopulated(state.Current.ReturnValue);
                     }
                 }
+                else if (state.Current.IsProcessingObject(ClassType.Object))
+                {
+                    if (classInfo.CreateObject is null)
+                    {
+                        if (classInfo.Type.IsInterface)
+                        {
+                            ThrowHelper.ThrowNotSupportedException_DeserializePolymorphicInterface(classInfo.Type);
+                        }
+                        else
+                        {
+                            ThrowHelper.ThrowNotSupportedException_DeserializeMissingParameterlessConstructor(classInfo.Type);
+                        }
+                    }
+
+                    state.Current.ReturnValue = classInfo.CreateObject();
+                }
                 else
                 {
-                    state.Current.ReturnValue = classInfo.CreateObject();
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type);
                 }
 
                 return;
