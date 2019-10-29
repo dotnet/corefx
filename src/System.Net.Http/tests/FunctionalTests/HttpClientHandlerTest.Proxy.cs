@@ -18,7 +18,6 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
     public abstract class HttpClientHandler_Proxy_Test : HttpClientHandlerTestBase
     {
         public HttpClientHandler_Proxy_Test(ITestOutputHelper output) : base(output) { }
@@ -146,8 +145,6 @@ namespace System.Net.Http.Functional.Tests
                         string body = await response.Content.ReadAsStringAsync();
                         Assert.Contains(proxyServer.ViaHeader, body);
                     }
-
-                    return RemoteExecutor.SuccessExitCode;
                 }
             }, UseSocketsHttpHandler.ToString(), UseHttp2.ToString()).Dispose();
         }

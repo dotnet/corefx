@@ -53,7 +53,7 @@
 #if HAVE_GETIFADDRS
 #include <ifaddrs.h>
 #endif
-#ifdef AF_CAN
+#if HAVE_LINUX_CAN_H
 #include <linux/can.h>
 #endif
 #if HAVE_KQUEUE
@@ -2087,7 +2087,7 @@ static bool TryConvertProtocolTypePalToPlatform(int32_t palAddressFamily, int32_
             *platformProtocolType = palProtocolType;
             return true;
 #endif
-#ifdef AF_CAN
+#if HAVE_LINUX_CAN_H
         case AddressFamily_AF_CAN:
             switch (palProtocolType)
             {
@@ -2578,8 +2578,7 @@ static int32_t WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32
 }
 
 #else
-#warning epoll/kqueue not detected; building with stub socket events support
-static const size_t SocketEventBufferElementSize = sizeof(struct pollfd);
+static const size_t SocketEventBufferElementSize = 0;
 
 static SocketEvents GetSocketEvents(int16_t filter, uint16_t flags)
 {

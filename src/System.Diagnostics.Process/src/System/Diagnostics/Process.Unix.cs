@@ -749,18 +749,27 @@ namespace System.Diagnostics
             return null;
         }
 
+        private static long s_ticksPerSecond;
+
         /// <summary>Convert a number of "jiffies", or ticks, to a TimeSpan.</summary>
         /// <param name="ticks">The number of ticks.</param>
         /// <returns>The equivalent TimeSpan.</returns>
         internal static TimeSpan TicksToTimeSpan(double ticks)
         {
-            // Look up the number of ticks per second in the system's configuration,
-            // then use that to convert to a TimeSpan
-            long ticksPerSecond = Interop.Sys.SysConf(Interop.Sys.SysConfName._SC_CLK_TCK);
-            if (ticksPerSecond <= 0)
+            long ticksPerSecond = Volatile.Read(ref s_ticksPerSecond);
+            if (ticksPerSecond == 0)
             {
-                throw new Win32Exception();
+                // Look up the number of ticks per second in the system's configuration,
+                // then use that to convert to a TimeSpan
+                ticksPerSecond = Interop.Sys.SysConf(Interop.Sys.SysConfName._SC_CLK_TCK);
+                if (ticksPerSecond <= 0)
+                {
+                    throw new Win32Exception();
+                }
+
+                Volatile.Write(ref s_ticksPerSecond, ticksPerSecond);
             }
+
             return TimeSpan.FromSeconds(ticks / (double)ticksPerSecond);
         }
 
@@ -800,7 +809,7 @@ namespace System.Diagnostics
 
         private static string GetNextArgument(string arguments, ref int i)
         {
-            var currentArgument = StringBuilderCache.Acquire();
+            var currentArgument = new ValueStringBuilder(stackalloc char[256]);
             bool inQuotes = false;
 
             while (i < arguments.Length)
@@ -874,7 +883,7 @@ namespace System.Diagnostics
                 i++;
             }
 
-            return StringBuilderCache.GetStringAndRelease(currentArgument);
+            return currentArgument.ToString();
         }
 
         /// <summary>Gets the wait state for this Process object.</summary>

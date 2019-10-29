@@ -308,7 +308,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
         [InlineData(true)]
         [InlineData(false)]
         public async Task ContentLength_Get_ExpectSameAsGetResponseStream(bool useSsl)
@@ -733,17 +732,6 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(EchoServers))]
-        public void PreAuthenticate_SetAndGetBooleanResponse_ValuesMatch(Uri remoteServer)
-        {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.PreAuthenticate = true;
-            using (var response = (HttpWebResponse)request.GetResponse())
-            {
-                Assert.True(request.PreAuthenticate);
-            }
-        }
-
-        [Theory, MemberData(nameof(EchoServers))]
         public void Connection_NullOrWhiteSpace_ValuesMatch(Uri remoteServer)
         {
             const string Connection = "connect";
@@ -797,8 +785,6 @@ namespace System.Net.Tests
                 {
                     HttpWebRequest.DefaultMaximumResponseHeadersLength = defaultMaximumResponseHeadersLength;
                 }
-
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -819,8 +805,6 @@ namespace System.Net.Tests
                 {
                     HttpWebRequest.DefaultMaximumErrorResponseLength = defaultMaximumErrorsResponseLength;
                 }
-
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -841,8 +825,6 @@ namespace System.Net.Tests
                 {
                     HttpWebRequest.DefaultCachePolicy = requestCachePolicy;
                 }
-
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -1007,7 +989,6 @@ namespace System.Net.Tests
             Assert.Equal(HttpVersion.Version11, request.ProtocolVersion);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not allow HTTP/1.0 requests.")]
         [OuterLoop]
         [Theory]
         [InlineData(false)]
@@ -1264,7 +1245,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
         [InlineData(true)]
         [InlineData(false)]
         public async Task GetResponseAsync_GetResponseStream_ContainsHost(bool useSsl)
@@ -1312,7 +1292,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
         [InlineData(true)]
         [InlineData(false)]
         public async Task GetResponseAsync_PostRequestStream_ContainsData(bool useSsl)
@@ -1358,7 +1337,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
         [InlineData(true)]
         [InlineData(false)]
         public async Task GetResponseAsync_UseDefaultCredentials_ExpectSuccess(bool useSsl)
@@ -1398,7 +1376,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
         [InlineData(true)]
         [InlineData(false)]
         public async Task HaveResponse_GetResponseAsync_ExpectTrue(bool useSsl)
@@ -1417,7 +1394,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
         [InlineData(true)]
         [InlineData(false)]
         public async Task Headers_GetResponseHeaders_ContainsExpectedValue(bool useSsl)
@@ -1503,8 +1479,6 @@ namespace System.Net.Tests
                     {
                         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     }
-
-                    return RemoteExecutor.SuccessExitCode;
                 }, cred.UserName, cred.Password, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
 
                 await proxyTask;
@@ -1519,7 +1493,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
         [InlineData(true)]
         [InlineData(false)]
         public async Task ResponseUri_GetResponseAsync_ExpectSameUri(bool useSsl)
@@ -1543,7 +1516,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
         [InlineData(true)]
         [InlineData(false)]
         public async Task SimpleScenario_UseGETVerb_Success(bool useSsl)
@@ -1560,7 +1532,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
         [InlineData(true)]
         [InlineData(false)]
         public async Task SimpleScenario_UsePOSTVerb_Success(bool useSsl)
@@ -1583,7 +1554,6 @@ namespace System.Net.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Loopback server with TLS has problems on UWP")]
         [InlineData(true)]
         [InlineData(false)]
         public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent(bool useSsl)
@@ -1616,7 +1586,6 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(MixedWebRequestParameters))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void GetResponseAsync_ParametersAreNotCachable_CreateNewClient(HttpWebRequestParameters requestParameters, bool connectionReusedParameter)
         {
             RemoteExecutor.Invoke(async (serializedParameters, connectionReusedString) =>
@@ -1662,12 +1631,10 @@ namespace System.Net.Tests
                         }
                     }
                 }
-                return RemoteExecutor.SuccessExitCode;
             }, JsonSerializer.Serialize<HttpWebRequestParameters>(requestParameters), connectionReusedParameter.ToString()).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void GetResponseAsync_ParametersAreCachableButDifferent_CreateNewClient()
         {
             RemoteExecutor.Invoke(async () =>
@@ -1726,7 +1693,6 @@ namespace System.Net.Tests
                          }
                      }
                  }
-                 return RemoteExecutor.SuccessExitCode;
              }).Dispose();
         }
 

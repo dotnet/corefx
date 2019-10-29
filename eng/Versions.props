@@ -7,7 +7,8 @@
     <PatchVersion>0</PatchVersion>
     <!-- Always use shipping version instead of dummy version -->
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
-    <PreReleaseVersionLabel>alpha1</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>alpha</PreReleaseVersionLabel>
+    <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
     <!-- Opt-in repo features -->
     <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
@@ -24,34 +25,33 @@
     <NETStandardLibraryPackageId>NETStandard.Library</NETStandardLibraryPackageId>
     <WindowsCoreFxOptimizationDataPackageId>optimization.windows_nt-x64.ibc.corefx</WindowsCoreFxOptimizationDataPackageId>
     <LinuxCoreFxOptimizationDataPackageId>optimization.linux-x64.ibc.corefx</LinuxCoreFxOptimizationDataPackageId>
-    <MicrosoftDotNetUapTestToolsPackageId>microsoft.dotnet.uap.testtools</MicrosoftDotNetUapTestToolsPackageId>
     <MicrosoftPrivateIntellisensePackageId>microsoft.private.intellisense</MicrosoftPrivateIntellisensePackageId>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Arcade dependencies -->
-    <MicrosoftDotNetApiCompatPackageVersion>5.0.0-beta.19510.4</MicrosoftDotNetApiCompatPackageVersion>
-    <MicrosoftDotNetCodeAnalysisPackageVersion>5.0.0-beta.19510.4</MicrosoftDotNetCodeAnalysisPackageVersion>
-    <MicrosoftDotNetGenAPIPackageVersion>5.0.0-beta.19510.4</MicrosoftDotNetGenAPIPackageVersion>
-    <MicrosoftDotNetGenFacadesPackageVersion>5.0.0-beta.19510.4</MicrosoftDotNetGenFacadesPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsPackageVersion>5.0.0-beta.19510.4</MicrosoftDotNetXUnitExtensionsPackageVersion>
-    <MicrosoftDotNetXUnitConsoleRunnerPackageVersion>2.5.1-beta.19510.4</MicrosoftDotNetXUnitConsoleRunnerPackageVersion>
-    <MicrosoftDotNetBuildTasksPackagingPackageVersion>5.0.0-beta.19510.4</MicrosoftDotNetBuildTasksPackagingPackageVersion>
-    <MicrosoftDotNetRemoteExecutorPackageVersion>5.0.0-beta.19510.4</MicrosoftDotNetRemoteExecutorPackageVersion>
-    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19510.4</MicrosoftDotNetBuildTasksFeedVersion>
-    <MicrosoftDotNetVersionToolsTasksPackageVersion>5.0.0-beta.19510.4</MicrosoftDotNetVersionToolsTasksPackageVersion>
+    <MicrosoftDotNetApiCompatPackageVersion>5.0.0-beta.19525.2</MicrosoftDotNetApiCompatPackageVersion>
+    <MicrosoftDotNetCodeAnalysisPackageVersion>5.0.0-beta.19525.2</MicrosoftDotNetCodeAnalysisPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>5.0.0-beta.19525.2</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenFacadesPackageVersion>5.0.0-beta.19525.2</MicrosoftDotNetGenFacadesPackageVersion>
+    <MicrosoftDotNetXUnitExtensionsPackageVersion>5.0.0-beta.19525.2</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <MicrosoftDotNetXUnitConsoleRunnerPackageVersion>2.5.1-beta.19525.2</MicrosoftDotNetXUnitConsoleRunnerPackageVersion>
+    <MicrosoftDotNetBuildTasksPackagingPackageVersion>5.0.0-beta.19525.2</MicrosoftDotNetBuildTasksPackagingPackageVersion>
+    <MicrosoftDotNetRemoteExecutorPackageVersion>5.0.0-beta.19525.2</MicrosoftDotNetRemoteExecutorPackageVersion>
+    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19525.2</MicrosoftDotNetBuildTasksFeedVersion>
+    <MicrosoftDotNetVersionToolsTasksPackageVersion>5.0.0-beta.19525.2</MicrosoftDotNetVersionToolsTasksPackageVersion>
     <!-- Core-setup dependencies -->
-    <MicrosoftNETCoreAppPackageVersion>5.0.0-alpha1.19510.2</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftNETCoreDotNetHostPackageVersion>5.0.0-alpha1.19510.2</MicrosoftNETCoreDotNetHostPackageVersion>
-    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>5.0.0-alpha1.19510.2</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>5.0.0-alpha1.19524.4</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreDotNetHostPackageVersion>5.0.0-alpha1.19524.4</MicrosoftNETCoreDotNetHostPackageVersion>
+    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>5.0.0-alpha1.19524.4</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
     <!-- Coreclr dependencies -->
-    <MicrosoftNETCoreILAsmPackageVersion>5.0.0-alpha1.19510.1</MicrosoftNETCoreILAsmPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>5.0.0-alpha1.19510.1</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
-    <MicrosoftNETSdkILPackageVersion>5.0.0-alpha1.19510.1</MicrosoftNETSdkILPackageVersion>
+    <MicrosoftNETCoreILAsmPackageVersion>5.0.0-alpha1.19525.1</MicrosoftNETCoreILAsmPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>5.0.0-alpha1.19525.1</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETSdkILPackageVersion>5.0.0-alpha1.19525.1</MicrosoftNETSdkILPackageVersion>
     <!-- Corefx dependencies -->
-    <MicrosoftNETCorePlatformsPackageVersion>5.0.0-alpha1.19510.15</MicrosoftNETCorePlatformsPackageVersion>
-    <runtimenativeSystemIOPortsPackageVersion>5.0.0-alpha1.19510.15</runtimenativeSystemIOPortsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>5.0.0-alpha.1.19524.14</MicrosoftNETCorePlatformsPackageVersion>
+    <runtimenativeSystemIOPortsPackageVersion>5.0.0-alpha.1.19524.14</runtimenativeSystemIOPortsPackageVersion>
     <!-- Standard dependencies -->
-    <NETStandardLibraryPackageVersion>2.2.0-prerelease.19510.2</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageVersion>2.2.0-prerelease.19524.1</NETStandardLibraryPackageVersion>
     <!-- dotnet-optimization dependencies -->
     <optimizationwindows_ntx64IBCCoreFxPackageVersion>99.99.99-master-20190716.1</optimizationwindows_ntx64IBCCoreFxPackageVersion>
     <!-- sni -->
@@ -61,7 +61,6 @@
     <MicrosoftNETTestSdkPackageVersion>16.2.0</MicrosoftNETTestSdkPackageVersion>
     <XUnitPackageVersion>2.4.1</XUnitPackageVersion>
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
-    <MicrosoftDotNetUapTestToolsPackageVersion>1.0.31</MicrosoftDotNetUapTestToolsPackageVersion>
     <NewtonsoftJsonPackageVersion>12.0.1</NewtonsoftJsonPackageVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.0.0-preview6-27804-01</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <!-- Test data -->
@@ -79,7 +78,7 @@
     <!-- Docs -->
     <MicrosoftPrivateIntellisensePackageVersion>3.0.0-preview9-190909-1</MicrosoftPrivateIntellisensePackageVersion>
     <!-- ILLink -->
-    <ILLinkTasksPackageVersion>0.1.5-preview-1461378</ILLinkTasksPackageVersion>
+    <ILLinkTasksPackageVersion>0.1.6-prerelease.19523.1</ILLinkTasksPackageVersion>
   </PropertyGroup>
   <!-- Override isolated build dependency versions with versions from Repo API. -->
   <Import Project="$(DotNetPackageVersionPropsPath)" Condition="'$(DotNetPackageVersionPropsPath)' != ''" />

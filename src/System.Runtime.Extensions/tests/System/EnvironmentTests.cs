@@ -52,8 +52,6 @@ namespace System.Tests
                     // path that followed the symlink.
                     Assert.Equal(TestDirectory, Directory.GetCurrentDirectory());
                 }
-
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -187,10 +185,9 @@ namespace System.Tests
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
         [OuterLoop]
         [Fact]
-        [ActiveIssue("21404", TargetFrameworkMonikers.Uap)]
         public void FailFast_ExpectFailureExitCode()
         {
-            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(() => { Environment.FailFast("message"); return RemoteExecutor.SuccessExitCode; }))
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(() => Environment.FailFast("message")))
             {
                 Process p = handle.Process;
                 handle.Process = null;
@@ -198,7 +195,7 @@ namespace System.Tests
                 Assert.NotEqual(RemoteExecutor.SuccessExitCode, p.ExitCode);
             }
 
-            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(() => { Environment.FailFast("message", new Exception("uh oh")); return RemoteExecutor.SuccessExitCode; }))
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(() => Environment.FailFast("message", new Exception("uh oh"))))
             {
                 Process p = handle.Process;
                 handle.Process = null;
@@ -208,7 +205,6 @@ namespace System.Tests
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
-        [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void FailFast_ExceptionStackTrace_ArgumentException()
         {
@@ -217,7 +213,7 @@ namespace System.Tests
             psi.RedirectStandardOutput = true;
 
             using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(
-                () => { Environment.FailFast("message", new ArgumentException("bad arg")); return RemoteExecutor.SuccessExitCode; },
+                () => Environment.FailFast("message", new ArgumentException("bad arg")),
                 new RemoteInvokeOptions { StartInfo = psi }))
             {
                 Process p = handle.Process;
@@ -230,7 +226,6 @@ namespace System.Tests
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
-        [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void FailFast_ExceptionStackTrace_StackOverflowException()
         {
@@ -240,7 +235,7 @@ namespace System.Tests
             psi.RedirectStandardOutput = true;
 
             using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(
-                () => { Environment.FailFast("message", new StackOverflowException("SO exception")); return RemoteExecutor.SuccessExitCode; },
+                () => Environment.FailFast("message", new StackOverflowException("SO exception")),
                 new RemoteInvokeOptions { StartInfo = psi }))
             {
                 Process p = handle.Process;
@@ -253,7 +248,6 @@ namespace System.Tests
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
-        [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void FailFast_ExceptionStackTrace_InnerException()
         {
@@ -263,7 +257,7 @@ namespace System.Tests
             psi.RedirectStandardOutput = true;
 
             using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(
-                () => { Environment.FailFast("message", new ArgumentException("first exception", new NullReferenceException("inner exception"))); return RemoteExecutor.SuccessExitCode; },
+                () => Environment.FailFast("message", new ArgumentException("first exception", new NullReferenceException("inner exception"))),
                 new RemoteInvokeOptions { StartInfo = psi }))
             {
                 Process p = handle.Process;
@@ -374,7 +368,7 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.System)]
         [InlineData(Environment.SpecialFolder.SystemX86)]
         [InlineData(Environment.SpecialFolder.Windows)]
-        public void GetFolderPath_UapExistAndAccessible(Environment.SpecialFolder folder)
+        public void GetFolderPath_UWP_ExistAndAccessible(Environment.SpecialFolder folder)
         {
             string knownFolder = Environment.GetFolderPath(folder);
             Assert.NotEmpty(knownFolder);
@@ -401,7 +395,7 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.CommonApplicationData)]
         [InlineData(Environment.SpecialFolder.Desktop)]
         [InlineData(Environment.SpecialFolder.Favorites)]
-        public void GetFolderPath_UapNotEmpty(Environment.SpecialFolder folder)
+        public void GetFolderPath_UWP_NotEmpty(Environment.SpecialFolder folder)
         {
             // The majority of the paths here cannot be accessed from an appcontainer
             string knownFolder = Environment.GetFolderPath(folder);
@@ -472,7 +466,6 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.SystemX86)]
         [InlineData(Environment.SpecialFolder.Windows)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests OS-specific environment
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Don't run on UAP
         public unsafe void GetFolderPath_Windows(Environment.SpecialFolder folder)
         {
             string knownFolder = Environment.GetFolderPath(folder);

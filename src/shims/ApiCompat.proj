@@ -9,15 +9,9 @@
     <ApiCompatNSBaselineFile>$(MSBuildThisFileDirectory)ApiCompatBaseline.$(TargetGroup).netstandard.txt</ApiCompatNSBaselineFile>
     <ApiCompatNSOnlyBaselineFile>$(MSBuildThisFileDirectory)ApiCompatBaseline.$(TargetGroup).netstandardOnly.txt</ApiCompatNSOnlyBaselineFile>
     <ApiCompatImplementationDirs>$(RefPath.TrimEnd('\/'))</ApiCompatImplementationDirs>
-    <!-- If we are targeting uap run ApiCompat against the implementation assemblies instead since they don't match the reference assemblies -->
-    <!-- also include $(RefPath) last to pick up windows.winmd dependency, which we don't place in RuntimePath -->
-    <ApiCompatImplementationDirs Condition="'$(TargetsUap)' == 'true'">$(RuntimePath.TrimEnd('\/')),$(RefPath.TrimEnd('\/'))</ApiCompatImplementationDirs>
     <!-- Set to true to build this project -->
-    <!-- Separate property otherwise /p:BaselineApiCompat=true would force it to run even for non-UAP -->
     <BaselineApiCompat Condition="'$(BaselineApiCompat)' == ''">false</BaselineApiCompat>
     <_RunApiCompat>true</_RunApiCompat>
-    <!-- Disable running apicompat for uap scenarios because the RuntimePath is not correctly setup in BuildAllConfigurations mode -->
-    <_RunApiCompat Condition="'$(BuildAllConfigurations)' == 'true' and '$(TargetsUap)' == 'true'">false</_RunApiCompat>
   </PropertyGroup>
 
   <ItemGroup>
@@ -90,7 +84,7 @@
     <Error Condition="'$(ApiCompatExitCode)' != '0'" Text="ApiCompat failed comparing netstandard.dll to $(TargetGroup)" />
 
     <!-- TODO: Once the repo targets netstandard2.1, have this instance of APICompat run against NetStandard21RefPath -->
-    <Exec Command="$(_ApiCompatCommand) &quot;$(NetStandardRefPath.TrimEnd('\/'))&quot; --baseline &quot;$(ApiCompatNSBaselineFile)&quot; @&quot;$(ApiCompatResponseFile)&quot;"
+    <Exec Command="$(_ApiCompatCommand) &quot;$(NetStandard20RefPath.TrimEnd('\/'))&quot; --baseline &quot;$(ApiCompatNSBaselineFile)&quot; @&quot;$(ApiCompatResponseFile)&quot;"
           CustomErrorRegularExpression="^[a-zA-Z]+ :"
           StandardOutputImportance="Low"
           IgnoreExitCode="true"

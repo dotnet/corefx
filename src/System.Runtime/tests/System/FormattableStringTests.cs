@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public partial class FormattableStringTests
+    public class FormattableStringTests
     {
         [Fact]
         public static void Invariant_Null_ThrowsArgumentNullException()
@@ -20,17 +20,13 @@ namespace System.Tests
         [Fact]
         public static void Invariant_DutchCulture_FormatsDoubleBasedOnInvariantCulture()
         {
-            RemoteExecutor.Invoke(
-                () =>
-                {
-                    CultureInfo.CurrentCulture = new CultureInfo("nl"); // would be 123,456 in Dutch
-                    double d = 123.456;
-                    string expected = string.Format(CultureInfo.InvariantCulture, "Invariant culture is used {0}", d);
-                    string actual = FormattableString.Invariant($"Invariant culture is used {d}");
-                    Assert.Equal(expected, actual);
-
-                    return RemoteExecutor.SuccessExitCode;
-                }).Dispose();
+            using (new ThreadCultureChange("nl"))
+            {
+                double d = 123.456; // would be 123,456 in Dutch
+                string expected = string.Format(CultureInfo.InvariantCulture, "Invariant culture is used {0}", d);
+                string actual = FormattableString.Invariant($"Invariant culture is used {d}");
+                Assert.Equal(expected, actual);
+            }
         }
 
         [Fact]
@@ -45,17 +41,41 @@ namespace System.Tests
         [Fact]
         public static void IFormattableToString_UsesSuppliedFormatProvider()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("nl"))
             {
-                CultureInfo.CurrentCulture = new CultureInfo("nl"); // would be 123,456 in Dutch
-                double d = 123.456;
+                double d = 123.456; // would be 123,456 in Dutch
                 string expected = string.Format(CultureInfo.InvariantCulture, "Invariant culture is used {0}", d);
                 string actual = ((IFormattable)((FormattableString)$"Invariant culture is used {d}")).ToString(null, CultureInfo.InvariantCulture);
                 Assert.Equal(expected, actual);
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
+        [Fact]
+        public static void CurrentCulture_ImplicityAndExplicitMethodsReturnSameString()
+        {
+            double d = 123.456;
+            string text1 = $"This will be formatted using current culture {d}";
+            string text2 = FormattableString.CurrentCulture($"This will be formatted using current culture {d}");
+            Assert.Equal(text1, text2);
+        }
+
+        [Fact]
+        public static void CurrentCulture_Null_ThrowsArgumentNullException()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("formattable", () => FormattableString.CurrentCulture(null));
+        }
+
+        [Fact]
+        public static void CurrentCulture_DutchCulture_FormatsDoubleBasedOnCurrentCulture()
+        {
+            var dutchCulture = new CultureInfo("nl");
+            using (new ThreadCultureChange(dutchCulture))
+            {
+                double d = 123.456;
+                string expected = string.Format(dutchCulture, "Dutch decimal separator is comma {0}", d);
+                string actual = FormattableString.CurrentCulture($"Dutch decimal separator is comma {d}");
+                Assert.Equal(expected, actual);
+            }
+        }
     }
 }

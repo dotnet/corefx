@@ -21,14 +21,6 @@
     <IsSourceProject>$([System.Text.RegularExpressions.Regex]::IsMatch($(MSBuildProjectDirectory), 'src%24'))</IsSourceProject>
   </PropertyGroup>
 
-  <!-- Define vNext UAP Moniker -->
-  <PropertyGroup>
-    <UAPvNextVersion>10.0.16300</UAPvNextVersion>
-    <UAPvNextTFI>UAP</UAPvNextTFI>
-    <UAPvNextTFMFull>$(UAPvNextTFI),Version=v$(UAPvNextVersion)</UAPvNextTFMFull>
-    <UAPvNextTFM>uap$(UAPvNextVersion)</UAPvNextTFM>
-  </PropertyGroup>
-
   <!-- Import configuration data model -->
   <Import Project="$(RepositoryEngineeringDir)configurations/properties.props" />
 
@@ -65,15 +57,20 @@
     <OSGroup Condition="'$(OSGroup)' == ''">$(DefaultOSGroup)</OSGroup>
     <ConfigurationGroup Condition="'$(ConfigurationGroup)' == ''">Debug</ConfigurationGroup>
     <HostArch>$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToLowerInvariant)</HostArch>
-    <ArchGroup Condition="'$(ArchGroup)' == '' AND '$(HostArch)' == 'arm'">arm</ArchGroup>
-    <ArchGroup Condition="'$(ArchGroup)' == '' AND '$(HostArch)' == 'arm64'">arm64</ArchGroup>
+    <ArchGroup Condition="'$(ArchGroup)' == '' and '$(HostArch)' == 'arm'">arm</ArchGroup>
+    <ArchGroup Condition="'$(ArchGroup)' == '' and '$(HostArch)' == 'arm64'">arm64</ArchGroup>
+    <ArchGroup Condition="'$(ArchGroup)' == '' and '$(OSGroup)' == 'WebAssembly'">wasm</ArchGroup>
     <ArchGroup Condition="'$(ArchGroup)' == ''">x64</ArchGroup>
+
+    <!-- RuntimeOS is calculated based on the build system OS, however if building for WebAssembly we need to let
+         the build system to use webassembly as the RuntimeOS for produced package RIDs. -->
+    <RuntimeOS Condition="'$(OSGroup)' == 'WebAssembly'">$(OSGroup.ToLowerInvariant())</RuntimeOS>
 
     <!-- Initialize BuildConfiguration from the individual properties if it wasn't already explicitly set -->
     <BuildConfiguration Condition="'$(BuildConfiguration)' == ''">$(TargetGroup)-$(OSGroup)-$(ConfigurationGroup)-$(ArchGroup)</BuildConfiguration>
 
     <!-- if PKGPROJ doesn't set BuildConfigurations, make sure it only builds for TargetGroup=package or BuildAllConfigurations -->
-    <BuildConfigurations Condition="'$(MSBuildProjectExtension)' == '.pkgproj' AND '$(BuildConfigurations)' == ''">package</BuildConfigurations>
+    <BuildConfigurations Condition="'$(MSBuildProjectExtension)' == '.pkgproj' and '$(BuildConfigurations)' == ''">package</BuildConfigurations>
   </PropertyGroup>
 
   <!-- Informs build tools to apply .NET Framework metadata if not a test project -->
@@ -138,18 +135,19 @@
     <ToolRuntimeRID Condition="'$(BuildingInsideVisualStudio)' == 'true'">$(_runtimeOS)-x64</ToolRuntimeRID>
     <ToolRuntimeRID Condition="'$(ToolRuntimeID)' == ''">$(_runtimeOS)-$(HostArch)</ToolRuntimeRID>
     <!-- We build linux-musl-arm on a ubuntu container, so we can't use the toolset build for alpine runtime. We need to use portable linux RID for our toolset in order to be able to use it. -->
-    <ToolRuntimeRID Condition="'$(_runtimeOS)' == 'linux-musl' AND $(ArchGroup.StartsWith('arm')) AND !$(HostArch.StartsWith('arm'))">linux-x64</ToolRuntimeRID>
+    <ToolRuntimeRID Condition="'$(_runtimeOS)' == 'linux-musl' and $(ArchGroup.StartsWith('arm')) and !$(HostArch.StartsWith('arm'))">linux-x64</ToolRuntimeRID>
 
-    <!-- There are no WebAssembly tools, so treat them as Windows -->
-    <ToolRuntimeRID Condition="'$(RuntimeOS)' == 'WebAssembly'">win-x64</ToolRuntimeRID>
+    <!-- There are no WebAssembly tools, so use the default ones -->
+    <_buildingInOSX>$([MSBuild]::IsOSPlatform('OSX'))</_buildingInOSX>
+    <ToolRuntimeRID Condition="'$(RuntimeOS)' == 'webassembly' and '$(OS)' == 'Windows_NT'">win-x64</ToolRuntimeRID>
+    <ToolRuntimeRID Condition="'$(RuntimeOS)' == 'webassembly' and '$(OS)' != 'Windows_NT' and $(_buildingInOSX)">osx-x64</ToolRuntimeRID>
+    <ToolRuntimeRID Condition="'$(RuntimeOS)' == 'webassembly' and '$(OS)' != 'Windows_NT' and !$(_buildingInOSX)">linux-x64</ToolRuntimeRID>
 
     <!-- support cross-targeting by choosing a RID to restore when running on a different machine that what we're build for -->
-    <_portableOS Condition="'$(OSGroup)' == 'Unix' AND '$(_runtimeOSFamily)' != 'osx' AND '$(_runtimeOSFamily)' != 'FreeBSD' AND '$(_runtimeOS)' != 'linux-musl'">linux</_portableOS>
+    <_portableOS Condition="'$(OSGroup)' == 'Unix' and '$(_runtimeOSFamily)' != 'osx' and '$(_runtimeOSFamily)' != 'FreeBSD' AND '$(_runtimeOS)' != 'linux-musl'">linux</_portableOS>
 
     <_packageRID />
     <_packageRID Condition="'$(PortableBuild)' == 'true'">$(_portableOS)-$(ArchGroup)</_packageRID>
-    <_packageRID Condition="$(TargetGroup.StartsWith('uap'))">win10-$(ArchGroup)</_packageRID>
-    <_packageRID Condition="$(TargetGroup.EndsWith('aot'))">$(_packageRID)-aot</_packageRID>
     <PackageRID Condition="'$(PackageRID)' == ''">$(_packageRID)</PackageRID>
     <PackageRID Condition="'$(PackageRID)' == ''">$(RuntimeOS)-$(ArchGroup)</PackageRID>
   </PropertyGroup>
@@ -157,7 +155,6 @@
   <!-- Set some shortcuts for more terse conditions in project files -->
   <PropertyGroup>
     <TargetsNetCoreApp Condition="$(TargetFramework.StartsWith('netcoreapp'))">true</TargetsNetCoreApp>
-    <TargetsUap Condition="$(TargetFramework.StartsWith('uap'))">true</TargetsUap>
     <TargetsNetStandard Condition="$(TargetFramework.StartsWith('netstandard'))">true</TargetsNetStandard>
     <TargetsNetFx Condition="$(TargetFramework.StartsWith('net4'))">true</TargetsNetFx>
   </PropertyGroup>
@@ -166,7 +163,6 @@
   <PropertyGroup>
     <BuildingNETCoreAppVertical Condition="'$(BuildingNETCoreAppVertical)' == '' AND ('$(_bc_TargetGroup)'=='netcoreapp' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETCoreAppVertical>
     <BuildingNETFxVertical Condition="'$(BuildingNETFxVertical)' == '' AND ('$(_bc_TargetGroup)'=='netfx' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETFxVertical>
-    <BuildingUAPVertical Condition="'$(BuildingUAPVertical)' == '' AND ('$(_bc_TargetGroup)'=='uap' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingUAPVertical>
   </PropertyGroup>
 
   <!--
@@ -281,7 +277,7 @@
     <RefRootPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsBinDir)', 'ref'))</RefRootPath>
     <BuildConfigurationRefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', '$(_bc_TargetGroup)'))</BuildConfigurationRefPath>
     <RefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', '$(TargetGroup)'))</RefPath>
-    <NetStandardRefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', 'netstandard'))</NetStandardRefPath>
+    <NetStandard20RefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', 'netstandard2.0'))</NetStandard20RefPath>
     <NetStandard21RefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', 'netstandard2.1'))</NetStandard21RefPath>
     <NetFxRefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', 'netfx'))</NetFxRefPath>
     <ILAsmToolPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsToolsetDir)', 'ilasm'))</ILAsmToolPath>
@@ -301,8 +297,6 @@
     <!-- Paths to binplace package content -->
     <NETCoreAppPackageRefPath>$(ArtifactsBinDir)pkg\netcoreapp\ref</NETCoreAppPackageRefPath>
     <NETCoreAppPackageRuntimePath>$(ArtifactsBinDir)pkg\netcoreapp\lib</NETCoreAppPackageRuntimePath>
-    <UAPPackageRefPath>$(ArtifactsBinDir)pkg\uap\ref</UAPPackageRefPath>
-    <UAPPackageRuntimePath>$(ArtifactsBinDir)pkg\uap\lib</UAPPackageRuntimePath>
     <NetFxPackageRefPath>$(ArtifactsBinDir)pkg\netfx\ref</NetFxPackageRefPath>
     <NetFxPackageRuntimePath>$(ArtifactsBinDir)pkg\netfx\lib</NetFxPackageRuntimePath>
 
@@ -317,15 +311,11 @@
   <PropertyGroup Condition="'$(BuildAllConfigurations)' != 'true'">
     <!-- We add extra binplacing for the test shared framework until we can get hardlinking with the runtime directory working on all platforms -->
     <BinPlaceTestSharedFramework Condition="'$(_bc_TargetGroup)' == 'netcoreapp'">true</BinPlaceTestSharedFramework>
-    <BinPlaceUAPFramework Condition="'$(_bc_TargetGroup)' == 'uap'">true</BinPlaceUAPFramework>
     <BinPlaceNETFXRuntime Condition="'$(_bc_TargetGroup)' == 'netfx'">true</BinPlaceNETFXRuntime>
 
     <NETCoreAppTestSharedFrameworkPath>$([MSBuild]::NormalizeDirectory('$(TestHostRootPath)', 'shared', 'Microsoft.NETCore.App', '$(ProductVersion)'))</NETCoreAppTestSharedFrameworkPath>
-    <!-- For UAP, we'll produce the layout and hard-link this into each test's directory -->
-    <UAPTestSharedFrameworkPath>$([MSBuild]::NormalizeDirectory('$(TestHostRootPath)', 'UAPLayout'))</UAPTestSharedFrameworkPath>
 
     <TestHostRuntimePath Condition="'$(BinPlaceTestSharedFramework)' == 'true'">$(NETCoreAppTestSharedFrameworkPath)</TestHostRuntimePath>
-    <TestHostRuntimePath Condition="'$(BinPlaceUAPFramework)' == 'true'">$(UAPTestSharedFrameworkPath)</TestHostRuntimePath>
     <TestHostRuntimePath Condition="'$(BinPlaceNETFXRuntime)' == 'true'">$(TestHostRootPath)</TestHostRuntimePath>
 
     <PlatformManifestFile>$(TestHostRuntimePath)PlatformManifest.txt</PlatformManifestFile>
@@ -334,24 +324,6 @@
   <ItemGroup Condition="'$(PlatformManifestFile)' != '' and '$(IsTestProject)' == 'true'">
     <PackageConflictPlatformManifests Include="$(PlatformManifestFile)" />
   </ItemGroup>
-
-  <!-- AOT only asset that we currently don't support. -->
-  <ItemGroup>
-    <ProjectExclusions Include="$(SourceDir)System.Private.Reflection.Metadata.Ecma335/**/*.csproj" />
-  </ItemGroup>
-
-  <!-- Specify the default constants for each target group -->
-  <PropertyGroup>
-    <DefineConstants Condition="'$(TargetsUap)' == 'true'">$(DefineConstants),uap</DefineConstants>
-    <DefineConstants Condition="'$(TargetsNetFx)' == 'true'">$(DefineConstants),netfx</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard'">$(DefineConstants),netstandard</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard1.0'">$(DefineConstants),NETSTANDARD10</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants),netstandard21</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants),netcoreapp</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp2.0'">$(DefineConstants),netcoreapp20</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp3.0'">$(DefineConstants),netcoreapp30</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp5.0'">$(DefineConstants),netcoreapp50</DefineConstants>
-  </PropertyGroup>
 
   <PropertyGroup>
     <!-- F5 and debugging support for netcoreapp and netfx inside VS. -->

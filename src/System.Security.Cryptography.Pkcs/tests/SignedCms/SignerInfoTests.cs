@@ -101,7 +101,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 Assert.NotSame(counterSigner.Certificate, counterSigner2.Certificate);
                 Assert.Equal(counterSigner.Certificate, counterSigner2.Certificate);
 
-#if netcoreapp
+#if NETCOREAPP
                 byte[] signature = counterSigner.GetSignature();
                 byte[] signature2 = counterSigner2.GetSignature();
 
@@ -111,7 +111,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             }
         }
 
-#if netcoreapp
+#if NETCOREAPP
         [Fact]
         public static void SignerInfo_GetSignature_UniquePerCall()
         {
@@ -140,7 +140,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.NotSame(oid, oid2);
         }
 
-#if netcoreapp
+#if NETCOREAPP
         [Fact]
         public static void SignerInfo_SignatureAlgorithm_NotSame()
         {
@@ -445,7 +445,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         [InlineData(0)]
         [InlineData(1)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFx bug")]
-        [ActiveIssue(31977, TargetFrameworkMonikers.Uap)]
         public static void RemoveCounterSignature_EncodedInSingleAttribute(int indexToRemove)
         {
             SignedCms cms = new SignedCms();
@@ -599,7 +598,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             // content-type attribute even for counter-signers.
             int expectedAttrCount = 1;
             // One of them is a V3 signer.
-#if netfx
+#if NETFRAMEWORK
             expectedAttrCount = 2;
 #endif
             Assert.Equal(expectedAttrCount, counterSigner.SignedAttributes.Count);
@@ -646,7 +645,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             // On NetFx there will be two attributes, because Windows emits the
             // content-type attribute even for counter-signers.
             int expectedCount = 1;
-#if netfx
+#if NETFRAMEWORK
             expectedCount = 2;
 #endif
             Assert.Equal(expectedCount, counterSigner.SignedAttributes.Count);
@@ -699,7 +698,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(31977, TargetFrameworkMonikers.Uap)]
         public static void AddCounterSigner_DSA()
         {
             SignedCms cms = new SignedCms();
@@ -736,7 +734,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             // On NetFx there will be two attributes, because Windows emits the
             // content-type attribute even for counter-signers.
             int expectedCount = 1;
-#if netfx
+#if NETFRAMEWORK
             expectedCount = 2;
 #endif
             Assert.Equal(expectedCount, counterSigner.SignedAttributes.Count);
@@ -745,7 +743,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.NotEqual(firstSigner2.Certificate, counterSigner.Certificate);
             Assert.Equal(2, cms.Certificates.Count);
 
-#if netcoreapp
+#if NETCOREAPP
             byte[] signature = counterSigner.GetSignature();
             Assert.NotEmpty(signature);
             // DSA PKIX signature format is a DER SEQUENCE.
@@ -804,7 +802,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             // On NetFx there will be two attributes, because Windows emits the
             // content-type attribute even for counter-signers.
             int expectedCount = 1;
-#if netfx
+#if NETFRAMEWORK
             expectedCount = 2;
 #endif
             Assert.Equal(expectedCount, counterSigner.SignedAttributes.Count);
@@ -813,7 +811,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.NotEqual(firstSigner2.Certificate, counterSigner.Certificate);
             Assert.Equal(2, cms.Certificates.Count);
 
-#if netcoreapp
+#if NETCOREAPP
             byte[] signature = counterSigner.GetSignature();
             Assert.NotEmpty(signature);
             // DSA PKIX signature format is a DER SEQUENCE.
@@ -1026,7 +1024,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
-        [ActiveIssue(31977, TargetFrameworkMonikers.Uap)]
         public static void EnsureExtraCertsAdded()
         {
             SignedCms cms = new SignedCms();
@@ -1048,7 +1045,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 cms.SignerInfos[0].ComputeCounterSignature(signer);
 
                 bool ExpectCopyRemoved =
-#if netfx
+#if NETFRAMEWORK
                     false
 #else
                     true
