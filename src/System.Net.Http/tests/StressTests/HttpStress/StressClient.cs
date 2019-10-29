@@ -111,7 +111,12 @@ namespace HttpStress
             }
 
             HttpClient CreateHttpClient() => 
-                new HttpClient(CreateHttpHandler()) { BaseAddress = _baseAddress, Timeout = _config.DefaultTimeout, DefaultRequestVersion = _config.HttpVersion };
+                new HttpClient(CreateHttpHandler()) 
+                { 
+                    BaseAddress = _baseAddress,
+                    Timeout = _config.DefaultTimeout,
+                    DefaultRequestVersion = _config.HttpVersion,
+                };
 
             using HttpClient client = CreateHttpClient();
 
