@@ -26,6 +26,8 @@ namespace System.Linq.Expressions.Compiler
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     internal sealed partial class LambdaCompiler : ILocalCache
     {
+        private static int s_lambdaMethodIndex;
+
         private delegate void WriteBack(LambdaCompiler compiler);
 
         // Information on the entire lambda tree currently being compiled
@@ -67,7 +69,7 @@ namespace System.Linq.Expressions.Compiler
         {
             Type[] parameterTypes = GetParameterTypes(lambda, typeof(Closure));
 
-            var method = new DynamicMethod(lambda.Name ?? "lambda_method", lambda.ReturnType, parameterTypes, true);
+            var method = new DynamicMethod(lambda.Name ?? ("lambda_method" + s_lambdaMethodIndex.ToString()), lambda.ReturnType, parameterTypes, true);
 
             _tree = tree;
             _lambda = lambda;
