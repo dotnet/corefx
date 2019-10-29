@@ -40,15 +40,13 @@ namespace System.IO
         /// <param name="options">One of the enumeration values that describes how to create or overwrite the file.</param>
         /// <param name="fileSecurity">An object that determines the access control and audit security for the file.</param>
         /// <returns>A file stream for the newly created file.</returns>
+        /// <exception cref="ArgumentException">The <paramref name="rights" /> and <paramref name="mode" /> combination is invalid.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="fileInfo" /> or <paramref name="fileSecurity" /> is <see langword="null" />.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="mode" /> or <paramref name="share" /> are out of their legal enum range.
         ///-or-
-        /// <paramref name="options" /> is not a supported enum value.
-        ///-or-
         /// <paramref name="bufferSize" /> is not a positive number.</exception>
+        /// <exception cref="DirectoryNotFoundException">Could not find a part of the path.</exception>
         /// <exception cref="UnauthorizedAccessException">Access to the path is denied.</exception>
-        /// <exception cref="ArgumentException">Invalid handle.</exception>
-        /// <exception cref="ObjectDisposedException">Cannot access a closed file.</exception>
         /// <remarks>This extension method was added to .NET Core to bring the functionality that was provided by the `System.IO.FileStream.#ctor(System.String,System.IO.FileMode,System.Security.AccessControl.FileSystemRights,System.IO.FileShare,System.Int32,System.IO.FileOptions,System.Security.AccessControl.FileSecurity)` .NET Framework constructor.</remarks>
         public static FileStream Create(this FileInfo fileInfo, FileMode mode, FileSystemRights rights, FileShare share, int bufferSize, FileOptions options, FileSecurity fileSecurity)
         {
