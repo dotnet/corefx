@@ -15,11 +15,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             X509Certificate2 expectedCert,
             Action<X509Certificate2> otherWork)
         {
-            using (X509Certificate2 cert = new X509Certificate2(pfxBytes, correctPassword, s_importFlags))
-            {
-                AssertCertEquals(expectedCert, cert);
-                otherWork?.Invoke(cert);
-            }
+            ReadPfx(pfxBytes, correctPassword, expectedCert, otherWork, s_importFlags);
+            ReadPfx(pfxBytes, correctPassword, expectedCert, otherWork, s_exportableImportFlags);
         }
 
         protected override void ReadMultiPfx(
@@ -28,9 +25,21 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             X509Certificate2 expectedSingleCert,
             X509Certificate2[] expectedOrder)
         {
-            using (X509Certificate2 cert = new X509Certificate2(pfxBytes, correctPassword, s_importFlags))
+            ReadPfx(pfxBytes, correctPassword, expectedSingleCert, null, s_importFlags);
+            ReadPfx(pfxBytes, correctPassword, expectedSingleCert, null, s_exportableImportFlags);
+        }
+
+        private void ReadPfx(
+            byte[] pfxBytes,
+            string correctPassword,
+            X509Certificate2 expectedCert,
+            Action<X509Certificate2> otherWork,
+            X509KeyStorageFlags flags)
+        {
+            using (X509Certificate2 cert = new X509Certificate2(pfxBytes, correctPassword, flags))
             {
-                AssertCertEquals(expectedSingleCert, cert);
+                AssertCertEquals(expectedCert, cert);
+                otherWork?.Invoke(cert);
             }
         }
 

@@ -15,14 +15,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             X509Certificate2 expectedCert,
             Action<X509Certificate2> otherWork)
         {
-            using (ImportedCollection imported = Cert.Import(pfxBytes, correctPassword, s_importFlags))
-            {
-                X509Certificate2Collection coll = imported.Collection;
-                Assert.Equal(1, coll.Count);
-
-                AssertCertEquals(expectedCert, coll[0]);
-                otherWork?.Invoke(coll[0]);
-            }
+            ReadPfx(pfxBytes, correctPassword, expectedCert, null, otherWork, s_importFlags);
+            ReadPfx(pfxBytes, correctPassword, expectedCert, null, otherWork, s_exportableImportFlags);
         }
 
         protected override void ReadMultiPfx(
@@ -31,14 +25,32 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             X509Certificate2 expectedSingleCert,
             X509Certificate2[] expectedOrder)
         {
-            using (ImportedCollection imported = Cert.Import(pfxBytes, correctPassword, s_importFlags))
+            ReadPfx(pfxBytes, correctPassword, expectedSingleCert, expectedOrder, null, s_importFlags);
+            ReadPfx(pfxBytes, correctPassword, expectedSingleCert, expectedOrder, null, s_exportableImportFlags);
+        }
+
+        private void ReadPfx(
+            byte[] pfxBytes,
+            string correctPassword,
+            X509Certificate2 expectedCert,
+            X509Certificate2[] expectedOrder,
+            Action<X509Certificate2> otherWork,
+            X509KeyStorageFlags flags)
+        {
+            using (ImportedCollection imported = Cert.Import(pfxBytes, correctPassword, flags))
             {
                 X509Certificate2Collection coll = imported.Collection;
-                Assert.Equal(expectedOrder.Length, coll.Count);
+                Assert.Equal(expectedOrder?.Length ?? 1, coll.Count);
 
-                for (int i = 0; i < coll.Count; i++)
+                Span<X509Certificate2> testOrder = expectedOrder == null ?
+                    MemoryMarshal.CreateSpan(ref expectedCert, 1) :
+                    expectedOrder.AsSpan();
+
+                for (int i = 0; i < testOrder.Length; i++)
                 {
-                    AssertCertEquals(expectedOrder[i], coll[i]);
+                    X509Certificate2 actual = coll[i];
+                    AssertCertEquals(testOrder[i], actual);
+                    otherWork?.Invoke(actual);
                 }
             }
         }
