@@ -551,7 +551,7 @@ namespace System.IO.Tests
                 watcher.EnableRaisingEvents = raisingEvent;
             }
 
-            if (error != null && error.GetException() != null)
+            if (error?.GetException() != null)
             {
                 Assert.False(true, $"Filewatcher error event triggered: {error.GetException().Message}");
             }
