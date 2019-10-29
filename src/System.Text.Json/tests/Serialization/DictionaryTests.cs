@@ -391,6 +391,15 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(typeof(ClassWithDictionary), @"{""MyDictionary"":[[]]}")]
         [InlineData(typeof(ClassWithDictionary), @"{""MyDictionary"":[{""test"": 1}]}")]
         [InlineData(typeof(ClassWithDictionary), @"{""MyDictionary"":[[true]]}")]
+        [InlineData(typeof(Dictionary<string, Poco>), @"{""key"":[{""Id"":3}]}")]
+        [InlineData(typeof(Dictionary<string, Poco>), @"{""key"":[""test""]}")]
+        [InlineData(typeof(Dictionary<string, Poco>), @"{""key"":[1]}")]
+        [InlineData(typeof(Dictionary<string, Poco>), @"{""key"":[false]}")]
+        [InlineData(typeof(Dictionary<string, Poco>), @"{""key"":[]}")]
+        [InlineData(typeof(Dictionary<string, Poco>), @"{""key"":1}")]
+        [InlineData(typeof(Dictionary<string, List<Poco>>), @"{""key"":{""Id"":3}}")]
+        [InlineData(typeof(Dictionary<string, List<Poco>>), @"{""key"":{}}")]
+        [InlineData(typeof(Dictionary<string, List<Poco>>), @"{""key"":[[]]}")]
         public static void InvalidJsonForTypeShouldFail(Type type, string json)
         {
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(json, type));
@@ -906,7 +915,7 @@ namespace System.Text.Json.Serialization.Tests
         public static void CustomEscapingOnPropertyNameAndValue()
         {
             var dict = new Dictionary<string, string>();
-            dict.Add("A\u046701","Value\u0467");
+            dict.Add("A\u046701", "Value\u0467");
 
             // Baseline with no escaping.
             var json = JsonSerializer.Serialize(dict);
@@ -1763,7 +1772,7 @@ namespace System.Text.Json.Serialization.Tests
             IEnumerator IEnumerable.GetEnumerator()
             {
                 // Create an incompatible converter.
-                return new int[] {100,200 }.GetEnumerator();
+                return new int[] { 100, 200 }.GetEnumerator();
             }
 
             public bool Remove(string key)
