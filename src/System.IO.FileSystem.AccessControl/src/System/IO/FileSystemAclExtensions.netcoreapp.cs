@@ -11,8 +11,6 @@ namespace System.IO
 {
     public static partial class FileSystemAclExtensions
     {
-        #region Public methods
-
         /// <summary>Creates a new directory, ensuring it is created with the specified directory security. If the directory already exists, nothing is done.</summary>
         /// <param name="directoryInfo">The object describing a directory that does not exist in disk yet.</param>
         /// <param name="directorySecurity">An object that determines the access control and audit security for the directory.</param>
@@ -89,7 +87,7 @@ namespace System.IO
                 throw new ArgumentException(SR.Format(SR.Argument_InvalidFileModeAndFileSystemRightsCombo, mode, rights));
             }
 
-            SafeFileHandle handle = CreateFileOpenHandle(fileInfo.FullName, mode, rights, share, options, fileSecurity);
+            SafeFileHandle handle = CreateFileHandle(fileInfo.FullName, mode, rights, share, options, fileSecurity);
 
             try
             {
@@ -102,10 +100,6 @@ namespace System.IO
                 throw;
             }
         }
-
-        #endregion
-
-        #region Private methods
 
         // In the context of a FileStream, the only ACCESS_MASK ACE rights we care about are reading/writing data and the generic read/write rights.
         // See: https://docs.microsoft.com/en-us/windows/win32/secauthz/access-mask
@@ -123,7 +117,7 @@ namespace System.IO
             return access;
         }
 
-        private static unsafe SafeFileHandle CreateFileOpenHandle(string fullPath, FileMode mode, FileSystemRights rights, FileShare share, FileOptions options, FileSecurity security)
+        private static unsafe SafeFileHandle CreateFileHandle(string fullPath, FileMode mode, FileSystemRights rights, FileShare share, FileOptions options, FileSecurity security)
         {
             Debug.Assert(fullPath != null);
 
@@ -178,7 +172,5 @@ namespace System.IO
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
             }
         }
-
-        #endregion
     }
 }

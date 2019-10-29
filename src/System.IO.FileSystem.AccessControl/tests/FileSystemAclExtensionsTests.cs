@@ -12,11 +12,7 @@ namespace System.IO
 {
     public class FileSystemAclExtensionsTests
     {
-        #region Private members
-
         private const int DefaultBufferSize = 4096;
-
-        #endregion
 
 
         #region Test methods
@@ -386,7 +382,7 @@ namespace System.IO
             {
                 if (PlatformDetection.IsFullFramework)
                 {
-                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.WriteData, invalidFileShare, DefaultBufferSize, FileOptions.None, security); ;
+                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.WriteData, invalidFileShare, DefaultBufferSize, FileOptions.None, security);
                 }
                 else
                 {
@@ -407,7 +403,7 @@ namespace System.IO
             {
                 if (PlatformDetection.IsFullFramework)
                 {
-                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.WriteData, FileShare.Read, invalidBufferSize, FileOptions.None, security);;
+                    FileSystemAclExtensions.Create(info, FileMode.Create, FileSystemRights.WriteData, FileShare.Read, invalidBufferSize, FileOptions.None, security);
                 }
                 else
                 {
@@ -470,8 +466,6 @@ namespace System.IO
 
         #region Helper methods
 
-        #region DirectoryInfo Create
-
         private DirectorySecurity GetDirectorySecurity(WellKnownSidType sid, FileSystemRights rights, AccessControlType controlType)
         {
             DirectorySecurity security = new DirectorySecurity();
@@ -499,10 +493,6 @@ namespace System.IO
 
             VerifyAccessSecurity(expectedSecurity, actualSecurity);
         }
-
-        #endregion
-
-        #region FileInfo Create
 
         private FileSecurity GetFileSecurity(WellKnownSidType sid, FileSystemRights rights, AccessControlType controlType)
         {
@@ -538,10 +528,6 @@ namespace System.IO
             VerifyAccessSecurity(expectedSecurity, actualSecurity);
         }
 
-        #endregion
-
-        #region Shared
-
         private void VerifyAccessSecurity(CommonObjectSecurity expectedSecurity, CommonObjectSecurity actualSecurity)
         {
             Assert.Equal(typeof(FileSystemRights), expectedSecurity.AccessRightType);
@@ -573,8 +559,6 @@ namespace System.IO
                 expectedRule.InheritanceFlags  == actualRule.InheritanceFlags &&
                 expectedRule.PropagationFlags  == actualRule.PropagationFlags;
         }
-
-        #endregion
 
         #endregion
     }
