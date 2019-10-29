@@ -96,20 +96,18 @@ namespace System.Text.Json
                 GetRuntimePropertyInfo(currentValue, state.Current.JsonClassInfo, ref jsonPropertyInfo, options);
             }
 
-            var defaultValueAttribute = JsonPropertyInfo.GetAttribute<System.ComponentModel.DefaultValueAttribute>(jsonPropertyInfo.PropertyInfo);
-
-            if (options.IgnoreDefaultValues && defaultValueAttribute != null &&
-                (object.Equals(jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue), defaultValueAttribute.Value)))
-            {
-                state.Current.MoveToNextProperty = true;
-                return;
-            }
-
             state.Current.JsonPropertyInfo = jsonPropertyInfo;
 
             if (jsonPropertyInfo.ClassType == ClassType.Value)
             {
-                jsonPropertyInfo.Write(ref state, writer);
+                var defaultValueAttribute = JsonPropertyInfo.GetAttribute<System.ComponentModel.DefaultValueAttribute>(jsonPropertyInfo.PropertyInfo);
+
+                // Ignoring Default Values.
+                if (!(options.IgnoreDefaultValues && defaultValueAttribute != null &&
+                (object.Equals(jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue), defaultValueAttribute.Value))))
+                {
+                    jsonPropertyInfo.Write(ref state, writer);
+                }
                 state.Current.MoveToNextProperty = true;
                 return;
             }
