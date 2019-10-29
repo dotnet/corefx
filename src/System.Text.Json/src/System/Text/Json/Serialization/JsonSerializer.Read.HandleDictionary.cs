@@ -28,32 +28,36 @@ namespace System.Text.Json
                 state.Push();
                 state.Current.JsonClassInfo = jsonPropertyInfo.ElementClassInfo;
                 state.Current.InitializeJsonPropertyInfo();
-                state.Current.CollectionPropertyInitialized = true;
-
-                ClassType classType = state.Current.JsonClassInfo.ClassType;
-                if (classType == ClassType.Value)
-                {
-                    Type elementClassInfoType = jsonPropertyInfo.ElementClassInfo.Type;
-                    if (elementClassInfoType != typeof(object) && elementClassInfoType != typeof(JsonElement))
-                    {
-                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type);
-                    }
-                }
 
                 JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
                 if (state.Current.IsProcessingIDictionaryConstructible())
                 {
                     state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
+                    state.Current.CollectionPropertyInitialized = true;
                 }
-                else
+                else if (state.Current.IsProcessingDictionary())
                 {
                     if (classInfo.CreateObject == null)
                     {
-                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type);
-                        return;
+                        throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(classInfo.Type, parentType: null, memberInfo: null);
                     }
+                    
                     state.Current.ReturnValue = classInfo.CreateObject();
+                    state.Current.CollectionPropertyInitialized = true;
+                }
+                else if (state.Current.IsProcessingObject(ClassType.Object))
+                {
+                    if (classInfo.CreateObject == null)
+                    {
+                        ThrowHelper.ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(classInfo.Type);
+                    }
+
+                    state.Current.ReturnValue = classInfo.CreateObject();
+                }
+                else
+                {
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type);
                 }
 
                 return;

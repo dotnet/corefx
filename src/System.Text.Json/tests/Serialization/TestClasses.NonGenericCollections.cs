@@ -169,6 +169,11 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
+    public class ReadOnlyWrapperForIList : WrapperForIList
+    {
+        public override bool IsReadOnly => true;
+    }
+
     public class WrapperForIList : IList
     {
         private readonly List<object> _list = new List<object>();
@@ -177,7 +182,7 @@ namespace System.Text.Json.Serialization.Tests
 
         public bool IsFixedSize => ((IList)_list).IsFixedSize;
 
-        public bool IsReadOnly => ((IList)_list).IsReadOnly;
+        public virtual bool IsReadOnly => ((IList)_list).IsReadOnly;
 
         public int Count => _list.Count;
 

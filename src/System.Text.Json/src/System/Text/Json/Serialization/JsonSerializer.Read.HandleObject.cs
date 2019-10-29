@@ -13,16 +13,28 @@ namespace System.Text.Json
         {
             Debug.Assert(!state.Current.IsProcessingDictionaryOrIDictionaryConstructible());
 
+            // Note: unless we are a root object, we are going to push a property onto the ReadStack
+            // in the if/else if check below.
+
             if (state.Current.IsProcessingEnumerable())
             {
-                // A nested object within an enumerable.
+                // A nested object within an enumerable (non-dictionary).
+
+                if (!state.Current.CollectionPropertyInitialized)
+                {
+                    // We have bad JSON: enumerable element appeared without preceding StartArray token.
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonPropertyInfo.DeclaredPropertyType);
+                }
+
                 Type objType = state.Current.GetElementType();
                 state.Push();
                 state.Current.Initialize(objType, options);
             }
             else if (state.Current.JsonPropertyInfo != null)
             {
-                // Nested object.
+                // Nested object within an object.
+                Debug.Assert(state.Current.IsProcessingObject(ClassType.Object));
+
                 Type objType = state.Current.JsonPropertyInfo.RuntimePropertyType;
                 state.Push();
                 state.Current.Initialize(objType, options);
@@ -30,31 +42,39 @@ namespace System.Text.Json
 
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
-            if (classInfo.CreateObject is null && classInfo.ClassType == ClassType.Object)
-            {
-                if (classInfo.Type.IsInterface)
-                {
-                    ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(classInfo.Type);
-                }
-                else
-                {
-                    ThrowHelper.ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(classInfo.Type);
-                }
-            }
-
-            if (state.Current.IsProcessingIDictionaryConstructible())
+            if (state.Current.IsProcessingObject(ClassType.IDictionaryConstructible))
             {
                 state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
                 state.Current.CollectionPropertyInitialized = true;
             }
-            else
+            else if (state.Current.IsProcessingObject(ClassType.Dictionary))
             {
+                if (classInfo.CreateObject == null)
+                {
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(classInfo.Type, parentType: null, memberInfo: null);
+                }
+
+                state.Current.ReturnValue = classInfo.CreateObject();
+                state.Current.CollectionPropertyInitialized = true;
+            }
+            else if (state.Current.IsProcessingObject(ClassType.Object))
+            {
+                if (classInfo.CreateObject == null)
+                {
+                    ThrowHelper.ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(classInfo.Type);
+                }
+
                 state.Current.ReturnValue = classInfo.CreateObject();
 
                 if (state.Current.IsProcessingDictionary())
                 {
                     state.Current.CollectionPropertyInitialized = true;
                 }
+            }
+            else
+            {
+                // Only dictionaries or objects are valid given the `StartObject` token.
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type);
             }
         }
 
