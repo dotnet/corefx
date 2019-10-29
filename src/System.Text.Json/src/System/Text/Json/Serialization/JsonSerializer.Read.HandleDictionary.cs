@@ -31,7 +31,7 @@ namespace System.Text.Json
                 state.Current.CollectionPropertyInitialized = true;
 
                 ClassType classType = state.Current.JsonClassInfo.ClassType;
-                if (classType == ClassType.Value)
+                if (classType != ClassType.Dictionary && classType != ClassType.Object)
                 {
                     Type elementClassInfoType = jsonPropertyInfo.ElementClassInfo.Type;
                     if (elementClassInfoType != typeof(object) && elementClassInfoType != typeof(JsonElement))
