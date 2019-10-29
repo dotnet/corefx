@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -17,9 +18,11 @@ namespace System.Net.Http.Headers
         private const int VarySlot = 3;
         private const int WwwAuthenticateSlot = 4;
         private const int NumCollectionsSlots = 5;
+        private static HashSet<string> ProhibitedTrailerHeaders = GetProhibitedTrailerHeaders();
 
         private object[] _specialCollectionsSlots;
         private HttpGeneralHeaders _generalHeaders;
+        private bool _containsTrailingHeaders;
 
         #region Response Headers
 
@@ -141,9 +144,11 @@ namespace System.Net.Http.Headers
 
         #endregion
 
-        internal HttpResponseHeaders()
-            : base(HttpHeaderType.General | HttpHeaderType.Response | HttpHeaderType.Custom, HttpHeaderType.Request)
+        internal HttpResponseHeaders(bool containsTrailingHeaders = false)
+            : base(containsTrailingHeaders ? HttpHeaderType.All & (HttpHeaderType.All ^ HttpHeaderType.Request) : HttpHeaderType.General | HttpHeaderType.Response | HttpHeaderType.Custom,
+                  HttpHeaderType.Request)
         {
+            _containsTrailingHeaders = containsTrailingHeaders;
         }
 
         internal override void AddHeaders(HttpHeaders sourceHeaders)
@@ -157,6 +162,21 @@ namespace System.Net.Http.Headers
             {
                 GeneralHeaders.AddSpecialsFrom(sourceResponseHeaders._generalHeaders);
             }
+        }
+
+        internal override bool IsAllowedHeaderName(string headerName)
+        {
+            return !_containsTrailingHeaders || headerName != null && !ProhibitedTrailerHeaders.Contains(headerName);
+        }
+
+        private static HashSet<string> GetProhibitedTrailerHeaders()
+        {
+            var result = new HashSet<string>();
+            foreach (var header in KnownHeaders.TrailerDisallowedHeaders)
+            {
+                result.Add(header.Name);
+            }
+            return result;
         }
 
         private HttpGeneralHeaders GeneralHeaders => _generalHeaders ?? (_generalHeaders = new HttpGeneralHeaders(this));

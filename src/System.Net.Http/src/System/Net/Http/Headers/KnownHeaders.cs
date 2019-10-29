@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
 using System.Net.Http.HPack;
 using System.Runtime.InteropServices;
 
@@ -96,6 +98,32 @@ namespace System.Net.Http.Headers
         public static readonly KnownHeader XPoweredBy = new KnownHeader("X-Powered-By");
         public static readonly KnownHeader XRequestID = new KnownHeader("X-Request-ID");
         public static readonly KnownHeader XUACompatible = new KnownHeader("X-UA-Compatible");
+
+        public static readonly IReadOnlyList<KnownHeader> TrailerDisallowedHeaders = Array.AsReadOnly(new[]    // rfc7230 4.1.2.
+        {
+            // Message framing headers.
+            TransferEncoding, ContentLength,
+
+            // Routing headers.
+            Host,
+
+            // Request modifiers: controls and conditionals.
+            // rfc7231#section-5.1: Controls.
+            CacheControl, Expect, MaxForwards, Pragma, Range, TE,
+
+            // rfc7231#section-5.2: Conditionals.
+            IfMatch, IfNoneMatch, IfModifiedSince, IfUnmodifiedSince, IfRange,
+
+            // Authentication headers.
+            Authorization, SetCookie,
+
+            // Response control data.
+            // rfc7231#section-7.1: Control Data.
+            Age, Expires, Date, Location, RetryAfter, Vary, Warning,
+
+            // Content-Encoding, Content-Type, Content-Range, and Trailer itself.
+            ContentEncoding, ContentType, ContentRange, Trailer
+        });
 
         // Helper interface for making GetCandidate generic over strings, utf8, etc
         private interface IHeaderNameAccessor

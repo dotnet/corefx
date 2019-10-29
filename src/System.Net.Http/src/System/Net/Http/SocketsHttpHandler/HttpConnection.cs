@@ -42,31 +42,7 @@ namespace System.Net.Http
         private static readonly byte[] s_http1DotBytes = Encoding.ASCII.GetBytes("HTTP/1.");
         private static readonly ulong s_http10Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.0"));
         private static readonly ulong s_http11Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.1"));
-        private static readonly HashSet<KnownHeader> s_disallowedTrailers = new HashSet<KnownHeader>    // rfc7230 4.1.2.
-        {
-            // Message framing headers.
-            KnownHeaders.TransferEncoding, KnownHeaders.ContentLength,
-
-            // Routing headers.
-            KnownHeaders.Host,
-
-            // Request modifiers: controls and conditionals.
-            // rfc7231#section-5.1: Controls.
-            KnownHeaders.CacheControl, KnownHeaders.Expect, KnownHeaders.MaxForwards, KnownHeaders.Pragma, KnownHeaders.Range, KnownHeaders.TE,
-
-            // rfc7231#section-5.2: Conditionals.
-            KnownHeaders.IfMatch, KnownHeaders.IfNoneMatch, KnownHeaders.IfModifiedSince, KnownHeaders.IfUnmodifiedSince, KnownHeaders.IfRange,
-
-            // Authentication headers.
-            KnownHeaders.Authorization, KnownHeaders.SetCookie,
-
-            // Response control data.
-            // rfc7231#section-7.1: Control Data.
-            KnownHeaders.Age, KnownHeaders.Expires, KnownHeaders.Date, KnownHeaders.Location, KnownHeaders.RetryAfter, KnownHeaders.Vary, KnownHeaders.Warning,
-
-            // Content-Encoding, Content-Type, Content-Range, and Trailer itself.
-            KnownHeaders.ContentEncoding, KnownHeaders.ContentType, KnownHeaders.ContentRange, KnownHeaders.Trailer
-        };
+        private static readonly HashSet<KnownHeader> s_disallowedTrailers = new HashSet<KnownHeader>(KnownHeaders.TrailerDisallowedHeaders);
 
         private readonly HttpConnectionPool _pool;
         private readonly Socket _socket; // used for polling; _stream should be used for all reading/writing. _stream owns disposal.
