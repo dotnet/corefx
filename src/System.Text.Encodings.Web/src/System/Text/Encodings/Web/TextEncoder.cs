@@ -985,6 +985,7 @@ namespace System.Text.Encodings.Web
             if (Ssse3.IsSupported)
             {
                 sbyte* tmp = stackalloc sbyte[Vector128<sbyte>.Count];
+                Sse2.Store(tmp, Vector128<sbyte>.Zero);
 
                 for (int i = 0; i < asciiNeedsEscaping.Length; i++)
                 {
