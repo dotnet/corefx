@@ -87,7 +87,7 @@ namespace System.Text.RegularExpressions
         void System.Collections.IList.Insert(int index, object value) { }
         void System.Collections.IList.Remove(object value) { }
         void System.Collections.IList.RemoveAt(int index) { }
-        public bool TryGetValue(string key, [System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)] out System.Text.RegularExpressions.Group value) { throw null; }
+        public bool TryGetValue(string key, [System.Diagnostics.CodeAnalysis.NotNullWhenAttribute(true)] out System.Text.RegularExpressions.Group? value) { throw null; }
     }
     public partial class Match : System.Text.RegularExpressions.Group
     {
@@ -147,9 +147,11 @@ namespace System.Text.RegularExpressions
         public Regex(string pattern, System.Text.RegularExpressions.RegexOptions options, System.TimeSpan matchTimeout) { }
         public static int CacheSize { get { throw null; } set { } }
         [System.CLSCompliantAttribute(false)]
-        protected System.Collections.IDictionary CapNames { get { throw null; } set { } }
+        [System.Diagnostics.CodeAnalysis.DisallowNullAttribute]
+        protected System.Collections.IDictionary? CapNames { get { throw null; } set { } }
         [System.CLSCompliantAttribute(false)]
-        protected System.Collections.IDictionary Caps { get { throw null; } set { } }
+        [System.Diagnostics.CodeAnalysis.DisallowNullAttribute]
+        protected System.Collections.IDictionary? Caps { get { throw null; } set { } }
         public System.TimeSpan MatchTimeout { get { throw null; } }
         public System.Text.RegularExpressions.RegexOptions Options { get { throw null; } }
         public bool RightToLeft { get { throw null; } }
