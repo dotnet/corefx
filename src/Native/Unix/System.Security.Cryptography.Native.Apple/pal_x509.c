@@ -528,13 +528,12 @@ int32_t AppleCryptoNative_X509GetRawData(SecCertificateRef cert, CFDataRef* ppDa
     return (*pOSStatus == noErr);
 }
 
-static OSStatus AddKeyToKeychain(SecKeyRef privateKey, SecKeychainRef targetKeychain)
+static OSStatus AddKeyToKeychain(SecKeyRef privateKey, SecKeychainRef targetKeychain, SecKeyRef* importedKey)
 {
     // This is quite similar to pal_seckey's ExportImportKey, but
     // a) is used to put something INTO a keychain, instead of to take it out.
     // b) Doesn't assume that the input should be CFRelease()d and overwritten.
-    // c) Doesn't return/emit the imported key reference.
-    // d) Works on private keys.
+    // c) Works on private keys.
     SecExternalFormat dataFormat = kSecFormatWrappedPKCS8;
     CFDataRef exportData = NULL;
 
@@ -554,6 +553,17 @@ static OSStatus AddKeyToKeychain(SecKeyRef privateKey, SecKeychainRef targetKeyc
     {
         status =
             SecItemImport(exportData, NULL, &actualFormat, &actualType, 0, &keyParams, targetKeychain, &outItems);
+    }
+
+    if (status == noErr && importedKey != NULL && outItems != NULL && CFArrayGetCount(outItems) == 1)
+    {
+        CFTypeRef outItem = CFArrayGetValueAtIndex(outItems, 0);
+
+        if (CFGetTypeID(outItem) == SecKeyGetTypeID())
+        {
+            CFRetain(outItem);
+            *importedKey = (SecKeyRef)CONST_CAST(void*, outItem);
+        }
     }
 
     if (exportData != NULL)
@@ -593,7 +603,7 @@ int32_t AppleCryptoNative_X509CopyWithPrivateKey(SecCertificateRef cert,
     // This only happens with an ephemeral key, so the keychain we're adding it to is temporary.
     if (status == errSecNoSuchKeychain)
     {
-        status = AddKeyToKeychain(privateKey, targetKeychain);
+        status = AddKeyToKeychain(privateKey, targetKeychain, NULL);
     }
 
     if (itemCopy != NULL)
@@ -737,6 +747,7 @@ int32_t AppleCryptoNative_X509MoveToKeychain(SecCertificateRef cert,
     }
 
     SecKeychainRef curKeychain = NULL;
+    SecKeyRef importedKey = NULL;
     OSStatus status = SecKeychainItemCopyKeychain((SecKeychainItemRef)cert, &curKeychain);
 
     if (status == errSecNoSuchKeychain)
@@ -764,7 +775,7 @@ int32_t AppleCryptoNative_X509MoveToKeychain(SecCertificateRef cert,
 
         if (status == errSecNoSuchKeychain)
         {
-            status = AddKeyToKeychain(privateKey, targetKeychain);
+            status = AddKeyToKeychain(privateKey, targetKeychain, &importedKey);
         }
         else
         {
@@ -842,18 +853,33 @@ int32_t AppleCryptoNative_X509MoveToKeychain(SecCertificateRef cert,
                 result = NULL;
             }
 
-            if (result != NULL && status == noErr)
+            if (result != NULL)
             {
-                if (CFGetTypeID(result) != SecIdentityGetTypeID())
-                {
-                    status = errSecItemNotFound;
-                }
-                else
+                if (CFGetTypeID(result) == SecIdentityGetTypeID())
                 {
                     SecIdentityRef identity = (SecIdentityRef)CONST_CAST(void*, result);
                     CFRetain(identity);
                     *pIdentityOut = identity;
                 }
+            }
+
+            if (status == errSecItemNotFound)
+            {
+                // An identity can't be found.
+                // That means that the private key does not match the certificate public key.
+                // Since we know we added the key, and nothing will reference it now, try to remove it.
+                const void* constKey = importedKey;
+                CFArrayRef newItemMatch = CFArrayCreate(NULL, (const void**)(&constKey), 1, &kCFTypeArrayCallBacks);
+                CFDictionarySetValue(query, kSecMatchItemList, newItemMatch);
+                CFRelease(itemMatch);
+                itemMatch = newItemMatch;
+
+                CFDictionarySetValue(query, kSecClass, kSecClassKey);
+
+                // Even if the key delete failed, there's nothing the user can do about it now.
+                // Ignore the result of delete and just return to noErr
+                SecItemDelete(query);
+                status = noErr;
             }
         }
 

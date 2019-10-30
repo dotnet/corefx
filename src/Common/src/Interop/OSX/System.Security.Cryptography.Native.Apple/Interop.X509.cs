@@ -441,14 +441,15 @@ internal static partial class Interop
 
             if (privateKey?.IsInvalid == false)
             {
-                if (identityHandle.IsInvalid)
+                // If a PFX has a mismatched association between a private key and the
+                // certificate public key then MoveToKeychain will write the NULL SecIdentityRef
+                // (after cleaning up the temporary key).
+                //
+                // When that happens, just treat the import as public-only.
+                if (!identityHandle.IsInvalid)
                 {
-                    identityHandle.Dispose();
-                    Debug.Fail($"{nameof(X509MoveToKeychain)} did not match cert to key");
-                    throw new CryptographicException();
+                    return identityHandle;
                 }
-
-                return identityHandle;
             }
 
             // If the cert in the PFX had no key, but it was imported with PersistKeySet (imports into
