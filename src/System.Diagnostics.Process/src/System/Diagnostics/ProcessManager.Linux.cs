@@ -110,14 +110,11 @@ namespace System.Diagnostics
         /// </summary>
         internal static ProcessInfo CreateProcessInfo(int pid, ReusableTextReader reusableReader = null)
         {
-            if (reusableReader == null)
-            {
-                reusableReader = new ReusableTextReader();
-            }
+            reusableReader ??= new ReusableTextReader();
+            bool readStatFile = Interop.procfs.TryReadStatFile(pid, out Interop.procfs.ParsedStat stat, reusableReader);
+            bool readStatusFile = Interop.procfs.TryReadStatusFile(pid, out Interop.procfs.ParsedStatus status, reusableReader);
 
-            return Interop.procfs.TryReadStatFile(pid, out Interop.procfs.ParsedStat stat, reusableReader) &&
-                   Interop.procfs.TryReadStatusFile(pid, out Interop.procfs.ParsedStatus status, reusableReader) ?
-                   CreateProcessInfo(ref stat, ref status, reusableReader) : null;
+            return readStatFile || readStatusFile ? CreateProcessInfo(ref stat, ref status, reusableReader) : null;
         }
 
         /// <summary>
