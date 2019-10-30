@@ -79,6 +79,17 @@ namespace System.ComponentModel.Tests
         {
             RemoteExecutor.Invoke((innerType, innerReturnNull, innerStringToConvert, innerExpectedValue) =>
             {
+                var l = new List<string>();
+                for(;;)
+                {
+                    var info = GC.GetGCMemoryInfo();
+                    if (info.MemoryLoadBytes > 0.9 * info.TotalAvailableMemoryBytes)
+                        break;
+                    l.Add(new string('a', 100_000_000));
+                }
+                System.Threading.Thread.Sleep(-1);
+                GC.KeepAlive(l);
+
                 FieldInfo s_convertFromInvariantString = typeof(DefaultValueAttribute).GetField("s_convertFromInvariantString", BindingFlags.GetField | Reflection.BindingFlags.NonPublic | Reflection.BindingFlags.Static);
                 Assert.NotNull(s_convertFromInvariantString);
 

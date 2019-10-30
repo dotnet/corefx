@@ -82,6 +82,16 @@ namespace System.Text.RegularExpressions.Tests
         {
             RemoteExecutor.Invoke(() =>
             {
+                var l = new List<string>();
+                for(;;)
+                {
+                    var info = GC.GetGCMemoryInfo();
+                    if (info.MemoryLoadBytes > 0.9 * info.TotalAvailableMemoryBytes)
+                        break;
+                    l.Add(new string('a', 100_000_000));
+                }
+                System.Threading.Thread.Sleep(-1);
+                GC.KeepAlive(l);
                 AppDomain.CurrentDomain.SetData(RegexHelpers.DefaultMatchTimeout_ConfigKeyName, true);
                 Assert.Throws<TypeInitializationException>(() => Regex.InfiniteMatchTimeout);
             }).Dispose();
