@@ -326,7 +326,8 @@ namespace System.Reflection.Tests
 
         // This test should apply equally to Unix, but this reliably hits a particular one of the
         // myriad ways that assembly load can fail
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows))]
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void LoadFile_ValidPEBadIL_ThrowsBadImageFormatExceptionWithPath()
         {
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "kernelbase.dll");
