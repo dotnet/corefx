@@ -24,19 +24,33 @@ namespace System.Text.RegularExpressions.Tests
             yield return new object[] { "([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z])))))))))))))))", "abcdefghiklmnop", "$3", RegexOptions.None, 15, 0, "cdefghiklmnop" };
 
             // Stress
-            string pattern = string.Empty;
-            for (int i = 0; i < 1000; i++)
-                pattern += "([a-z]";
-            for (int i = 0; i < 1000; i++)
-                pattern += ")";
-            string input = string.Empty;
-            for (int i = 0; i < 200; i++)
-                input += "abcde";
+            string pattern;
+            {
+                var sb = new StringBuilder();
+                for (int i = 0; i < 1000; i++)
+                    sb.Append("([a-z]");
+                for (int i = 0; i < 1000; i++)
+                    sb.Append(")");
+                pattern = sb.ToString();
+            }
+
+            string input;
+            {
+                var sb = new StringBuilder();
+                for (int i = 0; i < 200; i++)
+                    sb.Append("abcde");
+                input = sb.ToString();
+            }
+
             yield return new object[] { pattern, input, "$1000", RegexOptions.None, input.Length, 0, "e" };
 
-            string expected = string.Empty;
-            for (int i = 0; i < 200; i++)
-                expected += "abcde";
+            string expected;
+            {
+                var sb = new StringBuilder();
+                for (int i = 0; i < 200; i++)
+                    sb.Append("abcde");
+                expected = sb.ToString();
+            }
             yield return new object[] { pattern, input, "$1", RegexOptions.None, input.Length, 0, expected };
 
             // Undefined group
