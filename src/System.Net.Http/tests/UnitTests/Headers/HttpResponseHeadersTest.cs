@@ -19,6 +19,20 @@ namespace System.Net.Http.Tests
             headers = new HttpResponseHeaders();
         }
 
+        public static IEnumerable<object[]> ProhibitedTrailingHeaders()
+        {
+            return KnownHeaders.TrailerDisallowedHeaders.Select(h => new[] { h.Name });
+        }
+
+        public static IEnumerable<object[]> AllowedTrailingHeaders()
+        {
+            return new[]
+            {
+                new[] {"Content-MD5", "Q2hlY2sgSW50ZWdyaXR5IQ=="}, new [] { "Accept-Encoding", "identity,gzip" },
+                new[] {"X-MyHeader", "ABC"}, new[] { "ETag", "\"737060cd8c284d8af7ad3082f209582d\"" }
+            };
+        }
+
         #region Response headers
         [Fact]
         public void Location_ReadAndWriteProperty_CallsForwardedToHttpGeneralHeaders()
@@ -594,6 +608,27 @@ namespace System.Net.Http.Tests
 
             headers.TryAddWithoutValidation("Trailer", ",custom2, ,");
             Assert.Equal(2, headers.Trailer.Count);
+        }
+
+        [Theory, MemberData(nameof(AllowedTrailingHeaders))]
+        public void Trailer_AddAndGetAllowedContentHeader_Success(string name, string value)
+        {
+            var trailingHeaders = new HttpResponseHeaders(true);
+
+            trailingHeaders.Add(name, value);
+
+            var actualHeaderValues = trailingHeaders.GetValues(name).ToArray();
+            Assert.Equal(1, actualHeaderValues.Length);
+
+            Assert.Equal(value, actualHeaderValues[0]);
+        }
+
+        [Theory, MemberData(nameof(ProhibitedTrailingHeaders))]
+        public void Trailer_AddProhibitedHeader_ThrowsException(string header)
+        {
+            var trailingHeaders = new HttpResponseHeaders(true);
+
+            Assert.Throws<InvalidOperationException>(() => trailingHeaders.Add(header, "ABC"));
         }
 
         [Fact]
