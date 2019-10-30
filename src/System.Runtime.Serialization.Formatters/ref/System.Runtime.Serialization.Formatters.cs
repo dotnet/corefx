@@ -20,7 +20,7 @@ namespace System.Runtime.Serialization
         protected virtual object? GetNext(out long objID) { throw null; }
         protected virtual long Schedule(object? obj) { throw null; }
         public abstract void Serialize(System.IO.Stream serializationStream, object graph);
-        protected abstract void WriteArray(object? obj, string name, System.Type memberType);
+        protected abstract void WriteArray(object obj, string name, System.Type memberType);
         protected abstract void WriteBoolean(bool val, string name);
         protected abstract void WriteByte(byte val, string name);
         protected abstract void WriteChar(char val, string name);
@@ -42,7 +42,7 @@ namespace System.Runtime.Serialization
         protected abstract void WriteUInt32(uint val, string name);
         [System.CLSCompliantAttribute(false)]
         protected abstract void WriteUInt64(ulong val, string name);
-        protected abstract void WriteValueType(object? obj, string name, System.Type memberType);
+        protected abstract void WriteValueType(object obj, string name, System.Type memberType);
     }
     public partial class FormatterConverter : System.Runtime.Serialization.IFormatterConverter
     {
@@ -125,7 +125,7 @@ namespace System.Runtime.Serialization
     public abstract partial class SerializationBinder
     {
         protected SerializationBinder() { }
-        public virtual void BindToName(System.Type? serializedType, out string? assemblyName, out string? typeName) { throw null; }
+        public virtual void BindToName(System.Type serializedType, out string? assemblyName, out string? typeName) { throw null; }
         public abstract System.Type? BindToType(string assemblyName, string typeName);
     }
     public sealed partial class SerializationObjectManager
@@ -160,7 +160,7 @@ namespace System.Runtime.Serialization.Formatters
     public partial interface IFieldInfo
     {
         string[]? FieldNames { get; set; }
-        System.Type[] FieldTypes { get; set; }
+        System.Type[]? FieldTypes { get; set; }
     }
     public enum TypeFilterLevel
     {

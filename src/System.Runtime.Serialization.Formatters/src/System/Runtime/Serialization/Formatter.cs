@@ -62,7 +62,7 @@ namespace System.Runtime.Serialization
 
         public abstract void Serialize(Stream serializationStream, object graph);
 
-        protected abstract void WriteArray(object? obj, string name, Type memberType);
+        protected abstract void WriteArray(object obj, string name, Type memberType);
 
         protected abstract void WriteBoolean(bool val, string name);
 
@@ -180,7 +180,7 @@ namespace System.Runtime.Serialization
         [CLSCompliant(false)]
         protected abstract void WriteUInt64(ulong val, string name);
 
-        protected abstract void WriteValueType(object? obj, string name, Type memberType);
+        protected abstract void WriteValueType(object obj, string name, Type memberType);
 
         public abstract ISurrogateSelector? SurrogateSelector { get; set; }
 

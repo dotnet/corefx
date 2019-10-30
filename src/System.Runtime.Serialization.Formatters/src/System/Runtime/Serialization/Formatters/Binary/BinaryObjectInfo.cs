@@ -270,7 +270,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
         internal string GetAssemblyString() => _binderAssemblyString ?? _cache._assemblyString;
 
         private void InvokeSerializationBinder(SerializationBinder? binder) =>
-            binder?.BindToName(_objectType, out _binderAssemblyString, out _binderTypeName);
+            binder?.BindToName(_objectType!, out _binderAssemblyString, out _binderTypeName);
 
         internal void GetMemberInfo(out string[]? outMemberNames, out Type[]? outMemberTypes, out object?[]? outMemberData)
         {
