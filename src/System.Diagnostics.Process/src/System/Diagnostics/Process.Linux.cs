@@ -31,8 +31,8 @@ namespace System.Diagnostics
             foreach (int pid in ProcessManager.EnumerateProcessIds())
             {
                 if (Interop.procfs.TryReadStatFile(pid, out Interop.procfs.ParsedStat parsedStat, reusableReader) &&
-                    Interop.procfs.TryReadStatusFile(pid, out Interop.procfs.ParsedStatus parsedStatus, reusableReader) &&
-                    string.Equals(processName, Process.GetUntruncatedProcessName(ref parsedStat), StringComparison.OrdinalIgnoreCase))
+                    string.Equals(processName, Process.GetUntruncatedProcessName(ref parsedStat), StringComparison.OrdinalIgnoreCase) &&
+                    Interop.procfs.TryReadStatusFile(pid, out Interop.procfs.ParsedStatus parsedStatus, reusableReader))
                 {
                     ProcessInfo processInfo = ProcessManager.CreateProcessInfo(ref parsedStat, ref parsedStatus, reusableReader, processName);
                     processes.Add(new Process(machineName, false, processInfo.ProcessId, processInfo));
