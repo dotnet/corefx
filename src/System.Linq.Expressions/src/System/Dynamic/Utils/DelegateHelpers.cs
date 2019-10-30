@@ -130,7 +130,11 @@ namespace System.Dynamic.Utils
             }
             catch
             {
-                return null; // If unable to instantiate thunk, fall back to dynamic method creation
+                // If unable to instantiate thunk, fall back to dynamic method creation
+                // This is expected to happen for cases such as function pointer types as arguments
+                // Or new forms of types added to the typesystem in the future that aren't compatible with
+                // generics
+                return null;
             }
         }
 
