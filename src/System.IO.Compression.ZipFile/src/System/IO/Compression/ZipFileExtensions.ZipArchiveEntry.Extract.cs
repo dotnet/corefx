@@ -77,6 +77,7 @@ namespace System.IO.Compression
 
             using (Stream fs = new FileStream(destinationFileName, fMode, FileAccess.Write, FileShare.None, bufferSize: 0x1000, useAsync: false))
             {
+                fs.SetLength(source.Length);
                 using (Stream es = source.Open())
                     es.CopyTo(fs);
             }
