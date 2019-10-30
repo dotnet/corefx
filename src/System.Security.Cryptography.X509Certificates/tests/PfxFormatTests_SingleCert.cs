@@ -23,10 +23,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             byte[] pfxBytes,
             string correctPassword,
             X509Certificate2 expectedSingleCert,
-            X509Certificate2[] expectedOrder)
+            X509Certificate2[] expectedOrder,
+            Action<X509Certificate2> perCertOtherWork)
         {
-            ReadPfx(pfxBytes, correctPassword, expectedSingleCert, null, s_importFlags);
-            ReadPfx(pfxBytes, correctPassword, expectedSingleCert, null, s_exportableImportFlags);
+            ReadPfx(pfxBytes, correctPassword, expectedSingleCert, perCertOtherWork, s_importFlags);
+            ReadPfx(pfxBytes, correctPassword, expectedSingleCert, perCertOtherWork, s_exportableImportFlags);
         }
 
         private void ReadPfx(

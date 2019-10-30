@@ -42,7 +42,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             byte[] pfxBytes,
             string correctPassword,
             X509Certificate2 expectedSingleCert,
-            X509Certificate2[] expectedOrder);
+            X509Certificate2[] expectedOrder,
+            Action<X509Certificate2> perCertOtherWork = null);
 
         protected abstract void ReadEmptyPfx(byte[] pfxBytes, string correctPassword);
         protected abstract void ReadWrongPassword(byte[] pfxBytes, string wrongPassword);
@@ -585,6 +586,114 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             else
             {
                 builder.AddSafeContentsUnencrypted(contents);
+            }
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void TwoCerts_TwoKeys_ManySafeContentsValues(bool invertCertOrder, bool invertKeyOrder)
+        {
+            string pw = nameof(TwoCerts_TwoKeys_ManySafeContentsValues);
+
+            using (ImportedCollection ic = Cert.Import(TestData.MultiPrivateKeyPfx, null, s_exportableImportFlags))
+            {
+                X509Certificate2Collection certs = ic.Collection;
+                X509Certificate2 first = certs[0];
+                X509Certificate2 second = certs[1];
+
+                if (invertCertOrder)
+                {
+                    X509Certificate2 tmp = first;
+                    first = second;
+                    second = tmp;
+                }
+
+                using (AsymmetricAlgorithm firstKey = first.GetRSAPrivateKey())
+                using (AsymmetricAlgorithm secondKey = second.GetRSAPrivateKey())
+                {
+                    AsymmetricAlgorithm firstAdd = firstKey;
+                    AsymmetricAlgorithm secondAdd = secondKey;
+
+                    if (invertKeyOrder != invertCertOrder)
+                    {
+                        AsymmetricAlgorithm tmp = firstKey;
+                        firstAdd = secondAdd;
+                        secondAdd = tmp;
+                    }
+
+                    Pkcs12Builder builder = new Pkcs12Builder();
+                    Pkcs12SafeContents firstKeyContents = new Pkcs12SafeContents();
+                    Pkcs12SafeContents secondKeyContents = new Pkcs12SafeContents();
+                    Pkcs12SafeContents firstCertContents = new Pkcs12SafeContents();
+                    Pkcs12SafeContents secondCertContents = new Pkcs12SafeContents();
+
+                    Pkcs12SafeContents irrelevant = new Pkcs12SafeContents();
+                    irrelevant.AddSecret(new Oid("0.0"), new byte[] { 0x05, 0x00 });
+
+                    Pkcs12SafeBag firstAddedKeyBag = firstKeyContents.AddShroudedKey(firstAdd, pw, s_windowsPbe);
+                    Pkcs12SafeBag secondAddedKeyBag = secondKeyContents.AddShroudedKey(secondAdd, pw, s_windowsPbe);
+                    Pkcs12SafeBag firstCertBag = firstCertContents.AddCertificate(first);
+                    Pkcs12SafeBag secondCertBag = secondCertContents.AddCertificate(second);
+                    Pkcs12SafeBag firstKeyBag = firstAddedKeyBag;
+                    Pkcs12SafeBag secondKeyBag = secondAddedKeyBag;
+
+                    if (invertKeyOrder != invertCertOrder)
+                    {
+                        Pkcs12SafeBag tmp = firstKeyBag;
+                        firstKeyBag = secondKeyBag;
+                        secondKeyBag = tmp;
+                    }
+
+                    firstCertBag.Attributes.Add(s_keyIdOne);
+                    firstKeyBag.Attributes.Add(s_keyIdOne);
+
+                    Pkcs9LocalKeyId secondKeyId = new Pkcs9LocalKeyId(second.GetCertHash());
+                    secondCertBag.Attributes.Add(secondKeyId);
+                    secondKeyBag.Attributes.Add(secondKeyId);
+
+                    // 2C, 1K, 1C, 2K
+                    // With some non-participating contents values sprinkled in for good measure.
+                    AddContents(irrelevant, builder, pw, encrypt: true);
+                    AddContents(secondCertContents, builder, pw, encrypt: true);
+                    AddContents(irrelevant, builder, pw, encrypt: false);
+                    AddContents(firstKeyContents, builder, pw, encrypt: false);
+                    AddContents(firstCertContents, builder, pw, encrypt: true);
+                    AddContents(irrelevant, builder, pw, encrypt: false);
+                    AddContents(secondKeyContents, builder, pw, encrypt: true);
+                    AddContents(irrelevant, builder, pw, encrypt: true);
+
+                    builder.SealWithMac(pw, s_digestAlgorithm, MacCount);
+                    byte[] pfxBytes = builder.Encode();
+
+                    X509Certificate2[] expectedOrder = { first, second };
+
+                    ReadMultiPfx(
+                        pfxBytes,
+                        pw,
+                        first,
+                        expectedOrder,
+                        c =>
+                        {
+                            // Ensure that the public keys and private keys line up.
+                            using (RSA privKey = c.GetRSAPrivateKey())
+                            using (RSA pubKey = c.GetRSAPublicKey())
+                            {
+                                Assert.True(
+                                    pubKey.VerifyData(
+                                        pfxBytes,
+                                        privKey.SignData(
+                                            pfxBytes,
+                                            s_digestAlgorithm,
+                                            RSASignaturePadding.Pkcs1),
+                                        s_digestAlgorithm,
+                                        RSASignaturePadding.Pkcs1),
+                                    "RSA Signature 'Self-Test' Passed");
+                            }
+                        });
+                }
             }
         }
 
