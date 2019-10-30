@@ -350,7 +350,7 @@ namespace System.Reflection.Tests
             File.Copy(SourceTestAssemblyPath, path);
             using (var fs = new FileStream(path, FileMode.Open))
             {
-                fs.Seek(seek, SeekOrigin.Begin);
+                fs.Position = seek;
                 fs.Write(garbage);
             }
 
