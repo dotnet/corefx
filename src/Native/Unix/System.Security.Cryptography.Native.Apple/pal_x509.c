@@ -896,6 +896,9 @@ int32_t AppleCryptoNative_X509MoveToKeychain(SecCertificateRef cert,
             CFRelease(query);
     }
 
+    if (importedKey != NULL)
+        CFRelease(importedKey);
+
     *pOSStatus = status;
     return status == noErr;
 }
