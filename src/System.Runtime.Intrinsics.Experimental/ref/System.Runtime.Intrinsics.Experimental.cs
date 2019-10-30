@@ -72,18 +72,12 @@ namespace System.Runtime.Intrinsics.Arm
         public static System.Runtime.Intrinsics.Vector64<float> AndNot(System.Runtime.Intrinsics.Vector64<float> left, System.Runtime.Intrinsics.Vector64<float> right) { throw null; }
         public static System.Runtime.Intrinsics.Vector64<ushort> AndNot(System.Runtime.Intrinsics.Vector64<ushort> left, System.Runtime.Intrinsics.Vector64<ushort> right) { throw null; }
         public static System.Runtime.Intrinsics.Vector64<uint> AndNot(System.Runtime.Intrinsics.Vector64<uint> left, System.Runtime.Intrinsics.Vector64<uint> right) { throw null; }
-        public static System.Runtime.Intrinsics.Vector128<byte> LeadingSignCount(System.Runtime.Intrinsics.Vector128<byte> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector128<short> LeadingSignCount(System.Runtime.Intrinsics.Vector128<short> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector128<int> LeadingSignCount(System.Runtime.Intrinsics.Vector128<int> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector128<sbyte> LeadingSignCount(System.Runtime.Intrinsics.Vector128<sbyte> value) { throw null; }
-        public static System.Runtime.Intrinsics.Vector128<ushort> LeadingSignCount(System.Runtime.Intrinsics.Vector128<ushort> value) { throw null; }
-        public static System.Runtime.Intrinsics.Vector128<uint> LeadingSignCount(System.Runtime.Intrinsics.Vector128<uint> value) { throw null; }
-        public static System.Runtime.Intrinsics.Vector64<byte> LeadingSignCount(System.Runtime.Intrinsics.Vector64<byte> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector64<short> LeadingSignCount(System.Runtime.Intrinsics.Vector64<short> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector64<int> LeadingSignCount(System.Runtime.Intrinsics.Vector64<int> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector64<sbyte> LeadingSignCount(System.Runtime.Intrinsics.Vector64<sbyte> value) { throw null; }
-        public static System.Runtime.Intrinsics.Vector64<ushort> LeadingSignCount(System.Runtime.Intrinsics.Vector64<ushort> value) { throw null; }
-        public static System.Runtime.Intrinsics.Vector64<uint> LeadingSignCount(System.Runtime.Intrinsics.Vector64<uint> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector128<byte> LeadingZeroCount(System.Runtime.Intrinsics.Vector128<byte> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector128<short> LeadingZeroCount(System.Runtime.Intrinsics.Vector128<short> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector128<int> LeadingZeroCount(System.Runtime.Intrinsics.Vector128<int> value) { throw null; }
@@ -235,10 +229,27 @@ namespace System.Runtime.Intrinsics.Arm
             public static bool IsSupported { get { throw null; } }
             public static int LeadingSignCount(int value) { throw null; }
             public static int LeadingSignCount(long value) { throw null; }
-            public static int LeadingSignCount(uint value) { throw null; }
-            public static int LeadingSignCount(ulong value) { throw null; }
             public static int LeadingZeroCount(long value) { throw null; }
             public static int LeadingZeroCount(ulong value) { throw null; }
+        }
+    }
+    [System.CLSCompliantAttribute(false)]
+    public abstract partial class Crc32 : System.Runtime.Intrinsics.Arm.ArmBase
+    {
+        internal Crc32() { }
+        public static new bool IsSupported { get { throw null; } }
+        public static uint ComputeCrc32(uint crc, byte data) { throw null; }
+        public static uint ComputeCrc32(uint crc, ushort data) { throw null; }
+        public static uint ComputeCrc32(uint crc, uint data) { throw null; }
+        public static uint ComputeCrc32C(uint crc, byte data) { throw null; }
+        public static uint ComputeCrc32C(uint crc, ushort data) { throw null; }
+        public static uint ComputeCrc32C(uint crc, uint data) { throw null; }
+        public new abstract partial class Arm64 : System.Runtime.Intrinsics.Arm.ArmBase.Arm64
+        {
+            internal Arm64() { }
+            public static new bool IsSupported { get { throw null; } }
+            public static uint ComputeCrc32(uint crc, ulong data) { throw null; }
+            public static uint ComputeCrc32C(uint crc, ulong data) { throw null; }
         }
     }
     [System.CLSCompliantAttribute(false)]
