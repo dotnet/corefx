@@ -39,7 +39,7 @@ namespace System.Buffers.Text
             {
                 bytesConsumed = 0;
                 bytesWritten = 0;
-                return OperationStatus.Done;
+                return isFinalBlock ? OperationStatus.Done : OperationStatus.NeedMoreData;
             }
 
             fixed (byte* srcBytes = &MemoryMarshal.GetReference(utf8))
