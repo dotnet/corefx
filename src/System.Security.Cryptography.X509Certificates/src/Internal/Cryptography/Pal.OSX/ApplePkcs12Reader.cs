@@ -12,9 +12,9 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Internal.Cryptography.Pal
 {
-    internal sealed class AppleSslPkcs12Reader : UnixPkcs12Reader
+    internal sealed class ApplePkcs12Reader : UnixPkcs12Reader
     {
-        internal AppleSslPkcs12Reader(byte[] data)
+        internal ApplePkcs12Reader(byte[] data)
         {
             ParsePkcs12(data);
         }
@@ -78,7 +78,9 @@ namespace Internal.Cryptography.Pal
         internal static SafeSecKeyRefHandle GetPrivateKey(AsymmetricAlgorithm key)
         {
             if (key == null)
+            {
                 return null;
+            }
 
             if (key is RSAImplementation.RSASecurityTransforms rsa)
             {

@@ -58,6 +58,8 @@ internal static partial class Interop
                 return cfData;
             }
 
+            cfData.Dispose();
+
             if (ret == 0)
             {
                 throw CreateExceptionForOSStatus(osStatus);

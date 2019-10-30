@@ -126,13 +126,13 @@ internal static partial class Interop
             out SafeSecIdentityHandle identityHandle)
         {
             SafeCreateHandle cfPassphrase = null;
-            bool hasRef = false;
+            bool releasePassword = false;
 
             try
             {
                 if (!importPassword.IsInvalid)
                 {
-                    importPassword.DangerousAddRef(ref hasRef);
+                    importPassword.DangerousAddRef(ref releasePassword);
                     cfPassphrase = CoreFoundation.CFStringCreateFromSpan(importPassword.DangerousGetSpan());
                 }
 
@@ -146,7 +146,7 @@ internal static partial class Interop
             }
             finally
             {
-                if (hasRef)
+                if (releasePassword)
                 {
                     importPassword.DangerousRelease();
                 }

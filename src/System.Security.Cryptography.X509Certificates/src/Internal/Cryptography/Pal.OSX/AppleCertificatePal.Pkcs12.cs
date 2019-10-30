@@ -18,7 +18,7 @@ namespace Internal.Cryptography.Pal
             bool exportable,
             SafeKeychainHandle keychain)
         {
-            using (AppleSslPkcs12Reader reader = new AppleSslPkcs12Reader(rawData))
+            using (ApplePkcs12Reader reader = new ApplePkcs12Reader(rawData))
             {
                 reader.Decrypt(password);
 
@@ -26,7 +26,7 @@ namespace Internal.Cryptography.Pal
                 AppleCertificatePal pal = (AppleCertificatePal)certAndKey.Cert;
 
                 SafeSecKeyRefHandle safeSecKeyRefHandle =
-                    AppleSslPkcs12Reader.GetPrivateKey(certAndKey.Key);
+                    ApplePkcs12Reader.GetPrivateKey(certAndKey.Key);
 
                 AppleCertificatePal newPal;
 

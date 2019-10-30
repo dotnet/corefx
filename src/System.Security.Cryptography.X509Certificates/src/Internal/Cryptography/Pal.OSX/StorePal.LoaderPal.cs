@@ -59,13 +59,13 @@ namespace Internal.Cryptography.Pal
 
         private sealed class ApplePkcs12CertLoader : ILoaderPal
         {
-            private readonly AppleSslPkcs12Reader _pkcs12;
+            private readonly ApplePkcs12Reader _pkcs12;
             private readonly SafeKeychainHandle _keychain;
             private readonly SafePasswordHandle _password;
             private readonly bool _exportable;
 
             public ApplePkcs12CertLoader(
-                AppleSslPkcs12Reader pkcs12,
+                ApplePkcs12Reader pkcs12,
                 SafeKeychainHandle keychain,
                 SafePasswordHandle password,
                 bool exportable)
@@ -95,7 +95,7 @@ namespace Internal.Cryptography.Pal
                 {
                     AppleCertificatePal pal = (AppleCertificatePal)certAndKey.Cert;
                     SafeSecKeyRefHandle safeSecKeyRefHandle =
-                        AppleSslPkcs12Reader.GetPrivateKey(certAndKey.Key);
+                        ApplePkcs12Reader.GetPrivateKey(certAndKey.Key);
 
                     using (safeSecKeyRefHandle)
                     {

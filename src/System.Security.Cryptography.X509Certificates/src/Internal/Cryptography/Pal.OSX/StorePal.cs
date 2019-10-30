@@ -58,7 +58,6 @@ namespace Internal.Cryptography.Pal
                 SafeTemporaryKeychainHandle.InvalidHandle,
                 exportable: true);
 
-            // If the default keychain was used, null will be passed to the loader.
             return new AppleCertLoader(certs, null);
         }
 
@@ -68,7 +67,7 @@ namespace Internal.Cryptography.Pal
             bool exportable,
             SafeKeychainHandle keychain)
         {
-            AppleSslPkcs12Reader reader = new AppleSslPkcs12Reader(rawData);
+            ApplePkcs12Reader reader = new ApplePkcs12Reader(rawData);
 
             try
             {

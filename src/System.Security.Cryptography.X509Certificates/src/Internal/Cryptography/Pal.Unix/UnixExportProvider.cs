@@ -479,22 +479,29 @@ namespace Internal.Cryptography.Pal
             HashAlgorithmName hashAlgorithm = HashAlgorithmName.SHA1;
             RandomNumberGenerator.Fill(macSalt);
 
-            Pkcs12Kdf.DeriveMacKey(
-                passwordSpan,
-                hashAlgorithm,
-                s_windowsPbe.IterationCount,
-                macSalt,
-                macKey);
-
-            using (IncrementalHash mac = IncrementalHash.CreateHMAC(hashAlgorithm, macKey))
+            fixed (byte* macKeyPtr = macKey)
             {
-                mac.AppendData(encodedAuthSafe.Span);
+                Span<byte> macKeySpan = macKey;
 
-                if (!mac.TryGetHashAndReset(macSpan, out int bytesWritten) || bytesWritten != macSpan.Length)
+                Pkcs12Kdf.DeriveMacKey(
+                    passwordSpan,
+                    hashAlgorithm,
+                    s_windowsPbe.IterationCount,
+                    macSalt,
+                    macKeySpan);
+
+                using (IncrementalHash mac = IncrementalHash.CreateHMAC(hashAlgorithm, macKey))
                 {
-                    Debug.Fail($"TryGetHashAndReset wrote {bytesWritten} of {macSpan.Length} bytes");
-                    throw new CryptographicException();
+                    mac.AppendData(encodedAuthSafe.Span);
+
+                    if (!mac.TryGetHashAndReset(macSpan, out int bytesWritten) || bytesWritten != macSpan.Length)
+                    {
+                        Debug.Fail($"TryGetHashAndReset wrote {bytesWritten} of {macSpan.Length} bytes");
+                        throw new CryptographicException();
+                    }
                 }
+
+                CryptographicOperations.ZeroMemory(macKeySpan);
             }
 
             // https://tools.ietf.org/html/rfc7292#section-4
