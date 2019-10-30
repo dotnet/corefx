@@ -452,7 +452,7 @@ namespace System.IO
                                 // move from unwatched folder to watcher folder scenario or a move from the watcher folder out.
                                 // Check if the item exists on disk to check which it is
                                 // Don't send a new notification if we already sent one for this event.
-                                if (DoesItemExist(path, IsFlagSet(eventFlags[i], FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
+                                if (DoesItemExist(path, eventFlags[i].HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
                                 {
                                     if ((eventType & WatcherChangeTypes.Created) == 0)
                                     {
@@ -556,15 +556,15 @@ namespace System.IO
                 if (eventIsCorrectType || ((allowDirs || allowFiles) && (eventIsLink)))
                 {
                     // Notify Created/Deleted/Renamed events.
-                    if (IsFlagSet(eventFlags, FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
+                    if (eventFlags.HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
                     {
                         eventType |= WatcherChangeTypes.Renamed;
                     }
-                    if (IsFlagSet(eventFlags, FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated))
+                    if (eventFlags.HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated))
                     {
                         eventType |= WatcherChangeTypes.Created;
                     }
-                    if (IsFlagSet(eventFlags, FSEventStreamEventFlags.kFSEventStreamEventFlagItemRemoved))
+                    if (eventFlags.HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagItemRemoved))
                     {
                         eventType |= WatcherChangeTypes.Deleted;
                     }
@@ -575,12 +575,12 @@ namespace System.IO
             private bool ShouldRescanOccur(FSEventStreamEventFlags flags)
             {
                 // Check if any bit is set that signals that the caller should rescan
-                return (IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagMustScanSubDirs) ||
-                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagUserDropped) ||
-                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagKernelDropped) ||
-                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagRootChanged) ||
-                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagMount) ||
-                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagUnmount));
+                return (flags.HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagMustScanSubDirs) ||
+                        flags.HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagUserDropped) ||
+                        flags.HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagKernelDropped) ||
+                        flags.HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagRootChanged) ||
+                        flags.HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagMount) ||
+                        flags.HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagUnmount));
             }
 
             private bool CheckIfPathIsNested(ReadOnlySpan<char> eventPath)
@@ -601,19 +601,13 @@ namespace System.IO
                     return null;
 
                 if (ids[currentIndex] + 1 == ids[nextIndex] &&
-                    IsFlagSet(flags[nextIndex], FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
+                    flags[nextIndex].HasFlag(FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
                 {
                     return nextIndex;
                 }
 
                 return null;
             }
-
-            private static bool IsFlagSet(FSEventStreamEventFlags flags, FSEventStreamEventFlags value)
-            {
-                return (value & flags) == value;
-            }
-
             private static bool DoesItemExist(ReadOnlySpan<char> path, bool isFile)
             {
                 if (path.IsEmpty || path.Length == 0)
