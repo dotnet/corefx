@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.IO;
+using System.Net.Mail;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using Microsoft.Win32.SafeHandles;
@@ -11,7 +13,7 @@ namespace System.Threading
 {
     public static class EventWaitHandleAcl
     {
-        /// <summary>Creates a new <see cref="EventWaitHandle" /> instance, ensuring it is created with the specified event security.</summary>
+        /// <summary>Creates a new named <see cref="EventWaitHandle" /> instance, ensuring it is created with the specified event security.</summary>
         /// <param name="initialState"><see langword="true" /> to set the initial state to signaled if the named event is created as a result of this call; <see langword="false" /> to set it to nonsignaled.</param>
         /// <param name="mode">One of the enum values that determines whether the event resets automatically or manually.</param>
         /// <param name="name">The name of a system-wide synchronization event.</param>
@@ -21,51 +23,41 @@ namespace System.Threading
         /// <exception cref="ArgumentException">The length of the name exceeds the maximum limit.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="eventSecurity" /> is <see langword="null" />.</exception>
         /// <exception cref="ArgumentOutOfRangeException">The <paramref name="mode" /> enum value was out of legal range.</exception>
-        /// <exception cref="WaitHandleCannotBeOpenedException">An <see cref="EventWaitHandle" /> with system-wide name <paramref name="name" /> cannot be created. An <see cref="EventWaitHandle" /> of a different type might have the same name.</exception>
+        /// <exception cref="DirectoryNotFoundException">Could not find a part of the path specified in <paramref name="name" />.</exception>
+        /// <exception cref="WaitHandleCannotBeOpenedException">An event with the provided <paramref name="name" /> was not found.
+        /// -or-
+        /// An <see cref="EventWaitHandle" /> with system-wide name <paramref name="name" /> cannot be created. An <see cref="EventWaitHandle" /> of a different type might have the same name.</exception>
         public static EventWaitHandle Create(bool initialState, EventResetMode mode, string name, out bool createdNew, EventWaitHandleSecurity eventSecurity)
         {
-            if (name != null && name.Length > Interop.Kernel32.MAX_PATH)
+            if (string.IsNullOrEmpty(name))
             {
-                throw new ArgumentException(SR.Format(SR.Argument_WaitHandleNameTooLong, name));
+                throw new ArgumentException(SR.Format(SR.Argument_CannotBeNullOrEmpty), nameof(name));
             }
-
+            if (name.Length > Interop.Kernel32.MAX_PATH)
+            {
+                throw new ArgumentException(SR.Format(SR.Argument_WaitHandleNameTooLong, name), nameof(name));
+            }
             if (eventSecurity == null)
             {
                 throw new ArgumentNullException(nameof(eventSecurity));
             }
 
-            bool isManualReset;
-            switch (mode)
+            bool isManualReset = mode switch
             {
-                case EventResetMode.ManualReset:
-                    isManualReset = true;
-                    break;
-                case EventResetMode.AutoReset:
-                    isManualReset = false;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(mode), SR.Format(SR.ArgumentOutOfRange_Enum));
+                EventResetMode.ManualReset => true,
+                EventResetMode.AutoReset => false,
+                _ => throw new ArgumentOutOfRangeException(nameof(mode), SR.Format(SR.ArgumentOutOfRange_Enum))
             };
 
-            SafeWaitHandle handle = CreateWaitHandle(initialState, isManualReset, name, out createdNew, eventSecurity);
-
-            try
-            {
-                // This constructor is private
-                // return new EventWaitHandle(handle);
-                return null;
-            }
-            catch
-            {
-                handle.Dispose();
-                throw;
-            }
+            return CreateEventWaitHandle(initialState, isManualReset, name, out createdNew, eventSecurity);
         }
 
-
-        private static unsafe SafeWaitHandle CreateWaitHandle(bool initialState, bool isManualReset, string name, out bool createdNew, EventWaitHandleSecurity security)
+        private static unsafe EventWaitHandle CreateEventWaitHandle(bool initialState, bool isManualReset, string name, out bool createdNew, EventWaitHandleSecurity security)
         {
-            SafeWaitHandle handle;
+            Debug.Assert(!string.IsNullOrEmpty(name));
+            Debug.Assert(security != null);
+
+            EventWaitHandle eventHandle = null;
 
             fixed (byte* pSecurityDescriptor = security.GetSecurityDescriptorBinaryForm())
             {
@@ -75,36 +67,51 @@ namespace System.Threading
                     lpSecurityDescriptor = (IntPtr)pSecurityDescriptor
                 };
 
-                handle = Interop.Kernel32.CreateEvent(ref secAttrs, isManualReset, initialState, name);
+                SafeWaitHandle handle = Interop.Kernel32.CreateEvent(ref secAttrs, isManualReset, initialState, name);
                 ValidateHandle(handle, name, out createdNew);
+
+                AggregateException aggEx = null;
+
+                // Ensure we always close the handle regardless of the OpenExisting call result
+                try
+                {
+                    eventHandle = EventWaitHandle.OpenExisting(name);
+                }
+                catch (Exception ex)
+                {
+                    aggEx = new AggregateException(ex);
+                }
+                finally
+                {
+                    handle.Dispose();
+                }
+
+                if (aggEx != null)
+                {
+                    throw aggEx;
+                }
             }
 
-            return handle;
+            return eventHandle;
         }
 
         private static void ValidateHandle(SafeWaitHandle handle, string name, out bool createdNew)
         {
-            createdNew = false;
+            Debug.Assert(handle != null);
+
+            int errorCode = Marshal.GetLastWin32Error();
 
             if (handle.IsInvalid)
             {
-                // We call this in netfx. Is it still needed at this point?
                 handle.SetHandleAsInvalid();
 
-                int errorCode = Marshal.GetLastWin32Error();
+                if (!string.IsNullOrEmpty(name) && errorCode == Interop.Errors.ERROR_INVALID_HANDLE)
+                    throw new WaitHandleCannotBeOpenedException(SR.Format(SR.WaitHandleCannotBeOpenedException_InvalidHandle, name));
 
-                if (errorCode == Interop.Errors.ERROR_INVALID_HANDLE && string.IsNullOrEmpty(name))
-                {
-                    throw new WaitHandleCannotBeOpenedException(
-                        SR.Format(SR.WaitHandleCannotBeOpenedException_InvalidHandle, name));
-                }
-                else if (errorCode != Interop.Errors.ERROR_ALREADY_EXISTS)
-                {
-                    throw Win32Marshal.GetExceptionForWin32Error(errorCode, name);
-                }
-
-                createdNew = errorCode != Interop.Errors.ERROR_ALREADY_EXISTS;
+                throw Win32Marshal.GetExceptionForWin32Error(errorCode, name);
             }
+
+            createdNew = errorCode != Interop.Errors.ERROR_ALREADY_EXISTS;
         }
     }
 }
