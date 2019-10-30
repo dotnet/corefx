@@ -312,7 +312,7 @@ internal static partial class Interop
 
         internal static bool TryParseStatusFile(string statusFilePath, out ParsedStatus result, ReusableTextReader reusableReader)
         {
-            if (!TryReadFileAsSpan(statusFilePath, reusableReader, out ReadOnlySpan<char> statusFileContents))
+            if (!TryReadFile(statusFilePath, reusableReader, out string fileContents))
             {
                 // Between the time that we get an ID and the time that we try to read the associated stat
                 // file(s), the process could be gone.
@@ -321,73 +321,84 @@ internal static partial class Interop
             }
 
             var results = default(ParsedStatus);
+            var statusFileContents = fileContents.AsSpan();
             while (!statusFileContents.IsEmpty)
             {
                 int startIndex = statusFileContents.IndexOf(':');
-                int endIndex = statusFileContents.IndexOf('\n');
-
                 // Reached end of file
-                if (endIndex == -1)
+                if (startIndex == -1)
                 {
                     break;
                 }
 
                 ReadOnlySpan<char> title = statusFileContents.Slice(0, startIndex);
-                ReadOnlySpan<char> value = default;
-                // endIndex - startIndex - 1 --> To slice till just before '\n'
-                // endIndex - startIndex - 4 --> To slice till just before ' kB\n'
-                switch (title.ToString())
+                statusFileContents = statusFileContents.Slice(startIndex + 1);
+                int endIndex = statusFileContents.IndexOf('\n');
+                if (endIndex == -1)
                 {
-#if DEBUG
-                    case "Pid":
-                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 1);
-                        int.TryParse(value, out results.Pid);
-                        break;
-#endif
-                    case "VmHWM":
-                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
-                        ulong.TryParse(value, out results.VmHWM);
-                        break;
-
-                    case "VmRSS":
-                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
-                        ulong.TryParse(value, out results.VmRSS);
-                        break;
-
-                    case "VmData":
-                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
-                        ulong.TryParse(value, out results.VmData);
-                        break;
-
-                    case "VmSwap":
-                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
-                        ulong.TryParse(value, out results.VmSwap);
-                        break;
-
-                    case "VmSize":
-                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
-                        ulong.TryParse(value, out results.VmSize);
-                        break;
-
-                    case "VmPeak":
-                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
-                        ulong.TryParse(value, out results.VmPeak);
-                        break;
-
-                    case "VmStk":
-                        value = statusFileContents.Slice(startIndex + 1, endIndex - startIndex - 4);
-                        ulong.TryParse(value, out ulong VmStk);
-                        // Add stack value to VmData to calculate memory usage
-                        results.VmData += VmStk;
-                        break;
-
-                    default:
-                        endIndex = statusFileContents.IndexOf('\n');
-                        break;
+                    endIndex = statusFileContents.Length - 1;
                 }
-                // Slice off the parsed part and parse on the rest.
-                statusFileContents = statusFileContents.Slice(endIndex + 1, statusFileContents.Length - endIndex - 1);
+
+                ReadOnlySpan<char> value = default;
+                int sliceLength = endIndex  - 3;
+                bool valueParsed;
+#if DEBUG
+                if (title.SequenceEqual("Pid".AsSpan()))
+                {
+                    value = statusFileContents.Slice(0, endIndex);
+                    valueParsed = int.TryParse(value, out results.Pid);
+                    Debug.Assert(valueParsed);
+                    statusFileContents = statusFileContents.Slice(endIndex + 1);
+                    continue;
+                }
+#endif
+                if (title.SequenceEqual("VmHWM".AsSpan()))
+                {
+                    value = statusFileContents.Slice(0, sliceLength);
+                    valueParsed = ulong.TryParse(value, out results.VmHWM);
+                }
+                else if (title.SequenceEqual("VmRSS".AsSpan()))
+                {
+                    value = statusFileContents.Slice(0, sliceLength);
+                    valueParsed = ulong.TryParse(value, out results.VmRSS);
+                    Debug.Assert(valueParsed);
+                }
+                else if (title.SequenceEqual("VmData".AsSpan()))
+                {
+                    value = statusFileContents.Slice(0, sliceLength);
+                    valueParsed = ulong.TryParse(value, out ulong vmData);
+                    Debug.Assert(valueParsed);
+                    results.VmData += vmData;
+                }
+                else if (title.SequenceEqual("VmSwap".AsSpan()))
+                {
+                    value = statusFileContents.Slice(0, sliceLength);
+                    valueParsed = ulong.TryParse(value, out results.VmSwap);
+                    Debug.Assert(valueParsed);
+                }
+                else if (title.SequenceEqual("VmSize".AsSpan()))
+                {
+                    value = statusFileContents.Slice(0, sliceLength);
+                    valueParsed = ulong.TryParse(value, out results.VmSize);
+                    Debug.Assert(valueParsed);
+                }
+                else if (title.SequenceEqual("VmPeak".AsSpan()))
+                {
+                    value = statusFileContents.Slice(0, sliceLength);
+                    valueParsed = ulong.TryParse(value, out results.VmPeak);
+                    Debug.Assert(valueParsed);
+                }
+                else if (title.SequenceEqual("VmStk".AsSpan()))
+                {
+                    value = statusFileContents.Slice(0, sliceLength);
+                    valueParsed = ulong.TryParse(value, out ulong vmStack);
+                    Debug.Assert(valueParsed);
+                    results.VmData += vmStack;
+                }
+
+                statusFileContents = statusFileContents.Slice(endIndex + 1);
             }
+
             results.VmData *= 1024;
             results.VmPeak *= 1024;
             results.VmSize *= 1024;
@@ -405,23 +416,6 @@ internal static partial class Interop
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, useAsync: false))
                 {
                     fileContents = reusableReader.ReadAllText(fileStream);
-                    return true;
-                }
-            }
-            catch (IOException)
-            {
-                fileContents = null;
-                return false;
-            }
-        }
-
-        private static bool TryReadFileAsSpan(string filePath, ReusableTextReader reusableReader, out ReadOnlySpan<char> fileContents)
-        {
-            try
-            {
-                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, useAsync: false))
-                {
-                    fileContents = reusableReader.ReadAllText(fileStream).AsSpan();
                     return true;
                 }
             }
