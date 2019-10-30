@@ -47,7 +47,7 @@ namespace System.Runtime.Loader.Tests
         [Fact]
         public static void LoadFromAssemblyPath_PartiallyQualifiedPath_ThrowsArgumentException()
         {
-            string path = @"foo\bar.dll";
+            string path = Path.Combine("foo", "bar.dll");
             ArgumentException ex = AssertExtensions.Throws<ArgumentException>("assemblyPath", () => (new AssemblyLoadContext("alc")).LoadFromAssemblyPath(path));
             Assert.Contains(path, ex.Message);
         }
