@@ -155,29 +155,27 @@ namespace System.Text.Json.Serialization.Tests
                     byte[] objBytes = Encoding.UTF8.GetBytes(
                         @"{""Test"":{},""Test2"":[],""Test3"":{""Value"":{}},""PersonType"":0,""Id"":2}");
 
+                    byte[] utf8Bom = Encoding.UTF8.GetPreamble();
                     byte[] comma = Encoding.UTF8.GetBytes(@",");
+                    byte[] startArray = Encoding.UTF8.GetBytes(@"[");
+                    byte[] endArray = Encoding.UTF8.GetBytes(@"]");
 
                     var stream = new MemoryStream();
 
-                    // Write BOM.
-                    stream.Write(Encoding.UTF8.GetPreamble());
+                    stream.Write(utf8Bom, 0, utf8Bom.Length);
+                    stream.Write(startArray, 0, startArray.Length);
 
-                    // Write start array.
-                    stream.Write(Encoding.UTF8.GetBytes(@"["));
-
-                    // Write entries.
                     for (int i = 1; i <= count; i++)
                     {
-                        stream.Write(objBytes);
+                        stream.Write(objBytes, 0, objBytes.Length);
 
                         if (i < count)
                         {
-                            stream.Write(comma);
+                            stream.Write(comma, 0, comma.Length);
                         }
                     }
 
-                    // Write end array.
-                    stream.Write(Encoding.UTF8.GetBytes(@"]"));
+                    stream.Write(endArray, 0, endArray.Length);
 
                     stream.Position = 0;
                     return new object[] { stream, count };
