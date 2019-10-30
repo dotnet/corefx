@@ -60,13 +60,16 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        [Fact]
-        public void EncodeEmptySpan()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void EncodeEmptySpan(bool isFinalBlock)
         {
             Span<byte> source = Span<byte>.Empty;
             Span<byte> encodedBytes = new byte[Base64.GetMaxEncodedToUtf8Length(source.Length)];
 
-            Assert.Equal(OperationStatus.Done, Base64.EncodeToUtf8(source, encodedBytes, out int consumed, out int encodedBytesCount));
+            OperationStatus expectedStatus = isFinalBlock ? OperationStatus.Done : OperationStatus.NeedMoreData;
+            Assert.Equal(expectedStatus, Base64.EncodeToUtf8(source, encodedBytes, out int consumed, out int encodedBytesCount, isFinalBlock));
             Assert.Equal(source.Length, consumed);
             Assert.Equal(encodedBytes.Length, encodedBytesCount);
             Assert.True(Base64TestHelper.VerifyEncodingCorrectness(source.Length, encodedBytes.Length, source, encodedBytes));
