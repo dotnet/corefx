@@ -140,30 +140,38 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-        public static IEnumerable<object[]> BOMWithJsonElementTestData
+        public static IEnumerable<object[]> BOMWithStreamTestData
         {
             get
             {
-                yield return CreateStreamArgs(100);
-                yield return CreateStreamArgs(200);
-                yield return CreateStreamArgs(400);
-                yield return CreateStreamArgs(800);
-                yield return CreateStreamArgs(1600);
+                foreach (object[] testData in Yield(100, 6601)) yield return testData;
+                foreach (object[] testData in Yield(200, 13201)) yield return testData;
+                foreach (object[] testData in Yield(400, 26401)) yield return testData;
+                foreach (object[] testData in Yield(800, 52801)) yield return testData;
+                foreach (object[] testData in Yield(1600, 105601)) yield return testData;
 
-                static object[] CreateStreamArgs(int count)
+                IEnumerable<object[]> Yield(int count, int expectedStreamLength)
+                {
+                    // Use the same stream instance so the tests run faster.
+                    Stream stream = CreateStream(count);
+
+                    // Test with both small (1 byte) and default (16K) buffer sizes to encourage
+                    // different code paths dealing with buffer re-use and growing.
+                    yield return new object[] { stream, count, expectedStreamLength, 1 };
+                    yield return new object[] { stream, count, expectedStreamLength, 16 * 1024 };
+                }
+
+                static Stream CreateStream(int count)
                 {
                     byte[] objBytes = Encoding.UTF8.GetBytes(
                         @"{""Test"":{},""Test2"":[],""Test3"":{""Value"":{}},""PersonType"":0,""Id"":2}");
 
                     byte[] utf8Bom = Encoding.UTF8.GetPreamble();
-                    byte[] comma = Encoding.UTF8.GetBytes(@",");
-                    byte[] startArray = Encoding.UTF8.GetBytes(@"[");
-                    byte[] endArray = Encoding.UTF8.GetBytes(@"]");
 
                     var stream = new MemoryStream();
 
                     stream.Write(utf8Bom, 0, utf8Bom.Length);
-                    stream.Write(startArray, 0, startArray.Length);
+                    stream.WriteByte((byte)'[');
 
                     for (int i = 1; i <= count; i++)
                     {
@@ -171,65 +179,51 @@ namespace System.Text.Json.Serialization.Tests
 
                         if (i < count)
                         {
-                            stream.Write(comma, 0, comma.Length);
+                            stream.WriteByte((byte)',');
                         }
                     }
 
-                    stream.Write(endArray, 0, endArray.Length);
-
-                    stream.Position = 0;
-                    return new object[] { stream, count };
+                    stream.WriteByte((byte)']');
+                    return stream;
                 }
             }
         }
 
         [Theory]
-        [MemberData(nameof(BOMWithJsonElementTestData))]
-        public static async Task TestBOMWithShortAndLongBuffers(Stream stream, int count)
+        [MemberData(nameof(BOMWithStreamTestData))]
+        public static async Task TestBOMWithShortAndLongBuffers(Stream stream, int count, int expectedStreamLength, int bufferSize)
         {
             JsonElement[] value;
 
-            // Try with 16K. This should cause copy of the buffer for remaining bytes.
-            JsonSerializerOptions options16K = new JsonSerializerOptions()
+            JsonSerializerOptions options = new JsonSerializerOptions()
             {
-                DefaultBufferSize = 16 * 1024
+                DefaultBufferSize = bufferSize
             };
-            value = await JsonSerializer.DeserializeAsync<JsonElement[]>(stream, options16K);
-            Verify();
 
-            // Try with 1 byte. This should cause a copy and\or re-size of the buffer.
             stream.Position = 0;
-            JsonSerializerOptions options1Byte = new JsonSerializerOptions()
+            value = await JsonSerializer.DeserializeAsync<JsonElement[]>(stream, options);
+
+            // Verify first and last elements.
+            VerifyElement(0);
+            VerifyElement(count - 1);
+
+            // Round trip and verify.
+            stream.Position = 3; // Skip the BOM.
+            string originalString = new StreamReader(stream).ReadToEnd();
+            Assert.Equal(expectedStreamLength, originalString.Length);
+
+            string roundTrippedString = JsonSerializer.Serialize(value);
+            Assert.Equal(originalString, roundTrippedString);
+
+            void VerifyElement(int index)
             {
-                DefaultBufferSize = 1
-            };
-            value = await JsonSerializer.DeserializeAsync<JsonElement[]>(stream, options1Byte);
-            Verify();
-
-            stream.Dispose();
-
-            void Verify()
-            {
-                // Verify first and last elements.
-                VerifyElement(0);
-                VerifyElement(count - 1);
-
-                // Round trip and verify.
-                stream.Position = 3; // Skip the BOM.
-                string originalString = new StreamReader(stream).ReadToEnd();
-                string roundTrippedString = JsonSerializer.Serialize(value);
-                Assert.Equal(originalString, roundTrippedString);
-
-                void VerifyElement(int index)
-                {
-                    Assert.Equal(JsonValueKind.Object, value[index].GetProperty("Test").ValueKind);
-                    Assert.Equal(JsonValueKind.Array, value[index].GetProperty("Test2").ValueKind);
-                    Assert.Equal(0, value[index].GetProperty("Test2").GetArrayLength());
-                    Assert.Equal(JsonValueKind.Object, value[index].GetProperty("Test3").ValueKind);
-                    Assert.Equal(JsonValueKind.Object, value[index].GetProperty("Test3").GetProperty("Value").ValueKind);
-                    Assert.Equal(0, value[index].GetProperty("PersonType").GetInt32());
-                    Assert.Equal(2, value[index].GetProperty("Id").GetInt32());
-                }
+                Assert.Equal(JsonValueKind.Object, value[index].GetProperty("Test").ValueKind);
+                Assert.Equal(JsonValueKind.Array, value[index].GetProperty("Test2").ValueKind);
+                Assert.Equal(0, value[index].GetProperty("Test2").GetArrayLength());
+                Assert.Equal(JsonValueKind.Object, value[index].GetProperty("Test3").ValueKind);
+                Assert.Equal(JsonValueKind.Object, value[index].GetProperty("Test3").GetProperty("Value").ValueKind);
+                Assert.Equal(0, value[index].GetProperty("PersonType").GetInt32());
+                Assert.Equal(2, value[index].GetProperty("Id").GetInt32());
             }
         }
     }
