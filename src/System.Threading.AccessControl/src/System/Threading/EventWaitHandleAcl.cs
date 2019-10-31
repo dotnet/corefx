@@ -57,19 +57,18 @@ namespace System.Threading
                     lpSecurityDescriptor = (IntPtr)pSecurityDescriptor
                 };
 
-                using (SafeWaitHandle handle = Interop.Kernel32.CreateEvent(ref secAttrs, isManualReset, initialState, name))
-                {
-                    ValidateHandle(handle, name, out createdNew);
+                using SafeWaitHandle handle = Interop.Kernel32.CreateEvent(ref secAttrs, isManualReset, initialState, name);
 
-                    try
-                    {
-                        return EventWaitHandle.OpenExisting(name);
-                    }
-                    finally
-                    {
-                        // Close our handle as the EventWaitHandle will have it's own.
-                        handle.Dispose();
-                    }
+                ValidateHandle(handle, name, out createdNew);
+
+                try
+                {
+                    return EventWaitHandle.OpenExisting(name);
+                }
+                finally
+                {
+                    // Close our handle as the EventWaitHandle will have it's own.
+                    handle.Dispose();
                 }
             }
         }
