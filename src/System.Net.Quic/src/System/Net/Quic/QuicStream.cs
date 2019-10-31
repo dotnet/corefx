@@ -117,26 +117,6 @@ namespace System.Net.Quic
         }
 
         /// <summary>
-        /// Indicates whether the stream has been connected.
-        /// </summary>
-        public bool Connected
-        {
-            get
-            {
-                CheckDisposed();
-
-                if (_mock)
-                {
-                    return _socket != null;
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-            }
-        }
-
-        /// <summary>
         /// QUIC stream ID.
         /// </summary>
         public int StreamId
@@ -180,7 +160,7 @@ namespace System.Net.Quic
 
             if (_mock)
             {
-                if (!Connected)
+                if (_socket == null)
                 {
                     await ConnectAsync(cancellationToken).ConfigureAwait(false);
                 }
@@ -225,7 +205,7 @@ namespace System.Net.Quic
 
             if (_mock)
             {
-                if (!Connected)
+                if (_socket == null)
                 {
                     await ConnectAsync(cancellationToken).ConfigureAwait(false);
                 }

@@ -88,7 +88,6 @@ namespace System.Net.Quic.Tests
             {
                 Assert.True(s1.CanRead);
                 Assert.True(s1.CanWrite);
-                Assert.False(s1.Connected);
 
                 ValueTask writeTask = s1.WriteAsync(s_data);
                 using (QuicStream s2 = await c2.AcceptStreamAsync())
@@ -106,7 +105,6 @@ namespace System.Net.Quic.Tests
             {
                 Assert.False(s1.CanRead);
                 Assert.True(s1.CanWrite);
-                Assert.False(s1.Connected);
 
                 ValueTask writeTask = s1.WriteAsync(s_data);
                 using (QuicStream s2 = await c2.AcceptStreamAsync())
@@ -124,8 +122,6 @@ namespace System.Net.Quic.Tests
             Assert.True(s1.CanWrite);
             Assert.True(s2.CanRead);
             Assert.True(s2.CanWrite);
-            Assert.True(s1.Connected);
-            Assert.True(s2.Connected);
             Assert.Equal(s1.StreamId, s2.StreamId);
 
             await SendAndReceiveDataAsync(s_data, s1, s2);
@@ -143,8 +139,6 @@ namespace System.Net.Quic.Tests
             Assert.True(s1.CanWrite);
             Assert.True(s2.CanRead);
             Assert.False(s2.CanWrite);
-            Assert.True(s1.Connected);
-            Assert.True(s2.Connected);
             Assert.Equal(s1.StreamId, s2.StreamId);
 
             await SendAndReceiveDataAsync(s_data, s1, s2);
