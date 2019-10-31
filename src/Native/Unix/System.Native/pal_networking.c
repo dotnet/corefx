@@ -260,13 +260,19 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
         return GetAddrInfoErrorFlags_EAI_BADARG;
     }
 
+    int32_t ret = GetAddrInfoErrorFlags_EAI_SUCCESS;
+
+    struct addrinfo* info = NULL;
+#if HAVE_GETIFADDRS
+    struct ifaddrs* addrs = NULL;
+#endif
+
     // Get all address families and the canonical name
     struct addrinfo hint;
     memset(&hint, 0, sizeof(struct addrinfo));
     hint.ai_family = AF_UNSPEC;
     hint.ai_flags = AI_CANONNAME;
 
-    struct addrinfo* info = NULL;
     int result = getaddrinfo((const char*)address, NULL, &hint, &info);
     if (result != 0)
     {
@@ -287,7 +293,8 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
             entry->CanonicalName = (uint8_t*)strdup(ai->ai_canonname);
             if (entry->CanonicalName == NULL)
             {
-                ConvertGetAddrInfoAndGetNameInfoErrorsToPal(EAI_MEMORY);
+                ret = ConvertGetAddrInfoAndGetNameInfoErrorsToPal(EAI_MEMORY);
+                goto cleanup;
             }
         }
 
@@ -300,10 +307,10 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 #if HAVE_GETIFADDRS
     char name[_POSIX_HOST_NAME_MAX];
     result = gethostname((char*)name, _POSIX_HOST_NAME_MAX);
+
     bool includeIPv4Loopback = true;
     bool includeIPv6Loopback = true;
 
-    struct ifaddrs* addrs = NULL;
     if (result == 0 && strcasecmp((const char*)address, name) == 0)
     {
         // Get all interface addresses if the host name corresponds to the local host.
@@ -336,8 +343,7 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 
                     entry->IPAddressCount++;
                 }
-
-                if (ifa->ifa_addr->sa_family == AF_INET6)
+                else if (ifa->ifa_addr->sa_family == AF_INET6)
                 {
                     // Remember if there's at least one non-loopback address for IPv6, so that they will be skipped.
                     if ((ifa->ifa_flags & IFF_LOOPBACK) == 0)
@@ -357,7 +363,8 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
         entry->IPAddressList = (IPAddress*)calloc((size_t)entry->IPAddressCount, sizeof(IPAddress));
         if (entry->IPAddressList == NULL)
         {
-            ConvertGetAddrInfoAndGetNameInfoErrorsToPal(EAI_MEMORY);
+            ret = ConvertGetAddrInfoAndGetNameInfoErrorsToPal(EAI_MEMORY);
+            goto cleanup;
         }
 
         IPAddress* ipAddressList = entry->IPAddressList;
@@ -369,7 +376,6 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
                 ++ipAddressList;
             }
         }
-        freeaddrinfo(info);
 
 #if HAVE_GETIFADDRS
         if (addrs != NULL)
@@ -391,7 +397,7 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
                 if ((!includeIPv4Loopback && ifa->ifa_addr->sa_family == AF_INET && (ifa->ifa_flags & IFF_LOOPBACK) != 0) || 
                     (!includeIPv6Loopback && ifa->ifa_addr->sa_family == AF_INET6 && (ifa->ifa_flags & IFF_LOOPBACK) != 0))
                 {
-                    --entry->IPAddressCount;
+                    entry->IPAddressCount--;
                     continue;
                 }
 
@@ -400,20 +406,42 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
                     ++ipAddressList;
                 }
             }
-            freeifaddrs(addrs);
         }
 #endif
     }
 
-    return GetAddrInfoErrorFlags_EAI_SUCCESS;
+cleanup:
+    if (info != NULL)
+    {
+        freeaddrinfo(info);
+    }
+
+#if HAVE_GETIFADDRS
+    if (addrs != NULL)
+    {
+        freeifaddrs(addrs);
+    }
+#endif
+
+    // If the returned code is not success, the FreeHostEntry will not be called from the managed code.
+    if (ret != GetAddrInfoErrorFlags_EAI_SUCCESS)
+    {
+        SystemNative_FreeHostEntry(entry);
+    }
+
+    return ret;
 }
 
 void SystemNative_FreeHostEntry(HostEntry* entry)
 {
     if (entry != NULL)
-    {        
-        free(entry->IPAddressList);
+    {
         free(entry->CanonicalName);
+        free(entry->IPAddressList);
+
+        entry->CanonicalName = NULL;
+        entry->IPAddressList = NULL;
+        entry->IPAddressCount = 0;
     }
 }
 

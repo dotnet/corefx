@@ -72,7 +72,7 @@ namespace System.Net
                     // is likely to involve extra allocations, hashing, etc., and so will probably be more expensive than
                     // this one in the typical (short list) case.
 
-                    Interop.Sys.IPAddress[] nativeAddresses = new Interop.Sys.IPAddress[hostEntry.IPAddressCount];
+                    var nativeAddresses = new Interop.Sys.IPAddress[hostEntry.IPAddressCount];
                     int nativeAddressCount = 0;
 
                     Interop.Sys.IPAddress* addressHandle = hostEntry.IPAddressList;
