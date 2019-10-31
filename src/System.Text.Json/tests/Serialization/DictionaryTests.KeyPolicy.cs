@@ -47,6 +47,33 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void IgnoreKeyPolicyForExtensionData()
+        {
+            var options = new JsonSerializerOptions
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase // e.g. Key1 -> key1.
+            };
+
+            // Ensure we ignore key policy for extension data and deserialize keys as they are.
+            ClassWithExtensionData myClass = JsonSerializer.Deserialize<ClassWithExtensionData>(@"{""Key1"":1, ""Key2"":2}", options);
+            Assert.Equal(1, (myClass.ExtensionData["Key1"]).GetInt32());
+            Assert.Equal(2, (myClass.ExtensionData["Key2"]).GetInt32());
+
+            // Ensure we ignore key policy for extension data and serialize keys as they are.
+            const string expectedJson = @"{""Key1"":1,""Key2"":2}";
+            const string expectedJsonReversed = @"{""Key2"":2,""Key1"":1}";
+
+            string serialized = JsonSerializer.Serialize(myClass);
+            Assert.True(expectedJson == serialized || expectedJsonReversed == serialized);
+        }
+
+        public class ClassWithExtensionData
+        {
+            [JsonExtensionData]
+            public Dictionary<string, JsonElement> ExtensionData { get; set; }
+        }
+
+        [Fact]
         public static void CamelCaseSerialize()
         {
             var options = new JsonSerializerOptions()
@@ -57,19 +84,77 @@ namespace System.Text.Json.Serialization.Tests
             Dictionary<string, int>[] obj = new Dictionary<string, int>[]
             {
                 new Dictionary<string, int>() { { "Key1", 1 }, { "Key2", 2 } },
-                new Dictionary<string, int>() { { "Key1", 3 }, { "Key2", 4 } },
             };
 
-            const string Json = @"[{""Key1"":1,""Key2"":2},{""Key1"":3,""Key2"":4}]";
-            const string JsonCamel = @"[{""key1"":1,""key2"":2},{""key1"":3,""key2"":4}]";
+            const string Json = @"[{""Key1"":1,""Key2"":2}]";
+            const string JsonReversed = @"[{""Key2"":2,""Key1"":1}]";
+
+            const string JsonCamel = @"[{""key1"":1,""key2"":2}]";
+            const string JsonCamelReversed = @"[{""key2"":2,""key1"":1}]";
 
             // Without key policy option, serialize keys as they are.
             string json = JsonSerializer.Serialize<object>(obj);
-            Assert.Equal(Json, json);
+            Assert.True(Json == json || JsonReversed == json);
 
             // With key policy option, serialize keys with camel casing.
             json = JsonSerializer.Serialize<object>(obj, options);
-            Assert.Equal(JsonCamel, json);
+            Assert.True(JsonCamel == json || JsonCamelReversed == json);
+        }
+
+        [Fact]
+        public static void CamelCaseSerialize_Null_Values()
+        {
+            var options = new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase // e.g. Key1 -> key1.
+            };
+
+            Dictionary<string, string>[] obj = new Dictionary<string, string>[]
+            {
+                new Dictionary<string, string>() { { "Key1", null }, { "Key2", null } },
+            };
+
+            const string Json = @"[{""Key1"":null,""Key2"":null}]";
+            const string JsonReversed = @"[{""Key2"":null,""Key1"":null}]";
+
+            const string JsonCamel = @"[{""key1"":null,""key2"":null}]";
+            const string JsonCamelReversed = @"[{""key2"":null,""key1"":null}]";
+
+            // Without key policy option, serialize keys as they are.
+            string json = JsonSerializer.Serialize<object>(obj);
+            Assert.True(Json == json || JsonReversed == json);
+
+            // With key policy option, serialize keys with camel casing.
+            json = JsonSerializer.Serialize<object>(obj, options);
+            Assert.True(JsonCamel == json || JsonCamelReversed == json);
+        }
+
+        [Fact]
+        public static void CamelCaseSerialize_Null_Nullable_Values()
+        {
+            var options = new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase // e.g. Key1 -> key1.
+            };
+
+            Dictionary<string, int?>[] obj = new Dictionary<string, int?>[]
+            {
+                new Dictionary<string, int?>() { { "Key1", null }, { "Key2", null } },
+            };
+
+            const string Json = @"[{""Key1"":null,""Key2"":null}]";
+            const string JsonReversed = @"[{""Key2"":null,""Key1"":null}]";
+
+            const string JsonCamel = @"[{""key1"":null,""key2"":null}]";
+            const string JsonCamelReversed = @"[{""key2"":null,""key1"":null}]";
+
+            // Without key policy option, serialize keys as they are.
+            string json = JsonSerializer.Serialize<object>(obj);
+            Assert.True(Json == json || JsonReversed == json);
+
+            // With key policy option, serialize keys with camel casing.
+            json = JsonSerializer.Serialize<object>(obj, options);
+            Assert.True(JsonCamel == json || JsonCamelReversed == json);
         }
 
         [Fact]
@@ -98,10 +183,10 @@ namespace System.Text.Json.Serialization.Tests
                 DictionaryKeyPolicy = new UppercaseNamingPolicy() // e.g. myint -> MYINT.
             };
 
-            Dictionary<string, int> obj = new Dictionary<string, int> { { "myint1", 1 }, { "myint2", 2 } };
+            Dictionary<string, int> obj = new Dictionary<string, int> { { "myint1", 1 } };
 
-            const string Json = @"{""myint1"":1,""myint2"":2}";
-            const string JsonCustomKey = @"{""MYINT1"":1,""MYINT2"":2}";
+            const string Json = @"{""myint1"":1}";
+            const string JsonCustomKey = @"{""MYINT1"":1}";
 
             // Without key policy option, serialize keys as they are.
             string json = JsonSerializer.Serialize<object>(obj);
@@ -138,10 +223,10 @@ namespace System.Text.Json.Serialization.Tests
                 DictionaryKeyPolicy = new UppercaseNamingPolicy() // e.g. myint -> MYINT.
             };
 
-            Dictionary<string, int?> obj = new Dictionary<string, int?> { { "myint1", 1 }, { "myint2", 2 } };
+            Dictionary<string, int?> obj = new Dictionary<string, int?> { { "myint1", 1 } };
 
-            const string Json = @"{""myint1"":1,""myint2"":2}";
-            const string JsonCustomKey = @"{""MYINT1"":1,""MYINT2"":2}";
+            const string Json = @"{""myint1"":1}";
+            const string JsonCustomKey = @"{""MYINT1"":1}";
 
             // Without key policy option, serialize keys as they are.
             string json = JsonSerializer.Serialize<object>(obj);
@@ -183,7 +268,10 @@ namespace System.Text.Json.Serialization.Tests
             string json = JsonSerializer.Serialize(obj, options);
 
             // Check that we write all.
-            Assert.Equal(@"{""myInt"":1,""myInt"":2}", json);
+            string expectedJson = @"{""myInt"":1,""myInt"":2}";
+            string expectedJsonReversed = @"{""myInt"":2,""myInt"":1}";
+
+            Assert.True(expectedJson == json || expectedJsonReversed == json);
         }
     }
 }
