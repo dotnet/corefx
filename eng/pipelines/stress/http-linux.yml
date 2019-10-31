@@ -6,7 +6,7 @@ pool:
 variables:
   httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress
   sdkBaseImage: sdk-corefx-current
-  HTTPSTRESS_IMAGE: httpstress
+  httpStressImage: httpstress
 
 steps:
 - checkout: self
@@ -20,10 +20,12 @@ steps:
 
 - bash: |
     cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
-    docker build -t $(HTTPSTRESS_IMAGE) --build-arg SDK_BASE_IMAGE=$(sdkBaseImage) --build-arg CONFIGURATION=$(BUILD_CONFIGURATION) .
+    docker build -t $(HhttpStressImage) --build-arg SDK_BASE_IMAGE=$(sdkBaseImage) --build-arg CONFIGURATION=$(BUILD_CONFIGURATION) .
   displayName: Build HttpStress
 
 - bash: |
     cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
     docker-compose up --abort-on-container-exit --no-color
   displayName: Run HttpStress
+  env:
+    HTTPSTRESS_IMAGE: $(httpStressImage)
