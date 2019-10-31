@@ -108,7 +108,7 @@ namespace System.Text.Json
                 {
                     DefaultValueAttribute defaultValueAttribute = JsonPropertyInfo.GetAttribute<DefaultValueAttribute>(jsonPropertyInfo.PropertyInfo);
                     currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
-                    includeProperty = defaultValueAttribute != null && object.Equals(currentValue, defaultValueAttribute.Value) == false;
+                    includeProperty = (defaultValueAttribute != null && object.Equals(currentValue, defaultValueAttribute.Value)) == false;
                 }
 
                 if (includeProperty)
