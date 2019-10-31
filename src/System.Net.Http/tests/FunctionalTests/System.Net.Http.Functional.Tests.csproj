@@ -8,10 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs" Condition="'$(TargetsUnix)' == 'true'">
-      <Link>Common\Interop\Unix\System.Net.Http.Native\Interop.VersionInfo.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Http.Native\Interop.VersionInfo.cs" Condition="'$(TargetsUnix)' == 'true'">
-      <Link>Common\Interop\Unix\System.Net.Http.Native\Interop.VersionInfo.cs</Link>
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.IsNtlmInstalled.cs" Condition="'$(TargetsUnix)' == 'true'">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.IsNtlmInstalled.cs</Link>
