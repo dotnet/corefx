@@ -12,6 +12,10 @@
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>cea2bba3c295c5280d01900f7ae5492951ad8995</Sha>
     </Dependency>
+    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19523.1">
+      <Uri>https://github.com/mono/linker</Uri>
+      <Sha>e092fdbde46b6f904663d1a407fd1de29f5e7902</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.NETCore.App" Version="5.0.0-alpha1.19524.4">
