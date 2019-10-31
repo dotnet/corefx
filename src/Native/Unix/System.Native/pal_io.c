@@ -1340,6 +1340,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR);
 #endif
 
+    close(outFd);
     return 0;
 #endif // HAVE_FCOPYFILE
 }
