@@ -78,6 +78,7 @@ namespace System.Drawing
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Editor("System.Drawing.Design.FontNameEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+        [TypeConverter(typeof(FontConverter.FontNameConverter))]
         public string Name => FontFamily.Name;
 
         /// <summary>
