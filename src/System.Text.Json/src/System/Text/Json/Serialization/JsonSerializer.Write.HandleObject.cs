@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.ComponentModel;
 
 namespace System.Text.Json
 {
@@ -100,13 +101,17 @@ namespace System.Text.Json
 
             if (jsonPropertyInfo.ClassType == ClassType.Value)
             {
-                currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
-                var defaultValueAttribute = JsonPropertyInfo.GetAttribute<System.ComponentModel.DefaultValueAttribute>(jsonPropertyInfo.PropertyInfo);
-                bool ignoreDefaultValueProperty = options.IgnoreDefaultValues && (defaultValueAttribute != null) &&
-                    object.Equals(currentValue, defaultValueAttribute.Value);
+                bool includeProperty = true;
 
                 // Check default value property.
-                if (!ignoreDefaultValueProperty)
+                if (options.IgnoreDefaultValues)
+                {
+                    DefaultValueAttribute defaultValueAttribute = JsonPropertyInfo.GetAttribute<DefaultValueAttribute>(jsonPropertyInfo.PropertyInfo);
+                    currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
+                    includeProperty = defaultValueAttribute != null && object.Equals(currentValue, defaultValueAttribute.Value) == false;
+                }
+
+                if (includeProperty)
                 {
                     jsonPropertyInfo.Write(ref state, writer);
                 }
