@@ -59,17 +59,17 @@ however that can be overriden using the `SDK_BASE_IMAGE` build argument:
 
 ```bash
 $ docker build -t httpstress \
-    --build-arg SDK_BASE_IMAGE=sdk-3.1.100-preview1 \
+    --build-arg SDK_BASE_IMAGE=my-sdk-3.1.100-preview1 \
     .
 ```
 
-This should work with any base image with a working dotnet sdk targeting `netcoreapp3.0`.
+This should work with any base image with a dotnet sdk supporting `netcoreapp3.0`.
 
 #### Using corefx bits
 
 To containerize httpstress using current corefx source code, from the root of the corefx repo do:
 ```bash
-docker build -t sdk-corefx-current \
+$ docker build -t sdk-corefx-current \
     --build-arg BUILD_CONFIGURATION=Debug \
     -f src/System.Net.Http/tests/StressTests/HttpStress/corefx.Dockerfile \
     .
@@ -91,8 +91,9 @@ To do this, from the stress folder simply run
 ```bash
 $ docker-compose up
 ```
-Parameters of the stress run can be tuned by setting the environment variables:
+Parameters of the stress run can be tuned by setting environment variables:
 ```bash
 $ export HTTPSTRESS_CLIENT_ARGS='-maxExecutionTime 20'
 $ export HTTPSTRESS_SERVER_ARGS='-aspnetlog'
+$ docker-compose up
 ```
