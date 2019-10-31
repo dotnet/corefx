@@ -14,7 +14,7 @@ namespace System.Net.Quic
     public sealed class QuicStream : Stream
     {
         private bool _disposed = false;
-        private readonly int _streamId;
+        private readonly long _streamId;
         private bool _canRead;
         private bool _canWrite;
         private QuicConnection _connection;
@@ -25,7 +25,7 @@ namespace System.Net.Quic
 
         // Constructor for outbound streams
         // !!! TEMPORARY FOR QUIC MOCK SUPPORT
-        internal QuicStream(QuicConnection connection, int streamId, bool canRead)
+        internal QuicStream(QuicConnection connection, long streamId, bool canRead)
         {
             _mock = true;
             _connection = connection;
@@ -36,7 +36,7 @@ namespace System.Net.Quic
 
         // Constructor for inbound streams
         // !!! TEMPORARY FOR QUIC MOCK SUPPORT
-        internal QuicStream(Socket socket, int streamId, bool canWrite)
+        internal QuicStream(Socket socket, long streamId, bool canWrite)
         {
             _mock = true;
             _socket = socket;
@@ -119,7 +119,7 @@ namespace System.Net.Quic
         /// <summary>
         /// QUIC stream ID.
         /// </summary>
-        public int StreamId
+        public long StreamId
         {
             get
             {

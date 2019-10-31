@@ -187,7 +187,7 @@ namespace System.Net.Quic
         }
 
         // !!! TEMPORARY FOR QUIC MOCK SUPPORT
-        internal async Task<Socket> CreateOutboundMockStreamAsync(int streamId)
+        internal async Task<Socket> CreateOutboundMockStreamAsync(long streamId)
         {
             Debug.Assert(_mock);
             Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
@@ -195,8 +195,8 @@ namespace System.Net.Quic
             socket.NoDelay = true;
 
             // Write stream ID to socket so server can read it
-            byte[] buffer = new byte[4];
-            BinaryPrimitives.WriteInt32LittleEndian(buffer, streamId);
+            byte[] buffer = new byte[8];
+            BinaryPrimitives.WriteInt64LittleEndian(buffer, streamId);
             await socket.SendAsync(buffer, SocketFlags.None).ConfigureAwait(false);
 
             return socket;
@@ -214,15 +214,15 @@ namespace System.Net.Quic
             {
                 Socket socket = await _inboundListener.AcceptSocketAsync().ConfigureAwait(false);
 
-                // Read first 4 bytes to get stream ID
-                byte[] buffer = new byte[4];
+                // Read first bytes to get stream ID
+                byte[] buffer = new byte[8];
                 int bytesRead = 0;
                 do
                 {
                     bytesRead += await socket.ReceiveAsync(buffer.AsMemory().Slice(bytesRead), SocketFlags.None).ConfigureAwait(false);
                 } while (bytesRead != buffer.Length);
 
-                int streamId = BinaryPrimitives.ReadInt32LittleEndian(buffer);
+                long streamId = BinaryPrimitives.ReadInt64LittleEndian(buffer);
 
                 bool clientInitiated = ((streamId & 0b01) == 0);
                 if (clientInitiated == _isClient)
