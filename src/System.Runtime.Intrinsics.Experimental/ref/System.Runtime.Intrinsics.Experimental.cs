@@ -210,6 +210,10 @@ namespace System.Runtime.Intrinsics.Arm
             public static System.Runtime.Intrinsics.Vector128<ulong> Abs(System.Runtime.Intrinsics.Vector128<long> value) { throw null; }
             public static System.Runtime.Intrinsics.Vector128<double> Add(System.Runtime.Intrinsics.Vector128<double> left, System.Runtime.Intrinsics.Vector128<double> right) { throw null; }
             public static System.Runtime.Intrinsics.Vector128<double> Subtract(System.Runtime.Intrinsics.Vector128<double> left, System.Runtime.Intrinsics.Vector128<double> right) { throw null; }
+            public static System.Runtime.Intrinsics.Vector64<byte> ReverseElementBits(System.Runtime.Intrinsics.Vector64<byte> value) { throw null; }
+            public static System.Runtime.Intrinsics.Vector64<sbyte> ReverseElementBits(System.Runtime.Intrinsics.Vector64<sbyte> value)  { throw null; }
+            public static System.Runtime.Intrinsics.Vector128<byte> ReverseElementBits(System.Runtime.Intrinsics.Vector128<byte> value) { throw null; }
+            public static System.Runtime.Intrinsics.Vector128<sbyte> ReverseElementBits(System.Runtime.Intrinsics.Vector128<sbyte> value) { throw null; }
         }
     }
     [System.CLSCompliantAttribute(false)]
@@ -229,6 +233,9 @@ namespace System.Runtime.Intrinsics.Arm
         public static bool IsSupported { get { throw null; } }
         public static int LeadingZeroCount(int value) { throw null; }
         public static int LeadingZeroCount(uint value) { throw null; }
+        public static int ReverseElementBits(int value) { throw null; }
+        public static uint ReverseElementBits(uint value) { throw null; }
+
         public abstract partial class Arm64
         {
             internal Arm64() { }
@@ -239,6 +246,8 @@ namespace System.Runtime.Intrinsics.Arm
             public static int LeadingSignCount(ulong value) { throw null; }
             public static int LeadingZeroCount(long value) { throw null; }
             public static int LeadingZeroCount(ulong value) { throw null; }
+            public static long ReverseElementBits(long  value) { throw null; }
+            public static ulong ReverseElementBits(ulong value) { throw null; }
         }
     }
     [System.CLSCompliantAttribute(false)]
