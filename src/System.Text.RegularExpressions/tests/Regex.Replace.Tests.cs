@@ -24,14 +24,7 @@ namespace System.Text.RegularExpressions.Tests
             yield return new object[] { "([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z]([a-z])))))))))))))))", "abcdefghiklmnop", "$3", RegexOptions.None, 15, 0, "cdefghiklmnop" };
 
             // Stress
-            var sb = new StringBuilder();
-
-            for (int i = 0; i < 1000; i++)
-                sb.Append("([a-z]");
-            sb.Append(')', 1000);
-
-            string pattern = sb.ToString();
-
+            string pattern = string.Concat(Enumerable.Repeat("([a-z]", 1000).Concat(Enumerable.Repeat(")", 1000)));
             string input = string.Concat(Enumerable.Repeat("abcde", 200));
 
             yield return new object[] { pattern, input, "$1000", RegexOptions.None, input.Length, 0, "e" };
