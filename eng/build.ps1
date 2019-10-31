@@ -72,8 +72,6 @@ if ($vs) {
   # This tells .NET Core to use the same dotnet.exe that build scripts use
   $env:DOTNET_ROOT="$PSScriptRoot\..\artifacts\bin\testhost\netcoreapp-Windows_NT-$configuration-$archTestHost";
 
-  $env:DOTNET_HOST_PATH="$env:DOTNET_ROOT\dotnet.exe"
-
   # This tells .NET Core not to go looking for .NET Core in other places
   $env:DOTNET_MULTILEVEL_LOOKUP=0;
 
