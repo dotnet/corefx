@@ -56,7 +56,7 @@ namespace System.Diagnostics.Tracing
             Enqueue(value);
         }
 
-        public override string ToString() => $"EventCounter '{Name}' Count {_count} Mean {(_sum / _count).ToString("n3")}";
+        public override string ToString() => $"EventCounter '{Name}' Count {_count} Mean {(_count == 0 ? "" : (_sum / _count).ToString("n3"))}";
 
         #region Statistics Calculation
 
