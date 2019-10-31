@@ -122,7 +122,7 @@ namespace System.Net.Http
             {
                 if (_trailingHeaders == null)
                 {
-                    _trailingHeaders = new HttpResponseHeaders(true);
+                    _trailingHeaders = new HttpResponseHeaders(containsTrailingHeaders: true);
                 }
 
                 return _trailingHeaders;

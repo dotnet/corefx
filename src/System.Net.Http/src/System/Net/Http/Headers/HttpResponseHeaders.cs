@@ -18,7 +18,7 @@ namespace System.Net.Http.Headers
         private const int VarySlot = 3;
         private const int WwwAuthenticateSlot = 4;
         private const int NumCollectionsSlots = 5;
-        private static HashSet<string> ProhibitedTrailerHeaders = GetProhibitedTrailerHeaders();
+        private static HashSet<string> s_disallowedTrailerHeaders = GetDisallowedTrailerHeaders();
 
         private object[] _specialCollectionsSlots;
         private HttpGeneralHeaders _generalHeaders;
@@ -145,7 +145,7 @@ namespace System.Net.Http.Headers
         #endregion
 
         internal HttpResponseHeaders(bool containsTrailingHeaders = false)
-            : base(containsTrailingHeaders ? HttpHeaderType.All & (HttpHeaderType.All ^ HttpHeaderType.Request) : HttpHeaderType.General | HttpHeaderType.Response | HttpHeaderType.Custom,
+            : base(containsTrailingHeaders ? HttpHeaderType.All ^ HttpHeaderType.Request : HttpHeaderType.General | HttpHeaderType.Response | HttpHeaderType.Custom,
                   HttpHeaderType.Request)
         {
             _containsTrailingHeaders = containsTrailingHeaders;
@@ -166,12 +166,12 @@ namespace System.Net.Http.Headers
 
         internal override bool IsAllowedHeaderName(string headerName)
         {
-            return !_containsTrailingHeaders || headerName != null && !ProhibitedTrailerHeaders.Contains(headerName);
+            return !_containsTrailingHeaders || headerName != null && !s_disallowedTrailerHeaders.Contains(headerName);
         }
 
-        private static HashSet<string> GetProhibitedTrailerHeaders()
+        private static HashSet<string> GetDisallowedTrailerHeaders()
         {
-            var result = new HashSet<string>();
+            var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var header in KnownHeaders.TrailerDisallowedHeaders)
             {
                 result.Add(header.Name);
