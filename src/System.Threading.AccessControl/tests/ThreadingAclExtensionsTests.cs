@@ -100,7 +100,7 @@ namespace System.Threading.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void EventWaitHandle_Create_DefaultSecurity()
         {
-            using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, "WhyIsThisUnauthorized", out bool createdNew, new EventWaitHandleSecurity());
+            using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, "MyHandle", out bool createdNew, new EventWaitHandleSecurity());
             Assert.NotNull(eventHandle);
         }
 

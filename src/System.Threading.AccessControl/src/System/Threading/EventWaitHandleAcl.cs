@@ -27,7 +27,7 @@ namespace System.Threading
         /// <exception cref="WaitHandleCannotBeOpenedException">An event with the provided <paramref name="name" /> was not found.
         /// -or-
         /// An <see cref="EventWaitHandle" /> with system-wide name <paramref name="name" /> cannot be created. An <see cref="EventWaitHandle" /> of a different type might have the same name.</exception>
-        public static EventWaitHandle Create(bool initialState, EventResetMode mode, string name, out bool createdNew, EventWaitHandleSecurity eventSecurity)
+        public static unsafe EventWaitHandle Create(bool initialState, EventResetMode mode, string name, out bool createdNew, EventWaitHandleSecurity eventSecurity)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -49,17 +49,7 @@ namespace System.Threading
                 _ => throw new ArgumentOutOfRangeException(nameof(mode), SR.Format(SR.ArgumentOutOfRange_Enum))
             };
 
-            return CreateEventWaitHandle(initialState, isManualReset, name, out createdNew, eventSecurity);
-        }
-
-        private static unsafe EventWaitHandle CreateEventWaitHandle(bool initialState, bool isManualReset, string name, out bool createdNew, EventWaitHandleSecurity security)
-        {
-            Debug.Assert(!string.IsNullOrEmpty(name));
-            Debug.Assert(security != null);
-
-            EventWaitHandle eventHandle = null;
-
-            fixed (byte* pSecurityDescriptor = security.GetSecurityDescriptorBinaryForm())
+            fixed (byte* pSecurityDescriptor = eventSecurity.GetSecurityDescriptorBinaryForm())
             {
                 var secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES
                 {
@@ -67,38 +57,25 @@ namespace System.Threading
                     lpSecurityDescriptor = (IntPtr)pSecurityDescriptor
                 };
 
-                SafeWaitHandle handle = Interop.Kernel32.CreateEvent(ref secAttrs, isManualReset, initialState, name);
-                ValidateHandle(handle, name, out createdNew);
+                using (SafeWaitHandle handle = Interop.Kernel32.CreateEvent(ref secAttrs, isManualReset, initialState, name))
+                {
+                    ValidateHandle(handle, name, out createdNew);
 
-                AggregateException aggEx = null;
-
-                // Ensure we always close the handle regardless of the OpenExisting call result
-                try
-                {
-                    eventHandle = EventWaitHandle.OpenExisting(name);
-                }
-                catch (Exception ex)
-                {
-                    aggEx = new AggregateException(ex);
-                }
-                finally
-                {
-                    handle.Dispose();
-                }
-
-                if (aggEx != null)
-                {
-                    throw aggEx;
+                    try
+                    {
+                        return EventWaitHandle.OpenExisting(name);
+                    }
+                    finally
+                    {
+                        // Close our handle as the EventWaitHandle will have it's own.
+                        handle.Dispose();
+                    }
                 }
             }
-
-            return eventHandle;
         }
 
         private static void ValidateHandle(SafeWaitHandle handle, string name, out bool createdNew)
         {
-            Debug.Assert(handle != null);
-
             int errorCode = Marshal.GetLastWin32Error();
 
             if (handle.IsInvalid)
@@ -111,7 +88,7 @@ namespace System.Threading
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, name);
             }
 
-            createdNew = errorCode != Interop.Errors.ERROR_ALREADY_EXISTS;
+            createdNew = (errorCode != Interop.Errors.ERROR_ALREADY_EXISTS);
         }
     }
 }
