@@ -14,8 +14,6 @@ Param(
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
-. $PSScriptRoot\common\tools.ps1
-
 function Get-Help() {
   Write-Host "Common settings:"
   Write-Host "  -framework              Build framework: netcoreapp, netfx (short: -f)"
@@ -65,6 +63,8 @@ if ($null -ne $properties -and $actionPassedIn -ne $true) {
 
 # VS Test Explorer support
 if ($vs) {
+  . $PSScriptRoot\common\tools.ps1
+
   if (-Not (Test-Path $vs)) {
     $vs = Join-Path "$PSScriptRoot\..\src" $vs | Join-Path -ChildPath "$vs.sln"
   }
