@@ -3,17 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Transactions;
 using Xunit;
 
 namespace System.Threading.Tests
 {
     public static class ThreadingAclExtensionsTests
     {
+        // Dec: 34603010
+        // Hex: 0x2100002
+        // As predefined here: https://source.dot.net/#System.Private.CoreLib/shared/System/Threading/EventWaitHandle.Windows.cs
+        private const int BasicAccessRights = Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE;
+
         #region Test methods
 
         #region Existence tests
@@ -110,33 +113,25 @@ namespace System.Threading.Tests
         public static void EventWaitHandle_Create_BasicSecurity()
         {
             var security = GetBasicEventWaitHandleSecurity();
-            VerifyEventWaitHandle(security);
+            CreateAndVerifyEventWaitHandle(security);
         }
 
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [InlineData(true,  EventResetMode.AutoReset,   AccessControlType.Allow, Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE)]
-        [InlineData(false, EventResetMode.AutoReset,   AccessControlType.Allow, Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE)]
-        [InlineData(true,  EventResetMode.ManualReset, AccessControlType.Allow, Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE)]
-        [InlineData(false, EventResetMode.ManualReset, AccessControlType.Allow, Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE)]
-        [InlineData(true,  EventResetMode.AutoReset,   AccessControlType.Deny,  Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE)]
-        [InlineData(false, EventResetMode.AutoReset,   AccessControlType.Deny,  Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE)]
-        [InlineData(true,  EventResetMode.ManualReset, AccessControlType.Deny,  Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE)]
-        [InlineData(false, EventResetMode.ManualReset, AccessControlType.Deny,  Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE)]
+        [InlineData(true,  EventResetMode.AutoReset,   AccessControlType.Allow, BasicAccessRights)]
+        [InlineData(false, EventResetMode.AutoReset,   AccessControlType.Allow, BasicAccessRights)]
+        [InlineData(true,  EventResetMode.ManualReset, AccessControlType.Allow, BasicAccessRights)]
+        [InlineData(false, EventResetMode.ManualReset, AccessControlType.Allow, BasicAccessRights)]
+        [InlineData(true,  EventResetMode.AutoReset,   AccessControlType.Deny,  BasicAccessRights)]
+        [InlineData(false, EventResetMode.AutoReset,   AccessControlType.Deny,  BasicAccessRights)]
+        [InlineData(true,  EventResetMode.ManualReset, AccessControlType.Deny,  BasicAccessRights)]
+        [InlineData(false, EventResetMode.ManualReset, AccessControlType.Deny,  BasicAccessRights)]
+
         public static void EventWaitHandle_Create_SpecificParameters(bool initialState, EventResetMode mode, AccessControlType accessControl, int rights)
         {
             var security = GetEventWaitHandleSecurity(WellKnownSidType.BuiltinUsersSid, (EventWaitHandleRights)rights, accessControl);
-            if (accessControl == AccessControlType.Deny)
-            {
-                Assert.Throws<UnauthorizedAccessException>(() =>
-                {
-                    VerifyEventWaitHandle(initialState, mode, "MyName", security);
-                });
-            }
-            else
-            {
-                VerifyEventWaitHandle(initialState, mode, "MyName", security);
-            }
+            CreateAndVerifyEventWaitHandle(initialState, mode, security);
+               
         }
 
         #endregion
@@ -145,11 +140,16 @@ namespace System.Threading.Tests
 
         #region Helper methods
 
+        private static string GetRandomNameMaxLength()
+        {
+            return Guid.NewGuid().ToString("N");
+        }
+
         private static EventWaitHandleSecurity GetBasicEventWaitHandleSecurity()
         {
             return GetEventWaitHandleSecurity(
                 WellKnownSidType.BuiltinUsersSid,
-                EventWaitHandleRights.Synchronize | EventWaitHandleRights.Modify | EventWaitHandleRights.FullControl,
+                (EventWaitHandleRights)BasicAccessRights,
                 AccessControlType.Allow);
         }
 
@@ -162,16 +162,20 @@ namespace System.Threading.Tests
             return security;
         }
 
-        private static void VerifyEventWaitHandle(EventWaitHandleSecurity security)
+        private static void CreateAndVerifyEventWaitHandle(EventWaitHandleSecurity security)
         {
-            VerifyEventWaitHandle(initialState: true, EventResetMode.AutoReset, "DefaultEventName", security);
+
+            CreateAndVerifyEventWaitHandle(initialState: true, EventResetMode.AutoReset, security);
         }
 
-        private static void VerifyEventWaitHandle(bool initialState, EventResetMode mode, string name, EventWaitHandleSecurity expectedSecurity)
+        private static void CreateAndVerifyEventWaitHandle(bool initialState, EventResetMode mode, EventWaitHandleSecurity expectedSecurity)
         {
+            string name = GetRandomNameMaxLength();
+
             using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState, mode, name, out bool createdNew, expectedSecurity);
 
             Assert.NotNull(eventHandle);
+            Assert.True(createdNew);
 
             EventWaitHandleSecurity actualSecurity = eventHandle.GetAccessControl();
 
