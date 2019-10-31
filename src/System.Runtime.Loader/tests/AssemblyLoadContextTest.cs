@@ -55,7 +55,7 @@ namespace System.Runtime.Loader.Tests
         [Fact]
         public static void LoadFromNativeImagePath_PartiallyQualifiedPath_ThrowsArgumentException()
         {
-            string path = @"foo\bar.dll";
+            string path = Path.Combine("foo", "bar.dll");
             ArgumentException ex = AssertExtensions.Throws<ArgumentException>("nativeImagePath", () => (new AssemblyLoadContext("alc")).LoadFromNativeImagePath(path, null));
             Assert.Contains(path, ex.Message);
         }
