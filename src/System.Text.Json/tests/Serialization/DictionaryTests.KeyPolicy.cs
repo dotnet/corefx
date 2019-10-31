@@ -109,18 +109,15 @@ namespace System.Text.Json.Serialization.Tests
             };
 
             const string Json = @"[{""Key1"":null,""Key2"":null}]";
-            const string JsonReversed = @"[{""Key2"":null,""Key1"":null}]";
-
             const string JsonCamel = @"[{""key1"":null,""key2"":null}]";
-            const string JsonCamelReversed = @"[{""key2"":null,""key1"":null}]";
 
             // Without key policy option, serialize keys as they are.
             string json = JsonSerializer.Serialize<object>(obj);
-            Assert.True(Json == json || JsonReversed == json);
+            Assert.Equal(Json, json);
 
             // With key policy option, serialize keys with camel casing.
             json = JsonSerializer.Serialize<object>(obj, options);
-            Assert.True(JsonCamel == json || JsonCamelReversed == json);
+            Assert.Equal(JsonCamel, json);
         }
 
         [Fact]
@@ -137,18 +134,15 @@ namespace System.Text.Json.Serialization.Tests
             };
 
             const string Json = @"[{""Key1"":null,""Key2"":null}]";
-            const string JsonReversed = @"[{""Key2"":null,""Key1"":null}]";
-
             const string JsonCamel = @"[{""key1"":null,""key2"":null}]";
-            const string JsonCamelReversed = @"[{""key2"":null,""key1"":null}]";
 
             // Without key policy option, serialize keys as they are.
             string json = JsonSerializer.Serialize<object>(obj);
-            Assert.True(Json == json || JsonReversed == json);
+            Assert.Equal(Json, json);
 
             // With key policy option, serialize keys with camel casing.
             json = JsonSerializer.Serialize<object>(obj, options);
-            Assert.True(JsonCamel == json || JsonCamelReversed == json);
+            Assert.Equal(JsonCamel, json);
         }
 
         [Fact]
