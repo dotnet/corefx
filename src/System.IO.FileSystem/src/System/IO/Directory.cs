@@ -277,7 +277,7 @@ namespace System.IO
             bool sameDirectoryDifferentCase = directoriesAreCaseVariants
                                                 && string.Equals(destDirNameFromFullPath, sourceDirNameFromFullPath, fileSystemSensitivity);
 
-            // If the destination directories are the exact same name,
+            // If the destination directories are the exact same name
             if (!sameDirectoryDifferentCase
                 && string.Equals(sourcePath, destPath, fileSystemSensitivity))
                 throw new IOException(SR.IO_SourceDestMustBeDifferent);
