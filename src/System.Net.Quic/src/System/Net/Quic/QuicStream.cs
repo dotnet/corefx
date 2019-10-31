@@ -25,24 +25,24 @@ namespace System.Net.Quic
 
         // Constructor for outbound streams
         // !!! TEMPORARY FOR QUIC MOCK SUPPORT
-        internal QuicStream(QuicConnection connection, long streamId, bool canRead)
+        internal QuicStream(QuicConnection connection, long streamId, bool bidirectional)
         {
             _mock = true;
             _connection = connection;
             _streamId = streamId;
-            _canRead = canRead;
+            _canRead = bidirectional;
             _canWrite = true;
         }
 
         // Constructor for inbound streams
         // !!! TEMPORARY FOR QUIC MOCK SUPPORT
-        internal QuicStream(Socket socket, long streamId, bool canWrite)
+        internal QuicStream(Socket socket, long streamId, bool bidirectional)
         {
             _mock = true;
             _socket = socket;
             _streamId = streamId;
             _canRead = true;
-            _canWrite = canWrite;
+            _canWrite = bidirectional;
         }
 
         public override bool CanSeek => false;

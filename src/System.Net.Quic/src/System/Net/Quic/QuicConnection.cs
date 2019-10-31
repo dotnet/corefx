@@ -155,7 +155,7 @@ namespace System.Net.Quic
                     _nextOutboundUnidirectionalStream += 4;
                 }
 
-                return new QuicStream(this, streamId, false);
+                return new QuicStream(this, streamId, bidirectional: false);
             }
             else
             {
@@ -178,7 +178,7 @@ namespace System.Net.Quic
                     _nextOutboundBidirectionalStream += 4;
                 }
 
-                return new QuicStream(this, streamId, true);
+                return new QuicStream(this, streamId, bidirectional: true);
             }
             else
             {
@@ -231,7 +231,7 @@ namespace System.Net.Quic
                 }
 
                 bool bidirectional = ((streamId & 0b10) == 0);
-                return new QuicStream(socket, streamId, canWrite: bidirectional);
+                return new QuicStream(socket, streamId, bidirectional: bidirectional);
             }
             else
             {
