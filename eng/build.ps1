@@ -14,6 +14,8 @@ Param(
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
+. $PSScriptRoot\common\tools.ps1
+
 function Get-Help() {
   Write-Host "Common settings:"
   Write-Host "  -framework              Build framework: netcoreapp, netfx (short: -f)"
@@ -71,6 +73,9 @@ if ($vs) {
 
   # This tells .NET Core to use the same dotnet.exe that build scripts use
   $env:DOTNET_ROOT="$PSScriptRoot\..\artifacts\bin\testhost\netcoreapp-Windows_NT-$configuration-$archTestHost";
+
+  # This tells MSBuild to load the SDK from the directory of the bootstrapped SDK
+  $env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR=InitializeDotNetCli -install:$false
 
   # This tells .NET Core not to go looking for .NET Core in other places
   $env:DOTNET_MULTILEVEL_LOOKUP=0;
