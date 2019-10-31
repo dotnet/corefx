@@ -14,7 +14,7 @@ namespace System.Net.Quic
     public sealed class QuicStream : Stream
     {
         private bool _disposed = false;
-        private int _streamId = -1;     // -1 indicates stream ID has not yet been assigned
+        private readonly long _streamId;
         private bool _canRead;
         private bool _canWrite;
         private QuicConnection _connection;
@@ -25,24 +25,24 @@ namespace System.Net.Quic
 
         // Constructor for outbound streams
         // !!! TEMPORARY FOR QUIC MOCK SUPPORT
-        internal QuicStream(QuicConnection connection, bool canRead)
+        internal QuicStream(QuicConnection connection, long streamId, bool bidirectional)
         {
             _mock = true;
             _connection = connection;
-            _streamId = -1;
-            _canRead = canRead;
+            _streamId = streamId;
+            _canRead = bidirectional;
             _canWrite = true;
         }
 
         // Constructor for inbound streams
         // !!! TEMPORARY FOR QUIC MOCK SUPPORT
-        internal QuicStream(Socket socket, int streamId, bool canWrite)
+        internal QuicStream(Socket socket, long streamId, bool bidirectional)
         {
             _mock = true;
             _socket = socket;
             _streamId = streamId;
             _canRead = true;
-            _canWrite = canWrite;
+            _canWrite = bidirectional;
         }
 
         public override bool CanSeek => false;
@@ -105,57 +105,21 @@ namespace System.Net.Quic
             return WriteAsync(new ReadOnlyMemory<byte>(buffer, offset, count), cancellationToken).AsTask();
         }
 
-        public async ValueTask ConnectAsync(CancellationToken cancellationToken = default)
+        private async ValueTask ConnectAsync(CancellationToken cancellationToken = default)
         {
-            CheckDisposed();
+            Debug.Assert(_mock);
+            Debug.Assert(_connection != null, "Stream not connected but no connection???");
 
-            if (_mock)
-            {
-                if (Connected)
-                {
-                    // TODO: Exception text
-                    throw new InvalidOperationException("Already connected");
-                }
+            _socket = await _connection.CreateOutboundMockStreamAsync(_streamId).ConfigureAwait(false);
 
-                Debug.Assert(_connection != null, "Stream not connected but no connection???");
-
-                (Socket socket, int streamId) = await _connection.CreateOutboundMockStreamAsync(_canRead).ConfigureAwait(false);
-                _socket = socket;
-                _streamId = streamId;
-
-                // Don't need to hold on to the connection any longer.
-                _connection = null;
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            // Don't need to hold on to the connection any longer.
+            _connection = null;
         }
 
         /// <summary>
-        /// Indicates whether the stream has been connected.
+        /// QUIC stream ID.
         /// </summary>
-        public bool Connected
-        {
-            get
-            {
-                CheckDisposed();
-
-                if (_mock)
-                {
-                    return _socket != null;
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-            }
-        }
-
-        /// <summary>
-        /// QUIC stream ID. Will be -1 if not connected.
-        /// </summary>
-        public int StreamId
+        public long StreamId
         {
             get
             {
@@ -196,7 +160,7 @@ namespace System.Net.Quic
 
             if (_mock)
             {
-                if (!Connected)
+                if (_socket == null)
                 {
                     await ConnectAsync(cancellationToken).ConfigureAwait(false);
                 }
@@ -241,7 +205,7 @@ namespace System.Net.Quic
 
             if (_mock)
             {
-                if (!Connected)
+                if (_socket == null)
                 {
                     await ConnectAsync(cancellationToken).ConfigureAwait(false);
                 }
@@ -301,7 +265,8 @@ namespace System.Net.Quic
 
                 if (_mock)
                 {
-                    _socket.Dispose();
+                    _socket?.Dispose();
+                    _socket = null;
                 }
             }
 

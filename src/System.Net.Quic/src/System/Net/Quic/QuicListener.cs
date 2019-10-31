@@ -126,7 +126,8 @@ namespace System.Net.Quic
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
+                    _tcpListener?.Stop();
+                    _tcpListener = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

@@ -43,9 +43,7 @@ namespace System.Net.Quic
         public override void Flush() => throw null;
         public override int Read(byte[] buffer, int offset, int count) => throw null;
         public override void Write(byte[] buffer, int offset, int count) => throw null;
-        public System.Threading.Tasks.ValueTask ConnectAsync(System.Threading.CancellationToken cancellationToken = default) => throw null;
-        public bool Connected => throw null;
-        public int StreamId => throw null;
+        public long StreamId => throw null;
         public void ShutdownRead() => throw null;
         public void ShutdownWrite() => throw null;
     }

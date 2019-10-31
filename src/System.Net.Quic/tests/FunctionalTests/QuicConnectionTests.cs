@@ -52,10 +52,8 @@ namespace System.Net.Quic.Tests
             }
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task TestStreams(bool explicitConnect)
+        [Fact]
+        public async Task TestStreams()
         {
             using (QuicListener listener = new QuicListener(new IPEndPoint(IPAddress.Loopback, 0), sslServerAuthenticationOptions: null, mock: true))
             {
@@ -76,70 +74,44 @@ namespace System.Net.Quic.Tests
                     Assert.Equal(listenEndPoint, clientConnection.RemoteEndPoint);
                     Assert.Equal(clientConnection.LocalEndPoint, serverConnection.RemoteEndPoint);
 
-                    await CreateAndTestBidirectionalStream(clientConnection, serverConnection, explicitConnect);
-                    await CreateAndTestBidirectionalStream(serverConnection, clientConnection, explicitConnect);
-                    await CreateAndTestUnidirectionalStream(serverConnection, clientConnection, explicitConnect);
-                    await CreateAndTestUnidirectionalStream(clientConnection, serverConnection, explicitConnect);
+                    await CreateAndTestBidirectionalStream(clientConnection, serverConnection);
+                    await CreateAndTestBidirectionalStream(serverConnection, clientConnection);
+                    await CreateAndTestUnidirectionalStream(serverConnection, clientConnection);
+                    await CreateAndTestUnidirectionalStream(clientConnection, serverConnection);
                 }
             }
         }
 
-        private static async Task CreateAndTestBidirectionalStream(QuicConnection c1, QuicConnection c2, bool explicitConnect)
+        private static async Task CreateAndTestBidirectionalStream(QuicConnection c1, QuicConnection c2)
         {
             using (QuicStream s1 = c1.CreateBidirectionalStream())
             {
                 Assert.True(s1.CanRead);
                 Assert.True(s1.CanWrite);
-                Assert.False(s1.Connected);
-                Assert.Equal(s1.StreamId, -1);
 
-                if (explicitConnect)
+                ValueTask writeTask = s1.WriteAsync(s_data);
+                using (QuicStream s2 = await c2.AcceptStreamAsync())
                 {
-                    await s1.ConnectAsync();
-                    using (QuicStream s2 = await c2.AcceptStreamAsync())
-                    {
-                        await TestBidirectionalStream(s1, s2);
-                    }
-                }
-                else
-                {
-                    ValueTask writeTask = s1.WriteAsync(s_data);
-                    using (QuicStream s2 = await c2.AcceptStreamAsync())
-                    {
-                        await ReceiveDataAsync(s_data, s2);
-                        await writeTask;
-                        await TestBidirectionalStream(s1, s2);
-                    }
+                    await ReceiveDataAsync(s_data, s2);
+                    await writeTask;
+                    await TestBidirectionalStream(s1, s2);
                 }
             }
         }
 
-        private static async Task CreateAndTestUnidirectionalStream(QuicConnection c1, QuicConnection c2, bool explicitConnect)
+        private static async Task CreateAndTestUnidirectionalStream(QuicConnection c1, QuicConnection c2)
         {
             using (QuicStream s1 = c1.CreateUnidirectionalStream())
             {
                 Assert.False(s1.CanRead);
                 Assert.True(s1.CanWrite);
-                Assert.False(s1.Connected);
-                Assert.Equal(s1.StreamId, -1);
 
-                if (explicitConnect)
+                ValueTask writeTask = s1.WriteAsync(s_data);
+                using (QuicStream s2 = await c2.AcceptStreamAsync())
                 {
-                    await s1.ConnectAsync();
-                    using (QuicStream s2 = await c2.AcceptStreamAsync())
-                    {
-                        await TestUnidirectionalStream(s1, s2);
-                    }
-                }
-                else
-                {
-                    ValueTask writeTask = s1.WriteAsync(s_data);
-                    using (QuicStream s2 = await c2.AcceptStreamAsync())
-                    {
-                        await ReceiveDataAsync(s_data, s2);
-                        await writeTask;
-                        await TestUnidirectionalStream(s1, s2);
-                    }
+                    await ReceiveDataAsync(s_data, s2);
+                    await writeTask;
+                    await TestUnidirectionalStream(s1, s2);
                 }
             }
         }
@@ -150,8 +122,6 @@ namespace System.Net.Quic.Tests
             Assert.True(s1.CanWrite);
             Assert.True(s2.CanRead);
             Assert.True(s2.CanWrite);
-            Assert.True(s1.Connected);
-            Assert.True(s2.Connected);
             Assert.Equal(s1.StreamId, s2.StreamId);
 
             await SendAndReceiveDataAsync(s_data, s1, s2);
@@ -169,8 +139,6 @@ namespace System.Net.Quic.Tests
             Assert.True(s1.CanWrite);
             Assert.True(s2.CanRead);
             Assert.False(s2.CanWrite);
-            Assert.True(s1.Connected);
-            Assert.True(s2.Connected);
             Assert.Equal(s1.StreamId, s2.StreamId);
 
             await SendAndReceiveDataAsync(s_data, s1, s2);
