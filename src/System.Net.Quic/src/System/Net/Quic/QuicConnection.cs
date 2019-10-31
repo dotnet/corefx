@@ -24,8 +24,8 @@ namespace System.Net.Quic
         private Socket _socket = null;
         private IPEndPoint _peerListenEndPoint = null;
         private TcpListener _inboundListener = null;
-        private int _nextOutboundBidirectionalStream;
-        private int _nextOutboundUnidirectionalStream;
+        private long _nextOutboundBidirectionalStream;
+        private long _nextOutboundUnidirectionalStream;
 
         /// <summary>
         /// Create an outbound QUIC connection.
@@ -148,7 +148,7 @@ namespace System.Net.Quic
         {
             if (_mock)
             {
-                int streamId;
+                long streamId;
                 lock (_syncObject)
                 {
                     streamId = _nextOutboundUnidirectionalStream;
@@ -171,7 +171,7 @@ namespace System.Net.Quic
         {
             if (_mock)
             {
-                int streamId;
+                long streamId;
                 lock (_syncObject)
                 {
                     streamId = _nextOutboundBidirectionalStream;
