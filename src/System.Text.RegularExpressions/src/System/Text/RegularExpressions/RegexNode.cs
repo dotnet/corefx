@@ -286,20 +286,22 @@ namespace System.Text.RegularExpressions
         {
             // Extract empty-set, one and not-one case as special
 
-            if (RegexCharClass.IsEmpty(Str!))
+            Debug.Assert(Str != null);
+
+            if (RegexCharClass.IsEmpty(Str))
             {
                 NType = Nothing;
                 Str = null;
             }
-            else if (RegexCharClass.IsSingleton(Str!))
+            else if (RegexCharClass.IsSingleton(Str))
             {
-                Ch = RegexCharClass.SingletonChar(Str!);
+                Ch = RegexCharClass.SingletonChar(Str);
                 Str = null;
                 NType += (One - Set);
             }
-            else if (RegexCharClass.IsSingletonInverse(Str!))
+            else if (RegexCharClass.IsSingletonInverse(Str))
             {
-                Ch = RegexCharClass.SingletonChar(Str!);
+                Ch = RegexCharClass.SingletonChar(Str);
                 Str = null;
                 NType += (Notone - Set);
             }
