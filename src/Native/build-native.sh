@@ -153,10 +153,10 @@ build_native()
     # Regenerate the CMake solution
     if [ "$__GccBuild" = 0 ]; then
         echo "Invoking \"$__nativeroot/gen-buildsys-clang.sh\" \"$__rootRepo\" \"$__nativeroot\" \"$__ClangMajorVersion\" \"$__ClangMinorVersion\" \"$__BuildArch\" \"$__CMakeArgs\" \"$__CMakeExtraArgs\""
-        "$__nativeroot/gen-buildsys-clang.sh" "$__nativeroot" "$__ClangMajorVersion" "$__ClangMinorVersion" "$__BuildArch" "$__CMakeArgs" "$__CMakeExtraArgs"
+        "$__nativeroot/gen-buildsys-clang.sh" \"$__rootRepo\" "$__nativeroot" "$__ClangMajorVersion" "$__ClangMinorVersion" "$__BuildArch" "$__CMakeArgs" "$__CMakeExtraArgs"
     else
         echo "Invoking \"$__nativeroot/gen-buildsys-gcc.sh\" \"$__rootRepo\" \"$__nativeroot\" \"$__GccMajorVersion\" \"$__GccMinorVersion\" \"$__BuildArch\" \"$__CMakeArgs\" \"$__CMakeExtraArgs\""
-        "$__nativeroot/gen-buildsys-gcc.sh" "$__nativeroot" "$__GccMajorVersion" "$__GccMinorVersion" "$__BuildArch" "$__CMakeArgs" "$__CMakeExtraArgs"
+        "$__nativeroot/gen-buildsys-gcc.sh" \"$__rootRepo\" "$__nativeroot" "$__GccMajorVersion" "$__GccMinorVersion" "$__BuildArch" "$__CMakeArgs" "$__CMakeExtraArgs"
     fi
 
     # Check that the makefiles were created.
