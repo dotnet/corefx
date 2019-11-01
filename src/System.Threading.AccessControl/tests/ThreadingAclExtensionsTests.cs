@@ -67,18 +67,6 @@ namespace System.Threading.Tests
             });
         }
 
-        [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [InlineData(null)]
-        [InlineData("")]
-        public static void EventWaitHandle_Create_InvalidName(string name)
-        {
-            AssertExtensions.Throws<ArgumentException>("name", () =>
-            {
-                using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, name, out bool createdNew, GetBasicEventWaitHandleSecurity());
-            });
-        }
-
         [Fact]
         public static void EventWaitHandle_Create_BeyondMaxLengthName()
         {
@@ -113,12 +101,24 @@ namespace System.Threading.Tests
 
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [InlineData(true,  EventResetMode.AutoReset,   AccessControlType.Allow, EventWaitHandleRights.FullControl)]
-        [InlineData(true,  EventResetMode.ManualReset, AccessControlType.Allow, EventWaitHandleRights.FullControl)]
-        [InlineData(true,  EventResetMode.AutoReset,   AccessControlType.Deny,  EventWaitHandleRights.FullControl)]
-        [InlineData(true,  EventResetMode.ManualReset, AccessControlType.Deny,  EventWaitHandleRights.FullControl)]
+        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.FullControl, AccessControlType.Allow)]
+        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.FullControl, AccessControlType.Deny)]
+        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
+        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
+        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Modify,      AccessControlType.Allow)]
+        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Modify,      AccessControlType.Deny)]
+        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize,      AccessControlType.Allow)]
+        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize,      AccessControlType.Deny)]
+        [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.FullControl, AccessControlType.Allow)]
+        [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.FullControl, AccessControlType.Deny)]
+        [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
+        [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
+        [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Modify,      AccessControlType.Allow)]
+        [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Modify,      AccessControlType.Deny)]
+        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
+        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
 
-        public static void EventWaitHandle_Create_SpecificParameters(bool initialState, EventResetMode mode, AccessControlType accessControl, EventWaitHandleRights rights)
+        public static void EventWaitHandle_Create_SpecificParameters(bool initialState, EventResetMode mode, EventWaitHandleRights rights, AccessControlType accessControl)
         {
             var security = GetEventWaitHandleSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
             CreateAndVerifyEventWaitHandle(initialState, mode, security);
