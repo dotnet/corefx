@@ -12,12 +12,7 @@ namespace System.Threading.Tests
 {
     public static class ThreadingAclExtensionsTests
     {
-        // Dec: 34603010
-        // Hex: 0x2100002
-        // As predefined by the different wait handles:
-        // - https://source.dot.net/#System.Private.CoreLib/shared/System/Threading/EventWaitHandle.Windows.cs
-        // - https://source.dot.net/#System.Private.CoreLib/shared/System/Threading/Mutex.Windows.cs
-        private const int BasicAccessRights = Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE;
+        private const MutexRights BasicMutexRights = MutexRights.FullControl | MutexRights.Synchronize | MutexRights.Modify;
 
         #region Test methods
 
@@ -68,7 +63,7 @@ namespace System.Threading.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void Mutex_Create_NullSecurity()
         {
-            AssertExtensions.Throws<ArgumentNullException>("eventSecurity", () =>
+            AssertExtensions.Throws<ArgumentNullException>("mutexSecurity", () =>
             {
                 using Mutex eventHandle = MutexAcl.Create(initiallyOwned: true, "Test", out bool createdNew, mutexSecurity: null);
             });
@@ -106,14 +101,14 @@ namespace System.Threading.Tests
 
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [InlineData(true,  AccessControlType.Allow, BasicAccessRights)]
-        [InlineData(false, AccessControlType.Allow, BasicAccessRights)]
-        [InlineData(true,  AccessControlType.Deny,  BasicAccessRights)]
-        [InlineData(false, AccessControlType.Deny,  BasicAccessRights)]
+        [InlineData(true,  AccessControlType.Allow, BasicMutexRights)]
+        [InlineData(false, AccessControlType.Allow, BasicMutexRights)]
+        [InlineData(true,  AccessControlType.Deny,  BasicMutexRights)]
+        [InlineData(false, AccessControlType.Deny,  BasicMutexRights)]
 
-        public static void Mutex_Create_SpecificParameters(bool initiallyOwned, AccessControlType accessControl, int rights)
+        public static void Mutex_Create_SpecificParameters(bool initiallyOwned, AccessControlType accessControl, MutexRights rights)
         {
-            var security = GetMutexSecurity(WellKnownSidType.BuiltinUsersSid, (MutexRights)rights, accessControl);
+            var security = GetMutexSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
             CreateAndVerifyMutex(initiallyOwned, security);
                
         }
@@ -133,7 +128,7 @@ namespace System.Threading.Tests
         {
             return GetMutexSecurity(
                 WellKnownSidType.BuiltinUsersSid,
-                (MutexRights)BasicAccessRights,
+                BasicMutexRights,
                 AccessControlType.Allow);
         }
 

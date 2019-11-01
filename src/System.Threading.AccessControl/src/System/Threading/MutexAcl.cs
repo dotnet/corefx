@@ -29,6 +29,10 @@ namespace System.Threading
             {
                 throw new ArgumentException(SR.Format(SR.Argument_CannotBeNullOrEmpty), nameof(name));
             }
+            if (name.Length > Interop.Kernel32.MAX_PATH)
+            {
+                throw new ArgumentException(SR.Format(SR.Argument_WaitHandleNameTooLong, name), nameof(name));
+            }
             if (mutexSecurity == null)
             {
                 throw new ArgumentNullException(nameof(mutexSecurity));

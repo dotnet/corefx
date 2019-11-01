@@ -21,20 +21,18 @@
     <Compile Include="System\Security\AccessControl\MutexSecurity.cs" />
     <Compile Include="System\Security\AccessControl\EventWaitHandleSecurity.cs" />
     <Compile Include="System\Security\AccessControl\SemaphoreSecurity.cs" />
+    <Compile Include="System\Threading\MutexAcl.cs" />
     <Compile Include="System\Threading\ThreadingAclExtensions.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
-    <Compile Include="System\Threading\EventWaitHandleAcl.net46.cs" />
+    <Compile Include="System\Threading\MutexAcl.net46.cs" />
     <Compile Include="System\Threading\ThreadingAclExtensions.net46.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <Reference Include="System.Memory" />
     <Reference Include="System.Security.AccessControl" />
     <Reference Include="System.Security.Principal.Windows" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="System\Threading\MutexAcl.cs" />
   </ItemGroup>
 </Project>
