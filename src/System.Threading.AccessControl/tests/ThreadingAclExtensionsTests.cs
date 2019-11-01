@@ -62,19 +62,14 @@ namespace System.Threading.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void EventWaitHandle_Create_NullSecurity()
         {
-            AssertExtensions.Throws<ArgumentNullException>("eventSecurity", () =>
-            {
-                using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, "Test", out bool createdNew, eventSecurity: null);
-            });
+            CreateAndVerifyEventWaitHandle(null);
         }
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void EventWaitHandle_Create_NullName()
         {
-             using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, null, out bool createdNew, GetBasicEventWaitHandleSecurity());
-             Assert.NotNull(eventHandle);
-             Assert.True(createdNew);
+            CreateAndVerifyEventWaitHandle(true, EventResetMode.AutoReset, null, GetBasicEventWaitHandleSecurity());
         }
 
         [Fact]
@@ -94,9 +89,7 @@ namespace System.Threading.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void EventWaitHandle_Create_EmptyName()
         {
-            using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, string.Empty, out bool createdNew, GetBasicEventWaitHandleSecurity());
-            Assert.NotNull(eventHandle);
-            Assert.True(createdNew);
+            CreateAndVerifyEventWaitHandle(true, EventResetMode.AutoReset, string.Empty, GetBasicEventWaitHandleSecurity());
         }
 
         [Fact]
@@ -134,9 +127,7 @@ namespace System.Threading.Tests
             Assert.Throws<DirectoryNotFoundException>(() =>
             {
                 string prefixedName = @"GLOBAL\" + GetRandomName();
-                using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, prefixedName, out bool createdNew, GetBasicEventWaitHandleSecurity());
-                Assert.NotNull(eventHandle);
-                Assert.True(createdNew);
+                CreateAndVerifyEventWaitHandle(true, EventResetMode.AutoReset, prefixedName, GetBasicEventWaitHandleSecurity());
             });
         }
 
@@ -247,20 +238,25 @@ namespace System.Threading.Tests
 
         private static void CreateAndVerifyEventWaitHandle(EventWaitHandleSecurity security)
         {
-            CreateAndVerifyEventWaitHandle(initialState: true, EventResetMode.AutoReset, security);
+            CreateAndVerifyEventWaitHandle(initialState: true, EventResetMode.AutoReset, GetRandomName(), security);
         }
-
         private static void CreateAndVerifyEventWaitHandle(bool initialState, EventResetMode mode, EventWaitHandleSecurity expectedSecurity)
         {
-            string name = GetRandomName();
+            CreateAndVerifyEventWaitHandle(initialState: true, EventResetMode.AutoReset, GetRandomName(), expectedSecurity);
+        }
+
+        private static void CreateAndVerifyEventWaitHandle(bool initialState, EventResetMode mode, string name, EventWaitHandleSecurity expectedSecurity)
+        {
 
             using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState, mode, name, out bool createdNew, expectedSecurity);
             Assert.NotNull(eventHandle);
             Assert.True(createdNew);
 
-            EventWaitHandleSecurity actualSecurity = eventHandle.GetAccessControl();
-
-            VerifyEventWaitHandleSecurity(expectedSecurity, actualSecurity);
+            if (expectedSecurity != null)
+            {
+                EventWaitHandleSecurity actualSecurity = eventHandle.GetAccessControl();
+                VerifyEventWaitHandleSecurity(expectedSecurity, actualSecurity);
+            }
         }
 
         private static void VerifyEventWaitHandleSecurity(EventWaitHandleSecurity expectedSecurity, EventWaitHandleSecurity actualSecurity)

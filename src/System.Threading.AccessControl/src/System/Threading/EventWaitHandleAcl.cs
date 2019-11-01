@@ -33,7 +33,7 @@ namespace System.Threading
         {
             if (eventSecurity == null)
             {
-                throw new ArgumentNullException(nameof(eventSecurity));
+                return new EventWaitHandle(initialState, mode, name, out createdNew);
             }
 
             if (mode != EventResetMode.AutoReset && mode != EventResetMode.ManualReset)
@@ -44,7 +44,7 @@ namespace System.Threading
             uint eventFlags = initialState ? Interop.Kernel32.CREATE_EVENT_INITIAL_SET : 0;
             if (mode == EventResetMode.ManualReset)
             {
-                eventFlags |= (uint)Interop.Kernel32.CREATE_EVENT_MANUAL_RESET;
+                eventFlags |= Interop.Kernel32.CREATE_EVENT_MANUAL_RESET;
             }
 
             fixed (byte* pSecurityDescriptor = eventSecurity.GetSecurityDescriptorBinaryForm())

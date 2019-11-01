@@ -15,16 +15,6 @@ namespace System.Threading
             out bool createdNew,
             EventWaitHandleSecurity eventSecurity)
         {
-            if (eventSecurity == null)
-            {
-                throw new ArgumentNullException(nameof(eventSecurity));
-            }
-
-            if (mode != EventResetMode.AutoReset && mode != EventResetMode.ManualReset)
-            {
-                throw new ArgumentOutOfRangeException(nameof(mode), SR.Format(SR.ArgumentOutOfRange_Enum));
-            }
-
             return new EventWaitHandle(initialState, mode, name, out createdNew, eventSecurity);
         }
     }
