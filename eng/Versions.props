@@ -64,7 +64,7 @@
     <NewtonsoftJsonVersion>12.0.1</NewtonsoftJsonVersion>
     <MicrosoftDotNetPlatformAbstractionsVersion>3.0.0-preview6-27804-01</MicrosoftDotNetPlatformAbstractionsVersion>
     <!-- Test data -->
-    <SystemIOCompressionTestDataPackageVersion>1.0.16</SystemIOCompressionTestDataPackageVersion>
+    <SystemIOCompressionTestDataVersion>1.0.16</SystemIOCompressionTestDataVersion>
     <SystemIOPackagingTestDataVersion>1.0.4</SystemIOPackagingTestDataVersion>
     <SystemSecurityCryptographyX509CertificatesTestDataVersion>1.0.7</SystemSecurityCryptographyX509CertificatesTestDataVersion>
     <SystemNetTestDataVersion>1.0.6</SystemNetTestDataVersion>
