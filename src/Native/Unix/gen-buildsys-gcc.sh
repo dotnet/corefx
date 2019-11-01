@@ -113,7 +113,7 @@ if ! gcc_objcopy="$(locate_gcc_exec objcopy)"; then { echo "Unable to locate gcc
 
 if ! gcc_ranlib="$(locate_gcc_exec ranlib)"; then { echo "Unable to locate gcc-ranlib"; exit 1; } fi
 
-cmake_extra_defines="-DCMAKE_REPO_ROOT=\"$repo_root\""
+cmake_extra_defines=
 if [ -n "$LLDB_LIB_DIR" ]; then
     cmake_extra_defines="$cmake_extra_defines -DWITH_LLDB_LIBS=$LLDB_LIB_DIR"
 fi

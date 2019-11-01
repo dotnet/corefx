@@ -45,7 +45,7 @@ else
 fi
 
 cmake_cmd=cmake
-cmake_extra_defines="-DCMAKE_BUILD_TYPE=$buildtype -DCMAKE_REPO_ROOT=\"$repo_root\""
+cmake_extra_defines="-DCMAKE_BUILD_TYPE=$buildtype"
 if [[ -n "$CROSSCOMPILE" ]]; then
     if ! [[ -n "$ROOTFS_DIR" ]]; then
         echo "ROOTFS_DIR not set for crosscompile"
