@@ -736,7 +736,9 @@ namespace System.Security.Cryptography
                 _outputBuffer = new byte[_outputBlockSize];
             }
             else
+            {
                 throw new ArgumentNullException(nameof(_transform));
+            }
         }
 
         private SemaphoreSlim AsyncActiveSemaphore
