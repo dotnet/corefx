@@ -320,14 +320,15 @@ internal static partial class Interop
                 return false;
             }
 
-            var results = default(ParsedStatus);
-            var statusFileContents = fileContents.AsSpan();
+            ParsedStatus results = default(ParsedStatus);
+            ReadOnlySpan<char> statusFileContents = fileContents.AsSpan();
+            int sliceLength = -1;
             while (!statusFileContents.IsEmpty)
             {
                 int startIndex = statusFileContents.IndexOf(':');
-                // Reached end of file
                 if (startIndex == -1)
                 {
+                    // Reached end of file
                     break;
                 }
 
@@ -337,19 +338,20 @@ internal static partial class Interop
                 if (endIndex == -1)
                 {
                     endIndex = statusFileContents.Length - 1;
+                    sliceLength = statusFileContents.Length;
+                }
+                else
+                {
+                    sliceLength = endIndex - 3;
                 }
 
                 ReadOnlySpan<char> value = default;
-                int sliceLength = endIndex  - 3;
-                bool valueParsed;
+                bool valueParsed = true;
 #if DEBUG
                 if (title.SequenceEqual("Pid".AsSpan()))
                 {
-                    value = statusFileContents.Slice(0, endIndex);
+                    value = statusFileContents.Slice(0, sliceLength);
                     valueParsed = int.TryParse(value, out results.Pid);
-                    Debug.Assert(valueParsed);
-                    statusFileContents = statusFileContents.Slice(endIndex + 1);
-                    continue;
                 }
 #endif
                 if (title.SequenceEqual("VmHWM".AsSpan()))
@@ -361,41 +363,36 @@ internal static partial class Interop
                 {
                     value = statusFileContents.Slice(0, sliceLength);
                     valueParsed = ulong.TryParse(value, out results.VmRSS);
-                    Debug.Assert(valueParsed);
                 }
                 else if (title.SequenceEqual("VmData".AsSpan()))
                 {
                     value = statusFileContents.Slice(0, sliceLength);
                     valueParsed = ulong.TryParse(value, out ulong vmData);
-                    Debug.Assert(valueParsed);
                     results.VmData += vmData;
                 }
                 else if (title.SequenceEqual("VmSwap".AsSpan()))
                 {
                     value = statusFileContents.Slice(0, sliceLength);
                     valueParsed = ulong.TryParse(value, out results.VmSwap);
-                    Debug.Assert(valueParsed);
                 }
                 else if (title.SequenceEqual("VmSize".AsSpan()))
                 {
                     value = statusFileContents.Slice(0, sliceLength);
                     valueParsed = ulong.TryParse(value, out results.VmSize);
-                    Debug.Assert(valueParsed);
                 }
                 else if (title.SequenceEqual("VmPeak".AsSpan()))
                 {
                     value = statusFileContents.Slice(0, sliceLength);
                     valueParsed = ulong.TryParse(value, out results.VmPeak);
-                    Debug.Assert(valueParsed);
                 }
                 else if (title.SequenceEqual("VmStk".AsSpan()))
                 {
                     value = statusFileContents.Slice(0, sliceLength);
                     valueParsed = ulong.TryParse(value, out ulong vmStack);
-                    Debug.Assert(valueParsed);
                     results.VmData += vmStack;
                 }
 
+                Debug.Assert(valueParsed);
                 statusFileContents = statusFileContents.Slice(endIndex + 1);
             }
 
@@ -403,8 +400,8 @@ internal static partial class Interop
             results.VmPeak *= 1024;
             results.VmSize *= 1024;
             results.VmSwap *= 1024;
-            results.VmRSS  *= 1024;
-            results.VmHWM  *= 1024;
+            results.VmRSS *= 1024;
+            results.VmHWM *= 1024;
             result = results;
             return true;
         }
