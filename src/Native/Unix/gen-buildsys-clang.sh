@@ -15,7 +15,7 @@ then
   exit 1
 fi
 
-#Set the root directory of the project
+#root directory of the project
 repo_root="$1"
 
 # Set up the environment to be used for building with clang.
