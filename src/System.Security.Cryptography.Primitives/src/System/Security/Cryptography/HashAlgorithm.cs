@@ -16,7 +16,7 @@ namespace System.Security.Cryptography
 
         protected HashAlgorithm() { }
 
-        public static HashAlgorithm Create() =>
+        public static HashAlgorithm? Create() =>
             CryptoConfigForwarder.CreateDefaultHashAlgorithm();
 
         public static HashAlgorithm? Create(string hashName) =>

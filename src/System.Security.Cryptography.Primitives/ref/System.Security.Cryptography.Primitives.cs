@@ -40,7 +40,9 @@ namespace System.Security.Cryptography
     {
         CBC = 1,
         ECB = 2,
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         OFB = 3,
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         CFB = 4,
         CTS = 5,
     }
@@ -107,7 +109,7 @@ namespace System.Security.Cryptography
         public byte[] ComputeHash(byte[] buffer) { throw null; }
         public byte[] ComputeHash(byte[] buffer, int offset, int count) { throw null; }
         public byte[] ComputeHash(System.IO.Stream inputStream) { throw null; }
-        public static System.Security.Cryptography.HashAlgorithm Create() { throw null; }
+        public static System.Security.Cryptography.HashAlgorithm? Create() { throw null; }
         public static System.Security.Cryptography.HashAlgorithm? Create(string hashName) { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
@@ -147,7 +149,7 @@ namespace System.Security.Cryptography
         [System.Diagnostics.CodeAnalysis.DisallowNullAttribute]
         public string? HashName { get { throw null; } set { } }
         public override byte[] Key { get { throw null; } set { } }
-        public static new System.Security.Cryptography.HMAC Create() { throw null; }
+        public static new System.Security.Cryptography.HMAC? Create() { throw null; }
         public static new System.Security.Cryptography.HMAC? Create(string algorithmName) { throw null; }
         protected override void Dispose(bool disposing) { }
         protected override void HashCore(byte[] rgb, int ib, int cb) { }

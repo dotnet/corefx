@@ -19,7 +19,7 @@ namespace System.Security.Cryptography
 
         protected HMAC() { }
 
-        public static new HMAC Create() =>
+        public static new HMAC? Create() =>
             throw new PlatformNotSupportedException(SR.Cryptography_DefaultAlgorithm_NotSupported);
 
         public static new HMAC? Create(string algorithmName) =>
