@@ -322,7 +322,10 @@ internal static partial class Interop
 
             ParsedStatus results = default(ParsedStatus);
             ReadOnlySpan<char> statusFileContents = fileContents.AsSpan();
-            int sliceLength = -1;
+            int unitSliceLength = -1;
+#if DEBUG
+            int nonUnitSliceLength = -1;
+#endif
             while (!statusFileContents.IsEmpty)
             {
                 int startIndex = statusFileContents.IndexOf(':');
@@ -338,11 +341,17 @@ internal static partial class Interop
                 if (endIndex == -1)
                 {
                     endIndex = statusFileContents.Length - 1;
-                    sliceLength = statusFileContents.Length;
+                    unitSliceLength = statusFileContents.Length - 3;
+#if DEBUG
+                    nonUnitSliceLength = statusFileContents.Length;
+#endif
                 }
                 else
                 {
-                    sliceLength = endIndex - 3;
+                    unitSliceLength = endIndex - 3;
+#if DEBUG
+                    nonUnitSliceLength = endIndex;
+#endif
                 }
 
                 ReadOnlySpan<char> value = default;
@@ -350,44 +359,44 @@ internal static partial class Interop
 #if DEBUG
                 if (title.SequenceEqual("Pid".AsSpan()))
                 {
-                    value = statusFileContents.Slice(0, sliceLength);
+                    value = statusFileContents.Slice(0, nonUnitSliceLength);
                     valueParsed = int.TryParse(value, out results.Pid);
                 }
 #endif
                 if (title.SequenceEqual("VmHWM".AsSpan()))
                 {
-                    value = statusFileContents.Slice(0, sliceLength);
+                    value = statusFileContents.Slice(0, unitSliceLength);
                     valueParsed = ulong.TryParse(value, out results.VmHWM);
                 }
                 else if (title.SequenceEqual("VmRSS".AsSpan()))
                 {
-                    value = statusFileContents.Slice(0, sliceLength);
+                    value = statusFileContents.Slice(0, unitSliceLength);
                     valueParsed = ulong.TryParse(value, out results.VmRSS);
                 }
                 else if (title.SequenceEqual("VmData".AsSpan()))
                 {
-                    value = statusFileContents.Slice(0, sliceLength);
+                    value = statusFileContents.Slice(0, unitSliceLength);
                     valueParsed = ulong.TryParse(value, out ulong vmData);
                     results.VmData += vmData;
                 }
                 else if (title.SequenceEqual("VmSwap".AsSpan()))
                 {
-                    value = statusFileContents.Slice(0, sliceLength);
+                    value = statusFileContents.Slice(0, unitSliceLength);
                     valueParsed = ulong.TryParse(value, out results.VmSwap);
                 }
                 else if (title.SequenceEqual("VmSize".AsSpan()))
                 {
-                    value = statusFileContents.Slice(0, sliceLength);
+                    value = statusFileContents.Slice(0, unitSliceLength);
                     valueParsed = ulong.TryParse(value, out results.VmSize);
                 }
                 else if (title.SequenceEqual("VmPeak".AsSpan()))
                 {
-                    value = statusFileContents.Slice(0, sliceLength);
+                    value = statusFileContents.Slice(0, unitSliceLength);
                     valueParsed = ulong.TryParse(value, out results.VmPeak);
                 }
                 else if (title.SequenceEqual("VmStk".AsSpan()))
                 {
-                    value = statusFileContents.Slice(0, sliceLength);
+                    value = statusFileContents.Slice(0, unitSliceLength);
                     valueParsed = ulong.TryParse(value, out ulong vmStack);
                     results.VmData += vmStack;
                 }
