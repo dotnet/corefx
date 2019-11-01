@@ -1207,23 +1207,23 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     while ((ret = stat_(destPath, &destStat)) < 0 && errno == EINTR);
     if (ret == 0)
     {
-        if (sourceStat.st_dev == destStat.st_dev && sourceStat.st_ino == destStat.st_ino)
-        {
-            // Attempt to copy file over itself. Bail out early with the appropriate
-            // error code.
-            errno = overwrite ? EBUSY : EEXIST;
-            return -1;
-        }
-
         if (!overwrite)
         {
             errno = EEXIST;
             return -1;
         }
 
+        if (sourceStat.st_dev == destStat.st_dev && sourceStat.st_ino == destStat.st_ino)
+        {
+            // Attempt to copy file over itself. Fail with the same error code as
+            // open would.
+            errno = EBUSY;
+            return -1;
+        }
+
 #if HAVE_CLONEFILE
         // For clonefile we need to unlink the destination file first but we need to
-        // check permission first to ensure we don't try to unlink read-only file
+        // check permission first to ensure we don't try to unlink read-only file.
         if (access(destPath, W_OK) != 0)
         {
             return -1;
