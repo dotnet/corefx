@@ -312,7 +312,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void EmptyFusionLog()
         {
-            FileNotFoundException fnfe = Assert.Throws<FileNotFoundException>(() => Assembly.LoadFrom(@"c:\non\existent\file.dll"));
+            FileNotFoundException fnfe = Assert.Throws<FileNotFoundException>(() => Assembly.LoadFrom(@"\non\existent\file.dll"));
             Assert.Null(fnfe.FusionLog);
         }
 
