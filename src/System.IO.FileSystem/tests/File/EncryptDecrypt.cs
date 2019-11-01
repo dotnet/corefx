@@ -11,7 +11,6 @@ namespace System.IO.Tests
     public class EncryptDecrypt : FileSystemTest
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "File encryption is not supported on this platform.")]
         public static void NullArg_ThrowsException()
         {
             AssertExtensions.Throws<ArgumentNullException>("path", () => File.Encrypt(null));
@@ -29,7 +28,6 @@ namespace System.IO.Tests
         // On Windows Nano Server and Home Edition, file encryption with File.Encrypt(string path) throws an IOException
         // because EFS (Encrypted File System), its underlying technology, is not available on these operating systems.
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsHomeEdition))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "File encryption is not supported on this platform.")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void EncryptDecrypt_Read()
         {
@@ -41,7 +39,16 @@ namespace System.IO.Tests
                 string fileContentRead = File.ReadAllText(tmpFileName);
                 Assert.Equal(textContentToEncrypt, fileContentRead);
 
-                File.Encrypt(tmpFileName);
+                try
+                {
+                    File.Encrypt(tmpFileName);
+                }
+                catch (IOException e) when (e.HResult == unchecked((int)0x80070490))
+                {
+                    // Ignore ERROR_NOT_FOUND 1168 (0x490). It is reported when EFS is disabled by domain policy.
+                    return;
+                }
+
                 Assert.Equal(fileContentRead, File.ReadAllText(tmpFileName));
                 Assert.Equal(FileAttributes.Encrypted, (FileAttributes.Encrypted & File.GetAttributes(tmpFileName)));
 

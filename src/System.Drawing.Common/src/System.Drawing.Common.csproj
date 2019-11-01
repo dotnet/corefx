@@ -1,17 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Library</OutputType>
     <DefineConstants>$(DefineConstants);DRAWING_NAMESPACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningsNotAsErrors>CS0618</WarningsNotAsErrors>
-    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
     <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);FEATURE_WINDOWS_SYSTEM_COLORS;FEATURE_SYSTEM_EVENTS</DefineConstants>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetsUap)' == 'true'">SR.PlatformNotSupported_Drawing</GeneratePlatformNotSupportedAssemblyMessage>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp3.0-Unix-Debug;netcoreapp3.0-Unix-Release;netcoreapp3.0-Windows_NT-Debug;netcoreapp3.0-Windows_NT-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp3.0-Unix-Debug;netcoreapp3.0-Unix-Release;netcoreapp3.0-Windows_NT-Debug;netcoreapp3.0-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <!-- Shared source code, all configurations -->
-  <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp'))">
+  <ItemGroup>
     <Compile Include="System\Drawing\Bitmap.cs" />
     <Compile Include="System\Drawing\BitmapSuffixInSameAssemblyAttribute.cs" />
     <Compile Include="System\Drawing\BitmapSuffixInSatelliteAssemblyAttribute.cs" />
@@ -35,8 +31,10 @@
     <Compile Include="System\Drawing\Imaging\Metafile.cs" />
     <Compile Include="System\Drawing\Printing\PrinterUnit.cs" />
     <Compile Include="System\Drawing\Printing\PreviewPageInfo.cs" />
+    <Compile Include="System\Drawing\Printing\PreviewPrintController.cs" />
     <Compile Include="System\Drawing\Printing\PrintEventHandler.cs" />
     <Compile Include="System\Drawing\Printing\PrintAction.cs" />
+    <Compile Include="System\Drawing\Printing\PrintController.cs" />
     <Compile Include="System\Drawing\Printing\PrintPageEventHandler.cs" />
     <Compile Include="System\Drawing\Printing\QueryPageSettingsEventArgs.cs" />
     <Compile Include="System\Drawing\Printing\QueryPageSettingsEventHandler.cs" />
@@ -164,7 +162,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <!-- Windows-specific -->
-  <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp')) AND '$(TargetsWindows)' == 'true'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' and '$(TargetsWindows)' == 'true'">
     <Compile Include="SRDescriptionAttribute.cs" />
     <Compile Include="System\Drawing\Bitmap.Windows.cs" />
     <Compile Include="System\Drawing\BitmapSelector.cs" />
@@ -231,6 +229,12 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.FreeLibrary.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GlobalFree.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.GlobalFree.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GlobalLock.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.GlobalLock.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs</Link>
     </Compile>
@@ -263,7 +267,7 @@
     </Compile>
   </ItemGroup>
   <!-- Unix specific -->
-  <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp')) AND '$(TargetsUnix)' == 'true'">
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Compile Include="System\Drawing\Graphics.Unix.cs" />
     <Compile Include="System\Drawing\Icon.Unix.cs" />
     <Compile Include="System\Drawing\SystemFonts.Unix.cs" />

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -268,7 +269,7 @@ namespace System.Net.Http
             // We can either get 100 response from server and send body
             // or we may exceed timeout and send request body anyway.
             // If we get response status >= 300, we will not send the request body.
-            public async Task<bool> WaitFor100ContinueAsync(CancellationToken cancellationToken)
+            public async ValueTask<bool> WaitFor100ContinueAsync(CancellationToken cancellationToken)
             {
                 Debug.Assert(_request.Content != null);
                 if (NetEventSource.IsEnabled) Trace($"Waiting to send request body content for 100-Continue.");
@@ -968,7 +969,7 @@ namespace System.Net.Http
                 }
             }
 
-            private async Task SendDataAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
+            private async ValueTask SendDataAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
             {
                 ReadOnlyMemory<byte> remaining = buffer;
 
@@ -1046,11 +1047,11 @@ namespace System.Net.Http
                 // if it is cancelable, then register for the cancellation callback, allocate a task for the asynchronously
                 // completing case, etc.
                 return cancellationToken.CanBeCanceled ?
-                    new ValueTask(GetCancelableWaiterTask(cancellationToken)) :
+                    GetCancelableWaiterTask(cancellationToken) :
                     new ValueTask(this, _waitSource.Version);
             }
 
-            private async Task GetCancelableWaiterTask(CancellationToken cancellationToken)
+            private async ValueTask GetCancelableWaiterTask(CancellationToken cancellationToken)
             {
                 using (cancellationToken.UnsafeRegister(s =>
                 {
@@ -1159,7 +1160,7 @@ namespace System.Net.Http
 
                     if (http2Stream == null)
                     {
-                        return new ValueTask<int>(Task.FromException<int>(new ObjectDisposedException(nameof(Http2ReadStream))));
+                        return new ValueTask<int>(Task.FromException<int>(ExceptionDispatchInfo.SetCurrentStackTrace(new ObjectDisposedException(nameof(Http2ReadStream)))));
                     }
 
                     if (cancellationToken.IsCancellationRequested)
@@ -1212,7 +1213,7 @@ namespace System.Net.Http
                         return new ValueTask(Task.FromException(new ObjectDisposedException(nameof(Http2WriteStream))));
                     }
 
-                    return new ValueTask(http2Stream.SendDataAsync(buffer, cancellationToken));
+                    return http2Stream.SendDataAsync(buffer, cancellationToken);
                 }
 
                 public override Task FlushAsync(CancellationToken cancellationToken)

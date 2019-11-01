@@ -315,7 +315,7 @@ namespace System
                         else
                         {
                             // Find bitflag offset of first match and add to current offset
-                            return (int)(offset + (BitOperations.TrailingZeroCount(matches) / sizeof(char)));
+                            return (int)(offset + ((uint)BitOperations.TrailingZeroCount(matches) / sizeof(char)));
                         }
                     }
 
@@ -341,7 +341,7 @@ namespace System
 
                             // Find bitflag offset of first match and add to current offset,
                             // flags are in bytes so divide for chars
-                            return (int)(offset + (BitOperations.TrailingZeroCount(matches) / sizeof(char)));
+                            return (int)(offset + ((uint)BitOperations.TrailingZeroCount(matches) / sizeof(char)));
                         } while (lengthToExamine > 0);
                     }
 
@@ -365,7 +365,7 @@ namespace System
                         {
                             // Find bitflag offset of first match and add to current offset,
                             // flags are in bytes so divide for chars
-                            return (int)(offset + (BitOperations.TrailingZeroCount(matches) / sizeof(char)));
+                            return (int)(offset + ((uint)BitOperations.TrailingZeroCount(matches) / sizeof(char)));
                         }
                     }
 
@@ -404,7 +404,7 @@ namespace System
 
                             // Find bitflag offset of first match and add to current offset,
                             // flags are in bytes so divide for chars
-                            return (int)(offset + (BitOperations.TrailingZeroCount(matches) / sizeof(char)));
+                            return (int)(offset + ((uint)BitOperations.TrailingZeroCount(matches) / sizeof(char)));
                         } while (lengthToExamine > 0);
                     }
 
@@ -1046,10 +1046,6 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe Vector256<ushort> LoadVector256(ref char start, nint offset)
             => Unsafe.ReadUnaligned<Vector256<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref start, (IntPtr)offset)));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe UIntPtr LoadUIntPtr(ref char start, nint offset)
-            => Unsafe.ReadUnaligned<UIntPtr>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref start, (IntPtr)offset)));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe nint GetCharVectorSpanLength(nint offset, nint length)

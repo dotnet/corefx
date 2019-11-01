@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Tests;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -189,16 +190,14 @@ namespace System.Numerics.Tests
         [Fact]
         public static void RunRegionSpecificStandardFormatToStringTests()
         {
-            RemoteExecutor.Invoke(() =>
+            CultureInfo[] cultures = new CultureInfo[] { new CultureInfo("en-US"), new CultureInfo("en-GB"), new CultureInfo("fr-CA"),
+                                                            new CultureInfo("ar-SA"), new CultureInfo("de-DE"), new CultureInfo("he-IL"),
+                                                            new CultureInfo("ru-RU"), new CultureInfo("zh-CN") };
+            foreach (CultureInfo culture in cultures)
             {
-                CultureInfo[] cultures = new CultureInfo[] { new CultureInfo("en-US"), new CultureInfo("en-GB"), new CultureInfo("fr-CA"),
-                                                             new CultureInfo("ar-SA"), new CultureInfo("de-DE"), new CultureInfo("he-IL"),
-                                                             new CultureInfo("ru-RU"), new CultureInfo("zh-CN") };
-                foreach (CultureInfo culture in cultures)
+                // Set CurrentCulture to simulate different locales
+                using (new ThreadCultureChange(culture))
                 {
-                    // Set CurrentCulture to simulate different locales
-                    CultureInfo.CurrentCulture = culture;
-
                     // Currency
                     RunStandardFormatToStringTests(s_random, "C", culture.NumberFormat.NegativeSign, culture.NumberFormat.CurrencyDecimalDigits, CurrencyFormatter);
                     RunStandardFormatToStringTests(s_random, "c0", culture.NumberFormat.NegativeSign, 0, CurrencyFormatter);
@@ -280,7 +279,7 @@ namespace System.Numerics.Tests
                     RunStandardFormatToStringTests(s_random, "R33", culture.NumberFormat.NegativeSign, 33, DecimalFormatter);
                     RunStandardFormatToStringTests(s_random, "r99", culture.NumberFormat.NegativeSign, 99, DecimalFormatter);
                 }
-            }).Dispose();
+            }
         }
 
         [Fact]

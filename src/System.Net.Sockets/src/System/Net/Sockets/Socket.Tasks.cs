@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -635,7 +636,7 @@ namespace System.Net.Sockets
         /// <summary>Gets a SocketException or an IOException wrapping a SocketException for the specified error.</summary>
         private static Exception GetException(SocketError error, bool wrapExceptionsInIOExceptions = false)
         {
-            Exception e = new SocketException((int)error);
+            Exception e = ExceptionDispatchInfo.SetCurrentStackTrace(new SocketException((int)error));
             return wrapExceptionsInIOExceptions ?
                 new IOException(SR.Format(SR.net_io_readwritefailure, e.Message), e) :
                 e;
@@ -810,9 +811,9 @@ namespace System.Net.Sockets
         {
             internal static readonly AwaitableSocketAsyncEventArgs Reserved = new AwaitableSocketAsyncEventArgs() { _continuation = null };
             /// <summary>Sentinel object used to indicate that the operation has completed prior to OnCompleted being called.</summary>
-            private static readonly Action<object> s_completedSentinel = new Action<object>(state => throw new Exception(nameof(s_completedSentinel)));
+            private static readonly Action<object> s_completedSentinel = new Action<object>(state => throw new InvalidOperationException(SR.Format(SR.net_sockets_valuetaskmisuse, nameof(s_completedSentinel))));
             /// <summary>Sentinel object used to indicate that the instance is available for use.</summary>
-            private static readonly Action<object> s_availableSentinel = new Action<object>(state => throw new Exception(nameof(s_availableSentinel)));
+            private static readonly Action<object> s_availableSentinel = new Action<object>(state => throw new InvalidOperationException(SR.Format(SR.net_sockets_valuetaskmisuse, nameof(s_availableSentinel))));
             /// <summary>
             /// <see cref="s_availableSentinel"/> if the object is available for use, after GetResult has been called on a previous use.
             /// null if the operation has not completed.
@@ -1107,15 +1108,21 @@ namespace System.Net.Sockets
                     cancellationToken.ThrowIfCancellationRequested();
                 }
 
-                throw CreateException(error);
+                throw CreateException(error, forAsyncThrow: false);
             }
 
-            private Exception CreateException(SocketError error)
+            private Exception CreateException(SocketError error, bool forAsyncThrow = true)
             {
-                var se = new SocketException((int)error);
+                Exception e = new SocketException((int)error);
+
+                if (forAsyncThrow)
+                {
+                    e = ExceptionDispatchInfo.SetCurrentStackTrace(e);
+                }
+
                 return WrapExceptionsInIOExceptions ? (Exception)
-                    new IOException(SR.Format(SR.net_io_readfailure, se.Message), se) :
-                    se;
+                    new IOException(SR.Format(SR.net_io_readfailure, e.Message), e) :
+                    e;
             }
         }
     }

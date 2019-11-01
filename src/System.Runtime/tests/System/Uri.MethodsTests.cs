@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -415,19 +416,31 @@ namespace System.Tests
         }
 
         [Fact]
-        public void EscapeDataString_HighSurrogatePair()
+        public void EscapeDataString_InvalidSurrogatePairs()
         {
-            EscapeDataString("abc\uD800\uD800abc", "abc%EF%BF%BD%EF%BF%BD%61bc");
+            EscapeDataString("\uD800", "%EF%BF%BD");
+            EscapeDataString("abc\uD800", "abc%EF%BF%BD");
+            EscapeDataString("abc\uD800\uD800abc", "abc%EF%BF%BD%EF%BF%BDabc");
+            EscapeDataString("\xD800\xD800\xDFFF", "%EF%BF%BD%F0%90%8F%BF");
         }
 
         [Fact]
-        public void EscapeDataString_Invalid()
+        public void EscapeDataString_Long_Success()
         {
-            AssertExtensions.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeDataString(null)); // StringToEscape is null
-            Assert.Throws<UriFormatException>(() => Uri.EscapeDataString(UriCreateStringTests.s_longString)); // StringToEscape is too long
+            string s;
+            const int LongCount = 65520 + 1;
 
-            Assert.Throws<UriFormatException>(() => Uri.EscapeDataString("\uD800")); // Incomplete surrogate pair provided
-            Assert.Throws<UriFormatException>(() => Uri.EscapeDataString("abc\uD800")); // Incomplete surrogate pair provided
+            s = new string('a', LongCount);
+            Assert.Equal(s, Uri.EscapeDataString(s));
+
+            s = new string('/', LongCount);
+            Assert.Equal(string.Concat(Enumerable.Repeat("%2F", LongCount)), Uri.EscapeDataString(s));
+        }
+
+        [Fact]
+        public void EscapeDataString_NullArgument()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeDataString(null));
         }
 
         [Theory]
@@ -457,19 +470,31 @@ namespace System.Tests
         }
 
         [Fact]
-        public void EscapeUriString_HighSurrogatePair()
+        public void EscapeUriString_InvalidSurrogatePairs()
         {
-            EscapeUriString("abc\uD800\uD800abc", "abc%EF%BF%BD%EF%BF%BD%61bc");
+            EscapeUriString("\uD800", "%EF%BF%BD");
+            EscapeUriString("abc\uD800", "abc%EF%BF%BD");
+            EscapeUriString("abc\uD800\uD800abc", "abc%EF%BF%BD%EF%BF%BDabc");
+            EscapeUriString("\xD800\xD800\xDFFF", "%EF%BF%BD%F0%90%8F%BF");
+        }
+
+        [Fact]
+        public void EscapeUriString_Long_Success()
+        {
+            string s;
+            const int LongCount = 65520 + 1;
+
+            s = new string('a', LongCount);
+            Assert.Equal(s, Uri.EscapeUriString(s));
+
+            s = new string('<', LongCount);
+            Assert.Equal(string.Concat(Enumerable.Repeat("%3C", LongCount)), Uri.EscapeUriString(s));
         }
 
         [Fact]
         public void EscapeUriString_Invalid()
         {
             AssertExtensions.Throws<ArgumentNullException>("stringToEscape", () => Uri.EscapeUriString(null)); // StringToEscape is null
-            Assert.Throws<UriFormatException>(() => Uri.EscapeUriString(UriCreateStringTests.s_longString)); // StringToEscape is too long
-
-            Assert.Throws<UriFormatException>(() => Uri.EscapeUriString("\uD800")); // Incomplete surrogate pair provided
-            Assert.Throws<UriFormatException>(() => Uri.EscapeUriString("abc\uD800")); // Incomplete surrogate pair provided
         }
 
         public static IEnumerable<object[]> GetComponents_Basic_TestData()

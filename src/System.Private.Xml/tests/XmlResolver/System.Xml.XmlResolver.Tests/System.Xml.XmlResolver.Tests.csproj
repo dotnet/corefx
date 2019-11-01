@@ -1,34 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(CommonTestPath)\Tests.props" />
   <PropertyGroup>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(SourceDir)\System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml1-frameset.dtd">
+    <None Include="$(LibrariesProjectRoot)System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml1-frameset.dtd">
       <Link>Utils\DTDs\XHTML10\no_comments\xhtml1-frameset.dtd</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SourceDir)\System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml1-strict.dtd">
+    <None Include="$(LibrariesProjectRoot)System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml1-strict.dtd">
       <Link>Utils\DTDs\XHTML10\no_comments\xhtml1-strict.dtd</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SourceDir)\System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml1-transitional.dtd">
+    <None Include="$(LibrariesProjectRoot)System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml1-transitional.dtd">
       <Link>Utils\DTDs\XHTML10\no_comments\xhtml1-transitional.dtd</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SourceDir)\System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml-lat1.ent">
+    <None Include="$(LibrariesProjectRoot)System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml-lat1.ent">
       <Link>Utils\DTDs\XHTML10\no_comments\xhtml-lat1.ent</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SourceDir)\System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml-special.ent">
+    <None Include="$(LibrariesProjectRoot)System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml-special.ent">
       <Link>Utils\DTDs\XHTML10\no_comments\xhtml-special.ent</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SourceDir)\System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml-symbol.ent">
+    <None Include="$(LibrariesProjectRoot)System.Private.Xml\src\Utils\DTDs\XHTML10\no_comments\xhtml-symbol.ent">
       <Link>Utils\DTDs\XHTML10\no_comments\xhtml-symbol.ent</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SourceDir)\System.Private.Xml\src\Utils\DTDs\RSS091\no_comments\rss-0.91.dtd">
+    <None Include="$(LibrariesProjectRoot)System.Private.Xml\src\Utils\DTDs\RSS091\no_comments\rss-0.91.dtd">
       <Link>Utils\DTDs\RSS091\no_comments\rss-0.91.dtd</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

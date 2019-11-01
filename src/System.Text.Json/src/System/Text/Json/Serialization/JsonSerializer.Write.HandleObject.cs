@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
@@ -29,7 +30,6 @@ namespace System.Text.Json
                 }
 
                 state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, options);
-                state.Current.PropertyEnumeratorActive = true;
                 state.Current.MoveToNextProperty = true;
             }
 
@@ -39,7 +39,7 @@ namespace System.Text.Json
             }
 
             // Determine if we are done enumerating properties.
-            if (state.Current.PropertyEnumeratorActive)
+            if (state.Current.ExtensionDataStatus != ExtensionDataWriteStatus.Finished)
             {
                 // If ClassType.Unknown at this point, we are typeof(object) which should not have any properties.
                 Debug.Assert(state.Current.JsonClassInfo.ClassType != ClassType.Unknown);
@@ -59,10 +59,6 @@ namespace System.Text.Json
             if (state.Current.PopStackOnEndObject)
             {
                 state.Pop();
-            }
-            else
-            {
-                state.Current.EndObject();
             }
 
             return true;
@@ -134,21 +130,6 @@ namespace System.Text.Json
             // A property that returns a dictionary keeps the same stack frame.
             if (jsonPropertyInfo.ClassType == ClassType.Dictionary)
             {
-                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
-                if (endOfEnumerable)
-                {
-                    state.Current.MoveToNextProperty = true;
-                }
-
-                return;
-            }
-
-            // A property that returns a type that is deserialized by passing an
-            // IDictionary to its constructor keeps the same stack frame.
-            if (jsonPropertyInfo.ClassType == ClassType.IDictionaryConstructible)
-            {
-                state.Current.IsIDictionaryConstructibleProperty = true;
-
                 bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {

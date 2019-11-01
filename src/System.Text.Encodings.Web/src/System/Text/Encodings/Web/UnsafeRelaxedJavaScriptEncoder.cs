@@ -2,10 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Internal;
 using System.Text.Unicode;
+
+#if NETCOREAPP
+using System.Numerics;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+#endif
 
 namespace System.Text.Encodings.Web
 {
@@ -13,14 +20,11 @@ namespace System.Text.Encodings.Web
     {
         private readonly AllowedCharactersBitmap _allowedCharacters;
 
-        internal static readonly UnsafeRelaxedJavaScriptEncoder s_singleton = new UnsafeRelaxedJavaScriptEncoder(new TextEncoderSettings(UnicodeRanges.All));
+        internal static readonly UnsafeRelaxedJavaScriptEncoder s_singleton = new UnsafeRelaxedJavaScriptEncoder();
 
-        private UnsafeRelaxedJavaScriptEncoder(TextEncoderSettings filter)
+        private UnsafeRelaxedJavaScriptEncoder()
         {
-            if (filter == null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
+            var filter = new TextEncoderSettings(UnicodeRanges.All);
 
             _allowedCharacters = filter.GetAllowedCharacters();
 
@@ -44,18 +48,211 @@ namespace System.Text.Encodings.Web
                 return true;
             }
 
+            Debug.Assert(unicodeScalar >= char.MinValue && unicodeScalar <= char.MaxValue);
+
             return !_allowedCharacters.IsUnicodeScalarAllowed(unicodeScalar);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe override int FindFirstCharacterToEncode(char* text, int textLength)
+        public override unsafe int FindFirstCharacterToEncode(char* text, int textLength)
         {
             if (text == null)
             {
                 throw new ArgumentNullException(nameof(text));
             }
 
-            return _allowedCharacters.FindFirstCharacterToEncode(text, textLength);
+            int idx = 0;
+
+#if NETCOREAPP
+            if (Sse2.IsSupported)
+            {
+                short* startingAddress = (short*)text;
+                while (textLength - 8 >= idx)
+                {
+                    Debug.Assert(startingAddress >= text && startingAddress <= (text + textLength - 8));
+
+                    // Load the next 8 characters.
+                    Vector128<short> sourceValue = Sse2.LoadVector128(startingAddress);
+
+                    Vector128<short> mask = Sse2Helper.CreateAsciiMask(sourceValue);
+                    int index = Sse2.MoveMask(mask.AsByte());
+
+                    if (index != 0)
+                    {
+                        // At least one of the following 8 characters is non-ASCII.
+                        int processNextEight = idx + 8;
+                        Debug.Assert(processNextEight <= textLength);
+                        for (; idx < processNextEight; idx++)
+                        {
+                            Debug.Assert((text + idx) <= (text + textLength));
+                            if (!_allowedCharacters.IsCharacterAllowed(*(text + idx)))
+                            {
+                                goto Return;
+                            }
+                        }
+                        startingAddress += 8;
+                    }
+                    else
+                    {
+                        // Check if any of the 8 characters need to be escaped.
+                        mask = Sse2Helper.CreateEscapingMask_UnsafeRelaxedJavaScriptEncoder(sourceValue);
+
+                        index = Sse2.MoveMask(mask.AsByte());
+                        // If index == 0, that means none of the 8 characters needed to be escaped.
+                        // TrailingZeroCount is relatively expensive, avoid it if possible.
+                        if (index != 0)
+                        {
+                            // Found at least one character that needs to be escaped, figure out the index of
+                            // the first one found that needed to be escaped within the 8 characters.
+                            Debug.Assert(index > 0 && index <= 65_535);
+                            int tzc = BitOperations.TrailingZeroCount(index);
+                            Debug.Assert(tzc % 2 == 0 && tzc >= 0 && tzc <= 16);
+                            idx += tzc >> 1;
+                            goto Return;
+                        }
+                        idx += 8;
+                        startingAddress += 8;
+                    }
+                }
+
+                // Process the remaining characters.
+                Debug.Assert(textLength - idx < 8);
+            }
+#endif
+
+            for (; idx < textLength; idx++)
+            {
+                Debug.Assert((text + idx) <= (text + textLength));
+                if (!_allowedCharacters.IsCharacterAllowed(*(text + idx)))
+                {
+                    goto Return;
+                }
+            }
+
+            idx = -1; // All characters are allowed.
+
+        Return:
+            return idx;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override unsafe int FindFirstCharacterToEncodeUtf8(ReadOnlySpan<byte> utf8Text)
+        {
+            fixed (byte* ptr = utf8Text)
+            {
+                int idx = 0;
+
+#if NETCOREAPP
+                if (Sse2.IsSupported)
+                {
+                    sbyte* startingAddress = (sbyte*)ptr;
+                    while (utf8Text.Length - 16 >= idx)
+                    {
+                        Debug.Assert(startingAddress >= ptr && startingAddress <= (ptr + utf8Text.Length - 16));
+
+                        // Load the next 16 bytes.
+                        Vector128<sbyte> sourceValue = Sse2.LoadVector128(startingAddress);
+
+                        // Check for ASCII text. Any byte that's not in the ASCII range will already be negative when
+                        // casted to signed byte.
+                        int index = Sse2.MoveMask(sourceValue);
+
+                        if (index != 0)
+                        {
+                            // At least one of the following 16 bytes is non-ASCII.
+
+                            int processNextSixteen = idx + 16;
+                            Debug.Assert(processNextSixteen <= utf8Text.Length);
+
+                            while (idx < processNextSixteen)
+                            {
+                                Debug.Assert((ptr + idx) <= (ptr + utf8Text.Length));
+
+                                if (UnicodeUtility.IsAsciiCodePoint(ptr[idx]))
+                                {
+                                    if (!_allowedCharacters.IsUnicodeScalarAllowed(ptr[idx]))
+                                    {
+                                        goto Return;
+                                    }
+                                    idx++;
+                                }
+                                else
+                                {
+                                    OperationStatus opStatus = UnicodeHelpers.DecodeScalarValueFromUtf8(utf8Text.Slice(idx), out uint nextScalarValue, out int utf8BytesConsumedForScalar);
+
+                                    Debug.Assert(nextScalarValue <= int.MaxValue);
+                                    if (opStatus != OperationStatus.Done || WillEncode((int)nextScalarValue))
+                                    {
+                                        goto Return;
+                                    }
+
+                                    Debug.Assert(opStatus == OperationStatus.Done);
+                                    idx += utf8BytesConsumedForScalar;
+                                }
+                            }
+                            startingAddress = (sbyte*)ptr + idx;
+                        }
+                        else
+                        {
+                            // Check if any of the 16 bytes need to be escaped.
+                             Vector128<sbyte> mask = Sse2Helper.CreateEscapingMask_UnsafeRelaxedJavaScriptEncoder(sourceValue);
+
+                            index = Sse2.MoveMask(mask);
+                            // If index == 0, that means none of the 16 bytes needed to be escaped.
+                            // TrailingZeroCount is relatively expensive, avoid it if possible.
+                            if (index != 0)
+                            {
+                                // Found at least one byte that needs to be escaped, figure out the index of
+                                // the first one found that needed to be escaped within the 16 bytes.
+                                Debug.Assert(index > 0 && index <= 65_535);
+                                int tzc = BitOperations.TrailingZeroCount(index);
+                                Debug.Assert(tzc >= 0 && tzc <= 16);
+                                idx += tzc;
+                                goto Return;
+                            }
+                            idx += 16;
+                            startingAddress += 16;
+                        }
+                    }
+
+                    // Process the remaining bytes.
+                    Debug.Assert(utf8Text.Length - idx < 16);
+                }
+#endif
+
+                while (idx < utf8Text.Length)
+                {
+                    Debug.Assert((ptr + idx) <= (ptr + utf8Text.Length));
+
+                    if (UnicodeUtility.IsAsciiCodePoint(ptr[idx]))
+                    {
+                        if (!_allowedCharacters.IsUnicodeScalarAllowed(ptr[idx]))
+                        {
+                            goto Return;
+                        }
+                        idx++;
+                    }
+                    else
+                    {
+                        OperationStatus opStatus = UnicodeHelpers.DecodeScalarValueFromUtf8(utf8Text.Slice(idx), out uint nextScalarValue, out int utf8BytesConsumedForScalar);
+
+                        Debug.Assert(nextScalarValue <= int.MaxValue);
+                        if (opStatus != OperationStatus.Done || WillEncode((int)nextScalarValue))
+                        {
+                            goto Return;
+                        }
+
+                        Debug.Assert(opStatus == OperationStatus.Done);
+                        idx += utf8BytesConsumedForScalar;
+                    }
+                }
+                Debug.Assert(idx == utf8Text.Length);
+
+                idx = -1; // All bytes are allowed.
+
+            Return:
+                return idx;
+            }
         }
 
         // The worst case encoding is 6 output chars per input char: [input] U+FFFF -> [output] "\uFFFF"
@@ -75,7 +272,7 @@ namespace System.Text.Encodings.Web
         // See ECMA-262, Sec. 7.8.4, and ECMA-404, Sec. 9
         // http://www.ecma-international.org/ecma-262/5.1/#sec-7.8.4
         // http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
-        public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
+        public override unsafe bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
         {
             if (buffer == null)
             {
@@ -122,66 +319,9 @@ namespace System.Text.Encodings.Web
                     toCopy = s_back;
                     break;
                 default:
-                    return TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten);
+                    return JavaScriptEncoderHelper.TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten);
             }
             return TryCopyCharacters(toCopy, buffer, bufferLength, out numberOfCharactersWritten);
-        }
-
-        private static unsafe bool TryWriteEncodedScalarAsNumericEntity(int unicodeScalar, char* buffer, int length, out int numberOfCharactersWritten)
-        {
-            Debug.Assert(buffer != null && length >= 0);
-
-            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar))
-            {
-                // Convert this back to UTF-16 and write out both characters.
-                UnicodeHelpers.GetUtf16SurrogatePairFromAstralScalarValue(unicodeScalar, out char leadingSurrogate, out char trailingSurrogate);
-                if (TryWriteEncodedSingleCharacter(leadingSurrogate, buffer, length, out int leadingSurrogateCharactersWritten) &&
-                    TryWriteEncodedSingleCharacter(trailingSurrogate, buffer + leadingSurrogateCharactersWritten, length - leadingSurrogateCharactersWritten, out numberOfCharactersWritten)
-                )
-                {
-                    numberOfCharactersWritten += leadingSurrogateCharactersWritten;
-                    return true;
-                }
-                else
-                {
-                    numberOfCharactersWritten = 0;
-                    return false;
-                }
-            }
-            else
-            {
-                // This is only a single character.
-                return TryWriteEncodedSingleCharacter(unicodeScalar, buffer, length, out numberOfCharactersWritten);
-            }
-        }
-
-        // Writes an encoded scalar value (in the BMP) as a JavaScript-escaped character.
-        private static unsafe bool TryWriteEncodedSingleCharacter(int unicodeScalar, char* buffer, int length, out int numberOfCharactersWritten)
-        {
-            Debug.Assert(buffer != null && length >= 0);
-            Debug.Assert(!UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar), "The incoming value should've been in the BMP.");
-
-            if (length < 6)
-            {
-                numberOfCharactersWritten = 0;
-                return false;
-            }
-
-            // Encode this as 6 chars "\uFFFF".
-            *buffer = '\\';
-            buffer++;
-            *buffer = 'u';
-            buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit(unicodeScalar >> 12);
-            buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit((int)((unicodeScalar >> 8) & 0xFU));
-            buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit((int)((unicodeScalar >> 4) & 0xFU));
-            buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit((int)(unicodeScalar & 0xFU));
-
-            numberOfCharactersWritten = 6;
-            return true;
         }
     }
 }

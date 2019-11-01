@@ -11,6 +11,16 @@ namespace System
 {
     public static partial class Environment
     {
+        public static int ProcessorCount { get; } = GetProcessorCount();
+
+        /// <summary>
+        /// Gets whether the current machine has only a single processor.
+        /// </summary>
+        internal static bool IsSingleProcessor => ProcessorCount == 1;
+
+        // Unconditionally return false since .NET Core does not support object finalization during shutdown.
+        public static bool HasShutdownStarted => false;
+
         public static string? GetEnvironmentVariable(string variable)
         {
             if (variable == null)
@@ -111,6 +121,8 @@ namespace System
         public static bool Is64BitProcess => IntPtr.Size == 8;
 
         public static bool Is64BitOperatingSystem => Is64BitProcess || Is64BitOperatingSystemWhen32BitProcess;
+
+        public static string NewLine => NewLineConst;
 
         private static OperatingSystem? s_osVersion;
 

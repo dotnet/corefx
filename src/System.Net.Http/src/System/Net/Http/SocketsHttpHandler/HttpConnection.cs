@@ -78,6 +78,8 @@ namespace System.Net.Http
         private readonly byte[] _writeBuffer;
         private int _writeOffset;
         private int _allowedReadLineBytes;
+        /// <summary>Reusable array used to get the values for each header being written to the wire.</summary>
+        private string[] _headerValues = Array.Empty<string>();
 
         private ValueTask<int>? _readAheadTask;
         private int _readAheadTaskLock = 0; // 0 == free, 1 == held
@@ -215,52 +217,56 @@ namespace System.Net.Http
             _readOffset += bytesToConsume;
         }
 
-        private async Task WriteHeadersAsync(HttpHeaders headers, string cookiesFromContainer)
+        private async ValueTask WriteHeadersAsync(HttpHeaders headers, string cookiesFromContainer)
         {
-            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
+            if (headers.HeaderStore != null)
             {
-                if (header.Key.KnownHeader != null)
+                foreach (KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo> header in headers.HeaderStore)
                 {
-                    await WriteBytesAsync(header.Key.KnownHeader.AsciiBytesWithColonSpace).ConfigureAwait(false);
-                }
-                else
-                {
-                    await WriteAsciiStringAsync(header.Key.Name).ConfigureAwait(false);
-                    await WriteTwoBytesAsync((byte)':', (byte)' ').ConfigureAwait(false);
-                }
-
-                Debug.Assert(header.Value.Length > 0, "No values for header??");
-                if (header.Value.Length > 0)
-                {
-                    await WriteStringAsync(header.Value[0]).ConfigureAwait(false);
-
-                    if (cookiesFromContainer != null && header.Key.KnownHeader == KnownHeaders.Cookie)
+                    if (header.Key.KnownHeader != null)
                     {
-                        await WriteTwoBytesAsync((byte)';', (byte)' ').ConfigureAwait(false);
-                        await WriteStringAsync(cookiesFromContainer).ConfigureAwait(false);
-
-                        cookiesFromContainer = null;
+                        await WriteBytesAsync(header.Key.KnownHeader.AsciiBytesWithColonSpace).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await WriteAsciiStringAsync(header.Key.Name).ConfigureAwait(false);
+                        await WriteTwoBytesAsync((byte)':', (byte)' ').ConfigureAwait(false);
                     }
 
-                    // Some headers such as User-Agent and Server use space as a separator (see: ProductInfoHeaderParser)
-                    if (header.Value.Length > 1)
+                    int headerValuesCount = HttpHeaders.GetValuesAsStrings(header.Key, header.Value, ref _headerValues);
+                    Debug.Assert(headerValuesCount > 0, "No values for header??");
+                    if (headerValuesCount > 0)
                     {
-                        HttpHeaderParser parser = header.Key.Parser;
-                        string separator = HttpHeaderParser.DefaultSeparator;
-                        if (parser != null && parser.SupportsMultipleValues)
+                        await WriteStringAsync(_headerValues[0]).ConfigureAwait(false);
+
+                        if (cookiesFromContainer != null && header.Key.KnownHeader == KnownHeaders.Cookie)
                         {
-                            separator = parser.Separator;
+                            await WriteTwoBytesAsync((byte)';', (byte)' ').ConfigureAwait(false);
+                            await WriteStringAsync(cookiesFromContainer).ConfigureAwait(false);
+
+                            cookiesFromContainer = null;
                         }
 
-                        for (int i = 1; i < header.Value.Length; i++)
+                        // Some headers such as User-Agent and Server use space as a separator (see: ProductInfoHeaderParser)
+                        if (headerValuesCount > 1)
                         {
-                            await WriteAsciiStringAsync(separator).ConfigureAwait(false);
-                            await WriteStringAsync(header.Value[i]).ConfigureAwait(false);
+                            HttpHeaderParser parser = header.Key.Parser;
+                            string separator = HttpHeaderParser.DefaultSeparator;
+                            if (parser != null && parser.SupportsMultipleValues)
+                            {
+                                separator = parser.Separator;
+                            }
+
+                            for (int i = 1; i < headerValuesCount; i++)
+                            {
+                                await WriteAsciiStringAsync(separator).ConfigureAwait(false);
+                                await WriteStringAsync(_headerValues[i]).ConfigureAwait(false);
+                            }
                         }
                     }
-                }
 
-                await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
+                    await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
+                }
             }
 
             if (cookiesFromContainer != null)
@@ -272,7 +278,7 @@ namespace System.Net.Http
             }
         }
 
-        private async Task WriteHostHeaderAsync(Uri uri)
+        private async ValueTask WriteHostHeaderAsync(Uri uri)
         {
             await WriteBytesAsync(KnownHeaders.Host.AsciiBytesWithColonSpace).ConfigureAwait(false);
 
@@ -767,7 +773,7 @@ namespace System.Net.Http
 
         private static bool IsLineEmpty(ArraySegment<byte> line) => line.Count == 0;
 
-        private async Task SendRequestContentAsync(HttpRequestMessage request, HttpContentWriteStream stream, CancellationToken cancellationToken)
+        private async ValueTask SendRequestContentAsync(HttpRequestMessage request, HttpContentWriteStream stream, CancellationToken cancellationToken)
         {
             // Now that we're sending content, prohibit retries on this connection.
             _canRetry = false;
@@ -980,7 +986,7 @@ namespace System.Net.Http
             _writeOffset += source.Length;
         }
 
-        private async Task WriteAsync(ReadOnlyMemory<byte> source)
+        private async ValueTask WriteAsync(ReadOnlyMemory<byte> source)
         {
             int remaining = _writeBuffer.Length - _writeOffset;
 
@@ -1057,10 +1063,10 @@ namespace System.Net.Http
 
             // There's data in the write buffer and the data we're writing doesn't fit after it.
             // Do two writes, one to flush the buffer and then another to write the supplied content.
-            return new ValueTask(FlushThenWriteWithoutBufferingAsync(source));
+            return FlushThenWriteWithoutBufferingAsync(source);
         }
 
-        private async Task FlushThenWriteWithoutBufferingAsync(ReadOnlyMemory<byte> source)
+        private async ValueTask FlushThenWriteWithoutBufferingAsync(ReadOnlyMemory<byte> source)
         {
             await FlushAsync().ConfigureAwait(false);
             await WriteToStreamAsync(source).ConfigureAwait(false);
@@ -1399,7 +1405,7 @@ namespace System.Net.Http
         }
 
         // Throws IOException on EOF.  This is only called when we expect more data.
-        private async Task FillAsync()
+        private async ValueTask FillAsync()
         {
             Debug.Assert(_readAheadTask == null);
 
@@ -1592,7 +1598,7 @@ namespace System.Net.Http
             return bytesToCopy;
         }
 
-        private async Task CopyFromBufferAsync(Stream destination, int count, CancellationToken cancellationToken)
+        private async ValueTask CopyFromBufferAsync(Stream destination, int count, CancellationToken cancellationToken)
         {
             Debug.Assert(count <= _readLength - _readOffset);
 
@@ -1762,7 +1768,7 @@ namespace System.Net.Http
             }
         }
 
-        public async Task DrainResponseAsync(HttpResponseMessage response)
+        public async ValueTask DrainResponseAsync(HttpResponseMessage response)
         {
             Debug.Assert(_inUse);
 

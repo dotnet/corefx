@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Tests;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.RemoteExecutor;
@@ -294,9 +295,8 @@ namespace System.IO.Tests
         [Fact]
         public static void TestWriteMisc()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("en-US")) // floating-point formatting comparison depends on culture
             {
-                CultureInfo.CurrentCulture = new CultureInfo("en-US"); // floating-point formatting comparison depends on culture
                 var sw = new StringWriter();
 
                 sw.Write(true);
@@ -310,7 +310,7 @@ namespace System.IO.Tests
                 sw.Write((ulong)ulong.MaxValue);
 
                 Assert.Equal("Truea1234.013452342.0123456-92233720368547758081234.5429496729518446744073709551615", sw.ToString());
-            }).Dispose();
+            }
         }
 
         [Fact]
@@ -324,9 +324,8 @@ namespace System.IO.Tests
         [Fact]
         public static void TestWriteLineMisc()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("en-US")) // floating-point formatting comparison depends on culture
             {
-                CultureInfo.CurrentCulture = new CultureInfo("en-US"); // floating-point formatting comparison depends on culture
                 var sw = new StringWriter();
                 sw.WriteLine((bool)false);
                 sw.WriteLine((char)'B');
@@ -339,7 +338,7 @@ namespace System.IO.Tests
                 Assert.Equal(
                     string.Format("False{0}B{0}987{0}875634{0}1.23457{0}45634563{0}18446744073709551615{0}", Environment.NewLine),
                     sw.ToString());
-            }).Dispose();
+            }
         }
 
         [Fact]

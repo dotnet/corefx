@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace System.Net.NetworkInformation
 {
@@ -48,12 +47,12 @@ namespace System.Net.NetworkInformation
                 // to propogate out, because they will not be catchable. Instead, we track all the exceptions
                 // that are thrown in these callbacks, and aggregate them at the end.
                 int result = Interop.Sys.EnumerateInterfaceAddresses(
-                    (name, ipAddr, maskAddr) =>
+                    (name, ipAddr) =>
                     {
                         try
                         {
                             BsdNetworkInterface oni = GetOrCreate(interfacesByName, name, ipAddr->InterfaceIndex);
-                            oni.ProcessIpv4Address(ipAddr, maskAddr);
+                            oni.ProcessIpv4Address(ipAddr);
                         }
                         catch (Exception e)
                         {
@@ -102,7 +101,13 @@ namespace System.Net.NetworkInformation
                 }
                 else if (result == 0)
                 {
-                    return interfacesByName.Values.ToArray();
+                    var results = new BsdNetworkInterface[interfacesByName.Count];
+                    int i = 0;
+                    foreach (KeyValuePair<string, BsdNetworkInterface> item in interfacesByName)
+                    {
+                        results[i++] = item.Value;
+                    }
+                    return results;
                 }
                 else
                 {
