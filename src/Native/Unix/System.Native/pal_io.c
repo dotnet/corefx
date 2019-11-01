@@ -1197,6 +1197,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     int inFd = ToFileDescriptor(sourceFd);
     int outFd;
     int ret;
+    int tmpErrno;
     struct stat_ sourceStat;
 
     while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR);
@@ -1265,7 +1266,9 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     // implemented as user space library but future version of macOS
     // may optimize it.
     ret = fcopyfile(inFd, outFd, NULL, COPYFILE_ALL) == 0 ? 0 : -1;
+    tmpErrno = errno;
     close(outFd);
+    errno = tmpErrno;
     return ret;
 #else
     // Get the stats on the source file.
@@ -1289,7 +1292,9 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
         {
             if (errno != EINVAL && errno != ENOSYS)
             {
+                tmpErrno = errno;
                 close(outFd);
+                errno = tmpErrno;
                 return -1;
             }
             else
@@ -1315,7 +1320,9 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     // Manually read all data from the source and write it to the destination.
     if (!copied && CopyFile_ReadWrite(inFd, outFd) != 0)
     {
+        tmpErrno = errno;
         close(outFd);
+        errno = tmpErrno;
         return -1;
     }
 
@@ -1340,7 +1347,9 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR);
 #endif
 
+    tmpErrno = errno;
     close(outFd);
+    errno = tmpErrno;
     return 0;
 #endif // HAVE_FCOPYFILE
 }
