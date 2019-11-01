@@ -26,7 +26,7 @@ namespace System.Security.Cryptography
         // The return value of TransformBlock is the number of bytes returned to outputBuffer and is
         // always <= OutputBlockSize.  If CanTransformMultipleBlocks is true, then inputCount may be
         // any positive multiple of InputBlockSize
-        int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset);
+        int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[]? outputBuffer, int outputOffset);
 
         // Special function for transforming the last block or partial block in the stream.  The
         // return value is an array containing the remaining transformed bytes.

@@ -14,27 +14,27 @@ namespace System.Security.Cryptography
     {
         // Member variables
         private readonly Stream _stream;
-        private readonly ICryptoTransform _transform;
-        private byte[] _inputBuffer;  // read from _stream before _Transform
+        private readonly ICryptoTransform? _transform;
+        private byte[]? _inputBuffer;  // read from _stream before _Transform
         private int _inputBufferIndex;
         private int _inputBlockSize;
-        private byte[] _outputBuffer; // buffered output of _Transform
+        private byte[]? _outputBuffer; // buffered output of _Transform
         private int _outputBufferIndex;
         private int _outputBlockSize;
         private bool _canRead;
         private bool _canWrite;
         private bool _finalBlockTransformed;
-        private SemaphoreSlim _lazyAsyncActiveSemaphore;
+        private SemaphoreSlim? _lazyAsyncActiveSemaphore;
         private readonly bool _leaveOpen;
 
         // Constructors
 
-        public CryptoStream(Stream stream, ICryptoTransform transform, CryptoStreamMode mode)
+        public CryptoStream(Stream stream, ICryptoTransform? transform, CryptoStreamMode mode)
             : this(stream, transform, mode, false)
         {
         }
 
-        public CryptoStream(Stream stream, ICryptoTransform transform, CryptoStreamMode mode, bool leaveOpen)
+        public CryptoStream(Stream stream, ICryptoTransform? transform, CryptoStreamMode mode, bool leaveOpen)
         {
 
             _stream = stream;
@@ -112,6 +112,7 @@ namespace System.Security.Cryptography
             // Transform and write out the final bytes.
             if (_canWrite)
             {
+                Debug.Assert(_transform != null && _inputBuffer != null);
                 Debug.Assert(_outputBufferIndex == 0, "The output index can only ever be non-zero when in read mode.");
 
                 byte[] finalBytes = _transform.TransformFinalBlock(_inputBuffer, 0, _inputBufferIndex);
@@ -126,8 +127,7 @@ namespace System.Security.Cryptography
             }
 
             // If the inner stream is a CryptoStream, then we want to call FlushFinalBlock on it too, otherwise just Flush.
-            CryptoStream innerCryptoStream = _stream as CryptoStream;
-            if (innerCryptoStream != null)
+            if (_stream is CryptoStream innerCryptoStream)
             {
                 if (!innerCryptoStream.HasFlushedFinalBlock)
                 {
@@ -188,7 +188,7 @@ namespace System.Security.Cryptography
             return ReadAsyncInternal(buffer, offset, count, cancellationToken);
         }
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) =>
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state) =>
             TaskToApm.Begin(ReadAsync(buffer, offset, count, CancellationToken.None), callback, state);
 
         public override int EndRead(IAsyncResult asyncResult) =>
@@ -222,6 +222,7 @@ namespace System.Security.Cryptography
             // does in Read.  If/when that's fixed for Read, it should be fixed here, too.)
             if (_outputBufferIndex > 1)
             {
+                Debug.Assert(_outputBuffer != null);
                 byte b = _outputBuffer[0];
                 Buffer.BlockCopy(_outputBuffer, 1, _outputBuffer, 0, _outputBufferIndex - 1);
                 _outputBufferIndex -= 1;
@@ -239,7 +240,7 @@ namespace System.Security.Cryptography
             // complete a block, simply add the byte to the input buffer.
             if (_inputBufferIndex + 1 < _inputBlockSize)
             {
-                _inputBuffer[_inputBufferIndex++] = value;
+                _inputBuffer![_inputBufferIndex++] = value;
                 return;
             }
 
@@ -275,6 +276,7 @@ namespace System.Security.Cryptography
             // no bytes ready or we've delivered enough.
             int bytesToDeliver = count;
             int currentOutputIndex = offset;
+            Debug.Assert(_outputBuffer != null);
             if (_outputBufferIndex != 0)
             {
                 // we have some already-transformed bytes in the output buffer
@@ -315,13 +317,14 @@ namespace System.Security.Cryptography
             // OK, see first if it's a multi-block transform and we can speed up things
             int blocksToProcess = bytesToDeliver / _outputBlockSize;
 
+            Debug.Assert(_transform != null && _inputBuffer != null);
             if (blocksToProcess > 1 && _transform.CanTransformMultipleBlocks)
             {
                 int numWholeBlocksInBytes = blocksToProcess * _inputBlockSize;
 
                 // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
-                byte[] tempInputBuffer = ArrayPool<byte>.Shared.Rent(numWholeBlocksInBytes);
-                byte[] tempOutputBuffer = null;
+                byte[]? tempInputBuffer = ArrayPool<byte>.Shared.Rent(numWholeBlocksInBytes);
+                byte[]? tempOutputBuffer = null;
 
                 try
                 {
@@ -467,7 +470,7 @@ namespace System.Security.Cryptography
             return WriteAsyncInternal(buffer, offset, count, cancellationToken);
         }
 
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state) =>
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state) =>
             TaskToApm.Begin(WriteAsync(buffer, offset, count, CancellationToken.None), callback, state);
 
         public override void EndWrite(IAsyncResult asyncResult) =>
@@ -518,6 +521,7 @@ namespace System.Security.Cryptography
             // transform them, and write them out.  Cache any remaining bytes in the _InputBuffer.
             int bytesToWrite = count;
             int currentInputIndex = offset;
+            Debug.Assert(_inputBuffer != null);
             // if we have some bytes in the _InputBuffer, we have to deal with those first,
             // so let's try to make an entire block out of it
             if (_inputBufferIndex > 0)
@@ -542,7 +546,7 @@ namespace System.Security.Cryptography
             }
 
             Debug.Assert(_outputBufferIndex == 0, "The output index can only ever be non-zero when in read mode.");
-
+            Debug.Assert(_outputBuffer != null && _transform != null);
             // At this point, either the _InputBuffer is full, empty, or we've already returned.
             // If full, let's process it -- we now know the _OutputBuffer is empty
             int numOutputBytes;
@@ -571,7 +575,7 @@ namespace System.Security.Cryptography
                         int numWholeBlocksInBytes = numWholeBlocks * _inputBlockSize;
 
                         // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
-                        byte[] tempOutputBuffer = ArrayPool<byte>.Shared.Rent(numWholeBlocks * _outputBlockSize);
+                        byte[]? tempOutputBuffer = ArrayPool<byte>.Shared.Rent(numWholeBlocks * _outputBlockSize);
                         numOutputBytes = 0;
 
                         try

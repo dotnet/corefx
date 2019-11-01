@@ -14,11 +14,11 @@ namespace System.Security.Cryptography
             PaddingValue = PaddingMode.PKCS7;
         }
 
-        public static SymmetricAlgorithm Create() =>
+        public static SymmetricAlgorithm? Create() =>
             throw new PlatformNotSupportedException(SR.Cryptography_DefaultAlgorithm_NotSupported);
 
-        public static SymmetricAlgorithm Create(string algName) =>
-            (SymmetricAlgorithm)CryptoConfigForwarder.CreateFromName(algName);
+        public static SymmetricAlgorithm? Create(string algName) =>
+            (SymmetricAlgorithm?)CryptoConfigForwarder.CreateFromName(algName);
 
         public virtual int FeedbackSize
         {
@@ -62,7 +62,7 @@ namespace System.Security.Cryptography
             {
                 if (IVValue == null)
                     GenerateIV();
-                return IVValue.CloneByteArray();
+                return IVValue.CloneByteArray()!;
             }
 
             set
@@ -82,7 +82,7 @@ namespace System.Security.Cryptography
             {
                 if (KeyValue == null)
                     GenerateKey();
-                return KeyValue.CloneByteArray();
+                return KeyValue.CloneByteArray()!;
             }
 
             set
@@ -222,12 +222,12 @@ namespace System.Security.Cryptography
 
         protected CipherMode ModeValue;
         protected PaddingMode PaddingValue;
-        protected byte[] KeyValue;
-        protected byte[] IVValue;
+        protected byte[]? KeyValue;
+        protected byte[]? IVValue;
         protected int BlockSizeValue;
         protected int FeedbackSizeValue;
         protected int KeySizeValue;
-        protected KeySizes[] LegalBlockSizesValue;
-        protected KeySizes[] LegalKeySizesValue;
+        protected KeySizes[] LegalBlockSizesValue = null!;
+        protected KeySizes[] LegalKeySizesValue = null!;
     }
 }

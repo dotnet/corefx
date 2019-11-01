@@ -4,13 +4,15 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 
 namespace Internal.Cryptography
 {
     internal static partial class Helpers
     {
-        public static byte[] CloneByteArray(this byte[] src)
+        [return: NotNullIfNotNull("src")]
+        public static byte[]? CloneByteArray(this byte[]? src)
         {
             if (src == null)
             {

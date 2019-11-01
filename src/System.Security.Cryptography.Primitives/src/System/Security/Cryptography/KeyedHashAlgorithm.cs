@@ -10,11 +10,11 @@ namespace System.Security.Cryptography
     {
         protected KeyedHashAlgorithm() { }
 
-        public static new KeyedHashAlgorithm Create() =>
+        public static new KeyedHashAlgorithm? Create() =>
             throw new PlatformNotSupportedException(SR.Cryptography_DefaultAlgorithm_NotSupported);
 
-        public static new KeyedHashAlgorithm Create(string algName) =>
-            (KeyedHashAlgorithm)CryptoConfigForwarder.CreateFromName(algName);
+        public static new KeyedHashAlgorithm? Create(string algName) =>
+            (KeyedHashAlgorithm?)CryptoConfigForwarder.CreateFromName(algName);
 
         public virtual byte[] Key
         {
@@ -38,11 +38,11 @@ namespace System.Security.Cryptography
                 {
                     Array.Clear(KeyValue, 0, KeyValue.Length);
                 }
-                KeyValue = null;
+                KeyValue = null!;
             }
             base.Dispose(disposing);
         }
 
-        protected byte[] KeyValue;
+        protected byte[] KeyValue = null!;
     }
 }
