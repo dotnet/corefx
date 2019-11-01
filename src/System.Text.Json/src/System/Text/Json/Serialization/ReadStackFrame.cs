@@ -186,16 +186,6 @@ namespace System.Text.Json
         {
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
-            if (jsonPropertyInfo == null)
-            {
-                Debug.Assert(state.Current.JsonClassInfo != null);
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type);
-            }
-            else if (jsonPropertyInfo.ClassType != ClassType.Enumerable)
-            {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(jsonPropertyInfo.RuntimePropertyType);
-            }
-
             // If the property has an EnumerableConverter, then we use tempEnumerableValues.
             if (jsonPropertyInfo.EnumerableConverter != null)
             {
@@ -240,16 +230,6 @@ namespace System.Text.Json
         public static object CreateDictionaryValue(ref ReadStack state)
         {
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
-
-            if (jsonPropertyInfo == null)
-            {
-                Debug.Assert(state.Current.JsonClassInfo != null);
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type);
-            }
-            else if (jsonPropertyInfo.ClassType != ClassType.Dictionary)
-            {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(jsonPropertyInfo.RuntimePropertyType);
-            }
 
             // If the property has a DictionaryConverter, then we use tempDictionaryValues.
             if (jsonPropertyInfo.DictionaryConverter != null)

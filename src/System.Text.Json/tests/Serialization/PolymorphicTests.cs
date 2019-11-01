@@ -443,6 +443,7 @@ namespace System.Text.Json.Serialization.Tests
         public static void GenericListOfInterface_WithInvalidJson_ThrowsJsonException()
         {
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<MyThingCollection>("false"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<MyThingCollection>("{}"));
         }
 
         [Fact]

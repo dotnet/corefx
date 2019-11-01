@@ -180,7 +180,7 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
-    public class ReadOnlyWrapperForIlist : WrapperForIList
+    public class ReadOnlyWrapperForIList : WrapperForIList
     {
         public override bool IsReadOnly => true;
     }
