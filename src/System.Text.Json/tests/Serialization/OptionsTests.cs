@@ -54,6 +54,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(16 * 1024, options.DefaultBufferSize);
             Assert.Null(options.DictionaryKeyPolicy);
             Assert.Null(options.Encoder);
+            Assert.False(options.IgnoreDefaultValues);
             Assert.False(options.IgnoreNullValues);
             Assert.Equal(0, options.MaxDepth);
             Assert.False(options.PropertyNameCaseInsensitive);
@@ -75,6 +76,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<InvalidOperationException>(() => options.DefaultBufferSize = options.DefaultBufferSize);
             Assert.Throws<InvalidOperationException>(() => options.DictionaryKeyPolicy = options.DictionaryKeyPolicy);
             Assert.Throws<InvalidOperationException>(() => options.Encoder = JavaScriptEncoder.Default);
+            Assert.Throws<InvalidOperationException>(() => options.IgnoreDefaultValues = options.IgnoreDefaultValues);
             Assert.Throws<InvalidOperationException>(() => options.IgnoreNullValues = options.IgnoreNullValues);
             Assert.Throws<InvalidOperationException>(() => options.MaxDepth = options.MaxDepth);
             Assert.Throws<InvalidOperationException>(() => options.PropertyNameCaseInsensitive = options.PropertyNameCaseInsensitive);
