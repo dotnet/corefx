@@ -336,8 +336,6 @@ namespace System.Text.Json
 
         public abstract bool ParentDictionaryCanBePopulated(object target);
 
-        public bool IgnoreNullValues { get; private set; }
-
         public bool IsPropertyPolicy { get; protected set; }
 
         // The name from a Json value. This is cached for performance on first deserialize.
