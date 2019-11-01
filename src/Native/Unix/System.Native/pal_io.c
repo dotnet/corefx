@@ -1227,7 +1227,6 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
         // check permission first to ensure we don't try to unlink read-only file
         if (access(destPath, W_OK) != 0)
         {
-            errno = EACCES;
             return -1;
         }
         
