@@ -247,7 +247,7 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowNotSupportedException_DeserializCreateObjectDelegateIsNull(Type invalidType)
+        public static void ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(Type invalidType)
         {
             if (invalidType.IsInterface)
             {

@@ -22,13 +22,12 @@ namespace System.Text.Json
 
             Debug.Assert(jsonPropertyInfo != null);
 
-            // A nested object or dictionary so push new frame.
+            // A nested object or dictionary, so push new frame.
             if (state.Current.CollectionPropertyInitialized)
             {
                 state.Push();
                 state.Current.JsonClassInfo = jsonPropertyInfo.ElementClassInfo;
                 state.Current.InitializeJsonPropertyInfo();
-                state.Current.CollectionPropertyInitialized = true;
 
                 JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
@@ -42,12 +41,14 @@ namespace System.Text.Json
                         state.Current.ReturnValue = dictValue;
                         state.Current.DetermineIfDictionaryCanBePopulated(state.Current.ReturnValue);
                     }
+
+                    state.Current.CollectionPropertyInitialized = true;
                 }
                 else if (state.Current.IsProcessingObject(ClassType.Object))
                 {
                     if (classInfo.CreateObject == null)
                     {
-                        ThrowHelper.ThrowNotSupportedException_DeserializCreateObjectDelegateIsNull(classInfo.Type);
+                        ThrowHelper.ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(classInfo.Type);
                     }
 
                     state.Current.ReturnValue = classInfo.CreateObject();

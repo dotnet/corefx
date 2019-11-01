@@ -56,9 +56,9 @@ namespace System.Text.Json
             }
             else if (state.Current.IsProcessingObject(ClassType.Object))
             {
-                if (classInfo.CreateObject is null)
+                if (classInfo.CreateObject == null)
                 {
-                    ThrowHelper.ThrowNotSupportedException_DeserializCreateObjectDelegateIsNull(classInfo.Type);
+                    ThrowHelper.ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(classInfo.Type);
                 }
 
                 state.Current.ReturnValue = classInfo.CreateObject();

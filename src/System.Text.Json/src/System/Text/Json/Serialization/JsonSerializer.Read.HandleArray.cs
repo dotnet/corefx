@@ -51,7 +51,7 @@ namespace System.Text.Json
             // path invoked in the main read loop.
             // Only ClassType.Enumerable is valid here since we just saw a StartArray token.
             if (state.Current.JsonPropertyInfo == null ||
-                (ClassType.Enumerable & state.Current.JsonPropertyInfo.ClassType) == 0)
+                state.Current.JsonPropertyInfo.ClassType != ClassType.Enumerable)
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type);
             }
