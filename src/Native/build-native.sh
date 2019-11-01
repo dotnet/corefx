@@ -26,7 +26,7 @@ usage()
 
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __nativeroot=$__scriptpath/Unix
-__rootRepo="$__scriptpath/../.."
+__rootRepo=$(cd "$__scriptpath/../.."; pwd -P)
 __artifactsDir="$__rootRepo/artifacts"
 
 initHostDistroRid()
