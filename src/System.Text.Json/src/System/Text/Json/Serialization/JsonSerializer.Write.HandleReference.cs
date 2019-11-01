@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
@@ -14,26 +15,21 @@ namespace System.Text.Json
 
         private static ResolvedReferenceHandling ResolveReferenceHandling(JsonSerializerOptions options, ref WriteStack state, out int referenceId, out bool writeAsReference, object currentPropertyValue = null)
         {
-            //if (currentFramePropertyInfo != state.Current.JsonPropertyInfo)
-            //{
-            //    throw new Exception("Does not always match");
-            //}
-
-            //if jsonPropertyInfo == null
-            //We are in the root object.
-
             ReferenceHandling handling;
-            //JsonProperty is null if is either root object or and object element within an array.
+
+            //This might be a bit expensive...
+            //Property has attribute?
             JsonReferenceHandlingAttribute attr = JsonPropertyInfo.GetAttribute<JsonReferenceHandlingAttribute>(state.Current.JsonPropertyInfo?.PropertyInfo);
-
-            //JsonReferenceHandlingAttribute classAttr = JsonClassInfo.
-
             if (attr != null)
             {
                 handling = attr.Handling;
             }
-            //else if()
-            //TODO: Add support for class-level attributes... here.
+            //Class has attribute?
+            else if ((attr = state.Current.JsonClassInfo.Type.GetCustomAttribute<JsonReferenceHandlingAttribute>()) != null)
+            {
+                handling = attr.Handling;
+            }
+            //Otherwise use options.
             else
             {
                 handling = options.ReferenceHandling;

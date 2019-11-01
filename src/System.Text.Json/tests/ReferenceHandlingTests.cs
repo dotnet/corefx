@@ -344,26 +344,61 @@ namespace System.Text.Json.Tests
             Assert.Equal(expected, actual);
         }
         #endregion
-        //Base scenarios
+        //End Base scenarios
 
-        private class SmallReproClass
+
+        #region JsonReferenceHandlingAttribute
+        private class EmployeeAnnotatedProperty
         {
-            public Dictionary<string, string> MyDictionary { get; set; } = new Dictionary<string, string> { { "DefaultKey", "DefaultValue" } };
+            public string Name { get; set; }
+            [JsonReferenceHandling(ReferenceHandling.Ignore)]
+            [JsonProperty(ReferenceLoopHandling = ReferenceLoopHandling.Ignore)]
+            public EmployeeAnnotatedProperty Manager { get; set; }
+            public List<EmployeeAnnotatedProperty> Subordinates { get; set; }
         }
 
         [Fact]
-        public static void SmallRepro()
+        public static void ObjectPropertyAttribute()
         {
-            SmallReproClass elem = new SmallReproClass();
-            List<SmallReproClass> root = new List<SmallReproClass> { elem, elem };
-            
+            EmployeeAnnotatedProperty root = new EmployeeAnnotatedProperty { Name = "Angela" };
+            EmployeeAnnotatedProperty node = new EmployeeAnnotatedProperty { Name = "Bob" };
 
-            string expected = JsonConvert.SerializeObject(root, JsonNetSettings(ReferenceHandling.Ignore));
-            string actual = JsonSerializer.Serialize(root, SystemTextJsonOptions(ReferenceHandling.Ignore));
+            root.Subordinates = new List<EmployeeAnnotatedProperty> { node };
+            node.Manager = root;
+
+            string expected = JsonConvert.SerializeObject(root);
+            string actual = JsonSerializer.Serialize(root);
 
             Assert.Equal(expected, actual);
         }
 
+        [JsonReferenceHandling(ReferenceHandling.Preserve)]
+        [JsonObject(IsReference = true, ItemReferenceLoopHandling = ReferenceLoopHandling.Serialize)]
+        private class EmployeeAnnotatedClass
+        {
+            public string Name { get; set; }
+            public EmployeeAnnotatedClass Manager { get; set; }
+            //Need to ignore on collections due Newtonsoft's JsonObjectAttribute does not preserves them, that's a bug on their end.
+            [JsonReferenceHandling(ReferenceHandling.Ignore)]
+            [JsonProperty(ReferenceLoopHandling = ReferenceLoopHandling.Ignore, IsReference = false)]
+            public List<EmployeeAnnotatedClass> Subordinates { get; set; }
+        }
+
+        [Fact]
+        public static void ObjectClassAttribute()
+        {
+            EmployeeAnnotatedClass root = new EmployeeAnnotatedClass { Name = "Angela" };
+            EmployeeAnnotatedClass node = new EmployeeAnnotatedClass { Name = "Bob" };
+
+            root.Subordinates = new List<EmployeeAnnotatedClass> { node };
+            node.Manager = root;
+
+            string expected = JsonConvert.SerializeObject(root);
+            string actual = JsonSerializer.Serialize(root);
+
+            Assert.Equal(expected, actual);
+        }
+        #endregion
 
         //utility
         private static JsonSerializerSettings JsonNetSettings(ReferenceHandling referenceHandling)
@@ -395,154 +430,6 @@ namespace System.Text.Json.Tests
             return _serializeOptionsError;
         }
         //End utility
-
-
-        //[Fact]
-        //public static void SerializeArrayInArrayLoop()
-        //{
-        //    List<object> objectList = new List<object>();
-        //    objectList.Add(objectList);
-        //    objectList.Add(objectList);
-
-        //    var options = new JsonSerializerOptions
-        //    {
-        //        WriteIndented = true,
-        //        IgnoreNullValues = true,
-        //        ReferenceHandling = ReferenceHandling.Preserve
-        //    };
-
-        //    string json = JsonSerializer.Serialize(objectList, options);
-        //    Console.WriteLine(json);
-        //}
-
-        //[Fact]
-        //public static void SerializeArrayLoop()
-        //{
-        //    var Angela = new Employee { Name = "Angela" };
-        //    //var Bob = new Employee { Name = "Bob" };
-
-        //    Angela.Subordinates = new List<Employee> { Angela };
-        //    //Bob.Manager = Angela;
-
-        //    var options = new JsonSerializerOptions
-        //    {
-        //        WriteIndented = true,
-        //        IgnoreNullValues = true,
-        //        ReferenceHandling = ReferenceHandling.Preserve
-        //    };
-
-        //    string json = JsonSerializer.Serialize(Angela, options);
-        //    Console.WriteLine(json);
-        //}
-
-        //[Fact]
-        //public static void SerializeObjectWithDuplicateArray() 
-        //{
-        //    var Angela = new Employee { Name = "Angela" };
-        //    var subordinates = new List<Employee> { };
-
-        //    Angela.List1 = subordinates;
-        //    Angela.List2 = subordinates;
-
-        //    var options = new JsonSerializerOptions
-        //    {
-        //        WriteIndented = true,
-        //        IgnoreNullValues = true,
-        //        ReferenceHandling = ReferenceHandling.Ignore
-        //    };
-
-        //    string json = JsonSerializer.Serialize(Angela, options);
-        //    Console.WriteLine(json);
-        //}
-
-        //[Fact]
-        //public static void SerializeObjectLoop()
-        //{
-        //    var Angela = new Employee { Name = "Angela" };
-        //    //var Bob = new Employee { Name = "Bob" };
-
-        //    //Angela.Subordinates = new List<Employee> { Angela };
-        //    //Bob.Manager = Angela;
-        //    Angela.Manager = Angela;
-
-        //    var options = new JsonSerializerOptions
-        //    {
-        //        WriteIndented = true,
-        //        IgnoreNullValues = true,
-        //        ReferenceHandling = ReferenceHandling.Preserve
-        //    };
-
-        //    string json = JsonSerializer.Serialize(Angela, options);
-        //    Console.WriteLine(json);
-        //}
-
-        //[Fact]
-        //public static void SerializeReferenceLoop()
-        //{
-        //    var joe = new Employee { Name = "Joe User" };
-        //    var mike = new Employee { Name = "Mike Manager" };
-        //    joe.Manager = mike;
-        //    mike.Manager = mike;
-        //    //mike.Manager.Manager.Manager.Manager = null;
-
-        //    var options = new JsonSerializerOptions { 
-        //        WriteIndented = true, 
-        //        ReferenceHandling = ReferenceHandling.Ignore 
-        //    };
-
-        //    string json = JsonSerializer.Serialize(joe, options);
-
-        //    Console.WriteLine(json);
-        //}
-
-        //[Fact]
-        //public static void WriteReferenceLoop()
-        //{
-        //    var joe = new Employee { Name = "Joe User" };
-        //    var mike = new Employee { Name = "Mike Manager" };
-        //    joe.Manager = mike;
-        //    mike.Manager = mike;
-        //    //mike.Manager.Manager.Manager.Manager = null;
-
-        //    var options = new JsonSerializerOptions
-        //    {
-        //        WriteIndented = true,
-        //        ReferenceHandling = ReferenceHandling.Ignore
-        //    };
-
-        //    var json = JsonSerializer.Serialize(joe, options);
-
-        //    Console.WriteLine(json);
-        //}
-
-        //[Fact]
-        //public static void WriteReferenceLoopOnList()
-        //{
-        //    Employee mike = new Employee
-        //    {
-        //        Name = "Mike - Manager",
-        //    };
-
-        //    Employee joe = new Employee
-        //    {
-        //        Name = "Joe - User",
-        //        Manager = mike,
-        //    };
-
-        //    mike.Subordinates = new List<Employee>() 
-        //    { 
-        //        joe 
-        //    };
-
-        //    var options = new JsonSerializerOptions
-        //    {
-        //        WriteIndented = true,
-        //        ReferenceHandling = ReferenceHandling.Ignore
-        //    };
-
-        //    string json = JsonSerializer.Serialize(joe, options);
-        //    Console.WriteLine(json);
-        //}
 
     }
 }
