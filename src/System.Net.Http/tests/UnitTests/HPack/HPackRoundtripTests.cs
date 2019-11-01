@@ -18,7 +18,7 @@ namespace System.Net.Http.Unit.Tests.HPack
     public class HPackRoundtripTests
     {
 
-        [Property(Arbitrary = new[] { typeof(HeadersGenerator) }, MaxTest = 100, QuietOnSuccess = true)]
+        [Property(Arbitrary = new[] { typeof(HeadersGenerator) }, MaxTest = 100, QuietOnSuccess = true, Replay = "(0,0)")]
         public void HPack_HeaderEncodeDecodeRoundtrip_ShouldMatchOriginalInput(HttpHeaders headers)
         {
             Memory<byte> encoding = HPackEncode(headers);
@@ -40,7 +40,7 @@ namespace System.Net.Http.Unit.Tests.HPack
             FillAvailableSpaceWithOnes(buffer);
             string[] headerValues = Array.Empty<string>();
 
-            foreach (KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo> header in headers.HeaderStore ?? Enumerable.Empty<KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo>>())
+            foreach (KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo> header in headers.HeaderStore)
             {
                 int headerValuesCount = HttpHeaders.GetValuesAsStrings(header.Key, header.Value, ref headerValues);
                 Assert.InRange(headerValuesCount, 0, int.MaxValue);
