@@ -11,11 +11,11 @@ namespace System.Security.Cryptography
 
         protected AsymmetricAlgorithm() { }
 
-        public static AsymmetricAlgorithm? Create() =>
+        public static AsymmetricAlgorithm Create() =>
             throw new PlatformNotSupportedException(SR.Cryptography_DefaultAlgorithm_NotSupported);
 
-        public static AsymmetricAlgorithm? Create(string algName) =>
-            (AsymmetricAlgorithm?)CryptoConfigForwarder.CreateFromName(algName);
+        public static AsymmetricAlgorithm Create(string algName) =>
+            (AsymmetricAlgorithm)CryptoConfigForwarder.CreateFromName(algName);
 
         public virtual int KeySize
         {

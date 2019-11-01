@@ -16,11 +16,11 @@ namespace System.Security.Cryptography
 
         protected HashAlgorithm() { }
 
-        public static HashAlgorithm? Create() =>
+        public static HashAlgorithm Create() =>
             CryptoConfigForwarder.CreateDefaultHashAlgorithm();
 
-        public static HashAlgorithm? Create(string hashName) =>
-            (HashAlgorithm?)CryptoConfigForwarder.CreateFromName(hashName);
+        public static HashAlgorithm Create(string hashName) =>
+            (HashAlgorithm)CryptoConfigForwarder.CreateFromName(hashName);
 
         public virtual int HashSize => HashSizeValue;
 

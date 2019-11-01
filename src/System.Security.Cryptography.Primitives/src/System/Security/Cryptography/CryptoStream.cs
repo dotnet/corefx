@@ -14,7 +14,7 @@ namespace System.Security.Cryptography
     {
         // Member variables
         private readonly Stream _stream;
-        private readonly ICryptoTransform? _transform;
+        private readonly ICryptoTransform _transform;
         private byte[]? _inputBuffer;  // read from _stream before _Transform
         private int _inputBufferIndex;
         private int _inputBlockSize;
@@ -29,12 +29,12 @@ namespace System.Security.Cryptography
 
         // Constructors
 
-        public CryptoStream(Stream stream, ICryptoTransform? transform, CryptoStreamMode mode)
+        public CryptoStream(Stream stream, ICryptoTransform transform, CryptoStreamMode mode)
             : this(stream, transform, mode, false)
         {
         }
 
-        public CryptoStream(Stream stream, ICryptoTransform? transform, CryptoStreamMode mode, bool leaveOpen)
+        public CryptoStream(Stream stream, ICryptoTransform transform, CryptoStreamMode mode, bool leaveOpen)
         {
 
             _stream = stream;
@@ -112,10 +112,9 @@ namespace System.Security.Cryptography
             // Transform and write out the final bytes.
             if (_canWrite)
             {
-                Debug.Assert(_transform != null && _inputBuffer != null);
                 Debug.Assert(_outputBufferIndex == 0, "The output index can only ever be non-zero when in read mode.");
 
-                byte[] finalBytes = _transform.TransformFinalBlock(_inputBuffer, 0, _inputBufferIndex);
+                byte[] finalBytes = _transform.TransformFinalBlock(_inputBuffer!, 0, _inputBufferIndex);
                 if (useAsync)
                 {
                     await _stream.WriteAsync(new ReadOnlyMemory<byte>(finalBytes)).ConfigureAwait(false);
@@ -317,7 +316,7 @@ namespace System.Security.Cryptography
             // OK, see first if it's a multi-block transform and we can speed up things
             int blocksToProcess = bytesToDeliver / _outputBlockSize;
 
-            Debug.Assert(_transform != null && _inputBuffer != null);
+            Debug.Assert(_inputBuffer != null);
             if (blocksToProcess > 1 && _transform.CanTransformMultipleBlocks)
             {
                 int numWholeBlocksInBytes = blocksToProcess * _inputBlockSize;
@@ -521,11 +520,11 @@ namespace System.Security.Cryptography
             // transform them, and write them out.  Cache any remaining bytes in the _InputBuffer.
             int bytesToWrite = count;
             int currentInputIndex = offset;
-            Debug.Assert(_inputBuffer != null);
             // if we have some bytes in the _InputBuffer, we have to deal with those first,
             // so let's try to make an entire block out of it
             if (_inputBufferIndex > 0)
             {
+                Debug.Assert(_inputBuffer != null);
                 if (count >= _inputBlockSize - _inputBufferIndex)
                 {
                     // we have enough to transform at least a block, so fill the input block
@@ -546,12 +545,12 @@ namespace System.Security.Cryptography
             }
 
             Debug.Assert(_outputBufferIndex == 0, "The output index can only ever be non-zero when in read mode.");
-            Debug.Assert(_outputBuffer != null && _transform != null);
             // At this point, either the _InputBuffer is full, empty, or we've already returned.
             // If full, let's process it -- we now know the _OutputBuffer is empty
             int numOutputBytes;
             if (_inputBufferIndex == _inputBlockSize)
             {
+                Debug.Assert(_inputBuffer != null && _outputBuffer != null);
                 numOutputBytes = _transform.TransformBlock(_inputBuffer, 0, _inputBlockSize, _outputBuffer, 0);
                 // write out the bytes we just got
                 if (useAsync)
@@ -607,6 +606,7 @@ namespace System.Security.Cryptography
                     }
                     else
                     {
+                        Debug.Assert(_outputBuffer != null);
                         // do it the slow way
                         numOutputBytes = _transform.TransformBlock(buffer, currentInputIndex, _inputBlockSize, _outputBuffer, 0);
 
@@ -621,6 +621,7 @@ namespace System.Security.Cryptography
                 }
                 else
                 {
+                    Debug.Assert(_inputBuffer != null);
                     // In this case, we don't have an entire block's worth left, so store it up in the
                     // input buffer, which by now must be empty.
                     Buffer.BlockCopy(buffer, currentInputIndex, _inputBuffer, 0, bytesToWrite);
@@ -734,6 +735,8 @@ namespace System.Security.Cryptography
                 _outputBlockSize = _transform.OutputBlockSize;
                 _outputBuffer = new byte[_outputBlockSize];
             }
+            else
+                throw new ArgumentNullException(nameof(_transform));
         }
 
         private SemaphoreSlim AsyncActiveSemaphore
