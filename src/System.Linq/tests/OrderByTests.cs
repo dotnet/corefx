@@ -4,6 +4,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Threading;
 using Xunit;
 
 namespace System.Linq.Tests
@@ -440,6 +442,61 @@ namespace System.Linq.Tests
                 Assert.Equal(source.Min(), x);
             }
             Assert.Equal(1, count);
+        }
+
+        [Fact]
+        public void CultureOrdering()
+        {
+            CultureInfo current = Thread.CurrentThread.CurrentCulture;
+            try
+            {
+                string[] source = new[] { "Apple0", "Æble0", "Apple1", "Æble1", "Apple2", "Æble2" };
+
+                string[] resultDK = new[] { "Apple0", "Apple1", "Apple2", "Æble0", "Æble1", "Æble2" };
+                string[] resultAU = new[] { "Æble0", "Æble1", "Æble2", "Apple0", "Apple1", "Apple2" };
+
+                string[] check;
+
+                CultureInfo dk = new CultureInfo("da-DK");
+                CultureInfo au = new CultureInfo("en-AU");
+
+                Thread.CurrentThread.CurrentCulture = dk;
+                check = source.OrderBy(x => x).ToArray();
+                Assert.Equal(check, resultDK, StringComparer.InvariantCultureIgnoreCase);
+
+                Thread.CurrentThread.CurrentCulture = au;
+                check = source.OrderBy(x => x).ToArray();
+                Assert.Equal(check, resultAU, StringComparer.InvariantCultureIgnoreCase);
+
+                IEnumerator<string> s;
+                int idx;
+
+                Thread.CurrentThread.CurrentCulture = dk;
+                s = source.OrderBy(x => x).GetEnumerator(); // "dk" whilst GetEnumerator
+                Thread.CurrentThread.CurrentCulture = au; // but "au" whilst accessing...
+                idx = 0;
+                while (s.MoveNext()) // sort is done on first MoveNext, so should have "au" sorting
+                {
+                    Assert.Equal(s.Current, resultAU[idx++], StringComparer.InvariantCultureIgnoreCase);
+                }
+
+                Thread.CurrentThread.CurrentCulture = au;
+                s = source.OrderBy(x => x).GetEnumerator(); // "au" whilst GetEnumerator
+                Thread.CurrentThread.CurrentCulture = dk; // but "dk" whilst accessing...
+                idx = 0;
+                while (s.MoveNext()) // sort is done on first MoveNext, so should have "dk" sorting
+                {
+                    Assert.Equal(s.Current, resultDK[idx++], StringComparer.InvariantCultureIgnoreCase);
+
+                    // ensure changing culture whilst enumerating doesn't affect sort
+                    Thread.CurrentThread.CurrentCulture = au;
+                }
+            }
+            finally
+            {
+                // be polite and restore previous culture
+                Thread.CurrentThread.CurrentCulture = current;
+            }
         }
     }
 }

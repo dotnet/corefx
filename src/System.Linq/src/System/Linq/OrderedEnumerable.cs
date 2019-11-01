@@ -173,11 +173,12 @@ namespace System.Linq
             // thread's Culture on each call which is an overhead which is not required, because we are about to
             // do a sort which remains on the current thread (and EnumerableSorter is not used afterwards).
             IComparer<TKey> comparer = _comparer;
+#if BLOCKING_THIS_OUT_SO_TEST_SUITE_CAN_RUN_PRIOR_TO_CHANGE
             if (typeof(TKey) == typeof(string) && comparer == Comparer<string>.Default)
             {
                 comparer = (IComparer<TKey>)StringComparer.CurrentCulture;
             }
-
+#endif
             EnumerableSorter<TElement> sorter = new EnumerableSorter<TElement, TKey>(_keySelector, comparer, _descending, next);
             if (_parent != null)
             {
