@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
@@ -68,13 +69,105 @@ namespace System.Threading.Tests
         }
 
         [Fact]
-        public static void EventWaitHandle_Create_BeyondMaxLengthName()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void EventWaitHandle_Create_NullName()
         {
-            AssertExtensions.Throws<ArgumentException>("name", () =>
+             using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, null, out bool createdNew, GetBasicEventWaitHandleSecurity());
+             Assert.NotNull(eventHandle);
+             Assert.True(createdNew);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void EventWaitHandle_Create_NullNameMultipleNew()
+        {
+            using EventWaitHandle eventHandle1 = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, null, out bool createdNew1, GetBasicEventWaitHandleSecurity());
+            Assert.NotNull(eventHandle1);
+            Assert.True(createdNew1);
+
+            using EventWaitHandle eventHandle2 = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, null, out bool createdNew2, GetBasicEventWaitHandleSecurity());
+            Assert.NotNull(eventHandle2);
+            Assert.True(createdNew2);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void EventWaitHandle_Create_EmptyName()
+        {
+            using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, string.Empty, out bool createdNew, GetBasicEventWaitHandleSecurity());
+            Assert.NotNull(eventHandle);
+            Assert.True(createdNew);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void EventWaitHandle_Create_EmptyNameMultipleNew()
+        {
+            using EventWaitHandle eventHandle1 = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, string.Empty, out bool createdNew1, GetBasicEventWaitHandleSecurity());
+            Assert.NotNull(eventHandle1);
+            Assert.True(createdNew1);
+
+            using EventWaitHandle eventHandle2 = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, string.Empty, out bool createdNew2, GetBasicEventWaitHandleSecurity());
+            Assert.NotNull(eventHandle2);
+            Assert.True(createdNew2);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void EventWaitHandle_Create_CreateNewExisting()
+        {
+            string name = GetRandomName();
+
+            using EventWaitHandle eventHandleNew = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, name, out bool createdNew1, GetBasicEventWaitHandleSecurity());
+            Assert.NotNull(eventHandleNew);
+            Assert.True(createdNew1);
+
+            using EventWaitHandle eventHandleExisting = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, name, out bool createdNew2, GetBasicEventWaitHandleSecurity());
+            Assert.NotNull(eventHandleExisting);
+            Assert.False(createdNew2);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void EventWaitHandle_Create_GlobalPrefixNameNotFound()
+        {
+            Assert.Throws<DirectoryNotFoundException>(() =>
             {
-                string name = new string('X', Interop.Kernel32.MAX_PATH + 1);
-                using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, name, out bool createdNew, GetBasicEventWaitHandleSecurity());
+                string prefixedName = @"GLOBAL\" + GetRandomName();
+                using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, prefixedName, out bool createdNew, GetBasicEventWaitHandleSecurity());
+                Assert.NotNull(eventHandle);
+                Assert.True(createdNew);
             });
+        }
+
+        // The documentation says MAX_PATH is the length limit for name, but it won't throw any errors:
+        // https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createeventexw
+        // The .NET Core constructors for EventWaitHandle do not throw on name longer than MAX_LENGTH, so the extension method should match the behavior:
+        // https://source.dot.net/#System.Private.CoreLib/shared/System/Threading/EventWaitHandle.Windows.cs,20
+        // The .NET Framework constructor throws:
+        // https://referencesource.microsoft.com/#mscorlib/system/threading/eventwaithandle.cs,59
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void EventWaitHandle_Create_BeyondMaxPathLength()
+        {
+            string name = new string('x', Interop.Kernel32.MAX_PATH + 100);
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, name, out bool createdNew, GetBasicEventWaitHandleSecurity());
+                });
+            }
+            else
+            {
+                using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, EventResetMode.AutoReset, name, out bool createdNew, GetBasicEventWaitHandleSecurity());
+                Assert.NotNull(eventHandle);
+                Assert.True(createdNew);
+
+                using EventWaitHandle openedByName = EventWaitHandle.OpenExisting(name);
+                Assert.NotNull(openedByName);
+            }
         }
 
         [Theory]
@@ -107,16 +200,16 @@ namespace System.Threading.Tests
         [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
         [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Modify,      AccessControlType.Allow)]
         [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Modify,      AccessControlType.Deny)]
-        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize,      AccessControlType.Allow)]
-        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize,      AccessControlType.Deny)]
+        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
+        [InlineData(true,  EventResetMode.AutoReset,   EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
         [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.FullControl, AccessControlType.Allow)]
         [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.FullControl, AccessControlType.Deny)]
         [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
         [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
         [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Modify,      AccessControlType.Allow)]
         [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Modify,      AccessControlType.Deny)]
-        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
-        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
+        [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
+        [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
         public static void EventWaitHandle_Create_SpecificParameters(bool initialState, EventResetMode mode, EventWaitHandleRights rights, AccessControlType accessControl)
         {
             var security = GetEventWaitHandleSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
@@ -130,7 +223,7 @@ namespace System.Threading.Tests
 
         #region Helper methods
 
-        private static string GetRandomNameMaxLength()
+        private static string GetRandomName()
         {
             return Guid.NewGuid().ToString("N");
         }
@@ -154,16 +247,14 @@ namespace System.Threading.Tests
 
         private static void CreateAndVerifyEventWaitHandle(EventWaitHandleSecurity security)
         {
-
             CreateAndVerifyEventWaitHandle(initialState: true, EventResetMode.AutoReset, security);
         }
 
         private static void CreateAndVerifyEventWaitHandle(bool initialState, EventResetMode mode, EventWaitHandleSecurity expectedSecurity)
         {
-            string name = GetRandomNameMaxLength();
+            string name = GetRandomName();
 
             using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState, mode, name, out bool createdNew, expectedSecurity);
-
             Assert.NotNull(eventHandle);
             Assert.True(createdNew);
 
@@ -197,10 +288,10 @@ namespace System.Threading.Tests
         private static bool AreAccessRulesEqual(EventWaitHandleAccessRule expectedRule, EventWaitHandleAccessRule actualRule)
         {
             return
-                expectedRule.AccessControlType == actualRule.AccessControlType &&
+                expectedRule.AccessControlType     == actualRule.AccessControlType &&
                 expectedRule.EventWaitHandleRights == actualRule.EventWaitHandleRights &&
-                expectedRule.InheritanceFlags == actualRule.InheritanceFlags &&
-                expectedRule.PropagationFlags == actualRule.PropagationFlags;
+                expectedRule.InheritanceFlags      == actualRule.InheritanceFlags &&
+                expectedRule.PropagationFlags      == actualRule.PropagationFlags;
         }
 
         #endregion

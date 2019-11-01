@@ -20,8 +20,10 @@ namespace System.Threading
         /// <param name="createdNew">When this method returns, it is set to <see langword="true" /> if a local event was created (that is, if name is <see langword="null" /> or an empty string) or if the specified named system event was created; <see langword="false" /> if the specified named system event already existed. This parameter is passed uninitialized.</param>
         /// <param name="eventSecurity">The Windows access control security to apply.</param>
         /// <returns>An object that represents the named event wait handle.</returns>
-        /// <exception cref="ArgumentException">The length of the name exceeds the maximum limit.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="eventSecurity" /> is <see langword="null" />.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="eventSecurity" /> is <see langword="null" />.
+        /// -or-
+        /// .NET Framework only: The <paramref name="name" /> length is beyond MAX_PATH (260 characters).
+        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">The <paramref name="mode" /> enum value was out of legal range.</exception>
         /// <exception cref="DirectoryNotFoundException">Could not find a part of the path specified in <paramref name="name" />.</exception>
         /// <exception cref="WaitHandleCannotBeOpenedException">A system-wide synchronization event with the provided <paramref name="name" /> was not found.
@@ -29,21 +31,21 @@ namespace System.Threading
         /// An <see cref="EventWaitHandle" /> with system-wide name <paramref name="name" /> cannot be created. An <see cref="EventWaitHandle" /> of a different type might have the same name.</exception>
         public static unsafe EventWaitHandle Create(bool initialState, EventResetMode mode, string name, out bool createdNew, EventWaitHandleSecurity eventSecurity)
         {
-            if (name.Length > Interop.Kernel32.MAX_PATH)
-            {
-                throw new ArgumentException(SR.Format(SR.Argument_WaitHandleNameTooLong, name), nameof(name));
-            }
             if (eventSecurity == null)
             {
                 throw new ArgumentNullException(nameof(eventSecurity));
             }
 
-            bool isManualReset = mode switch
+            if (mode != EventResetMode.AutoReset && mode != EventResetMode.ManualReset)
             {
-                EventResetMode.ManualReset => true,
-                EventResetMode.AutoReset => false,
-                _ => throw new ArgumentOutOfRangeException(nameof(mode), SR.Format(SR.ArgumentOutOfRange_Enum))
-            };
+                throw new ArgumentOutOfRangeException(nameof(mode));
+            }
+
+            uint eventFlags = initialState ? Interop.Kernel32.CREATE_EVENT_INITIAL_SET : 0;
+            if (mode == EventResetMode.ManualReset)
+            {
+                eventFlags |= (uint)Interop.Kernel32.CREATE_EVENT_MANUAL_RESET;
+            }
 
             fixed (byte* pSecurityDescriptor = eventSecurity.GetSecurityDescriptorBinaryForm())
             {
@@ -53,7 +55,7 @@ namespace System.Threading
                     lpSecurityDescriptor = (IntPtr)pSecurityDescriptor
                 };
 
-                SafeWaitHandle handle = Interop.Kernel32.CreateEvent(ref secAttrs, isManualReset, initialState, name);
+                SafeWaitHandle handle = Interop.Kernel32.CreateEventEx((IntPtr)(&secAttrs), name, eventFlags, (uint)EventWaitHandleRights.FullControl);
 
                 ValidateHandle(handle, name, out createdNew);
 
