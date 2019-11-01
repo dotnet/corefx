@@ -37,7 +37,7 @@ namespace System.IO
                     // FileNotFound only if the containing directory exists.
 
                     bool isDirectory = (error.Error == Interop.Error.ENOENT) &&
-                        (overwrite || !DirectoryExists(Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(destFullPath!))!));
+                        (overwrite || !DirectoryExists(Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(destFullPath))!));
 
                     Interop.CheckIo(
                         error.Error,
