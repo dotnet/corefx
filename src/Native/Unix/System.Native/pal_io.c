@@ -1194,6 +1194,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     int outFd;
     int ret;
     int tmpErrno;
+    int openFlags;
     struct stat_ sourceStat;
 
     while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR);
@@ -1249,11 +1250,18 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     (void)srcPath;
 #endif
 
-    while ((outFd = open(destPath, O_WRONLY | O_TRUNC | O_CREAT | (overwrite ? 0 : O_EXCL), sourceStat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))) < 0 && errno == EINTR);
+    openFlags = O_WRONLY | O_TRUNC | O_CREAT | (overwrite ? 0 : O_EXCL);
+#if HAVE_O_CLOEXEC
+    openFlags |= O_CLOEXEC;
+#endif
+    while ((outFd = open(destPath, openFlags, sourceStat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))) < 0 && errno == EINTR);
     if (outFd < 0)
     {
         return -1;
     }
+#if !HAVE_O_CLOEXEC
+    fcntl(outFd, F_SETFD, FD_CLOEXEC);
+#endif
 
     // Get the stats on the source file.
     bool copied = false;
