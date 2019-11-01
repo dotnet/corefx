@@ -29,29 +29,29 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Arcade dependencies -->
-    <MicrosoftDotNetApiCompatVersion>5.0.0-beta.19530.15</MicrosoftDotNetApiCompatVersion>
-    <MicrosoftDotNetCodeAnalysisVersion>5.0.0-beta.19530.15</MicrosoftDotNetCodeAnalysisVersion>
-    <MicrosoftDotNetGenAPIVersion>5.0.0-beta.19530.15</MicrosoftDotNetGenAPIVersion>
-    <MicrosoftDotNetGenFacadesVersion>5.0.0-beta.19530.15</MicrosoftDotNetGenFacadesVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.19530.15</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftDotNetXUnitConsoleRunnerVersion>2.5.1-beta.19530.15</MicrosoftDotNetXUnitConsoleRunnerVersion>
-    <MicrosoftDotNetBuildTasksPackagingVersion>5.0.0-beta.19530.15</MicrosoftDotNetBuildTasksPackagingVersion>
-    <MicrosoftDotNetRemoteExecutorVersion>5.0.0-beta.19530.15</MicrosoftDotNetRemoteExecutorVersion>
-    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19530.15</MicrosoftDotNetBuildTasksFeedVersion>
-    <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19530.15</MicrosoftDotNetVersionToolsTasksVersion>
+    <MicrosoftDotNetApiCompatVersion>5.0.0-beta.19551.2</MicrosoftDotNetApiCompatVersion>
+    <MicrosoftDotNetCodeAnalysisVersion>5.0.0-beta.19551.2</MicrosoftDotNetCodeAnalysisVersion>
+    <MicrosoftDotNetGenAPIVersion>5.0.0-beta.19551.2</MicrosoftDotNetGenAPIVersion>
+    <MicrosoftDotNetGenFacadesVersion>5.0.0-beta.19551.2</MicrosoftDotNetGenFacadesVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.19551.2</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitConsoleRunnerVersion>2.5.1-beta.19551.2</MicrosoftDotNetXUnitConsoleRunnerVersion>
+    <MicrosoftDotNetBuildTasksPackagingVersion>5.0.0-beta.19551.2</MicrosoftDotNetBuildTasksPackagingVersion>
+    <MicrosoftDotNetRemoteExecutorVersion>5.0.0-beta.19551.2</MicrosoftDotNetRemoteExecutorVersion>
+    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19551.2</MicrosoftDotNetBuildTasksFeedVersion>
+    <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19551.2</MicrosoftDotNetVersionToolsTasksVersion>
     <!-- Core-setup dependencies -->
-    <MicrosoftNETCoreAppVersion>5.0.0-alpha.1.19530.10</MicrosoftNETCoreAppVersion>
-    <MicrosoftNETCoreDotNetHostVersion>5.0.0-alpha.1.19530.10</MicrosoftNETCoreDotNetHostVersion>
-    <MicrosoftNETCoreDotNetHostPolicyVersion>5.0.0-alpha.1.19530.10</MicrosoftNETCoreDotNetHostPolicyVersion>
+    <MicrosoftNETCoreAppVersion>5.0.0-alpha.1.19551.1</MicrosoftNETCoreAppVersion>
+    <MicrosoftNETCoreDotNetHostVersion>5.0.0-alpha.1.19551.1</MicrosoftNETCoreDotNetHostVersion>
+    <MicrosoftNETCoreDotNetHostPolicyVersion>5.0.0-alpha.1.19551.1</MicrosoftNETCoreDotNetHostPolicyVersion>
     <!-- Coreclr dependencies -->
     <MicrosoftNETCoreILAsmVersion>5.0.0-alpha1.19525.1</MicrosoftNETCoreILAsmVersion>
     <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19525.1</MicrosoftNETCoreRuntimeCoreCLRVersion>
     <MicrosoftNETSdkILVersion>5.0.0-alpha1.19525.1</MicrosoftNETSdkILVersion>
     <!-- Corefx dependencies -->
-    <MicrosoftNETCorePlatformsVersion>5.0.0-alpha.1.19531.1</MicrosoftNETCorePlatformsVersion>
-    <runtimenativeSystemIOPortsVersion>5.0.0-alpha.1.19531.1</runtimenativeSystemIOPortsVersion>
+    <MicrosoftNETCorePlatformsVersion>5.0.0-alpha.1.19551.1</MicrosoftNETCorePlatformsVersion>
+    <runtimenativeSystemIOPortsVersion>5.0.0-alpha.1.19551.1</runtimenativeSystemIOPortsVersion>
     <!-- Standard dependencies -->
-    <NETStandardLibraryVersion>2.2.0-prerelease.19530.2</NETStandardLibraryVersion>
+    <NETStandardLibraryVersion>2.2.0-prerelease.19551.1</NETStandardLibraryVersion>
     <!-- dotnet-optimization dependencies -->
     <optimizationwindows_ntx64IBCCoreFxVersion>99.99.99-master-20190716.1</optimizationwindows_ntx64IBCCoreFxVersion>
     <!-- sni -->
