@@ -12,8 +12,6 @@ namespace System.Threading.Tests
 {
     public static class ThreadingAclExtensionsTests
     {
-        private const MutexRights BasicMutexRights = MutexRights.FullControl | MutexRights.Synchronize | MutexRights.Modify;
-
         #region Test methods
 
         #region Existence tests
@@ -65,7 +63,7 @@ namespace System.Threading.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("mutexSecurity", () =>
             {
-                using Mutex eventHandle = MutexAcl.Create(initiallyOwned: true, "Test", out bool createdNew, mutexSecurity: null);
+                using Mutex eventHandle = MutexAcl.Create(initiallyOwned: true, GetRandomName(), out bool createdNew, mutexSecurity: null);
             });
         }
 
@@ -101,16 +99,18 @@ namespace System.Threading.Tests
 
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [InlineData(true,  AccessControlType.Allow, BasicMutexRights)]
-        [InlineData(false, AccessControlType.Allow, BasicMutexRights)]
-        [InlineData(true,  AccessControlType.Deny,  BasicMutexRights)]
-        [InlineData(false, AccessControlType.Deny,  BasicMutexRights)]
-
+        [InlineData(true,  AccessControlType.Allow, MutexRights.FullControl)]
+        [InlineData(true,  AccessControlType.Allow, MutexRights.Modify)]
+        [InlineData(true,  AccessControlType.Deny,  MutexRights.Synchronize)]
+        [InlineData(true,  AccessControlType.Deny,  MutexRights.Modify | MutexRights.Synchronize)]
+        [InlineData(false, AccessControlType.Allow, MutexRights.FullControl)]
+        [InlineData(false, AccessControlType.Allow, MutexRights.Modify)]
+        [InlineData(false, AccessControlType.Deny, MutexRights.Synchronize)]
+        [InlineData(false, AccessControlType.Deny, MutexRights.Modify | MutexRights.Synchronize)]
         public static void Mutex_Create_SpecificParameters(bool initiallyOwned, AccessControlType accessControl, MutexRights rights)
         {
             var security = GetMutexSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
             CreateAndVerifyMutex(initiallyOwned, security);
-               
         }
 
         #endregion
@@ -119,7 +119,7 @@ namespace System.Threading.Tests
 
         #region Helper methods
 
-        private static string GetRandomNameMaxLength()
+        private static string GetRandomName()
         {
             return Guid.NewGuid().ToString("N");
         }
@@ -128,7 +128,7 @@ namespace System.Threading.Tests
         {
             return GetMutexSecurity(
                 WellKnownSidType.BuiltinUsersSid,
-                BasicMutexRights,
+                MutexRights.FullControl,
                 AccessControlType.Allow);
         }
 
@@ -148,7 +148,7 @@ namespace System.Threading.Tests
 
         private static void CreateAndVerifyMutex(bool initiallyOwned, MutexSecurity expectedSecurity)
         {
-            string name = GetRandomNameMaxLength();
+            string name = GetRandomName();
 
             using Mutex eventHandle = MutexAcl.Create(initiallyOwned, name, out bool createdNew, expectedSecurity);
 
@@ -186,9 +186,9 @@ namespace System.Threading.Tests
         {
             return
                 expectedRule.AccessControlType == actualRule.AccessControlType &&
-                expectedRule.MutexRights == actualRule.MutexRights &&
-                expectedRule.InheritanceFlags == actualRule.InheritanceFlags &&
-                expectedRule.PropagationFlags == actualRule.PropagationFlags;
+                expectedRule.MutexRights       == actualRule.MutexRights &&
+                expectedRule.InheritanceFlags  == actualRule.InheritanceFlags &&
+                expectedRule.PropagationFlags  == actualRule.PropagationFlags;
         }
 
         #endregion
