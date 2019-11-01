@@ -105,7 +105,6 @@ if %__IntermediatesDir% == "" (
 )
 set "__CMakeBinDir=%__CMakeBinDir:\=/%"
 set "__IntermediatesDir=%__IntermediatesDir:\=/%"
-set "CMAKE_ROOT_REPO=%__repoRoot%
 
 :: Check that the intermediate directory exists so we can place our cmake build tree there
 if "%__BuildTarget%"=="rebuild" if exist "%__IntermediatesDir%" rd /s /q "%__IntermediatesDir%"
