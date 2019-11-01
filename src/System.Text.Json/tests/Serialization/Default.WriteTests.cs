@@ -28,7 +28,6 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Contains(@"""MyDateTime"":null", json);
             Assert.Contains(@"""MyIntArray"":null", json);
             Assert.Contains(@"""MyIntList"":null", json);
-            Assert.Contains(@"""MyStringDictionary"":{""key"":""value""},", json);
         }
 
         [Fact]
