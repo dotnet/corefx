@@ -14,7 +14,7 @@ namespace System.Text.Json.Serialization
         /// Initializes a new instance of <see cref="JsonPropertyNameAttribute"/> with the specified property name.
         /// </summary>
         /// <param name="handling">One of the enumeration values on ReferenceLoopHandling.</param>
-        public JsonReferenceHandlingAttribute(ReferenceHandling handling)
+        public JsonReferenceHandlingAttribute(ReferenceHandlingOnSerialize handling)
         {
             Handling = handling;
         }
@@ -22,6 +22,6 @@ namespace System.Text.Json.Serialization
         /// <summary>
         /// The name of the property.
         /// </summary>
-        public ReferenceHandling Handling { get; }
+        public ReferenceHandlingOnSerialize Handling { get; }
     }
 }

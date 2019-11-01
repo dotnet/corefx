@@ -85,7 +85,7 @@ namespace System.Text.Json
         Allow = (byte)2,
     }
 
-    public enum ReferenceHandling
+    public enum ReferenceHandlingOnSerialize
     {
         Error = 0,
         Ignore = 1,
@@ -466,7 +466,7 @@ namespace System.Text.Json
         public bool PropertyNameCaseInsensitive { get { throw null; } set { } }
         public System.Text.Json.JsonNamingPolicy PropertyNamingPolicy { get { throw null; } set { } }
         public System.Text.Json.JsonCommentHandling ReadCommentHandling { get { throw null; } set { } }
-        public System.Text.Json.ReferenceHandling ReferenceHandling { get { throw null; } set { } }
+        public System.Text.Json.ReferenceHandlingOnSerialize ReferenceHandlingOnSerialize { get { throw null; } set { } }
         public bool WriteIndented { get { throw null; } set { } }
         public System.Text.Json.Serialization.JsonConverter GetConverter(System.Type typeToConvert) { throw null; }
     }
@@ -782,10 +782,10 @@ namespace System.Text.Json.Serialization
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false)]
     public sealed class JsonReferenceHandlingAttribute : JsonAttribute
     {
-        public JsonReferenceHandlingAttribute(ReferenceHandling handling)
+        public JsonReferenceHandlingAttribute(ReferenceHandlingOnSerialize handling)
         {
             Handling = handling;
         }
-        public ReferenceHandling Handling { get; }
+        public ReferenceHandlingOnSerialize Handling { get; }
     }
 }

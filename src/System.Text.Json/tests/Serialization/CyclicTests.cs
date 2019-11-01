@@ -20,7 +20,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Serialize(obj));
         }
 
-        [Theory]
+        [Theory(Skip = "Behavior changed due ReferenceHandlingOnSerialize")]
         [InlineData(1)]
         [InlineData(2)]
         [InlineData(10)]
@@ -28,6 +28,7 @@ namespace System.Text.Json.Serialization.Tests
         public static void WriteCyclicFail(int depth)
         {
             var rootObj = new TestClassWithCycle("root");
+            //This creates unique objects, so no real cycle is expected.
             CreateObjectHierarchy(1, depth, rootObj);
 
             {

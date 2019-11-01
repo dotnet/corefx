@@ -120,7 +120,7 @@ namespace System.Text.Json
         {
             if (_referenceLoopStack == null)
             {
-                _referenceLoopStack = new HashSet<object>();
+                _referenceLoopStack = new HashSet<object>(ReferenceEqualsEqualityComparer.Comparer);
             }
 
             return _referenceLoopStack.Add(value);
@@ -132,7 +132,7 @@ namespace System.Text.Json
         {
             if (_preservedReferences == null)
             {
-                _preservedReferences = new Dictionary<object, int>();
+                _preservedReferences = new Dictionary<object, int>(ReferenceEqualsEqualityComparer.Comparer);
                 _preservedReferences[value] = id = 1;
                 return true;
             }

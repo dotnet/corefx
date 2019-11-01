@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 namespace System.Text.Json
@@ -15,7 +16,7 @@ namespace System.Text.Json
 
         private static ResolvedReferenceHandling ResolveReferenceHandling(JsonSerializerOptions options, ref WriteStack state, out int referenceId, out bool writeAsReference, object currentPropertyValue = null)
         {
-            ReferenceHandling handling;
+            ReferenceHandlingOnSerialize handling;
 
             //This might be a bit expensive...
             //Property has attribute?
@@ -32,19 +33,19 @@ namespace System.Text.Json
             //Otherwise use options.
             else
             {
-                handling = options.ReferenceHandling;
+                handling = options.ReferenceHandlingOnSerialize;
             }
 
             object value = currentPropertyValue ?? state.Current.CurrentValue;
 
             switch (handling)
             {
-                case ReferenceHandling.Error:
-                case ReferenceHandling.Ignore:
+                case ReferenceHandlingOnSerialize.Error:
+                case ReferenceHandlingOnSerialize.Ignore:
                     referenceId = default;
                     writeAsReference = default;
                     return ResolveReferenceLoop(handling, value, ref state);
-                case ReferenceHandling.Preserve:
+                case ReferenceHandlingOnSerialize.Preserve:
                     writeAsReference = ResolvePreserveReference(out referenceId, value, ref state);
                     return ResolvedReferenceHandling.Preserve;//return ResolvePreserveReference(currentValue, ref state, writer);
                 default:
@@ -54,13 +55,14 @@ namespace System.Text.Json
             }
         }
 
-        private static ResolvedReferenceHandling ResolveReferenceLoop(ReferenceHandling handling, object value, ref WriteStack state)
+        private static ResolvedReferenceHandling ResolveReferenceLoop(ReferenceHandlingOnSerialize handling, object value, ref WriteStack state)
         {
             if (!state.AddStackReference(value))
             {
-                if (handling == ReferenceHandling.Error)
+                if (handling == ReferenceHandlingOnSerialize.Error)
                 {
-                    throw new JsonException("Invalid Reference Loop Detected!");
+                    //Nice to have: include the name of the property in this message.
+                    throw new JsonException("Invalid Reference Loop Detected!.");
                 }
 
                 //if reference wasn't added to the set, it means it was already there, therefore we should ignore it BUT not remove it from the set in order to keep validating against further references.

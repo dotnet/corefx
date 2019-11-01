@@ -25,6 +25,7 @@ namespace System.Text.Json
         private JsonNamingPolicy _jsonPropertyNamingPolicy;
         private JsonCommentHandling _readCommentHandling;
         private JavaScriptEncoder _encoder;
+        private ReferenceHandlingOnSerialize _referenceHandlingOnSerialize;
         private int _defaultBufferSize = BufferSizeDefault;
         private int _maxDepth;
         private bool _allowTrailingCommas;
@@ -297,9 +298,22 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Defines how reference loops are treated when writing the JSON.
+        /// Defines how references are treated when writing the JSON, this is convenient to dealt with circularity.
         /// </summary>
-        public ReferenceHandling ReferenceHandling { get; set; }
+        public ReferenceHandlingOnSerialize ReferenceHandlingOnSerialize
+        {
+            get => _referenceHandlingOnSerialize;
+            set
+            {
+                VerifyMutable();
+
+                if ((uint)value > (uint)ReferenceHandlingOnSerialize.Preserve)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                _referenceHandlingOnSerialize = value;
+            }
+        }
 
         internal MemberAccessor MemberAccessorStrategy
         {
