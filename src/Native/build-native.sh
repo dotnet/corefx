@@ -26,7 +26,13 @@ usage()
 
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __nativeroot=$__scriptpath/Unix
-__rootRepo=$(cd "$__scriptpath/../.."; pwd -P)
+# TODO: (Consolidation) Remove when consolidated
+if [ -f "$__scriptpath/../../../.dotnet-runtime-placeholder" ]; then
+    __rootRepo=$(cd "$__scriptpath/../../.."; pwd -P)
+else
+    # we're still in corefx
+    __rootRepo=$(cd "$__scriptpath/../.."; pwd -P)
+fi
 __artifactsDir="$__rootRepo/artifacts"
 
 initHostDistroRid()
