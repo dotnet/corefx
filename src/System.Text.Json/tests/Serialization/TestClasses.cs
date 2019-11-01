@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -195,6 +196,19 @@ namespace System.Text.Json.Serialization.Tests
                 @"}";
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_null_json);
+    }
+
+    public class TestClassWithInitializedDefaultValueProperties
+    {
+        [DefaultValue("Hello")]
+        public string MyString { get; set; } = "Hello";
+        [DefaultValue(1)]
+        public int? MyInt { get; set; } = 1;
+        [DefaultValue(null)]
+        public DateTime? MyDateTime { get; set; } = null;
+        public int[] MyIntArray { get; set; } = new int[] { 1 };
+        public List<int> MyIntList { get; set; } = new List<int> { 1 };
+        public Dictionary<string, string> MyStringDictionary { get; set; } = new Dictionary<string, string> { ["key"] = "value" };
     }
 
     public class TestClassWithNestedObjectInner : ITestClass
