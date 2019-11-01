@@ -1209,7 +1209,9 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     {
         if (sourceStat.st_dev == destStat.st_dev && sourceStat.st_ino == destStat.st_ino)
         {
-            errno = EBUSY;
+            // Attempt to copy file over itself. Bail out early with the appropriate
+            // error code.
+            errno = overwrite ? EBUSY : EEXIST;
             return -1;
         }
 
