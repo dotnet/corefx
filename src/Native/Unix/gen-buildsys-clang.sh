@@ -16,7 +16,7 @@ then
 fi
 
 #root directory of the project
-repo_root="$1"
+repo_root=$1
 
 # Set up the environment to be used for building with clang.
 if which "clang-$3.$4" > /dev/null 2>&1

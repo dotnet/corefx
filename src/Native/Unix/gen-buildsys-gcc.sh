@@ -16,7 +16,7 @@ then
 fi
 
 #root directory of the project
-repo_root="$1"
+repo_root=$1
 
 # Locate gcc
 gcc_prefix=""
