@@ -948,6 +948,9 @@ namespace System.Net.Sockets
         /// <summary>
         /// Places a <see cref="Socket"/> in a listening state.
         /// </summary>
+        /// <remarks>
+        /// The maximum length of the pending connections queue will be determined automatically.
+        /// </remarks>
         public void Listen() => Listen(int.MaxValue);
 
         /// <summary>
