@@ -40,7 +40,6 @@ namespace System.Text.Json.Serialization.Tests
 
             var obj = new TestClassWithInitializedDefaultValueProperties
             {
-                MyString = "Hello",
                 MyInt = 1,
                 MyDateTime = null,
                 MyIntArray = new int[] { 1 },
