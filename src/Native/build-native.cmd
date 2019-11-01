@@ -4,8 +4,8 @@ setlocal
 :SetupArgs
 :: Initialize the args that will be passed to cmake
 set __nativeWindowsDir=%~dp0\Windows
-set __artifactsDir=%~dp0..\..\artifacts
-set __rootDir=%~dp0..\..
+set __repoRoot=%~dp0..\..
+set __artifactsDir=%__repoRoot%\artifacts
 set __CMakeBinDir=""
 set __IntermediatesDir=""
 set __BuildArch=x64
@@ -105,6 +105,7 @@ if %__IntermediatesDir% == "" (
 )
 set "__CMakeBinDir=%__CMakeBinDir:\=/%"
 set "__IntermediatesDir=%__IntermediatesDir:\=/%"
+set "CMAKE_ROOT_REPO=%__repoRoot%
 
 :: Check that the intermediate directory exists so we can place our cmake build tree there
 if "%__BuildTarget%"=="rebuild" if exist "%__IntermediatesDir%" rd /s /q "%__IntermediatesDir%"
