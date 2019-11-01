@@ -52,11 +52,11 @@ if [[ -n "$CROSSCOMPILE" ]]; then
         exit 1
     fi
     if [[ -z "$CONFIG_DIR" ]]; then
-        CONFIG_DIR="$repo_root/cross"
+        CONFIG_DIR=$repo_root/cross
     fi
     export TARGET_BUILD_ARCH=$build_arch
-    cmake_extra_defines="$cmake_extra_defines -C $CONFIG_DIR/tryrun.cmake"
-    cmake_extra_defines="$cmake_extra_defines -DCMAKE_TOOLCHAIN_FILE=$CONFIG_DIR/toolchain.cmake"
+    cmake_extra_defines="$cmake_extra_defines -C \"$CONFIG_DIR/tryrun.cmake\""
+    cmake_extra_defines="$cmake_extra_defines -DCMAKE_TOOLCHAIN_FILE=\"$CONFIG_DIR/toolchain.cmake\""
 fi
 if [ "$build_arch" == "armel" ]; then
     cmake_extra_defines="$cmake_extra_defines -DARM_SOFTFP=1"
