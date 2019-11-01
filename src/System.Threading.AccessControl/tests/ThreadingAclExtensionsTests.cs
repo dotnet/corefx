@@ -117,7 +117,6 @@ namespace System.Threading.Tests
         [InlineData(true,  EventResetMode.ManualReset, EventWaitHandleRights.Modify,      AccessControlType.Deny)]
         [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
         [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
-
         public static void EventWaitHandle_Create_SpecificParameters(bool initialState, EventResetMode mode, EventWaitHandleRights rights, AccessControlType accessControl)
         {
             var security = GetEventWaitHandleSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
