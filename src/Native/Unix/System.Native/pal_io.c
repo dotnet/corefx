@@ -32,9 +32,7 @@
 #include <sys/attr.h>
 #include <sys/clonefile.h>
 #endif
-#if HAVE_FCOPYFILE
-#include <copyfile.h>
-#elif HAVE_SENDFILE_4
+#if HAVE_SENDFILE_4
 #include <sys/sendfile.h>
 #endif
 #if HAVE_INOTIFY
@@ -1137,7 +1135,6 @@ int32_t SystemNative_Write(intptr_t fd, const void* buffer, int32_t bufferSize)
     return (int32_t)count;
 }
 
-#if !HAVE_FCOPYFILE
 // Read all data from inFd and write it to outFd
 static int32_t CopyFile_ReadWrite(int inFd, int outFd)
 {
@@ -1190,7 +1187,6 @@ static int32_t CopyFile_ReadWrite(int inFd, int outFd)
     free(buffer);
     return 0;
 }
-#endif // !HAVE_FCOPYFILE
 
 int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char* destPath, int32_t overwrite)
 {
@@ -1259,17 +1255,6 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
         return -1;
     }
 
-#if HAVE_FCOPYFILE
-    // If fcopyfile is available (macOS), try to use it, as it handles
-    // copying both data and metadata. Unlike sendfile below it's
-    // implemented as user space library but future version of macOS
-    // may optimize it.
-    ret = fcopyfile(inFd, outFd, NULL, COPYFILE_ALL) == 0 ? 0 : -1;
-    tmpErrno = errno;
-    close(outFd);
-    errno = tmpErrno;
-    return ret;
-#else
     // Get the stats on the source file.
     bool copied = false;
 
@@ -1350,7 +1335,6 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     close(outFd);
     errno = tmpErrno;
     return 0;
-#endif // HAVE_FCOPYFILE
 }
 
 intptr_t SystemNative_INotifyInit(void)
