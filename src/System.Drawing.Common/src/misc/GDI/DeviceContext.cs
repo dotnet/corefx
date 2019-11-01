@@ -164,7 +164,7 @@ namespace System.Drawing.Internal
                 _hWnd = Interop.User32.WindowFromDC(new HandleRef(this, _hDC));
             }
 #if TRACK_HDC
-            Debug.WriteLine(DbgUtil.StackTraceToStr($"DeviceContext(hDC=0x{unchecked((int)hDC):X8}, Type={dcType})"));
+            Debug.WriteLine(DbgUtil.StackTraceToStr($"DeviceContext(hDC=0x{(int)hDC:X8}, Type={dcType})"));
 #endif
         }
 

@@ -10,12 +10,12 @@ internal static partial class Interop
     internal static partial class Gdi32
     {
         [DllImport(Libraries.Gdi32, ExactSpelling = true)]
-        public static extern bool DeleteObject(IntPtr hObject);
+        public static extern bool DeleteObject(IntPtr ho);
 
-        public static bool DeleteObject(HandleRef hObject)
+        public static bool DeleteObject(HandleRef ho)
         {
-            bool result = DeleteObject(hObject.Handle);
-            GC.KeepAlive(hObject.Wrapper);
+            bool result = DeleteObject(ho.Handle);
+            GC.KeepAlive(ho.Wrapper);
             return result;
         }
     }

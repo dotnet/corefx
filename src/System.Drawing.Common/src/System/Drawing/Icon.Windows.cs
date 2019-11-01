@@ -382,21 +382,12 @@ namespace System.Drawing
         {
             IntPtr hTempRgn = Interop.Gdi32.CreateRectRgn(0, 0, 0, 0);
             IntPtr hSaveRgn = IntPtr.Zero;
-            try
+
+            int result = Interop.Gdi32.GetClipRgn(hDC, hTempRgn);
+            if (result > 0)
             {
-                int result = Interop.Gdi32.GetClipRgn(hDC, hTempRgn);
-                if (result > 0)
-                {
-                    hSaveRgn = hTempRgn;
-                    hTempRgn = IntPtr.Zero;
-                }
-            }
-            finally
-            {
-                if (hTempRgn != IntPtr.Zero)
-                {
-                    Interop.Gdi32.DeleteObject(hTempRgn);
-                }
+                hSaveRgn = hTempRgn;
+                hTempRgn = IntPtr.Zero;
             }
 
             return hSaveRgn;
@@ -404,17 +395,7 @@ namespace System.Drawing
 
         private static void RestoreClipRgn(IntPtr hDC, IntPtr hRgn)
         {
-            try
-            {
-                Interop.Gdi32.SelectClipRgn(new HandleRef(null, hDC), new HandleRef(null, hRgn));
-            }
-            finally
-            {
-                if (hRgn != IntPtr.Zero)
-                {
-                   Interop.Gdi32.DeleteObject(hRgn);
-                }
-            }
+            Interop.Gdi32.SelectClipRgn(new HandleRef(null, hDC), new HandleRef(null, hRgn));
         }
 
         internal void Draw(Graphics graphics, int x, int y)

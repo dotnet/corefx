@@ -10,12 +10,12 @@ internal static partial class Interop
     internal static partial class Gdi32
     {
         [DllImport(Libraries.Gdi32, ExactSpelling = true)]
-        public static extern RegionType GetRgnBox(IntPtr hRegion, ref RECT clipRect);
+        public static extern RegionType GetRgnBox(IntPtr hrgn, ref RECT lprc);
 
-        public static RegionType GetRgnBox(HandleRef hRegion, ref RECT clipRect)
+        public static RegionType GetRgnBox(HandleRef hrgn, ref RECT lprc)
         {
-            RegionType result = GetRgnBox(hRegion.Handle, ref clipRect);
-            GC.KeepAlive(hRegion.Wrapper);
+            RegionType result = GetRgnBox(hrgn.Handle, ref lprc);
+            GC.KeepAlive(hrgn.Wrapper);
             return result;
         }
     }

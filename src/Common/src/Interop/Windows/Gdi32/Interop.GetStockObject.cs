@@ -15,6 +15,6 @@ internal static partial class Interop
         }
 
         [DllImport(Libraries.Gdi32, ExactSpelling = true)]
-        public static extern IntPtr GetStockObject(StockObject nIndex);
+        public static extern IntPtr GetStockObject(StockObject i);
     }
 }

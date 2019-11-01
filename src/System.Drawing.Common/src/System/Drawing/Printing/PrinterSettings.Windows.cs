@@ -834,14 +834,7 @@ namespace System.Drawing.Printing
         {
             using (DeviceContext dc = CreateInformationContext(DefaultPageSettings))
             {
-                try
-                {
-                    return Interop.Gdi32.GetDeviceCaps(new HandleRef(dc, dc.Hdc), capability);
-                }
-                catch (InvalidPrinterException)
-                {
-                    return defaultValue;
-                }
+                return Interop.Gdi32.GetDeviceCaps(new HandleRef(dc, dc.Hdc), capability);
             }
         }
 
