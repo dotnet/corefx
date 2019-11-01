@@ -445,7 +445,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void CultureOrdering()
+        public void CultureOrderBy()
         {
             CultureInfo current = Thread.CurrentThread.CurrentCulture;
             try
@@ -462,11 +462,11 @@ namespace System.Linq.Tests
 
                 Thread.CurrentThread.CurrentCulture = dk;
                 check = source.OrderBy(x => x).ToArray();
-                Assert.Equal(check, resultDK, StringComparer.InvariantCultureIgnoreCase);
+                Assert.Equal(check, resultDK, StringComparer.Ordinal);
 
                 Thread.CurrentThread.CurrentCulture = au;
                 check = source.OrderBy(x => x).ToArray();
-                Assert.Equal(check, resultAU, StringComparer.InvariantCultureIgnoreCase);
+                Assert.Equal(check, resultAU, StringComparer.Ordinal);
 
                 IEnumerator<string> s;
                 int idx;
@@ -477,7 +477,7 @@ namespace System.Linq.Tests
                 idx = 0;
                 while (s.MoveNext()) // sort is done on first MoveNext, so should have "au" sorting
                 {
-                    Assert.Equal(s.Current, resultAU[idx++], StringComparer.InvariantCultureIgnoreCase);
+                    Assert.Equal(s.Current, resultAU[idx++], StringComparer.Ordinal);
                 }
 
                 Thread.CurrentThread.CurrentCulture = au;
@@ -486,10 +486,41 @@ namespace System.Linq.Tests
                 idx = 0;
                 while (s.MoveNext()) // sort is done on first MoveNext, so should have "dk" sorting
                 {
-                    Assert.Equal(s.Current, resultDK[idx++], StringComparer.InvariantCultureIgnoreCase);
+                    Assert.Equal(s.Current, resultDK[idx++], StringComparer.Ordinal);
 
                     // ensure changing culture whilst enumerating doesn't affect sort
                     Thread.CurrentThread.CurrentCulture = au;
+                }
+            }
+            finally
+            {
+                // be polite and restore previous culture
+                Thread.CurrentThread.CurrentCulture = current;
+            }
+        }
+
+        [Fact]
+        public void CultureOrderByElementAt()
+        {
+            CultureInfo current = Thread.CurrentThread.CurrentCulture;
+            try
+            {
+                string[] source = new[] { "Apple0", "Æble0", "Apple1", "Æble1", "Apple2", "Æble2" };
+
+                string[] resultDK = new[] { "Apple0", "Apple1", "Apple2", "Æble0", "Æble1", "Æble2" };
+                string[] resultAU = new[] { "Æble0", "Æble1", "Æble2", "Apple0", "Apple1", "Apple2" };
+
+                CultureInfo dk = new CultureInfo("da-DK");
+                CultureInfo au = new CultureInfo("en-AU");
+
+                IEnumerable<string> delaySortedSource = source.OrderBy(x => x);
+                for (var i = 0; i < source.Length; ++i)
+                {
+                    Thread.CurrentThread.CurrentCulture = dk;
+                    Assert.Equal(delaySortedSource.ElementAt(i), resultDK[i], StringComparer.Ordinal);
+
+                    Thread.CurrentThread.CurrentCulture = au;
+                    Assert.Equal(delaySortedSource.ElementAt(i), resultAU[i], StringComparer.Ordinal);
                 }
             }
             finally
