@@ -12,11 +12,6 @@ namespace System.Threading.Tests
 {
     public static class ThreadingAclExtensionsTests
     {
-        // Dec: 34603010
-        // Hex: 0x2100002
-        // As predefined here: https://source.dot.net/#System.Private.CoreLib/shared/System/Threading/EventWaitHandle.Windows.cs
-        private const int BasicAccessRights = Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.EVENT_MODIFY_STATE;
-
         #region Test methods
 
         #region Existence tests
@@ -118,18 +113,14 @@ namespace System.Threading.Tests
 
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [InlineData(true,  EventResetMode.AutoReset,   AccessControlType.Allow, BasicAccessRights)]
-        [InlineData(false, EventResetMode.AutoReset,   AccessControlType.Allow, BasicAccessRights)]
-        [InlineData(true,  EventResetMode.ManualReset, AccessControlType.Allow, BasicAccessRights)]
-        [InlineData(false, EventResetMode.ManualReset, AccessControlType.Allow, BasicAccessRights)]
-        [InlineData(true,  EventResetMode.AutoReset,   AccessControlType.Deny,  BasicAccessRights)]
-        [InlineData(false, EventResetMode.AutoReset,   AccessControlType.Deny,  BasicAccessRights)]
-        [InlineData(true,  EventResetMode.ManualReset, AccessControlType.Deny,  BasicAccessRights)]
-        [InlineData(false, EventResetMode.ManualReset, AccessControlType.Deny,  BasicAccessRights)]
+        [InlineData(true,  EventResetMode.AutoReset,   AccessControlType.Allow, EventWaitHandleRights.FullControl)]
+        [InlineData(true,  EventResetMode.ManualReset, AccessControlType.Allow, EventWaitHandleRights.FullControl)]
+        [InlineData(true,  EventResetMode.AutoReset,   AccessControlType.Deny,  EventWaitHandleRights.FullControl)]
+        [InlineData(true,  EventResetMode.ManualReset, AccessControlType.Deny,  EventWaitHandleRights.FullControl)]
 
-        public static void EventWaitHandle_Create_SpecificParameters(bool initialState, EventResetMode mode, AccessControlType accessControl, int rights)
+        public static void EventWaitHandle_Create_SpecificParameters(bool initialState, EventResetMode mode, AccessControlType accessControl, EventWaitHandleRights rights)
         {
-            var security = GetEventWaitHandleSecurity(WellKnownSidType.BuiltinUsersSid, (EventWaitHandleRights)rights, accessControl);
+            var security = GetEventWaitHandleSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
             CreateAndVerifyEventWaitHandle(initialState, mode, security);
                
         }
@@ -149,7 +140,7 @@ namespace System.Threading.Tests
         {
             return GetEventWaitHandleSecurity(
                 WellKnownSidType.BuiltinUsersSid,
-                (EventWaitHandleRights)BasicAccessRights,
+                EventWaitHandleRights.FullControl,
                 AccessControlType.Allow);
         }
 

@@ -19,7 +19,7 @@ namespace System.Threading
         /// <param name="name">The name of a system-wide synchronization event.</param>
         /// <param name="createdNew">When this method returns, it is set to <see langword="true" /> if a local event was created (that is, if name is <see langword="null" /> or an empty string) or if the specified named system event was created; <see langword="false" /> if the specified named system event already existed. This parameter is passed uninitialized.</param>
         /// <param name="eventSecurity">The Windows access control security to apply.</param>
-        /// <returns></returns>
+        /// <returns>An object that represents the named event wait handle.</returns>
         /// <exception cref="ArgumentException">The length of the name exceeds the maximum limit.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="eventSecurity" /> is <see langword="null" />.</exception>
         /// <exception cref="ArgumentOutOfRangeException">The <paramref name="mode" /> enum value was out of legal range.</exception>
@@ -42,12 +42,12 @@ namespace System.Threading
                 throw new ArgumentNullException(nameof(eventSecurity));
             }
 
-            bool isManualReset = mode switch
+            uint eventFlags = initialState ? Interop.Kernel32.CREATE_EVENT_INITIAL_SET : 0;
+
+            if (mode == EventResetMode.ManualReset)
             {
-                EventResetMode.ManualReset => true,
-                EventResetMode.AutoReset => false,
-                _ => throw new ArgumentOutOfRangeException(nameof(mode), SR.Format(SR.ArgumentOutOfRange_Enum))
-            };
+                eventFlags |= (uint)Interop.Kernel32.CREATE_EVENT_MANUAL_RESET;
+            }
 
             fixed (byte* pSecurityDescriptor = eventSecurity.GetSecurityDescriptorBinaryForm())
             {
@@ -57,7 +57,7 @@ namespace System.Threading
                     lpSecurityDescriptor = (IntPtr)pSecurityDescriptor
                 };
 
-                using SafeWaitHandle handle = Interop.Kernel32.CreateEvent(ref secAttrs, isManualReset, initialState, name);
+                using SafeWaitHandle handle = Interop.Kernel32.CreateEvent(ref secAttrs, name, eventFlags, (uint)EventWaitHandleRights.FullControl);
 
                 ValidateHandle(handle, name, out createdNew);
 
