@@ -4,7 +4,12 @@ setlocal
 :SetupArgs
 :: Initialize the args that will be passed to cmake
 set __nativeWindowsDir=%~dp0\Windows
-set __repoRoot=%~dp0..\..
+:: TODO: (Consolidation) Remove when consolidated
+if exist "%~dp0..\..\..\.dotnet-runtime-placeholder" (
+    set __repoRoot=%~dp0..\..\..
+) else (
+    set __repoRoot=%~dp0..\..
+)
 set __artifactsDir=%__repoRoot%\artifacts
 set __CMakeBinDir=""
 set __IntermediatesDir=""
