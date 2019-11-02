@@ -253,6 +253,7 @@ namespace Internal.Cryptography.Pal
             CertBagAsn[] certBags = ArrayPool<CertBagAsn>.Shared.Rent(10);
             AttributeAsn[][] certBagAttrs = ArrayPool<AttributeAsn[]>.Shared.Rent(10);
             SafeBagAsn[] keyBags = ArrayPool<SafeBagAsn>.Shared.Rent(10);
+            SubjectPublicKeyInfoAsn[] publicKeyInfos = null;
             AsymmetricAlgorithm[] keys = null;
             int certBagIdx = 0;
             int keyBagIdx = 0;
@@ -298,11 +299,57 @@ namespace Internal.Cryptography.Pal
                 keys = ArrayPool<AsymmetricAlgorithm>.Shared.Rent(keyBagIdx);
                 keys.AsSpan().Clear();
 
-                // Windows Compat: Load all keys before matching.
-                // Unloadable key? Unloadable PFX.
+                publicKeyInfos = ArrayPool<SubjectPublicKeyInfoAsn>.Shared.Rent(keyBagIdx);
+                publicKeyInfos.AsSpan().Clear();
+
+                byte[] spkiBuf = null;
+
                 for (int i = keyBagIdx - 1; i >= 0; i--)
                 {
-                    keys[i] = LoadKey(keyBags[i], password);
+                    byte[] publicKeyBytes = null;
+
+                    try
+                    {
+                        SafeBagAsn keyBag = keyBags[i];
+                        AsymmetricAlgorithm key = LoadKey(keyBag, password);
+                        publicKeyBytes = CryptoPool.Rent(keyBag.BagValue.Length);
+
+                        int pubLength;
+
+                        while (!key.TryExportSubjectPublicKeyInfo(spkiBuf, out pubLength))
+                        {
+                            byte[] toReturn = spkiBuf;
+                            spkiBuf = CryptoPool.Rent((toReturn?.Length ?? 128) * 2);
+
+                            if (toReturn != null)
+                            {
+                                // public key info doesn't need to be cleared
+                                CryptoPool.Return(toReturn, clearSize: 0);
+                            }
+                        }
+
+                        publicKeyInfos[i] = SubjectPublicKeyInfoAsn.Decode(
+                            spkiBuf.AsMemory(0, pubLength),
+                            AsnEncodingRules.DER);
+
+                        keys[i] = key;
+                        publicKeyBytes = null;
+                    }
+                    catch (CryptographicException)
+                    {
+                        // Windows 10 compatibility:
+                        // If anything goes wrong loading this key, just ignore it.
+                        // If no one ended up needing it, no harm/no foul.
+                        // If this has a LocalKeyId and something references it, then it'll fail.
+                    }
+                    finally
+                    {
+                        if (publicKeyBytes != null)
+                        {
+                            // Public key data doesn't need to be cleared.
+                            CryptoPool.Return(publicKeyBytes, clearSize: 0);
+                        }
+                    }
                 }
 
                 int certsCount = certBagIdx;
@@ -330,8 +377,32 @@ namespace Internal.Cryptography.Pal
 
                     _certs[certBagIdx].Cert = ReadX509Der(x509Data);
 
+                    // If no matching key was found, but there are keys,
+                    // compare SubjectPublicKeyInfo values
+                    if (matchingKeyIdx == -1 && keyBagIdx > 0)
+                    {
+                        ICertificatePalCore cert = _certs[certBagIdx].Cert;
+                        string algorithm = cert.KeyAlgorithm;
+                        byte[] keyParams = cert.KeyAlgorithmParameters;
+                        byte[] keyValue = cert.PublicKeyValue;
+
+                        for (int i = 0; i < keyBagIdx; i++)
+                        {
+                            if (PublicKeyMatches(algorithm, keyParams, keyValue, ref publicKeyInfos[i]))
+                            {
+                                matchingKeyIdx = i;
+                                break;
+                            }
+                        }
+                    }
+
                     if (matchingKeyIdx != -1)
                     {
+                        if (keys[matchingKeyIdx] == null)
+                        {
+                            throw new CryptographicException(SR.Cryptography_Pfx_BadKeyReference);
+                        }
+
                         _certs[certBagIdx].Key = keys[matchingKeyIdx];
                         keys[matchingKeyIdx] = null;
                     }
@@ -363,10 +434,71 @@ namespace Internal.Cryptography.Pal
                     ArrayPool<AsymmetricAlgorithm>.Shared.Return(keys);
                 }
 
+                if (publicKeyInfos != null)
+                {
+                    ArrayPool<SubjectPublicKeyInfoAsn>.Shared.Return(publicKeyInfos, clearArray: true);
+                }
+
                 ArrayPool<CertBagAsn>.Shared.Return(certBags, clearArray: true);
                 ArrayPool<AttributeAsn[]>.Shared.Return(certBagAttrs, clearArray: true);
                 ArrayPool<SafeBagAsn>.Shared.Return(keyBags, clearArray: true);
             }
+        }
+
+        private static bool PublicKeyMatches(
+            string algorithm,
+            byte[] keyParams,
+            byte[] keyValue,
+            ref SubjectPublicKeyInfoAsn publicKeyInfo)
+        {
+            if (!publicKeyInfo.SubjectPublicKey.Span.SequenceEqual(keyValue))
+            {
+                return false;
+            }
+
+            switch (algorithm)
+            {
+                case Oids.Rsa:
+                case Oids.RsaPss:
+                    switch (publicKeyInfo.Algorithm.Algorithm.Value)
+                    {
+                        case Oids.Rsa:
+                        case Oids.RsaPss:
+                            break;
+                        default:
+                            return false;
+                    }
+
+                    return
+                        publicKeyInfo.Algorithm.HasNullEquivalentParameters() &&
+                        AlgorithmIdentifierAsn.RepresentsNull(keyParams);
+                case Oids.EcPublicKey:
+                case Oids.EcDiffieHellman:
+                    switch (publicKeyInfo.Algorithm.Algorithm.Value)
+                    {
+                        case Oids.EcPublicKey:
+                        case Oids.EcDiffieHellman:
+                            break;
+                        default:
+                            return false;
+                    }
+
+                    return
+                        publicKeyInfo.Algorithm.Parameters.HasValue &&
+                        publicKeyInfo.Algorithm.Parameters.Value.Span.SequenceEqual(keyParams);
+            }
+
+            if (algorithm != publicKeyInfo.Algorithm.Algorithm.Value)
+            {
+                return false;
+            }
+
+            if (!publicKeyInfo.Algorithm.Parameters.HasValue)
+            {
+                return (keyParams?.Length ?? 0) == 0;
+            }
+
+            return publicKeyInfo.Algorithm.Parameters.Value.Span.SequenceEqual(keyParams);
         }
 
         private static int FindMatchingKey(
@@ -387,6 +519,8 @@ namespace Internal.Cryptography.Pal
                         {
                             return i;
                         }
+
+                        break;
                     }
                 }
             }

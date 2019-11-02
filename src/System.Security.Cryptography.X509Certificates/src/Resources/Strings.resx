@@ -201,6 +201,9 @@
   <data name="Cryptography_OpenInvalidHandle" xml:space="preserve">
     <value>Cannot open an invalid handle.</value>
   </data>
+  <data name="Cryptography_Pfx_BadKeyReference" xml:space="preserve">
+    <value>A certificate referenced a private key which was already referenced, or could not be loaded.</value>
+  </data>
   <data name="Cryptography_Pfx_BadPassword" xml:space="preserve">
     <value>The certificate data cannot be read with the provided password, the password may be incorrect.</value>
   </data>
