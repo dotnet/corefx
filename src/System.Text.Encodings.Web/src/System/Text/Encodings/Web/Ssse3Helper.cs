@@ -55,10 +55,7 @@ namespace System.Text.Encodings.Web
 
             Vector128<sbyte> mask = Sse2.And(bitPositions, bitMask);
 
-            Vector128<sbyte> ne0Gt = Sse2.CompareGreaterThan(mask, s_nullMaskSByte);
-            Vector128<sbyte> ne0Lt = Sse2.CompareLessThan(mask, s_nullMaskSByte);
-            mask = Sse2.Or(ne0Gt, ne0Lt);
-
+            mask = Sse2.CompareEqual(s_nullMaskSByte, Sse2.CompareEqual(s_nullMaskSByte, mask));
             return mask;
         }
 
