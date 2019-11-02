@@ -7,11 +7,11 @@ namespace System.Text.Json.Serialization
     /// <summary>
     /// Specifies handling of object references during serialization.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
     public sealed class JsonReferenceHandlingAttribute : JsonAttribute
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="JsonPropertyNameAttribute"/> with the specified property name.
+        /// Initializes a new instance of <see cref="JsonReferenceHandlingAttribute"/> with the specified handling.
         /// </summary>
         /// <param name="handling">One of the enumeration values on ReferenceLoopHandling.</param>
         public JsonReferenceHandlingAttribute(ReferenceHandlingOnSerialize handling)
@@ -20,7 +20,7 @@ namespace System.Text.Json.Serialization
         }
 
         /// <summary>
-        /// The name of the property.
+        /// The handling to use for the annotated type or property.
         /// </summary>
         public ReferenceHandlingOnSerialize Handling { get; }
     }

@@ -298,7 +298,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Defines how references are treated when writing the JSON, this is convenient to dealt with circularity.
+        /// Defines how references are treated when writing the JSON, this is convenient to deal with circularity.
         /// </summary>
         public ReferenceHandlingOnSerialize ReferenceHandlingOnSerialize
         {

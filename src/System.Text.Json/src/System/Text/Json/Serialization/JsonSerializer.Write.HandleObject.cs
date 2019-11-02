@@ -154,23 +154,15 @@ namespace System.Text.Json
 
             if (currentValue != null)
             {
-                //Probably remove this.
-                //if (ShouldHandleReference(ref state, currentValue, jsonPropertyInfo, options, writer))
-                //{
-                //    state.Current.MoveToNextProperty = true;
-                //    return true;
-                //}
-
                 // A new stack frame is required.
                 JsonPropertyInfo previousPropertyInfo = state.Current.JsonPropertyInfo;
                 state.Current.MoveToNextProperty = true;
 
                 JsonClassInfo nextClassInfo = jsonPropertyInfo.RuntimeClassInfo;
                 state.Push(nextClassInfo, currentValue);
+
                 // Set the PropertyInfo so we can obtain the property name in order to write it.
                 state.Current.JsonPropertyInfo = previousPropertyInfo;
-                ////TODO: PreserveRefereneHandling
-                //state.Current.CurrentFramePropertyInfo = previousPropertyInfo;
             }
             else
             {

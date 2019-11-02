@@ -13,7 +13,6 @@ namespace System.Text.Json
     {
         // The object (POCO or IEnumerable) that is being populated.
         public object CurrentValue;
-        //public JsonPropertyInfo CurrentFramePropertyInfo; //I need to hold JsonPropertyInfo so I can determine the action to take for PreserveReferenceHandling in write() based on the attribute hierarchy.
         public JsonClassInfo JsonClassInfo;
 
         // Support Dictionary keys.
@@ -29,7 +28,7 @@ namespace System.Text.Json
         public bool PopStackOnEndObject;
         public bool StartObjectWritten;
         public bool MoveToNextProperty;
-        //For preservation object wrapper.
+
         public bool WriteWrappingBraceOnEndCollection;
         public bool KeepReferenceInSet;
 

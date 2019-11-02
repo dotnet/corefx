@@ -12,12 +12,10 @@ namespace System.Text.Json
     {
         // Fields are used instead of properties to avoid value semantics.
         public WriteStackFrame Current;
-        public List<WriteStackFrame> Previous => _previous;
         private List<WriteStackFrame> _previous;
         private int _index;
-        //TODO: meant for ReferenceHandling.
         private Dictionary<object, int> _preservedReferences;
-        private HashSet<object> _referenceLoopStack; //Using a set for better performance.
+        private HashSet<object> _referenceLoopStack;
 
         public void Push()
         {

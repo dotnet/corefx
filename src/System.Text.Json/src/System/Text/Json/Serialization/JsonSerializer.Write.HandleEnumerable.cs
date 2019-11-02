@@ -53,7 +53,7 @@ namespace System.Text.Json
 
                 if (writeAsReference)
                 {
-                    // We don't need to enumerate, this is a reference and was already wrote in WriteObjectOrArrayStart.
+                    // We don't need to enumerate, this is a reference and was already written in WriteObjectOrArrayStart.
                     return WriteEndArray(ref state);
                 }
             }

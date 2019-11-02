@@ -5,7 +5,7 @@
 namespace System.Text.Json
 {
     /// <summary>
-    /// This enum defines the various ways the <see cref="Utf8JsonReader"/> can deal with comments.
+    /// This enum defines the various ways the <see cref="JsonSerializer"/> can deal with references on Serialization.
     /// </summary>
     public enum ReferenceHandlingOnSerialize
     {
