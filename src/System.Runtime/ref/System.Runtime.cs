@@ -5310,6 +5310,8 @@ namespace System.IO
         public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize) { throw null; }
         public virtual System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { throw null; }
         public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public virtual void CopyTo(System.Buffers.ReadOnlySpanAction<byte, object> callback, object state, int bufferSize) { }
+        public virtual System.Threading.Tasks.Task CopyToAsync(System.Func<object, System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.Task> callback, object state, int bufferSize, System.Threading.CancellationToken cancellationToken) { throw null; }
         [System.ObsoleteAttribute("CreateWaitHandle will be removed eventually.  Please use \"new ManualResetEvent(false)\" instead.")]
         protected virtual System.Threading.WaitHandle CreateWaitHandle() { throw null; }
         public void Dispose() { }

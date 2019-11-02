@@ -48,6 +48,7 @@
     <Compile Include="Stream\Stream.AsyncTests.cs" />
     <Compile Include="Stream\Stream.CopyToTests.cs" />
     <Compile Include="Stream\Stream.CopyToTests.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
+    <Compile Include="Stream\Stream.CopyToSpanTests.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="Stream\Stream.Methods.cs" />
     <Compile Include="Stream\Stream.TestLeaveOpen.cs" />
     <Compile Include="Stream\Stream.TimeoutTests.cs" />
