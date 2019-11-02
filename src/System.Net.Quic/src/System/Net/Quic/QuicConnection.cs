@@ -144,7 +144,7 @@ namespace System.Net.Quic
         /// Create an outbound unidirectional stream.
         /// </summary>
         /// <returns></returns>
-        public QuicStream CreateUnidirectionalStream()
+        public QuicStream OpenUnidirectionalStream()
         {
             if (_mock)
             {
@@ -167,7 +167,7 @@ namespace System.Net.Quic
         /// Create an outbound bidirectional stream.
         /// </summary>
         /// <returns></returns>
-        public QuicStream CreateBidirectionalStream()
+        public QuicStream OpenBidirectionalStream()
         {
             if (_mock)
             {

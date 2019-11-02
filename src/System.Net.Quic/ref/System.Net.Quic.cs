@@ -16,8 +16,8 @@ namespace System.Net.Quic
         public bool Connected => throw null;
         public IPEndPoint LocalEndPoint => throw null;
         public IPEndPoint RemoteEndPoint => throw null;
-        public QuicStream CreateUnidirectionalStream() => throw null;
-        public QuicStream CreateBidirectionalStream() => throw null;
+        public QuicStream OpenUnidirectionalStream() => throw null;
+        public QuicStream OpenBidirectionalStream() => throw null;
         public System.Threading.Tasks.ValueTask<QuicStream> AcceptStreamAsync(System.Threading.CancellationToken cancellationToken = default) => throw null;
         public void Close() => throw null;
         public void Dispose() => throw null;

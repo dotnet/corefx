@@ -29,7 +29,7 @@ namespace System.Net.Quic.Tests
                             using (QuicConnection connection = new QuicConnection(listenEndPoint, sslClientAuthenticationOptions: null, mock: true))
                             {
                                 await connection.ConnectAsync();
-                                using (QuicStream stream = connection.CreateBidirectionalStream())
+                                using (QuicStream stream = connection.OpenBidirectionalStream())
                                 {
                                     await stream.WriteAsync(s_data);
                                 }
@@ -84,7 +84,7 @@ namespace System.Net.Quic.Tests
 
         private static async Task CreateAndTestBidirectionalStream(QuicConnection c1, QuicConnection c2)
         {
-            using (QuicStream s1 = c1.CreateBidirectionalStream())
+            using (QuicStream s1 = c1.OpenBidirectionalStream())
             {
                 Assert.True(s1.CanRead);
                 Assert.True(s1.CanWrite);
@@ -101,7 +101,7 @@ namespace System.Net.Quic.Tests
 
         private static async Task CreateAndTestUnidirectionalStream(QuicConnection c1, QuicConnection c2)
         {
-            using (QuicStream s1 = c1.CreateUnidirectionalStream())
+            using (QuicStream s1 = c1.OpenUnidirectionalStream())
             {
                 Assert.False(s1.CanRead);
                 Assert.True(s1.CanWrite);
