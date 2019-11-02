@@ -344,14 +344,17 @@ check_c_source_compiles(
     "
     HAVE_SENDFILE_6)
 
-check_symbol_exists(
-    fcopyfile
-    copyfile.h
-    HAVE_FCOPYFILE)
+check_include_files(
+    "sys/clonefile.h"
+    HAVE_CLONEFILE)
 
 check_include_files(
      "sys/sockio.h"
      HAVE_SYS_SOCKIO_H)
+
+check_include_files(
+     "linux/ethtool.h"
+     HAVE_ETHTOOL_H)
 
 check_include_files(
      "sys/poll.h"
@@ -650,6 +653,10 @@ check_include_files(
 check_include_files(
     linux/rtnetlink.h
     HAVE_LINUX_RTNETLINK_H)
+
+check_include_files(
+    linux/can.h
+    HAVE_LINUX_CAN_H)
 
 check_symbol_exists(
     getpeereid

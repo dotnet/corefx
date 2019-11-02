@@ -24,6 +24,17 @@ usage()
     exit 1
 }
 
+__scriptpath=$(cd "$(dirname "$0")"; pwd -P)
+__nativeroot=$__scriptpath/Unix
+# TODO: (Consolidation) Remove when consolidated
+if [ -f "$__scriptpath/../../../.dotnet-runtime-placeholder" ]; then
+    __rootRepo=$(cd "$__scriptpath/../../.."; pwd -P)
+else
+    # we're still in corefx
+    __rootRepo=$(cd "$__scriptpath/../.."; pwd -P)
+fi
+__artifactsDir="$__rootRepo/artifacts"
+
 initHostDistroRid()
 {
     __HostDistroRid=""
@@ -137,13 +148,21 @@ build_native()
     echo "Commencing build of corefx native components for $__BuildOS.$__BuildArch.$__BuildType"
     cd "$__IntermediatesDir"
 
+    if [ "$__BuildArch" == "wasm" ]; then
+        if [ "$EMSDK_PATH" == "" ]; then
+            echo "Error: Should set EMSDK_PATH environment variable pointing to emsdk root."
+            exit 1
+        fi
+        source $EMSDK_PATH/emsdk_env.sh
+    fi
+
     # Regenerate the CMake solution
     if [ "$__GccBuild" = 0 ]; then
-        echo "Invoking \"$__nativeroot/gen-buildsys-clang.sh\" \"$__nativeroot\" \"$__ClangMajorVersion\" \"$__ClangMinorVersion\" \"$__BuildArch\" \"$__CMakeArgs\" \"$__CMakeExtraArgs\""
-        "$__nativeroot/gen-buildsys-clang.sh" "$__nativeroot" "$__ClangMajorVersion" "$__ClangMinorVersion" "$__BuildArch" "$__CMakeArgs" "$__CMakeExtraArgs"
+        echo "Invoking \"$__nativeroot/gen-buildsys-clang.sh\" \"$__rootRepo\" \"$__nativeroot\" \"$__ClangMajorVersion\" \"$__ClangMinorVersion\" \"$__BuildArch\" \"$__CMakeArgs\" \"$__CMakeExtraArgs\""
+        "$__nativeroot/gen-buildsys-clang.sh" "$__rootRepo" "$__nativeroot" "$__ClangMajorVersion" "$__ClangMinorVersion" "$__BuildArch" "$__CMakeArgs" "$__CMakeExtraArgs"
     else
-        echo "Invoking \"$__nativeroot/gen-buildsys-gcc.sh\" \"$__nativeroot\" \"$__GccMajorVersion\" \"$__GccMinorVersion\" \"$__BuildArch\" \"$__CMakeArgs\" \"$__CMakeExtraArgs\""
-        "$__nativeroot/gen-buildsys-gcc.sh" "$__nativeroot" "$__GccMajorVersion" "$__GccMinorVersion" "$__BuildArch" "$__CMakeArgs" "$__CMakeExtraArgs"
+        echo "Invoking \"$__nativeroot/gen-buildsys-gcc.sh\" \"$__rootRepo\" \"$__nativeroot\" \"$__GccMajorVersion\" \"$__GccMinorVersion\" \"$__BuildArch\" \"$__CMakeArgs\" \"$__CMakeExtraArgs\""
+        "$__nativeroot/gen-buildsys-gcc.sh" "$__rootRepo" "$__nativeroot" "$__GccMajorVersion" "$__GccMinorVersion" "$__BuildArch" "$__CMakeArgs" "$__CMakeExtraArgs"
     fi
 
     # Check that the makefiles were created.
@@ -163,11 +182,6 @@ build_native()
         exit 1
     fi
 }
-
-__scriptpath=$(cd "$(dirname "$0")"; pwd -P)
-__nativeroot=$__scriptpath/Unix
-__rootRepo="$__scriptpath/../.."
-__artifactsDir="$__rootRepo/artifacts"
 
 # Set the various build properties here so that CMake and MSBuild can pick them up
 __CMakeExtraArgs=""
@@ -259,6 +273,9 @@ while :; do
             ;;
         arm64|-arm64)
             __BuildArch=arm64
+            ;;
+        wasm|-wasm)
+            __BuildArch=wasm
             ;;
         debug|-debug)
             __BuildType=Debug
@@ -388,24 +405,26 @@ while :; do
     shift
 done
 
-__CMakeExtraArgs="$__CMakeExtraArgs -DFEATURE_DISTRO_AGNOSTIC_SSL=$__PortableBuild"
-__CMakeExtraArgs="$__CMakeExtraArgs -DCMAKE_STATIC_LIB_LINK=$__StaticLibLink"
-
 # Set cross build
-case $CPUName in
-    i686)
-        if [ $__BuildArch != x86 ]; then
-            __CrossBuild=1
-            echo "Set CrossBuild for $__BuildArch build"
-        fi
-        ;;
-    x86_64)
-        if [ $__BuildArch != x64 ]; then
-            __CrossBuild=1
-            echo "Set CrossBuild for $__BuildArch build"
-        fi
-        ;;
-esac
+if [ $__BuildArch != wasm ]; then
+    __CMakeExtraArgs="$__CMakeExtraArgs -DFEATURE_DISTRO_AGNOSTIC_SSL=$__PortableBuild"
+    __CMakeExtraArgs="$__CMakeExtraArgs -DCMAKE_STATIC_LIB_LINK=$__StaticLibLink"
+
+    case $CPUName in
+        i686)
+            if [ $__BuildArch != x86 ]; then
+                __CrossBuild=1
+                echo "Set CrossBuild for $__BuildArch build"
+            fi
+            ;;
+        x86_64)
+            if [ $__BuildArch != x64 ]; then
+                __CrossBuild=1
+                echo "Set CrossBuild for $__BuildArch build"
+            fi
+            ;;
+    esac
+fi
 
 # Set the default clang version if not already set
 if [[ $__ClangMajorVersion == 0 && $__ClangMinorVersion == 0 ]]; then

@@ -83,4 +83,4 @@ Note: See officially supported [OS versions](https://github.com/dotnet/core/blob
 
 ## License
 
-.NET (including the runtime repo) is licensed under the [MIT](LICENSE) license.
+.NET (including the runtime repo) is licensed under the [MIT](LICENSE.TXT) license.

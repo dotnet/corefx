@@ -10,7 +10,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -332,6 +331,9 @@ namespace System.Text.Json
             // No cached item was found. Try the main list which has all of the properties.
 
             string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
+
+            Debug.Assert(PropertyCache != null);
+
             if (!PropertyCache.TryGetValue(stringPropertyName, out info))
             {
                 info = JsonPropertyInfo.s_missingProperty;
