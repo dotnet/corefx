@@ -15,6 +15,25 @@ namespace System.IO.Tests
             File.Move(sourceFile, destFile);
         }
 
+        protected virtual void Move(string sourceFile, string destFile, bool overwrite)
+        {
+            File.Move(sourceFile, destFile, overwrite);
+        }
+
+        private void MoveDestinationFileDoesNotExist(bool overwrite)
+        {
+            string srcPath = GetTestFilePath();
+            string destPath = GetTestFilePath();
+
+            byte[] srcContents = new byte[] { 1, 2, 3, 4, 5 };
+            File.WriteAllBytes(srcPath, srcContents);
+
+            Move(srcPath, destPath, overwrite);
+
+            Assert.False(File.Exists(srcPath));
+            Assert.Equal(srcContents, File.ReadAllBytes(destPath));
+        }
+
         #endregion
 
         #region UniversalTests
@@ -329,29 +348,6 @@ namespace System.IO.Tests
             string testFile2 = Path.Combine(testDirectory.FullName, GetTestFileName());
             Assert.Throws<IOException>(() => Move(testFileAlternateStream, testFile2));
         }
-        #endregion
-
-        #region Utilities
-
-        protected virtual void Move(string sourceFile, string destFile, bool overwrite)
-        {
-            File.Move(sourceFile, destFile, overwrite);
-        }
-
-        private void MoveDestinationFileDoesNotExist(bool overwrite)
-        {
-            string srcPath = GetTestFilePath();
-            string destPath = GetTestFilePath();
-
-            byte[] srcContents = new byte[] { 1, 2, 3, 4, 5 };
-            File.WriteAllBytes(srcPath, srcContents);
-
-            Move(srcPath, destPath, overwrite);
-
-            Assert.False(File.Exists(srcPath));
-            Assert.Equal(srcContents, File.ReadAllBytes(destPath));
-        }
-
         #endregion
 
         [Fact]
