@@ -36,7 +36,6 @@ namespace System.IO.Compression
             _stream.Write(buffer, offset, count);
         }
 
-        
         public override void Write(ReadOnlySpan<byte> buffer)
         {
             _position += buffer.Length;
