@@ -700,15 +700,6 @@ namespace System.Data.Tests
             */
         }
 
-        //TODO: Unused?
-        private void CheckRowVersion(DataRow dr)
-        {
-            if (dr.HasVersion(DataRowVersion.Current)) Console.WriteLine("Has " + DataRowVersion.Current.ToString());
-            if (dr.HasVersion(DataRowVersion.Default)) Console.WriteLine("Has " + DataRowVersion.Default.ToString());
-            if (dr.HasVersion(DataRowVersion.Original)) Console.WriteLine("Has " + DataRowVersion.Original.ToString());
-            if (dr.HasVersion(DataRowVersion.Proposed)) Console.WriteLine("Has " + DataRowVersion.Proposed.ToString());
-        }
-
         [Fact]
         public void HasErrors()
         {
@@ -2016,15 +2007,16 @@ namespace System.Data.Tests
 
             //  testMore();
         }
-        //TODO: why is this disabled?
-        /*public void testMore()
+
+        [Fact]
+        public void TestMore()
         {
             DataTable dt = DataProvider.CreateParentDataTable();
             dt.Rows[0].BeginEdit();
             dt.Rows[0][0] = 10;
             dt.Rows[0].EndEdit();
             dt.AcceptChanges();
-        }*/
+        }
 
         [Fact]
         public void RejectChanges()
@@ -2184,7 +2176,7 @@ namespace System.Data.Tests
         }
 
         [Fact]
-        public void testMore()
+        public void TestMore2()
         {
             DataSet ds = DataProvider.CreateForeignConstraint();
             DataRow drParent = ds.Tables[0].Rows[0];
@@ -2193,7 +2185,7 @@ namespace System.Data.Tests
         }
 
         [Fact]
-        public void test()
+        public void Test()
         {
             // test SetParentRow
             DataTable parent = DataProvider.CreateParentDataTable();
@@ -2626,33 +2618,11 @@ namespace System.Data.Tests
 
             row = table.Rows.Add(new object[] { 1, 2, 3 });
             Assert.Equal(DataRowState.Added, row.RowState);
-            //TODO: messages
-            //try
-            //{
-            //    row.SetModified();
-            //    Assert.False(true);
-            //}
-            //catch (InvalidOperationException e)
-            //{
-            //    // Never premise English.
-            //    //Assert.Equal (SetAddedModified_ErrMsg, e.Message);
-            //}
             Assert.Throws<InvalidOperationException>(() => row.SetModified());
 
             row.AcceptChanges();
             row[0] = 10;
             Assert.Equal(DataRowState.Modified, row.RowState);
-            //TODO
-            //try
-            //{
-            //    row.SetModified();
-            //    Assert.False(true);
-            //}
-            //catch (InvalidOperationException e)
-            //{
-            //    // Never premise English.
-            //    //Assert.Equal (SetAddedModified_ErrMsg, e.Message);
-            //}
             Assert.Throws<InvalidOperationException>(() => row.SetModified());
 
             row.AcceptChanges();

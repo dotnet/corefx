@@ -379,13 +379,6 @@ namespace System.Data.Tests
             });
         }
 
-        //TODO: what
-        [Fact]
-        public void Add_DataColumn5()
-        {
-            DataSet ds = GetDataSet();
-        }
-
         [Fact]
         public void Remove_DataColumn()
         {
@@ -451,7 +444,7 @@ namespace System.Data.Tests
             });
         }
 
-        //TODO: missing Fact?
+        [Fact]
         private void RemoveAt()
         {
             DataSet ds = GetDataSet();

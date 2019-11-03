@@ -147,17 +147,8 @@ namespace System.Data.Tests
             // Accept changes
             _table.AcceptChanges();
             Assert.Equal("Name 1", (_table.Rows[0])[1]);
-            //TODO: message
-            //try
-            //{
-            //    object o = rc[2];
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    // Never premise English.
-            //    //Assert.Equal ("#A08", "There is no row at position 2.");
-            //}
+
+            // There is no row at position 2.
             Assert.Throws<IndexOutOfRangeException>(() => rc[2]);
         }
 

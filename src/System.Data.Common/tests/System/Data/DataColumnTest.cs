@@ -63,11 +63,9 @@ namespace System.Data.Tests
         [Fact]
         public void Constructor3_DataType_Null()
         {
-            //TODO: what to do with the message?
             ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => new DataColumn("ColName", null));
             Assert.Null(ex.InnerException);
-            // Never premise English.
-            // Assert.NotNull (ex.Message);
+            Assert.NotNull (ex.Message);
             Assert.NotNull(ex.ParamName);
             Assert.Equal("dataType", ex.ParamName);
         }
@@ -356,51 +354,17 @@ namespace System.Data.Tests
             // Exceptions
             //
 
-            // TODO: which exception is it exactly?
             Assert.ThrowsAny<InvalidExpressionException>(() => c.Expression = "iff (age = 24, 'hurrey', 'boo')");
-            //TODO
             //The following two cases fail on mono. MS.net evaluates the expression
             //immediately upon assignment. We don't do this yet hence we don't throw
             //an exception at this point.
-            //try
-            //{
-            //    C.Expression = "iif (nimi = 24, 'hurrey', 'boo')";
-            //    Assert.False(true);
-            //}
-            //catch (EvaluateException e)
-            //{
-            //    Assert.Equal(typeof(EvaluateException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("Cannot find column [nimi].", e.Message);
-            //}
-            // TODO: Exception message?
+            // Cannot find column [nimi].
             Assert.Throws<EvaluateException>(() => c.Expression = "iif (nimi = 24, 'hurrey', 'boo')");
 
-            //try
-            //{
-            //    C.Expression = "iif (name = 24, 'hurrey', 'boo')";
-            //    Assert.False(true);
-            //}
-            //catch (EvaluateException e)
-            //{
-            //    Assert.Equal(typeof(EvaluateException), e.GetType());
-            //    //AssertEquals ("DC41", "Cannot perform '=' operation on System.String and System.Int32.", e.Message);
-            //}
-            //TODO: Exception message?
+            // Cannot perform '=' operation on System.String and System.Int32.
             Assert.Throws<EvaluateException>(() => c.Expression = "iif (name = 24, 'hurrey', 'boo')");
 
-            //try
-            //{
-            //    C.Expression = "convert (age, Boolean)";
-            //    Assert.False(true);
-            //}
-            //catch (EvaluateException e)
-            //{
-            //    Assert.Equal(typeof(EvaluateException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("Invalid type name 'Boolean'.", e.Message);
-            //}
-            //TODO: Exception message?
+            // Invalid type name 'Boolean'.
             Assert.Throws<EvaluateException>(() => c.Expression = "convert (age, Boolean)");
         }
 
@@ -854,28 +818,5 @@ namespace System.Data.Tests
                 Expression = test
             };
         }
-        // TODO: what's this?
-#if false
-// Check Windows output for the row [0] value
-        [Fact]
-        public void NullStrings ()
-        {
-            var a = MakeColumn ("nullbar", "null+'bar'");
-            var b = MakeColumn ("barnull", "'bar'+null");
-            var c = MakeColumn ("foobar", "'foo'+'bar'");
-
-                var table = new DataTable();
-
-                table.Columns.Add(a);
-                table.Columns.Add(b);
-                table.Columns.Add(c);
-
-                var row = table.NewRow();
-                table.Rows.Add(row);
-            Assert.Equal (row [0], DBNull.Value);
-            Assert.Equal (row [1], DBNull.Value);
-            Assert.Equal (row [2], "foobar");
-        }
-#endif
     }
 }

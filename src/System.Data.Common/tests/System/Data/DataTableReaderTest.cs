@@ -745,35 +745,15 @@ namespace System.Data.Tests
             Assert.Equal(1, rdr.GetSchemaTable().Rows.Count);
 
             table.Columns[0].ColumnName = "newcol1";
-            //TODO
-            //try
-            //{
-            //    rdr.GetSchemaTable();
-            //    Assert.False(true);
-            //}
-            //catch (InvalidOperationException)
-            //{
-            //    // Never premise English.
-            //    //Assert.Equal ("Schema of current DataTable '" + table.TableName + 
-            //    //		"' in DataTableReader has changed, DataTableReader is invalid.", e.Message, "#1");
-            //}
+
+            // Schema of current DataTable '' in DataTableReader has changed, DataTableReader is invalid.
             Assert.Throws<InvalidOperationException>(() => rdr.GetSchemaTable());
 
             rdr = table.CreateDataReader();
             rdr.GetSchemaTable(); //no exception
             table.Columns.Add("col2");
-            //TODO
-            //try
-            //{
-            //    rdr.GetSchemaTable();
-            //    Assert.False(true);
-            //}
-            //catch (InvalidOperationException)
-            //{
-            //    // Never premise English.
-            //    //Assert.Equal ("Schema of current DataTable '" + table.TableName + 
-            //    //		"' in DataTableReader has changed, DataTableReader is invalid.", e.Message, "#1");
-            //}
+
+            // Schema of current DataTable '' in DataTableReader has changed, DataTableReader is invalid.
             Assert.Throws<InvalidOperationException>(() => rdr.GetSchemaTable());
         }
 
@@ -813,18 +793,7 @@ namespace System.Data.Tests
 
             rdr.Read();
 
-            //TODO
-            //try
-            //{
-            //    rdr.GetChars(1, 0, null, 0, 10);
-            //    Assert.False(true);
-            //}
-            //catch (InvalidCastException e)
-            //{
-            //    // Never premise English.
-            //    //Assert.Equal ("Unable to cast object of type 'System.String'" +
-            //    //	" to type 'System.Char[]'.", e.Message, "#1");
-            //}
+            // Unable to cast object of type 'System.String' to type 'System.Char[]'.
             Assert.Throws<InvalidCastException>(() => rdr.GetChars(1, 0, null, 0, 10));
             char[] char_arr = null;
             long len = 0;

@@ -56,7 +56,6 @@ namespace System.Data.Tests
 
             Assert.False(dt.CaseSensitive);
             Assert.NotNull(dt.Columns);
-            //TODO: why is this commented out?
             //Assert.True (dt.ChildRelations != null);
             Assert.NotNull(dt.Constraints);
             Assert.Null(dt.DataSet);
@@ -368,7 +367,7 @@ namespace System.Data.Tests
             Assert.Equal(100, t.Select("age <> 10").Length);
             Assert.Equal(3, t.Select("name < 'human10'").Length);
             Assert.Equal(3, t.Select("id < '10'").Length);
-            //TODO
+
             // FIXME: Somebody explain how this can be possible.
             // it seems that it is no matter between 10 - 30. The
             // result is always 25 :-P
@@ -649,7 +648,6 @@ namespace System.Data.Tests
             rows = child.Select("Parent.childname = 'Jack'");
             Assert.Equal(1, rows.Length);
 
-            //TODO: why is this disabled?
             /*
             try {
                 Mom.Select ("Child.Name = 'Jack'");
@@ -698,18 +696,8 @@ Assert.False(true);
 
             r = new DataRelation("Rel2", Parent2.Columns[1], child.Columns[0]);
             set.Relations.Add(r);
-            //TODO
-            //try
-            //{
-            //    rows = child.Select("Parent.ChildName = 'Jack'");
-            //    Assert.False(true);
-            //}
-            //catch (EvaluateException e)
-            //{
-            //    Assert.Equal(typeof(EvaluateException), e.GetType());
-            //    // Do not compare exception messages!
-            //    //Assert.Equal ("The table [Child] involved in more than one relation. You must explicitly mention a relation name in the expression 'parent.[ChildName]'.", e.Message);
-            //}
+
+            // The table [Child] involved in more than one relation. You must explicitly mention a relation name in the expression 'parent.[ChildName]'
             Assert.Throws<EvaluateException>(() => child.Select("Parent.ChildName = 'Jack'"));
 
             rows = child.Select("Parent(rel).ChildName = 'Jack'");
@@ -717,17 +705,8 @@ Assert.False(true);
 
             rows = child.Select("Parent(Rel2).ChildName = 'Jack'");
             Assert.Equal(1, rows.Length);
-            //TODO
-            //try
-            //{
-            //    m.Select("Parent.name  = 'John'");
-            //}
-            //catch (IndexOutOfRangeException e)
-            //{
-            //    Assert.Equal(typeof(IndexOutOfRangeException), e.GetType());
-            //    // Do not compare exception messages!
-            //    //Assert.Equal ("Cannot find relation 0.", e.Message);
-            //}
+
+            // Cannot find relation 0.
             Assert.Throws<IndexOutOfRangeException>(() => m.Select("Parent.name  = 'John'"));
         }
 
@@ -780,35 +759,13 @@ Assert.False(true);
 
             Col = new DataColumn("failed");
 
-            //TODO
-            //try
-            //{
-            //    dt.PrimaryKey = new DataColumn[] { Col };
-            //    Assert.False(true);
-            //}
-            //catch (ArgumentException e)
-            //{
-            //    Assert.Equal(typeof(ArgumentException), e.GetType());
-            //    // Never expect English message
-            //    // Assert.Equal ("Column must belong to a table.", e.Message);
-            //}
+            // Column must belong to a table.
             Assert.Throws<ArgumentException>(() => dt.PrimaryKey = new DataColumn[] { Col });
 
             DataTable dt2 = new DataTable();
             dt2.Columns.Add();
 
-            //TODO
-            //try
-            //{
-            //    dt.PrimaryKey = new DataColumn[] { dt2.Columns[0] };
-            //    Assert.False(true);
-            //}
-            //catch (ArgumentException e)
-            //{
-            //    Assert.Equal(typeof(ArgumentException), e.GetType());
-            //    // Never expect English message
-            //    // Assert.Equal ("PrimaryKey columns do not belong to this table.", e.Message);
-            //}
+            // PrimaryKey columns do not belong to this table.
             Assert.Throws<ArgumentException>(() => dt.PrimaryKey = new DataColumn[] { dt2.Columns[0] });
 
             Assert.Equal(0, dt.Constraints.Count);
@@ -1354,16 +1311,7 @@ Assert.False(true);
 
                     if (invalid.Contains(Tuple.Create(types[a], types[b])))
                     {
-                        //TODO: what
-                        try
-                        {
-                            dt2.ImportRow(r1);
-                            Assert.False(true);
-                        }
-                        catch /*(ArgumentException)*/
-                        {
-                            continue;
-                        }
+                        Assert.Throws<ArgumentException>(() => dt2.ImportRow(r1));
                     }
                     else
                     {
@@ -2171,7 +2119,6 @@ Assert.False(true);
         {
             e.Continue = _fillErr[_fillErrCounter]._contFlag;
             Assert.Equal(_fillErr[_fillErrCounter]._tableName, e.DataTable.TableName);
-            //TODO
             //Assert.Equal (fillErr[fillErrCounter].rowKey, e.Values[0]);
             Assert.Equal(_fillErr[_fillErrCounter]._contFlag, e.Continue);
             //Assert.Equal (fillErr[fillErrCounter].error, e.Errors.Message);
@@ -2356,14 +2303,13 @@ Assert.False(true);
             Assert.Equal("miss6", dtLoad.Rows[2][2]);
             Assert.Equal(1, dtLoad.Rows[3][0]);
             Assert.Equal("mono 1", dtLoad.Rows[3][1]);
-            //TODO
-            //Assert.Null (dtLoad.Rows[3][2]);
+            //Assert.Null(dtLoad.Rows[3][2]);
             Assert.Equal(2, dtLoad.Rows[4][0]);
             Assert.Equal("mono 2", dtLoad.Rows[4][1]);
-            //Assert.Null (dtLoad.Rows[4][2]);
+            //Assert.Null(dtLoad.Rows[4][2]);
             Assert.Equal(3, dtLoad.Rows[5][0]);
             Assert.Equal("mono 3", dtLoad.Rows[5][1]);
-            //Assert.Null (dtLoad.Rows[5][2]);
+            //Assert.Null(dtLoad.Rows[5][2]);
         }
 
         private DataTable setupRowState()

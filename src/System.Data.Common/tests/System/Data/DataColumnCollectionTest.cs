@@ -225,57 +225,18 @@ namespace System.Data.Tests
             c = new DataColumn("test");
             cols.Add(c);
 
-            //TODO: what to do with the exception messages? are they disabled because of localisation issues?
-            // try
-            // {
-            //     Cols.Add(C);
-            //     Assert.False(true);
-            // }
-            // catch (ArgumentException e)
-            // {
-            //     // Assert.Equal(typeof (ArgumentException), e.GetType ());
-            //     // Assert.Equal("Column 'test' already belongs to this or another DataTable.", e.Message);
-            // }
+            // Column 'test' already belongs to this or another DataTable.
             Assert.Throws<ArgumentException>(() => cols.Add(c));
 
-            // try
-            // {
-            //     Table2.Columns.Add(C);
-            //     Assert.False(true);
-            // }
-            // catch (ArgumentException e)
-            // {
-            //     // Assert.Equal(typeof (ArgumentException), e.GetType ());
-            //     // Assert.Equal("Column 'test' already belongs to this or another DataTable.", e.Message);
-            // }
+            // Column 'test' already belongs to this or another DataTable.
             Assert.Throws<ArgumentException>(() => table2.Columns.Add(c));
 
             DataColumn c2 = new DataColumn("test");
 
-            //try
-            //{
-            //    cols.Add(c2);
-            //    Assert.False(true);
-            //}
-            //catch (DuplicateNameException e)
-            //{
-            //    // Assert.Equal(typeof (DuplicateNameException), e.GetType ());
-            //    // Assert.Equal("A DataColumn named 'test' already belongs to this DataTable.", e.Message);
-            //}
+            // A DataColumn named 'test' already belongs to this DataTable.
             Assert.Throws<DuplicateNameException>(() => cols.Add(c2));
 
-            //try
-            //{
-            //    cols.Add("test2", typeof(string), "substring ('fdsafewq', 2)");
-            //    Assert.False(true);
-            //}
-            //catch (InvalidExpressionException e)
-            //{
-            //    // Assert.True(e is InvalidExpressionException);
-            //    // Assert.Equal("Expression 'substring ('fdsafewq', 2)' is invalid.", e.Message);
-            //}
-            //TODO: EvaluateException : Invalid number of arguments: function substring().
-            // Should we look for the exact exception? could this be a regression? the commented code above seems to say something else.
+            // EvaluateException : Invalid number of arguments: function substring().
             Assert.ThrowsAny<InvalidExpressionException>(() => cols.Add("test2", typeof(string), "substring ('fdsafewq', 2)"));
         }
 
@@ -407,20 +368,9 @@ namespace System.Data.Tests
             cols2.Add();
             cols2.Add();
 
-            DataRelation Rel = new DataRelation("Rel", cols[0], cols2[0]);
-            set.Relations.Add(Rel);
-            // TODO: do we check the messages?
-            // try
-            // {
-            //     Cols.Clear();
-            //     Assert.False(true);
-            // }
-            // catch (Exception e)
-            // {
-            //     Assert.Equal(typeof(ArgumentException), e.GetType());
-            //     // Never premise English.
-            //     //Assert.Equal ("Cannot remove this column, because it is part of the parent key for relationship Rel.", e.Message);
-            // }
+            DataRelation rel = new DataRelation("Rel", cols[0], cols2[0]);
+            set.Relations.Add(rel);
+            // Cannot remove this column, because it is part of the parent key for relationship Rel.
             Assert.Throws<ArgumentException>(() => cols.Clear());
         }
 
@@ -536,18 +486,7 @@ namespace System.Data.Tests
             cols.Remove("TEST3");
             Assert.Equal(2, cols.Count);
 
-            // TODO: what to do with the exception messages?
-            // try
-            // {
-            //     Cols.Remove("_test_");
-            //     Assert.False(true);
-            // }
-            // catch (Exception e)
-            // {
-            //     Assert.Equal(typeof(ArgumentException), e.GetType());
-            //     // Never premise English.
-            //     //Assert.Equal ("Column '_test_' does not belong to table test_table.", e.Message);
-            // }
+            // Column '_test_' does not belong to table test_table.
             Assert.Throws<ArgumentException>(() => cols.Remove("_test_"));
 
             cols.Add();
@@ -561,17 +500,7 @@ namespace System.Data.Tests
             Assert.Equal(4, cols.Count);
             Assert.Equal("Column1", cols[0].ColumnName);
 
-            // try
-            // {
-            //     cols.Remove(new DataColumn("Column10"));
-            //     Assert.False(true);
-            // }
-            // catch (Exception e)
-            // {
-            //     Assert.Equal(typeof(ArgumentException), e.GetType());
-            //     // Never premise English.
-            //     //Assert.Equal ("Cannot remove a column that doesn't belong to this table.", e.Message);
-            // }
+            // Cannot remove a column that doesn't belong to this table.
             Assert.Throws<ArgumentException>(() => cols.Remove(new DataColumn("Column10")));
 
             cols.Add();
@@ -588,17 +517,7 @@ namespace System.Data.Tests
             Assert.Equal("Column4", cols[0].ColumnName);
             Assert.Equal("Column5", cols[1].ColumnName);
 
-            // try
-            // {
-            //     cols.RemoveAt(10);
-            //     Assert.False(true);
-            // }
-            // catch (Exception e)
-            // {
-            //     Assert.Equal(typeof(IndexOutOfRangeException), e.GetType());
-            //     // Never premise English.
-            //     //Assert.Equal ("Cannot find column 10.", e.Message);
-            // }
+            // Cannot find column 10.
             Assert.Throws<IndexOutOfRangeException>(() => cols.RemoveAt(10));
         }
 

@@ -41,9 +41,9 @@ namespace System.Data.Tests.SqlTypes
         public SqlMoneyTest()
         {
             _test1 = new SqlMoney(6464.6464d);
-            _test2 = new SqlMoney(90000.0m);
-            _test3 = new SqlMoney(90000.0m);
-            _test4 = new SqlMoney(-45000.0m);
+            _test2 = new SqlMoney(90000m);
+            _test3 = new SqlMoney(90000m);
+            _test4 = new SqlMoney(-45000m);
         }
 
         // Test constructor
@@ -53,18 +53,18 @@ namespace System.Data.Tests.SqlTypes
             Assert.Throws<OverflowException>(() => new SqlMoney(1000000000000000m));
 
             SqlMoney CreationTest = new SqlMoney((decimal)913.3);
-            Assert.Equal(913.3000m, CreationTest.Value);
+            Assert.Equal(913.3m, CreationTest.Value);
 
             Assert.Throws<OverflowException>(() => new SqlMoney(1e200));
 
             SqlMoney CreationTest2 = new SqlMoney(913.3);
-            Assert.Equal(913.3000m, CreationTest2.Value);
+            Assert.Equal(913.3m, CreationTest2.Value);
 
             SqlMoney CreationTest3 = new SqlMoney(913);
-            Assert.Equal(913.0000m, CreationTest3.Value);
+            Assert.Equal(913m, CreationTest3.Value);
 
             SqlMoney CreationTest4 = new SqlMoney((long)913.3);
-            Assert.Equal(913.0000m, CreationTest4.Value);
+            Assert.Equal(913m, CreationTest4.Value);
         }
 
         // Test public fields
@@ -84,8 +84,8 @@ namespace System.Data.Tests.SqlTypes
         [Fact]
         public void Properties()
         {
-            Assert.Equal(90000.0000m, _test2.Value);
-            Assert.Equal(-45000.0000m, _test4.Value);
+            Assert.Equal(90000m, _test2.Value);
+            Assert.Equal(-45000m, _test4.Value);
             Assert.True(SqlMoney.Null.IsNull);
         }
 
@@ -141,7 +141,6 @@ namespace System.Data.Tests.SqlTypes
         {
             // FIXME: Better way to test HashCode
             Assert.Equal(_test3.GetHashCode(), _test2.GetHashCode());
-            Assert.NotEqual(_test2.GetHashCode(), _test1.GetHashCode());
         }
 
         [Fact]
@@ -195,7 +194,7 @@ namespace System.Data.Tests.SqlTypes
 
             Assert.Throws<OverflowException>(() => SqlMoney.Parse("1000000000000000"));
 
-            Assert.Equal(150.0000M, SqlMoney.Parse("150").Value);
+            Assert.Equal(150M, SqlMoney.Parse("150").Value);
         }
 
         [Fact]
@@ -229,7 +228,7 @@ namespace System.Data.Tests.SqlTypes
 
             // ToSqlDecimal ()
             Assert.Equal((decimal)6464.6464, _test1.ToSqlDecimal().Value);
-            Assert.Equal(-45000.0000m, _test4.ToSqlDecimal().Value);
+            Assert.Equal(-45000m, _test4.ToSqlDecimal().Value);
 
             // ToSqlInt16 ()
             Assert.Equal((short)6465, _test1.ToSqlInt16().Value);
@@ -326,7 +325,7 @@ namespace System.Data.Tests.SqlTypes
         public void UnaryNegation()
         {
             Assert.Equal((decimal)(-6464.6464), -(_test1).Value);
-            Assert.Equal(45000.0000M, -(_test4).Value);
+            Assert.Equal(45000M, -(_test4).Value);
         }
 
         [Fact]
@@ -334,7 +333,7 @@ namespace System.Data.Tests.SqlTypes
         {
             SqlBoolean TestBoolean = new SqlBoolean(true);
 
-            Assert.Equal(1.0000M, ((SqlMoney)TestBoolean).Value);
+            Assert.Equal(1M, ((SqlMoney)TestBoolean).Value);
             Assert.True(((SqlDecimal)SqlBoolean.Null).IsNull);
         }
 
@@ -345,7 +344,7 @@ namespace System.Data.Tests.SqlTypes
             SqlDecimal testDecimal2 = new SqlDecimal(1E+20);
 
             SqlMoney testMoney = (SqlMoney)testDecimal;
-            Assert.Equal(4000.0000M, testMoney.Value);
+            Assert.Equal(4000M, testMoney.Value);
 
             Assert.Throws<OverflowException>(() => (SqlMoney)testDecimal2);
         }
@@ -357,7 +356,7 @@ namespace System.Data.Tests.SqlTypes
             SqlDouble testDouble2 = new SqlDouble(1E+20);
 
             SqlMoney testMoney = (SqlMoney)testDouble;
-            Assert.Equal(1000000000.0000m, testMoney.Value);
+            Assert.Equal(1000000000m, testMoney.Value);
 
             Assert.Throws<OverflowException>(() => (SqlMoney)testDouble2);
         }
@@ -366,7 +365,7 @@ namespace System.Data.Tests.SqlTypes
         public void SqlMoneyToDecimal()
         {
             Assert.Equal((decimal)6464.6464, (decimal)_test1);
-            Assert.Equal(-45000.0000M, (decimal)_test4);
+            Assert.Equal(-45000M, (decimal)_test4);
         }
 
         [Fact]
@@ -375,7 +374,7 @@ namespace System.Data.Tests.SqlTypes
             SqlSingle testSingle = new SqlSingle(1e10);
             SqlSingle testSingle2 = new SqlSingle(1e20);
 
-            Assert.Equal(10000000000.0000m, ((SqlMoney)testSingle).Value);
+            Assert.Equal(10000000000m, ((SqlMoney)testSingle).Value);
 
             Assert.Throws<OverflowException>(() => (SqlMoney)testSingle2);
         }
@@ -386,7 +385,7 @@ namespace System.Data.Tests.SqlTypes
             SqlString testString = new SqlString("Test string");
             SqlString testString100 = new SqlString("100");
 
-            Assert.Equal(100.0000M, ((SqlMoney)testString100).Value);
+            Assert.Equal(100M, ((SqlMoney)testString100).Value);
 
             Assert.Throws<FormatException>(() => (SqlMoney)testString);
         }
@@ -396,7 +395,7 @@ namespace System.Data.Tests.SqlTypes
         {
             decimal testDecimal = 1e10m;
             decimal testDecimal2 = 1e20m;
-            Assert.Equal(10000000000.0000M, ((SqlMoney)testDecimal).Value);
+            Assert.Equal(10000000000M, ((SqlMoney)testDecimal).Value);
 
             Assert.Throws<OverflowException>(() => (SqlMoney)testDecimal2);
         }
@@ -405,7 +404,7 @@ namespace System.Data.Tests.SqlTypes
         public void SqlByteToSqlMoney()
         {
             SqlByte TestByte = new SqlByte(200);
-            Assert.Equal(200.0000m, ((SqlMoney)TestByte).Value);
+            Assert.Equal(200m, ((SqlMoney)TestByte).Value);
         }
 
         [Fact]
@@ -415,9 +414,9 @@ namespace System.Data.Tests.SqlTypes
             SqlInt32 testInt32 = new SqlInt32(5000);
             SqlInt64 testInt64 = new SqlInt64(5000);
 
-            Assert.Equal(5000.0000m, ((SqlMoney)testInt16).Value);
-            Assert.Equal(5000.0000m, ((SqlMoney)testInt32).Value);
-            Assert.Equal(5000.0000m, ((SqlMoney)testInt64).Value);
+            Assert.Equal(5000m, ((SqlMoney)testInt16).Value);
+            Assert.Equal(5000m, ((SqlMoney)testInt32).Value);
+            Assert.Equal(5000m, ((SqlMoney)testInt64).Value);
 
             Assert.Throws<OverflowException>(() => (SqlMoney)SqlInt64.MaxValue);
         }

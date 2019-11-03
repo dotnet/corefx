@@ -73,7 +73,6 @@ namespace System.Data.Tests.Common
             // Specified method is not supported
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-
         }
 
         [Fact]
@@ -126,7 +125,6 @@ namespace System.Data.Tests.Common
             Assert.Contains("666", ex.Message);
             Assert.NotNull(ex.ParamName);
             Assert.Equal("MissingMappingAction", ex.ParamName);
-
         }
 
         [Fact]

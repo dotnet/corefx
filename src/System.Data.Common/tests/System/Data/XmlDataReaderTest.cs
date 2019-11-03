@@ -294,7 +294,6 @@ namespace System.Data.Tests
                 // On function level
                 if (doc.DocumentElement.Name == "Func")
                 {
-                    //TODO: what
                     try { doc.DocumentElement.Attributes.Remove(doc.DocumentElement.Attributes["ReturnType"]); }
                     catch { }
                     try { doc.DocumentElement.Attributes.Remove(doc.DocumentElement.Attributes["ReturnTId"]); }
@@ -321,7 +320,6 @@ namespace System.Data.Tests
             {
                 XmlDocument doc = new XmlDocument();
                 string str = reader.ReadString();
-                //TODO: what
                 try
                 {
                     doc.LoadXml(str);
@@ -344,7 +342,6 @@ namespace System.Data.Tests
             #region private UpgradeSchema
             private void UpgradeSchema(XmlNode xNode)
             {
-                //TODO: what
                 // Attribute removals (cleanup)
                 try { xNode.Attributes.Remove(xNode.Attributes["TId"]); }
                 catch { }
@@ -358,7 +355,6 @@ namespace System.Data.Tests
                 catch { }
 
                 // Attribute removals (order)
-                //TODO: what
                 try
                 {
                     XmlAttribute attr = xNode.Attributes["IsExpGetRef"];

@@ -118,31 +118,10 @@ namespace System.Data.Tests
             Assert.Equal("second", rows[1][1]);
             Assert.Equal("else", rows[2][1]);
 
-            //TODO: messages?
-            //try
-            //{
-            //    Rows.Add(Row);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(ArgumentException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("This row already belongs to this table.", e.Message);
-            //}
+            // This row already belongs to this table.
             Assert.Throws<ArgumentException>(() => rows.Add(row));
-            //TODO: messages?
-            //try
-            //{
-            //    Row = null;
-            //    Rows.Add(Row);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(ArgumentNullException), e.GetType());
-            //    //Assert.Equal ("'row' argument cannot be null.\r\nParameter name: row", e.Message);
-            //}
+
+            // 'row' argument cannot be null.\r\nParameter name: row
             Assert.Throws<ArgumentNullException>(() => rows.Add((DataRow)null));
 
             DataColumn column = new DataColumn("not_null");
@@ -153,17 +132,8 @@ namespace System.Data.Tests
             cols[0] = "first";
             cols[1] = "second";
             cols[2] = null;
-            //TODO: messages
-            //try
-            //{
-            //    Rows.Add(cols);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(NoNullAllowedException), e.GetType());
-            //    //Assert.Equal ("Column 'not_null' does not allow nulls.", e.Message);
-            //}
+
+            // Column 'not_null' does not allow nulls.
             Assert.Throws<NoNullAllowedException>(() => rows.Add(cols));
 
             column = _tbl.Columns[0];
@@ -174,18 +144,7 @@ namespace System.Data.Tests
             cols[1] = "second";
             cols[2] = "blabal";
 
-            //TODO: messages
-            //try
-            //{
-            //    Rows.Add(cols);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(ConstraintException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("Column 'Column1' is constrained to be unique.  Value 'first' is already present.", e.Message);
-            //}
+            // Column 'Column1' is constrained to be unique.  Value 'first' is already present.
             Assert.Throws<ConstraintException>(() => rows.Add(cols));
 
             column = new DataColumn("integer");
@@ -197,17 +156,6 @@ namespace System.Data.Tests
             obs[1] = "second";
             obs[2] = "blabal";
             obs[3] = "ads";
-            // TODO: discrepancy with the docs?
-            //try
-            //{
-            //    Rows.Add(obs);
-            //    Assert.False(true);
-            //}
-            //catch (ArgumentException e)
-            //{
-            //    // MSDN says this exception is InvalidCastException
-            //    //				Assert.Equal (typeof (ArgumentException), e.GetType ());
-            //}
             Assert.Throws<ArgumentException>(() => rows.Add(obs));
 
             object[] obs1 = new object[5];
@@ -359,18 +307,7 @@ namespace System.Data.Tests
             Assert.Equal(2, _tbl.Rows[2][0]);
             Assert.Equal(3, _tbl.Rows[3][0]);
 
-            //TODO: messages
-            //try
-            //{
-            //    Rows.Contains(1);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(MissingPrimaryKeyException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("Table doesn't have a primary key.", e.Message);
-            //}
+            // Table doesn't have a primary key.
             Assert.Throws<MissingPrimaryKeyException>(() => rows.Contains(1));
 
             _tbl.PrimaryKey = new DataColumn[] { _tbl.Columns[0] };
@@ -378,18 +315,7 @@ namespace System.Data.Tests
             Assert.True(rows.Contains(2));
             Assert.False(rows.Contains(4));
 
-            //TODO: messages
-            //try
-            //{
-            //    Rows.Contains(new object[] { 64, "test0" });
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(ArgumentException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("Expecting 1 value(s) for the key being indexed, but received 2 value(s).", e.Message);
-            //}
+            // Expecting 1 value(s) for the key being indexed, but received 2 value(s).
             Assert.Throws<ArgumentException>(() => rows.Contains(new object[] { 64, "test0" }));
 
             _tbl.PrimaryKey = new DataColumn[] { _tbl.Columns[0], _tbl.Columns[1] };
@@ -397,18 +323,8 @@ namespace System.Data.Tests
             Assert.False(rows.Contains(new object[] { 0, "test1" }));
             Assert.True(rows.Contains(new object[] { 1, "test1" }));
             Assert.True(rows.Contains(new object[] { 2, "test2" }));
-            //TODO: messages
-            //try
-            //{
-            //    Rows.Contains(new object[] { 2 });
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(ArgumentException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("Expecting 2 value(s) for the key being indexed, but received 1 value(s).", e.Message);
-            //}
+
+            // Expecting 2 value(s) for the key being indexed, but received 1 value(s).
             Assert.Throws<ArgumentException>(() => rows.Contains(new object[] { 2 }));
         }
 
@@ -431,17 +347,7 @@ namespace System.Data.Tests
 
             DataRow[] dr = new DataRow[10];
 
-            //TODO: messages
-            //try
-            //{
-            //    rows.CopyTo(dr, 4);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(ArgumentException), e.GetType());
-            //    //Assert.Equal ("Destination array was not long enough.  Check destIndex and length, and the array's lower bounds.", e.Message);
-            //}
+            // Destination array was not long enough.  Check destIndex and length, and the array's lower bounds.
             Assert.Throws<ArgumentException>(() => rows.CopyTo(dr, 4));
 
             dr = new DataRow[11];
@@ -519,18 +425,7 @@ namespace System.Data.Tests
             rows.Add(new object[] { 4, "fourth" });
             rows.Add(new object[] { 5, "fifth" });
 
-            //TODO: messages
-            //try
-            //{
-            //    rows.Find(1);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(MissingPrimaryKeyException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("Table doesn't have a primary key.", e.Message);
-            //}
+            // Table doesn't have a primary key.
             Assert.Throws<MissingPrimaryKeyException>(() => rows.Find(1));
 
             _tbl.PrimaryKey = new DataColumn[] { _tbl.Columns[0] };
@@ -540,50 +435,21 @@ namespace System.Data.Tests
             Assert.Equal(2L, row[0]);
             row = rows.Find("2");
             Assert.Equal(2L, row[0]);
-            //TODO: messages
-            //try
-            //{
-            //    row = rows.Find("test");
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(FormatException), e.GetType());
-            //    //Assert.Equal ("Input string was not in a correct format.", e.Message);
-            //}
+
+            // Input string was not in a correct format.
             Assert.Throws<FormatException>(() => rows.Find("test"));
 
             string tes = null;
             row = rows.Find(tes);
             Assert.Null(row);
             _tbl.PrimaryKey = null;
-            //TODO: messages
-            //try
-            //{
-            //    rows.Find(new object[] { 1, "fir" });
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(MissingPrimaryKeyException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("Table doesn't have a primary key.", e.Message);
-            //}
+
+            // Table doesn't have a primary key.
             Assert.Throws<MissingPrimaryKeyException>(() => rows.Find(new object[] { 1, "fir" }));
 
             _tbl.PrimaryKey = new DataColumn[] { _tbl.Columns[0], _tbl.Columns[1] };
-            //TODO: messages
-            //try
-            //{
-            //    rows.Find(1);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(ArgumentException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("Expecting 2 value(s) for the key being indexed, but received 1 value(s).", e.Message);
-            //}
+
+            // Expecting 2 value(s) for the key being indexed, but received 1 value(s).
             Assert.Throws<ArgumentException>(() => rows.Find(1));
 
             row = rows.Find(new object[] { 1, "fir" });
@@ -640,18 +506,8 @@ namespace System.Data.Tests
             row[0] = "e";
             row[1] = "ee";
             row[2] = "eee";
-            //TODO: messages
-            //try
-            //{
-            //    Rows.InsertAt(Row, -1);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(IndexOutOfRangeException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("The row insert position -1 is invalid.", e.Message);
-            //}
+
+            // The row insert position -1 is invalid.
             Assert.Throws<IndexOutOfRangeException>(() => rows.InsertAt(row, -1));
 
             rows.InsertAt(row, 0);
@@ -673,18 +529,8 @@ namespace System.Data.Tests
 
             rows.InsertAt(row, 500);
             Assert.Equal("g", rows[6][0]);
-            //TODO: messages
-            //try
-            //{
-            //    rows.InsertAt(row, 6);  //Row already belongs to the table
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(ArgumentException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("This row already belongs to this table.", e.Message);
-            //}
+
+            // This row already belongs to this table.
             Assert.Throws<ArgumentException>(() => rows.InsertAt(row, 6));
 
             DataTable table = new DataTable();
@@ -693,18 +539,8 @@ namespace System.Data.Tests
             row = table.NewRow();
             row["Name"] = "Abc";
             table.Rows.Add(row);
-            //TODO: messages, I'll stop commenting on this
-            //try
-            //{
-            //    rows.InsertAt(row, 6);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(ArgumentException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("This row already belongs to another table.", e.Message);
-            //}
+
+            // This row already belongs to another table.
             Assert.Throws<ArgumentException>(() => rows.InsertAt(row, 6));
 
             table = new DataTable();
@@ -745,59 +581,19 @@ namespace System.Data.Tests
             Assert.Equal("a", _tbl.Rows[0][0]);
             Assert.Equal("c", _tbl.Rows[1][0]);
             Assert.Equal("d", _tbl.Rows[2][0]);
-            //TODO
-            //try
-            //{
-            //    rows.Remove(null);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(IndexOutOfRangeException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("The given datarow is not in the current DataRowCollection.", e.Message);
-            //}
+
+            // The given datarow is not in the current DataRowCollection.
             Assert.Throws<IndexOutOfRangeException>(() => rows.Remove(null));
 
             DataRow row = new DataTable().NewRow();
-            //TODO
-            //try
-            //{
-            //    rows.Remove(Row);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(IndexOutOfRangeException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("The given datarow is not in the current DataRowCollection.", e.Message);
-            //}
+
+            // The given datarow is not in the current DataRowCollection.
             Assert.Throws<IndexOutOfRangeException>(() => rows.Remove(row));
-            //TODO
-            //try
-            //{
-            //    rows.RemoveAt(-1);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(IndexOutOfRangeException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("There is no row at position -1.", e.Message);
-            //}
+
+            // There is no row at position -1.
             Assert.Throws<IndexOutOfRangeException>(() => rows.RemoveAt(-1));
-            //TODO
-            //try
-            //{
-            //    rows.RemoveAt(64);
-            //    Assert.False(true);
-            //}
-            //catch (Exception e)
-            //{
-            //    Assert.Equal(typeof(IndexOutOfRangeException), e.GetType());
-            //    // Never premise English.
-            //    //Assert.Equal ("There is no row at position 64.", e.Message);
-            //}
+
+            // There is no row at position 64.
             Assert.Throws<IndexOutOfRangeException>(() => rows.RemoveAt(64));
 
             rows.RemoveAt(0);

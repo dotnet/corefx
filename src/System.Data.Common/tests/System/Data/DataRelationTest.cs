@@ -141,14 +141,13 @@ namespace System.Data.Tests
         [Fact]
         public void DataSetRelations()
         {
-            DataRelation relation;
             Assert.Equal(0, _set.Relations.Count);
             Assert.Equal(0, _mom.ParentRelations.Count);
             Assert.Equal(0, _mom.ChildRelations.Count);
             Assert.Equal(0, _child.ParentRelations.Count);
             Assert.Equal(0, _child.ChildRelations.Count);
 
-            relation = new DataRelation("Rel", _mom.Columns[1], _child.Columns[0]);
+            DataRelation relation = new DataRelation("Rel", _mom.Columns[1], _child.Columns[0]);
             _set.Relations.Add(relation);
 
             Assert.Equal(1, _set.Relations.Count);
@@ -184,13 +183,12 @@ namespace System.Data.Tests
         {
             DataRelation relation = new DataRelation("Rel", _mom.Columns[1], _child.Columns[0]);
             _set.Relations.Add(relation);
-            DataRelation test = null;
             Assert.Equal(1, _mom.ChildRelations.Count);
             Assert.Equal(0, _child.ChildRelations.Count);
             Assert.Equal(0, _mom.ParentRelations.Count);
             Assert.Equal(1, _child.ParentRelations.Count);
 
-            test = _child.ParentRelations[0];
+            DataRelation test = _child.ParentRelations[0];
             Assert.Equal("Rel", test.ToString());
             Assert.Equal("Rel", test.RelationName);
             Assert.Equal("Mom", test.ParentTable.TableName);

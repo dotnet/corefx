@@ -738,7 +738,7 @@ namespace System.Data.Tests
             ser.Deserialize(new XmlTextReader(
                 xml, XmlNodeType.Document, null));
         }
-        // TODO: what's this?
+
         /* To be added
         [Fact]
         public void WriteDiffReadAutoWriteSchema ()

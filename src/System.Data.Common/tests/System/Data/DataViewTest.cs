@@ -107,8 +107,7 @@ namespace System.Data.Tests
             }
             Console.WriteLine();
         }
-        
-        //TODO: what is this for? looks like it's called from nowhere.
+
         public void Dispose()
         {
             _dataTable = null;

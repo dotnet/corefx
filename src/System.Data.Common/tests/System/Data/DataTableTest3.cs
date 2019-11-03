@@ -645,7 +645,6 @@ namespace System.Data.Tests
             // The URL cannot be empty
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            //TODO
             //Assert.Equal ("url", ex.ParamName);
         }
 

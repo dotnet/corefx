@@ -223,13 +223,9 @@ namespace System.Data.Tests.SqlTypes
             Assert.Equal(0, _test2.CompareTo(_test3));
             Assert.True(_test3.CompareTo(SqlString.Null) > 0);
 
-            // TODO: What's this? the values are immediately overwritten.
-            SqlString t1 = new SqlString("test", 2057, SqlCompareOptions.IgnoreCase);
-            SqlString t2 = new SqlString("TEST", 2057, SqlCompareOptions.None);
-
             // IgnoreCase
-            t1 = new SqlString("test", 2057, SqlCompareOptions.IgnoreCase);
-            t2 = new SqlString("TEST", 2057, SqlCompareOptions.IgnoreCase);
+            SqlString t1 = new SqlString("test", 2057, SqlCompareOptions.IgnoreCase);
+            SqlString t2 = new SqlString("TEST", 2057, SqlCompareOptions.IgnoreCase);
             Assert.Equal(0, t2.CompareTo(t1));
 
             t1 = new SqlString("test", 2057);
@@ -270,15 +266,6 @@ namespace System.Data.Tests.SqlTypes
             // Static Equals()-method
             Assert.True(SqlString.Equals(_test2, _test3).Value);
             Assert.False(SqlString.Equals(_test1, _test2).Value);
-        }
-
-        [Fact]
-        public void GetHashCodeTest()
-        {
-            // FIXME: Better way to test HashCode
-            Assert.Equal(_test1.GetHashCode(), _test1.GetHashCode());
-            Assert.NotEqual(_test1.GetHashCode(), _test2.GetHashCode());
-            Assert.Equal(_test2.GetHashCode(), _test2.GetHashCode());
         }
 
         [Fact]

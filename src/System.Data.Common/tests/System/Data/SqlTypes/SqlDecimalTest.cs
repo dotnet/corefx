@@ -238,15 +238,6 @@ namespace System.Data.Tests.SqlTypes
             Assert.False(SqlDecimal.NotEquals(_test2, _test3).Value);
             Assert.True(SqlDecimal.NotEquals(SqlDecimal.Null, _test3).IsNull);
         }
-        //TODO
-        /* Don't do such environment-dependent test. It will never succeed under Portable.NET and MS.NET
-        [Fact]
-        public void GetHashCodeTest()
-        {
-            // FIXME: Better way to test HashCode
-            Assert.Equal (-1281249885, Test1.GetHashCode ());
-        }
-        */
 
         [Fact]
         public void Greaters()

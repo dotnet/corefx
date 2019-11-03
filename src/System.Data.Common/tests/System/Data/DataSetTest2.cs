@@ -268,18 +268,8 @@ namespace System.Data.Tests
             ds.Tables[0].PrimaryKey = new DataColumn[] { ds.Tables[0].Columns[0] };
             ds.EnforceConstraints = false;
             ds.Tables[0].Rows.Add(new object[] { null });
-            //TODO
-            //try
-            //{
-            //    ds.EnforceConstraints = true;
-            //    Assert.False(true);
-            //}
-            //catch (ConstraintException e)
-            //{
-            //    // Never premise English.
-            //    //Assert.Equal ("Failed to enable constraints. One or more rows contain values " + 
-            //    //		"violating non-null, unique, or foreign-key constraints.", e.Message, "#2");
-            //}
+
+            // Failed to enable constraints. One or more rows contain values violating non-null, unique, or foreign-key constraints.
             Assert.Throws<ConstraintException>(() => ds.EnforceConstraints = true);
         }
 
@@ -293,18 +283,8 @@ namespace System.Data.Tests
 
             ds.EnforceConstraints = false;
             ds.Tables[0].Rows.Add(new object[] { null });
-            //TODO
-            //try
-            //{
-            //    ds.EnforceConstraints = true;
-            //    Assert.False(true);
-            //}
-            //catch (ConstraintException e)
-            //{
-            //    // Never premise English.
-            //    //Assert.Equal ("Failed to enable constraints. One or more rows contain values " + 
-            //    //		"violating non-null, unique, or foreign-key constraints.", e.Message, "#2");
-            //}
+
+            // Failed to enable constraints. One or more rows contain values violating non-null, unique, or foreign-key constraints.
             Assert.Throws<ConstraintException>(() => ds.EnforceConstraints = true);
         }
 
@@ -1348,12 +1328,12 @@ namespace System.Data.Tests
 
             // Merge MissingSchemaAction.Add - Table
             Assert.True(dsTarget1.Tables.Contains("NewTable"));
-            //TODO
+
             //failed, should be success by MSDN Library documentation
             //        // Merge MissingSchemaAction.Add - PrimaryKey
             //        Assert.Equal(0, dsTarget1.Tables["NewTable"].PrimaryKey.Length);
             #endregion
-            //TODO
+
             #region "ds,false,MissingSchemaAction.AddWithKey)"
             //MissingSchemaAction.Add,MissingSchemaAction.AddWithKey - behave the same, checked only Add
 
@@ -1676,7 +1656,6 @@ namespace System.Data.Tests
                 ds1.Merge(ds2, true, MissingSchemaAction.Error);
             });
 
-            //TODO: InvalidConstraintException at 1687 ...Add("fk"..., what are testing exactly?
             //"This constraint cannot be added since ForeignKey doesn't belong to table table1."
             Assert.ThrowsAny<DataException>(() =>
             {

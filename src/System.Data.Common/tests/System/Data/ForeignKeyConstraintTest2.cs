@@ -357,7 +357,6 @@ namespace System.Data.Tests
             ds1.Tables[1].AcceptChanges();
 
             DataRow[] arr = ds1.Tables[1].Select("ChildId is null");
-            //TODO
             /*foreach (DataRow dr in arr)
                     {
                         Assert.Null(dr["ChildId"]);
@@ -366,7 +365,6 @@ namespace System.Data.Tests
             Assert.Equal(4, arr.Length);
 
             // Rule = SetDefault
-            //TODO
             //fc.DeleteRule = Rule.SetDefault;
             ds1 = new DataSet();
             ds1.Tables.Add(DataProvider.CreateParentDataTable());
@@ -509,7 +507,7 @@ namespace System.Data.Tests
         [Fact]
         public void UpdateRule2()
         {
-            Assert.Throws<ConstraintException>((Action)(() =>
+            Assert.Throws<ConstraintException>(() =>
             {
                 DataSet ds = GetNewDataSet();
                 ds.Tables[0].PrimaryKey = null;
@@ -520,12 +518,11 @@ namespace System.Data.Tests
                 //Changing parent row
 
                 ds.Tables[0].Rows[0]["ParentId"] = 5;
-                //TODO
                 /*ds.Tables[0].AcceptChanges();
                 ds.Tables[1].AcceptChanges();
                 //Checking the table
                 Compare(ds.Tables[1].Select("ParentId=8").Length ,0);*/
-            }));
+            });
         }
 
         [Fact]

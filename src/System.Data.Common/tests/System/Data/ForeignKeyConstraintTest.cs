@@ -197,18 +197,7 @@ namespace System.Data.Tests
             // Create a ForeingKeyConstraint Object using the constructor
             // ForeignKeyConstraint (string, string, string[], string[], AcceptRejectRule, Rule, Rule);
             ForeignKeyConstraint fkc = new ForeignKeyConstraint("hello world", parentTableName, parentColumnNames, childColumnNames, AcceptRejectRule.Cascade, Rule.Cascade, Rule.Cascade);                                                                                                                            // Assert that the Constraint object does not belong to any table yet
-            //TODO
-            //try
-            //{
-            //    DataTable tmp = fkc.Table;
-            //    Assert.False(true);
-            //}
-            //catch (NullReferenceException)
-            //{ // actually .NET throws this (bug)
-            //}
-            //catch (InvalidOperationException)
-            //{
-            //}
+
             Exception ex = Assert.ThrowsAny<Exception>(() => fkc.Table);
             Assert.True(ex is NullReferenceException || ex is InvalidOperationException);
 
@@ -224,51 +213,21 @@ namespace System.Data.Tests
             //    table2.Constraints.Add(fkc);
             //    throw new ApplicationException("An Exception was expected");
             //}
-            //TODO
             // spec says InvalidConstraintException but throws this
             //catch (NullReferenceException)
             //{
             //}
             Assert.Throws<NullReferenceException>(() => table2.Constraints.Add(fkc));
-            //TODO
-#if false // FIXME: Here this test crashes under MS.NET.
-                        // OK - So AddRange() is the only way!
-                        table2.Constraints.AddRange (constraints);
-               // After AddRange(), Check the properties of ForeignKeyConstraint object
-                        Assert.True(fkc.RelatedColumns [0].ColumnName.Equals ("col1"));
-                        Assert.True(fkc.RelatedColumns [1].ColumnName.Equals ("col2"));
-                        Assert.True(fkc.RelatedColumns [2].ColumnName.Equals ("col3"));
-                        Assert.True(fkc.Columns [0].ColumnName.Equals ("col4"));
-                        Assert.True(fkc.Columns [1].ColumnName.Equals ("col5"));
-                        Assert.True(fkc.Columns [2].ColumnName.Equals ("col6"));
-#endif
+
             // Try to add columns with names which do not exist in the table
             parentColumnNames[2] = "noColumn";
             ForeignKeyConstraint foreignKeyConstraint = new ForeignKeyConstraint("hello world", parentTableName, parentColumnNames, childColumnNames, AcceptRejectRule.Cascade, Rule.Cascade, Rule.Cascade);
             constraints[0] = new UniqueConstraint(column1);
             constraints[1] = new UniqueConstraint(column2);
             constraints[2] = foreignKeyConstraint;
-            //TODO
-            //try
-            //{
-            //    table2.Constraints.AddRange(constraints);
-            //    throw new ApplicationException("An Exception was expected");
-            //}
-            //catch (ArgumentException e)
-            //{
-            //}
-            //catch (InvalidConstraintException e)
-            //{ // Could not test on ms.net, as ms.net does not reach here so far.        
-            //}
+
             Exception ex2 = Assert.ThrowsAny<Exception>(() => table2.Constraints.AddRange(constraints));
             Assert.True(ex2 is ArgumentException || ex2 is InvalidConstraintException);
-
-
-            //TODO
-#if false // FIXME: Here this test crashes under MS.NET.
-                        // Check whether the child table really contains the foreign key constraint named "hello world"
-                        Assert.True(table2.Constraints.Contains ("hello world"));
-#endif
         }
 
 
@@ -403,7 +362,6 @@ namespace System.Data.Tests
 
             Assert.False(fkc.Equals(fkcDiff));
 
-            //Assert.True( "Hash Code Assert.True.Failed. 1");
             Assert.NotEqual(fkc.GetHashCode(), fkcDiff.GetHashCode());
         }
 

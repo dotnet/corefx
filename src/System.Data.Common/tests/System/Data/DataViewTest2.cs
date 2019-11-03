@@ -351,11 +351,8 @@ namespace System.Data.Tests
             bool succeed = true;
             for (int i = 0; i < dvArr.Length; i++)
             {
-                succeed = (int)dvArr[i]["ChildId"] == (int)drExpected[i]["ChildId"];
-                if (!succeed)
-                    break;
+                Assert.Equal((int)drExpected[i]["ChildId"], (int)dvArr[i]["ChildId"]);
             }
-            Assert.True(succeed);
         }
 
         //Activate This Construntor to log All To Standard output
@@ -1189,17 +1186,8 @@ namespace System.Data.Tests
 
             table.AcceptChanges();
             DataView view = new DataView(table);
-            //TODO
-            //try
-            //{
-            //    DataTable newTable = view.ToTable(false, null);
-            //}
-            //catch (ArgumentNullException e)
-            //{
-            //    // Never premise English.
-            //    //Assert.Equal ("'columnNames' argument cannot be null." + Environment.NewLine + 
-            //    //		"Parameter name: columnNames", e.Message, "#1");
-            //}
+
+            // 'columnNames' argument cannot be null.\r\nParameter name: columnNames
             Assert.Throws<ArgumentNullException>(() => view.ToTable(false, null));
             DataTable newTable1 = view.ToTable(false, new string[] { });
             Assert.Equal(10, newTable1.Rows.Count);

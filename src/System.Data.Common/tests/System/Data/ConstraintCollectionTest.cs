@@ -222,13 +222,8 @@ namespace System.Data.Tests
             table.BeginInit();
             table.Constraints.AddRange(constraints);
 
-            //TODO: what's up with this NRE swallow? does not seem to throw.
             //Check the table property of UniqueConstraint Object
-            try
-            {
-                Assert.Null(constraints[2].Table);
-            }
-            catch (NullReferenceException) { } 
+            Assert.Null(constraints[2].Table);
 
             table.EndInit();
         }

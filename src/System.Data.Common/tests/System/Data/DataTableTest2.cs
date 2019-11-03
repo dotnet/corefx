@@ -912,14 +912,7 @@ namespace System.Data.Tests
         private void DataColumnChangeHandler(object sender, DataColumnChangeEventArgs e)
         {
             DataTable dt = (DataTable)sender;
-            if ((e.Column.Equals(dt.Columns["Value"])) && (e.Row.Equals(dt.Rows[0])) && (e.ProposedValue.Equals("NewValue")))
-            {
-                _eventValues = true;
-            }
-            else
-            {
-                _eventValues = false;
-            }
+            _eventValues = e.Column.Equals(dt.Columns["Value"]) && e.Row.Equals(dt.Rows[0]) && e.ProposedValue.Equals("NewValue");
             _eventRaised = true;
         }
 
@@ -1321,17 +1314,7 @@ namespace System.Data.Tests
             // Select_S - ChildDateTime >= #12/3/2005 5:06:30 PM# or ChildDateTime <= #11/3/1980#
             drSelect = dt.Select("ChildDateTime >= #12/3/2005 5:06:30 PM# or ChildDateTime <= #11/3/1980#  ");
             CompareUnsorted(drSelect, al.ToArray());
-            //TODO
-#if LATER
-            //-------------------------------------------------------------
-            al.Clear();
-            foreach (DataRow dr in dt.Rows)
-                if (dr["ChildDouble"].ToString().Length > 10)
-                    al.Add(dr);
-                // Select_S - Len(Convert(ChildDouble,'System.String')) > 10
-                drSelect = dt.Select ("Len(Convert(ChildDouble,'System.String')) > 10");
-                Assert.Equal (al.ToArray(), drSelect);
-#endif
+
             //-------------------------------------------------------------
             al.Clear();
             foreach (DataRow dr in dt.Rows)
@@ -1340,7 +1323,6 @@ namespace System.Data.Tests
             // Select_S - SubString(Trim(String1),1,2) = '1-'
             drSelect = dt.Select("SubString(Trim(String1),1,2) = '1-'");
             Assert.Equal(al.ToArray(), drSelect);
-            //TODO
             //-------------------------------------------------------------
             /*
             al.Clear();
@@ -1369,12 +1351,7 @@ namespace System.Data.Tests
             Assert.Equal(al.ToArray(), drSelect);
         }
 
-        private void CompareUnsorted<T>(T[] a, T[] b)
-        {
-            IEnumerable<T> union = a.Union(b);
-            IEnumerable<T> intersection = a.Intersect(b);
-            Assert.Equal(union.Count(), intersection.Count());
-        }
+        private void CompareUnsorted<T>(T[] a, T[] b) => Assert.Equal(a.Union(b).Count(), a.Intersect(b).Count());
 
         [Fact]
         public void Select_ByFilterDataViewRowState()
@@ -1912,7 +1889,7 @@ namespace System.Data.Tests
                 if ((int)dr["ChildId"] == 1 && dr["String1"].ToString() == "1-String1")
                     al.Add(dr);
             }
-            //TODO
+
             //al.Reverse();
             al.Sort(new DataRowsComparer("ParentId", "Desc"));
 
@@ -1927,7 +1904,7 @@ namespace System.Data.Tests
                 if (dr["String1"].ToString().Length < 4)
                     al.Add(dr);
             }
-            //TODO
+
             //al.Reverse();
             al.Sort(new DataRowsComparer("ParentId", "Desc"));
 
@@ -1967,9 +1944,9 @@ namespace System.Data.Tests
             // to a Boolean term
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            //TODO
-            //Assert.True (ex.Message.IndexOf ("'col1*10'") != -1);
-            //Assert.True (ex.Message.IndexOf ("Boolean") != -1);
+
+            Assert.Contains("'col1*10'", ex.Message);
+            Assert.Contains("Boolean", ex.Message);
         }
 
         [Fact]
@@ -1988,8 +1965,8 @@ namespace System.Data.Tests
             // a Boolean term
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            //Assert.True (ex.Message.IndexOf ("'col1'") != -1);
-            //Assert.True (ex.Message.IndexOf ("Boolean") != -1);
+            Assert.Contains("'col1'", ex.Message);
+            Assert.Contains("Boolean", ex.Message);
 
             //col2 is a boolean expression, and a null value translates to
             //false.
@@ -2056,7 +2033,6 @@ namespace System.Data.Tests
             table3.Merge(table2, false, MissingSchemaAction.Ignore);
             Assert.Equal(0, table3.Constraints.Count);
 
-            //TODO
             //FIXME : If both source and target have PK, then 
             // shud be the exception raised when schema is merged? 
             // ms.net throws a nullreference exception.

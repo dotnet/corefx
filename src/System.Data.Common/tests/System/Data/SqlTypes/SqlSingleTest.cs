@@ -236,7 +236,7 @@ namespace System.Data.Tests.SqlTypes
             Assert.Throws<OverflowException>(() => test2.ToSqlByte());
 
             // ToSqlDecimal ()
-            Assert.Equal(250.00000000000000M, test1.ToSqlDecimal().Value);
+            Assert.Equal(250M, test1.ToSqlDecimal().Value);
             Assert.Equal(0, test0.ToSqlDecimal().Value);
 
             Assert.Throws<OverflowException>(() => test3.ToSqlDecimal().Value);
@@ -284,27 +284,27 @@ namespace System.Data.Tests.SqlTypes
         {
             SqlSingle test0 = new SqlSingle(0);
             SqlSingle test1 = new SqlSingle(24E+11);
-            SqlSingle test3 = new SqlSingle(12E+11);
-            SqlSingle test4 = new SqlSingle(1E+10);
-            SqlSingle Test5 = new SqlSingle(2E+10);
+            SqlSingle test2 = new SqlSingle(12E+11);
+            SqlSingle test3 = new SqlSingle(1E+10);
+            SqlSingle test4 = new SqlSingle(2E+10);
 
             // "+"-operator
-            Assert.Equal((SqlSingle)3E+10, test4 + Test5);
+            Assert.Equal((SqlSingle)3E+10, test3 + test4);
 
             Assert.Throws<OverflowException>(() => SqlSingle.MaxValue + SqlSingle.MaxValue);
 
             // "/"-operator
-            Assert.Equal(2, test1 / test3);
+            Assert.Equal(2, test1 / test2);
 
-            Assert.Throws<DivideByZeroException>(() => test3 / test0);
+            Assert.Throws<DivideByZeroException>(() => test2 / test0);
 
             // "*"-operator
-            Assert.Equal((SqlSingle)2E+20, test4 * Test5);
+            Assert.Equal((SqlSingle)2E+20, test3 * test4);
 
             Assert.Throws<OverflowException>(() => SqlSingle.MaxValue * test1);
 
             // "-"-operator
-            Assert.Equal((SqlSingle)12e11, test1 - test3);
+            Assert.Equal((SqlSingle)12e11, test1 - test2);
 
             Assert.Throws<OverflowException>(() => SqlSingle.MinValue - SqlSingle.MaxValue);
         }

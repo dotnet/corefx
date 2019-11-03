@@ -144,15 +144,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        public void GetHashCodeTest()
-        {
-            SqlDouble test15 = new SqlDouble(15);
-
-            // FIXME: Better way to test HashCode
-            Assert.Equal(test15.GetHashCode(), test15.GetHashCode());
-        }
-
-        [Fact]
         public void Greaters()
         {
             SqlDouble test1 = new SqlDouble(1e100);
