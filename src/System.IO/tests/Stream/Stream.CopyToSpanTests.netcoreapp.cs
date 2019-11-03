@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,10 +32,11 @@ namespace System.IO.Tests
             Assert.Equal(TaskStatus.Canceled, src.CopyToAsync((_, __, ___) => Task.CompletedTask, null, 4096, new CancellationToken(true)).Status);
         }
 
-        [Fact]
-        public async Task CopyToAsync_CancellationToken_Propagated()
+        [Theory]
+        [MemberData(nameof(CopyTo_TestData))]
+        public async Task CopyToAsync_CancellationToken_Propagated(MemoryStream input)
         {
-            using var src = new MemoryStream();
+            using var src = input;
             src.WriteByte(0);
             src.Position = 0;
 
@@ -46,10 +49,11 @@ namespace System.IO.Tests
             );
         }
 
-        [Fact]
-        public async Task CopyToAsync_State_Propagated()
+        [Theory]
+        [MemberData(nameof(CopyTo_TestData))]
+        public async Task CopyToAsync_State_Propagated(MemoryStream input)
         {
-            using var src = new MemoryStream();
+            using var src = input;
             src.WriteByte(0);
             src.Position = 0;
 
@@ -62,10 +66,11 @@ namespace System.IO.Tests
             );
         }
 
-        [Fact]
-        public void CopyTo_AllDataCopied()
+        [Theory]
+        [MemberData(nameof(CopyTo_TestData))]
+        public void CopyTo_AllDataCopied(MemoryStream input)
         {
-            using var src = new MemoryStream();
+            using var src = input;
             src.Write(Enumerable.Range(0, 10000).Select(i => (byte)i).ToArray(), 0, 256);
             src.Position = 0;
 
@@ -75,10 +80,11 @@ namespace System.IO.Tests
             Assert.Equal<byte>(src.ToArray(), dst.ToArray());
         }
 
-        [Fact]
-        public async Task CopyToAsync_AllDataCopied()
+        [Theory]
+        [MemberData(nameof(CopyTo_TestData))]
+        public async Task CopyToAsync_AllDataCopied(MemoryStream input)
         {
-            using var src = new MemoryStream();
+            using var src = input;
             src.Write(Enumerable.Range(0, 10000).Select(i => (byte)i).ToArray(), 0, 256);
             src.Position = 0;
 
@@ -86,6 +92,64 @@ namespace System.IO.Tests
             await src.CopyToAsync((memory, _, ___) => dst.WriteAsync(memory).AsTask(), null, 4096, default);
 
             Assert.Equal<byte>(src.ToArray(), dst.ToArray());
+        }
+
+        private sealed class CustomMemoryStream : MemoryStream
+        {
+            private readonly bool _spanCopy;
+
+            public CustomMemoryStream(bool spanCopy)
+            : base()
+            {
+                _spanCopy = spanCopy;
+            }
+
+            public override void CopyTo(Stream destination, int bufferSize)
+            {
+                byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+                try
+                {
+                    int read;
+                    while ((read = Read(buffer, 0, buffer.Length)) != 0)
+                    {
+                        if (_spanCopy)
+                            destination.Write(new ReadOnlySpan<byte>(buffer, 0, read));
+                        else
+                            destination.Write(buffer, 0, read);
+                    }
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
+            }
+
+            public override async Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+            {
+                byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+                try
+                {
+                    while (true)
+                    {
+                        int bytesRead = await ReadAsync(new Memory<byte>(buffer), cancellationToken).ConfigureAwait(false);
+                        if (bytesRead == 0) break;
+                        if (_spanCopy)
+                            await destination.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
+                        else
+                            await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+                    }
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> CopyTo_TestData()
+        {
+            foreach (var spanCopy in new[] { false, true })
+                yield return new object[] { new CustomMemoryStream(spanCopy) };
         }
     }
 }
