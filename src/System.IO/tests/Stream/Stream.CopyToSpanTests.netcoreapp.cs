@@ -22,14 +22,14 @@ namespace System.IO.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => s.CopyTo((_, __) => { }, null, 0));
 
             AssertExtensions.Throws<ArgumentNullException>("callback", () => s.CopyToAsync(null, null, 0, default));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => s.CopyToAsync((_, __, ___) => Task.CompletedTask, null, 0, default));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => s.CopyToAsync((_, __, ___) => new ValueTask(Task.CompletedTask), null, 0, default));
         }
 
         [Fact]
         public void CopyToAsync_PrecanceledToken_Cancels()
         {
             using var src = new MemoryStream();
-            Assert.Equal(TaskStatus.Canceled, src.CopyToAsync((_, __, ___) => Task.CompletedTask, null, 4096, new CancellationToken(true)).Status);
+            Assert.Equal(TaskStatus.Canceled, src.CopyToAsync((_, __, ___) => new ValueTask(Task.CompletedTask), null, 4096, new CancellationToken(true)).AsTask().Status);
         }
 
         [Theory]
@@ -42,7 +42,7 @@ namespace System.IO.Tests
 
             var cancellationToken = new CancellationToken();
             await src.CopyToAsync(
-                (_, __, token) => Task.Run(() => Assert.Equal(cancellationToken, token)),
+                (_, __, token) => new ValueTask(Task.Run(() => Assert.Equal(cancellationToken, token))),
                 null,
                 4096,
                 cancellationToken
@@ -59,7 +59,7 @@ namespace System.IO.Tests
 
             var expected = 42;
             await src.CopyToAsync(
-                (_, state, __) => Task.Run(() => Assert.Equal(expected, state)),
+                (_, state, __) => new ValueTask(Task.Run(() => Assert.Equal(expected, state))),
                 expected,
                 4096,
                 default
@@ -89,7 +89,7 @@ namespace System.IO.Tests
             src.Position = 0;
 
             using var dst = new MemoryStream();
-            await src.CopyToAsync((memory, _, ___) => dst.WriteAsync(memory).AsTask(), null, 4096, default);
+            await src.CopyToAsync((memory, _, ___) => dst.WriteAsync(memory), null, 4096, default);
 
             Assert.Equal<byte>(src.ToArray(), dst.ToArray());
         }
