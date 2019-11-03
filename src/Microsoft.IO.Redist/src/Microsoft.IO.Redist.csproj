@@ -64,7 +64,6 @@
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.cs" Link="Common\CoreLib\System\IO\PathInternal.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Windows.cs" Link="Common\CoreLib\System\IO\PathInternal.Windows.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs" Link="Common\CoreLib\System\IO\Win32Marshal.cs" />
-    <Compile Include="$(CommonPath)\CoreLib\System\Text\StringBuilderCache.cs" Link="Common\CoreLib\System\Text\StringBuilderCache.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs" Link="Common\CoreLib\System\Text\ValueStringBuilder.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.EncryptDecrypt.cs" Link="Common\Interop\Windows\Interop.EncryptDecrypt.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs" Link="Common\Interop\Windows\Interop.Errors.cs" />
@@ -100,6 +99,7 @@
     <Compile Include="$(CommonPath)\System\IO\FileSystem.DirectoryCreation.Windows.cs" Link="Common\System\IO\FileSystem.DirectoryCreation.Windows.cs" />
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitivity.cs" Link="Common\System\IO\PathInternal.CaseSensitivity.cs" />
     <Compile Include="$(CommonPath)\System\Memory\FixedBufferExtensions.cs" Link="Common\System\Memory\FixedBufferExtensions.cs" />
+    <Compile Include="$(CommonPath)\System\Runtime\InteropServices\SuppressGCTransitionAttribute.internal.cs" />
     <Compile Include="Microsoft\IO\StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">

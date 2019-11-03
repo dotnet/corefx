@@ -57,14 +57,13 @@ stages:
             /p:BlobBasePath='$(Build.ArtifactStagingDirectory)/BlobArtifacts/'
             /p:SymbolPublishingExclusionsFile='$(Build.SourcesDirectory)/eng/SymbolPublishingExclusionsFile.txt'
             /p:Configuration=Release
+            /p:PublishToMSDL=false
             ${{ parameters.symbolPublishingAdditionalParameters }}
 
   - job: publish_assets
     displayName: Publish Assets
     dependsOn: setupMaestroVars
     variables:
-      - group: DotNet-Blob-Feed
-      - group: AzureDevOps-Artifact-Feeds-Pats
       - name: BARBuildId
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.BARBuildId'] ]
       - name: IsStableBuild
@@ -78,12 +77,14 @@ stages:
         inputs:
           buildType: current
           artifactName: PackageArtifacts
+        continueOnError: true
 
       - task: DownloadBuildArtifacts@0
         displayName: Download Blob Artifacts
         inputs:
           buildType: current
           artifactName: BlobArtifacts
+        continueOnError: true
 
       - task: DownloadBuildArtifacts@0
         displayName: Download Asset Manifests

@@ -122,29 +122,37 @@ namespace System.Text.Encodings.Web
 
 #if NETCOREAPP
         VectorizedEntry:
-            short* vectorizedEnd = end - 2 * Vector128<short>.Count;
             int index;
+            short* vectorizedEnd;
 
-            while (ptr <= vectorizedEnd)
+            if (textLength >= 2 * Vector128<short>.Count)
             {
-                Debug.Assert(text <= ptr && ptr <= (text + textLength - 2 * Vector128<short>.Count));
+                vectorizedEnd = end - 2 * Vector128<short>.Count;
 
-                // Load the next 16 characters, combine them to one byte vector
-                Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
-                    Sse2.LoadVector128(ptr),
-                    Sse2.LoadVector128(ptr + Vector128<short>.Count));
-
-                // Check if any of the 16 characters need to be escaped.
-                index = NeedsEscaping(sourceValue);
-
-                // If index == 0, that means none of the 16 characters needed to be escaped.
-                // TrailingZeroCount is relatively expensive, avoid it if possible.
-                if (index != 0)
+                do
                 {
-                    goto VectorizedFound;
-                }
+                    Debug.Assert(text <= ptr && ptr <= (text + textLength - 2 * Vector128<short>.Count));
 
-                ptr += 2 * Vector128<short>.Count;
+                    // Load the next 16 characters, combine them to one byte vector.
+                    // Chars that don't cleanly convert to ASCII bytes will get converted (saturated) to
+                    // somewhere in the range [0x7F, 0xFF], which the NeedsEscaping method will detect.
+                    Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
+                        Sse2.LoadVector128(ptr),
+                        Sse2.LoadVector128(ptr + Vector128<short>.Count));
+
+                    // Check if any of the 16 characters need to be escaped.
+                    index = NeedsEscaping(sourceValue);
+
+                    // If index == 0, that means none of the 16 characters needed to be escaped.
+                    // TrailingZeroCount is relatively expensive, avoid it if possible.
+                    if (index != 0)
+                    {
+                        goto VectorizedFound;
+                    }
+
+                    ptr += 2 * Vector128<short>.Count;
+                }
+                while (ptr <= vectorizedEnd);
             }
 
             vectorizedEnd = end - Vector128<short>.Count;
