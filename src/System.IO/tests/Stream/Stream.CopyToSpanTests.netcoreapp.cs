@@ -150,6 +150,8 @@ namespace System.IO.Tests
         {
             foreach (var spanCopy in new[] { false, true })
                 yield return new object[] { new CustomMemoryStream(spanCopy) };
+            
+            yield return new object[] { new MemoryStream() };
         }
     }
 }
