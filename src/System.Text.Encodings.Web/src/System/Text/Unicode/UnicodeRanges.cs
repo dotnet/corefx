@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -27,21 +28,19 @@ namespace System.Text.Unicode
         private static UnicodeRange? _all;
 
         [MethodImpl(MethodImplOptions.NoInlining)] // the caller should be inlined, not this method
-        private static UnicodeRange CreateEmptyRange(ref UnicodeRange? range)
+        private static UnicodeRange CreateEmptyRange([NotNull] ref UnicodeRange? range)
         {
-            // If the range hasn't been created, create it now.
             // It's ok if two threads race and one overwrites the other's 'range' value.
             Volatile.Write(ref range, new UnicodeRange(0, 0));
-            return range!;
+            return range;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)] // the caller should be inlined, not this method
-        private static UnicodeRange CreateRange(ref UnicodeRange? range, char first, char last)
+        private static UnicodeRange CreateRange([NotNull] ref UnicodeRange? range, char first, char last)
         {
-            // If the range hasn't been created, create it now.
             // It's ok if two threads race and one overwrites the other's 'range' value.
             Volatile.Write(ref range, UnicodeRange.Create(first, last));
-            return range!;
+            return range;
         }
     }
 }
