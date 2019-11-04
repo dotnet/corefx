@@ -280,6 +280,7 @@ internal static partial class Interop
                     // To handle that we will fall-through block bellow to pull it out and we will fail after
                     // while preserving original error.
                     handshakeException = new SslException(SR.Format(SR.net_ssl_handshake_failed_error, error), innerError);
+                    Crypto.ErrClearError();
                 }
             }
 
@@ -292,13 +293,10 @@ internal static partial class Interop
                 {
                     sendCount = BioRead(context.OutputBio, sendBuf, sendCount);
                 }
-                catch (Exception e)
+                catch (Exception e) when (handshakeException != null)
                 {
                     // If we already have handshake exception, ignore any exception from BioRead().
-                    if (handshakeException == null)
-                    {
-                        handshakeException = e;
-                    }
+                    handshakeException = e;
                 }
                 finally
                 {

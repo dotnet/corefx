@@ -644,7 +644,7 @@ namespace System.Net.Security
             }
 
             Interop.SspiCli.SecBufferDesc inSecurityBufferDescriptor = new Interop.SspiCli.SecBufferDesc(inSecBuffers.Length);
-            Interop.SspiCli.SecBufferDesc outSecurityBufferDescriptor = new Interop.SspiCli.SecBufferDesc(2);
+            Interop.SspiCli.SecBufferDesc outSecurityBufferDescriptor = new Interop.SspiCli.SecBufferDesc(count: 2);
 
             // Actually, this is returned in outFlags.
             bool isSspiAllocated = (inFlags & Interop.SspiCli.ContextFlags.AllocateMemory) != 0 ? true : false;
@@ -701,7 +701,7 @@ namespace System.Net.Security
                         // Copy the SecurityBuffer content into unmanaged place holder.
                         outUnmanagedBuffer[0].cbBuffer = outSecBuffer.size;
                         outUnmanagedBuffer[0].BufferType = outSecBuffer.type;
-                        outUnmanagedBuffer[0].pvBuffer =  outSecBuffer.token == null || outSecBuffer.token.Length == 0 ?
+                        outUnmanagedBuffer[0].pvBuffer = outSecBuffer.token == null || outSecBuffer.token.Length == 0 ?
                             IntPtr.Zero :
                             (IntPtr)(pinnedOutBytes + outSecBuffer.offset);
 
