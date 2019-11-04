@@ -18,7 +18,7 @@ namespace System.IO.Tests
     public partial class DangerousFileSystemWatcherTests
     {
         [ConditionalFact]
-        [OuterLoop("Slow test with significant resource ussage.")]
+        [OuterLoop("Slow test with significant resource usage.")]
         public void FileSystemWatcher_Unix_DoesNotLeak()
         {
             Interop.Sys.GetRLimit(Interop.Sys.RlimitResources.RLIMIT_NOFILE, out Interop.Sys.RLimit limits);
