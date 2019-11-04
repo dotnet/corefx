@@ -121,6 +121,55 @@ namespace System.Buffers
         }
 
         /// <summary>
+        /// Peeks at the next value at specific offset without advancing the reader.
+        /// </summary>
+        /// <param name="offset">The offset from current position.</param>
+        /// <param name="value">The next value or default if at the end.</param>
+        /// <returns>False if at the end of the reader.</returns>
+        public readonly bool TryPeek(long offset, out T value)
+        {
+            if (offset < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+
+            // if we've data and offset is not out of bounds
+            if (_moreData && Remaining > offset)
+            {
+                int currentIndex = CurrentSpanIndex;
+                long currentOffset = offset;
+                ReadOnlySpan<T> currentSpan = CurrentSpan;
+                SequencePosition nextPosition = _nextPosition;
+
+                // if offset doesn't fall inside current segment move to next until we found correct one
+                while ((currentIndex + currentOffset) > currentSpan.Length - 1)
+                {
+                    // subtract current non consumed data
+                    currentOffset -= currentSpan.Length - currentIndex;
+
+                    // move index to start of next span
+                    currentIndex = 0;
+
+                    // get next segment
+                    if (Sequence.TryGet(ref nextPosition, out ReadOnlyMemory<T> memory, true))
+                    {
+                        currentSpan = memory.Span;
+                    }
+                    else
+                    {
+                        Debug.Fail("Unexpected, if offset is in bounds we should find a segment");
+                    }
+                }
+
+                value = currentSpan[currentIndex + (int)currentOffset];
+                return true;
+            }
+            else
+            {
+                value = default;
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Read the next value and advance the reader.
         /// </summary>
         /// <param name="value">The next value or default if at the end.</param>
