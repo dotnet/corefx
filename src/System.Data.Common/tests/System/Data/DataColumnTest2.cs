@@ -404,8 +404,7 @@ namespace System.Data.Tests
         {
             DataColumn col = new DataColumn("ColName", typeof(string), "Price * 1.18");
             Assert.Equal("ColName", col.ColumnName);
-            // Assert.IsType fails because the type returned is System.RuntimeType not System.Type it seems.
-            Assert.Equal("System.String", col.DataType.FullName);
+            Assert.Equal(typeof(string), col.DataType);
             Assert.Equal("Price * 1.18", col.Expression);
         }
 
