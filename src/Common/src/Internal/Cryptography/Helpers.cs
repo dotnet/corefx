@@ -9,7 +9,7 @@ namespace Internal.Cryptography
 {
     internal static partial class Helpers
     {
-        // TODO: add attribute [return: NotNullIfNotNull("src")]
+        [return: NotNullIfNotNull("src")]
         public static byte[]? CloneByteArray(this byte[]? src)
         {
             if (src == null)

@@ -17,8 +17,8 @@ namespace System.Security.Cryptography
         public static SymmetricAlgorithm Create() =>
             throw new PlatformNotSupportedException(SR.Cryptography_DefaultAlgorithm_NotSupported);
 
-        public static SymmetricAlgorithm Create(string algName) =>
-            (SymmetricAlgorithm)CryptoConfigForwarder.CreateFromName(algName);
+        public static SymmetricAlgorithm? Create(string algName) =>
+            (SymmetricAlgorithm?)CryptoConfigForwarder.CreateFromName(algName);
 
         public virtual int FeedbackSize
         {

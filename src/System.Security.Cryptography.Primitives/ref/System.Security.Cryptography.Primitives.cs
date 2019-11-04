@@ -18,7 +18,7 @@ namespace System.Security.Cryptography
         public virtual string? SignatureAlgorithm { get { throw null; } }
         public void Clear() { }
         public static System.Security.Cryptography.AsymmetricAlgorithm Create() { throw null; }
-        public static System.Security.Cryptography.AsymmetricAlgorithm Create(string algName) { throw null; }
+        public static System.Security.Cryptography.AsymmetricAlgorithm? Create(string algName) { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public virtual byte[] ExportEncryptedPkcs8PrivateKey(System.ReadOnlySpan<byte> passwordBytes, System.Security.Cryptography.PbeParameters pbeParameters) { throw null; }
@@ -110,7 +110,7 @@ namespace System.Security.Cryptography
         public byte[] ComputeHash(byte[] buffer, int offset, int count) { throw null; }
         public byte[] ComputeHash(System.IO.Stream inputStream) { throw null; }
         public static System.Security.Cryptography.HashAlgorithm Create() { throw null; }
-        public static System.Security.Cryptography.HashAlgorithm Create(string hashName) { throw null; }
+        public static System.Security.Cryptography.HashAlgorithm? Create(string hashName) { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         protected abstract void HashCore(byte[] array, int ibStart, int cbSize);
@@ -147,9 +147,9 @@ namespace System.Security.Cryptography
         protected HMAC() { }
         protected int BlockSizeValue { get { throw null; } set { } }
         public string HashName { get { throw null; } set { } }
-        public override byte[] Key { get { throw null; } set { } }
+        public override byte[]? Key { get { throw null; } set { } }
         public static new System.Security.Cryptography.HMAC Create() { throw null; }
-        public static new System.Security.Cryptography.HMAC Create(string algorithmName) { throw null; }
+        public static new System.Security.Cryptography.HMAC? Create(string algorithmName) { throw null; }
         protected override void Dispose(bool disposing) { }
         protected override void HashCore(byte[] rgb, int ib, int cb) { }
         protected override void HashCore(System.ReadOnlySpan<byte> source) { }
@@ -170,9 +170,9 @@ namespace System.Security.Cryptography
     {
         protected byte[] KeyValue;
         protected KeyedHashAlgorithm() { }
-        public virtual byte[] Key { get { throw null; } set { } }
+        public virtual byte[]? Key { get { throw null; } set { } }
         public static new System.Security.Cryptography.KeyedHashAlgorithm Create() { throw null; }
-        public static new System.Security.Cryptography.KeyedHashAlgorithm Create(string algName) { throw null; }
+        public static new System.Security.Cryptography.KeyedHashAlgorithm? Create(string algName) { throw null; }
         protected override void Dispose(bool disposing) { }
     }
     public sealed partial class KeySizes
@@ -228,7 +228,7 @@ namespace System.Security.Cryptography
         public virtual System.Security.Cryptography.PaddingMode Padding { get { throw null; } set { } }
         public void Clear() { }
         public static System.Security.Cryptography.SymmetricAlgorithm Create() { throw null; }
-        public static System.Security.Cryptography.SymmetricAlgorithm Create(string algName) { throw null; }
+        public static System.Security.Cryptography.SymmetricAlgorithm? Create(string algName) { throw null; }
         public virtual System.Security.Cryptography.ICryptoTransform CreateDecryptor() { throw null; }
         public abstract System.Security.Cryptography.ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV);
         public virtual System.Security.Cryptography.ICryptoTransform CreateEncryptor() { throw null; }
