@@ -445,6 +445,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void CultureOrderBy()
         {
             CultureInfo current = Thread.CurrentThread.CurrentCulture;
@@ -500,6 +501,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void CultureOrderByElementAt()
         {
             CultureInfo current = Thread.CurrentThread.CurrentCulture;
