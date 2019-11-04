@@ -20,7 +20,7 @@ namespace System.Text.RegularExpressions
     {
         public readonly int[] Positive;
         public readonly int[] NegativeASCII;
-        public readonly int[][] NegativeUnicode;
+        public readonly int[][]? NegativeUnicode;
         public readonly string Pattern;
         public readonly int LowASCII;
         public readonly int HighASCII;
@@ -192,7 +192,7 @@ namespace System.Text.RegularExpressions
 
                         if (i == 0)
                         {
-                            Array.Copy(NegativeASCII, 0, newarray, 0, 128);
+                            Array.Copy(NegativeASCII, newarray, 128);
                             NegativeASCII = newarray;
                         }
 
