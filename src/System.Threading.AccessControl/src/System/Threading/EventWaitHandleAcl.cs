@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.IO;
-using System.Net.Mail;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using Microsoft.Win32.SafeHandles;
@@ -55,7 +53,11 @@ namespace System.Threading
                     lpSecurityDescriptor = (IntPtr)pSecurityDescriptor
                 };
 
-                SafeWaitHandle handle = Interop.Kernel32.CreateEventEx((IntPtr)(&secAttrs), name, eventFlags, (uint)EventWaitHandleRights.FullControl);
+                SafeWaitHandle handle = Interop.Kernel32.CreateEventEx(
+                    (IntPtr)(&secAttrs),
+                    name,
+                    eventFlags,
+                    (uint)EventWaitHandleRights.FullControl);
 
                 ValidateHandle(handle, name, out createdNew);
 

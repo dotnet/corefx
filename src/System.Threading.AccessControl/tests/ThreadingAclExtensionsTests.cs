@@ -169,10 +169,20 @@ namespace System.Threading.Tests
         [InlineData((EventResetMode)int.MaxValue)]
         public static void EventWaitHandle_Create_InvalidMode(EventResetMode mode)
         {
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("mode", () =>
+            if (PlatformDetection.IsFullFramework)
             {
-                using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, mode, "name", out bool createdNew, GetBasicEventWaitHandleSecurity());
-            });
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, mode, "name", out bool createdNew, GetBasicEventWaitHandleSecurity());
+                });
+            }
+            else
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("mode", () =>
+                {
+                    using EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState: true, mode, "name", out bool createdNew, GetBasicEventWaitHandleSecurity());
+                });
+            }
         }
 
         [Fact]
