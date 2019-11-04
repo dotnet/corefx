@@ -30,11 +30,13 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Loading from PathToAssembly is only supported in .NET Framework")]
         public void CompiledAssembly_GetWithPathToAssembly_ReturnsExpected()
         {
-            var results = new CompilerResults(null) { PathToAssembly = typeof(int).Assembly.CodeBase };
-            Assert.Null(results.CompiledAssembly);
+            var results = new CompilerResults(null) { PathToAssembly = typeof(CompilerResultsTests).Assembly.Location };
+
+            Assert.NotNull(results.CompiledAssembly);
+//            Assert.Equal(typeof(CompilerResultsTests).Assembly, results.CompiledAssembly);
+            Assert.Same(results.CompiledAssembly, results.CompiledAssembly);
         }
 
         public static IEnumerable<object[]> CompiledAssembly_Set_TestData()

@@ -9,6 +9,8 @@ namespace System.CodeDom.Compiler
 {
     public partial class CompilerResults
     {
+        private Assembly _compiledAssembly;
+
         public CompilerResults(TempFileCollection tempFiles)
         {
             TempFiles = tempFiles;
@@ -16,8 +18,18 @@ namespace System.CodeDom.Compiler
 
         public TempFileCollection TempFiles { get; set; }
 
-        public Assembly CompiledAssembly { get; set; }
-
+        public Assembly CompiledAssembly
+        {
+            get
+            {
+                if (_compiledAssembly == null && PathToAssembly != null)
+                {
+                    _compiledAssembly = Assembly.LoadFile(PathToAssembly);
+                }
+                return _compiledAssembly;
+            }
+            set => _compiledAssembly = value;
+        }
         public CompilerErrorCollection Errors { get; } = new CompilerErrorCollection();
 
         public StringCollection Output { get; } = new StringCollection();
