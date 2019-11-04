@@ -11,7 +11,7 @@ namespace System.Threading
 {
     public static class EventWaitHandleAcl
     {
-        /// <summary>Creates a new <see cref="EventWaitHandle" /> instance, ensuring it is created with the specified event security.</summary>
+        /// <summary>Gets or creates an <see cref="EventWaitHandle" /> instance, allowing a <see cref="EventWaitHandleSecurity " /> instance to be optionally specified to set it during the event creation.</summary>
         /// <param name="initialState"><see langword="true" /> to set the initial state to signaled if the named event is created as a result of this call; <see langword="false" /> to set it to non-signaled.</param>
         /// <param name="mode">One of the enum values that determines whether the event resets automatically or manually.</param>
         /// <param name="name">The name, if the event is a system-wide synchronization event; otherwise, <see langword="null" /> or an empty string.</param>
@@ -27,6 +27,7 @@ namespace System.Threading
         /// <exception cref="WaitHandleCannotBeOpenedException">A system-wide synchronization event with the provided <paramref name="name" /> was not found.
         /// -or-
         /// An <see cref="EventWaitHandle" /> with system-wide name <paramref name="name" /> cannot be created. An <see cref="EventWaitHandle" /> of a different type might have the same name.</exception>
+        /// <remarks>If a `name` is passed and the system event already exists, the existing event is returned. If `name` is `null` or <see cref="string.Empty" />, a new local event is always created.</remarks>
         public static unsafe EventWaitHandle Create(bool initialState, EventResetMode mode, string name, out bool createdNew, EventWaitHandleSecurity eventSecurity)
         {
             if (eventSecurity == null)
