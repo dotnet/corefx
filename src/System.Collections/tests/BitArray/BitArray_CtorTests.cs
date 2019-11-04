@@ -79,7 +79,7 @@ namespace System.Collections.Tests
             Random rnd = new Random(0);
 
             yield return new object[] { new bool[0] };
-            foreach (int size in new[] { 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2 })
+            foreach (int size in new[] { 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, BitsPerInt32 * 4, BitsPerInt32 * 8, BitsPerInt32 * 16})
             {
                 yield return new object[] { Enumerable.Repeat(true, size).ToArray() };
                 yield return new object[] { Enumerable.Repeat(false, size).ToArray() };
