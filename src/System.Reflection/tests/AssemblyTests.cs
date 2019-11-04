@@ -320,8 +320,8 @@ namespace System.Reflection.Tests
         [Fact]
         public void LoadFile_NoSuchPath_ThrowsFileNotFoundException()
         {
-            string path = Guid.NewGuid().ToString("N");
-            AssertExtensions.ThrowsContains<FileNotFoundException>(() => Assembly.LoadFile(path), path);
+            string rootedPath = "\\" + Guid.NewGuid().ToString("N");
+            AssertExtensions.ThrowsContains<FileNotFoundException>(() => Assembly.LoadFile(rootedPath), rootedPath);
         }
 
         [Fact]
