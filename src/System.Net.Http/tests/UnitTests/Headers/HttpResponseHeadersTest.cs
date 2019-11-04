@@ -21,7 +21,31 @@ namespace System.Net.Http.Tests
 
         public static IEnumerable<object[]> ProhibitedTrailingHeaders()
         {
-            return KnownHeaders.TrailerDisallowedHeaders.Select(h => new[] { h.Name });
+            return new KnownHeader[]    // rfc7230 4.1.2.
+            {
+                // Message framing headers.
+                KnownHeaders.TransferEncoding, KnownHeaders.ContentLength,
+
+                // Routing headers.
+                KnownHeaders.Host,
+
+                // Request modifiers: controls and conditionals.
+                // rfc7231#section-5.1: Controls.
+                KnownHeaders.CacheControl, KnownHeaders.Expect, KnownHeaders.MaxForwards, KnownHeaders.Pragma, KnownHeaders.Range, KnownHeaders.TE,
+
+                // rfc7231#section-5.2: Conditionals.
+                KnownHeaders.IfMatch, KnownHeaders.IfNoneMatch, KnownHeaders.IfModifiedSince, KnownHeaders.IfUnmodifiedSince, KnownHeaders.IfRange,
+
+                // Authentication headers.
+                KnownHeaders.Authorization, KnownHeaders.SetCookie,
+
+                // Response control data.
+                // rfc7231#section-7.1: Control Data.
+                KnownHeaders.Age, KnownHeaders.Expires, KnownHeaders.Date, KnownHeaders.Location, KnownHeaders.RetryAfter, KnownHeaders.Vary, KnownHeaders.Warning,
+
+                // Content-Encoding, Content-Type, Content-Range, and Trailer itself.
+                KnownHeaders.ContentEncoding, KnownHeaders.ContentType, KnownHeaders.ContentRange, KnownHeaders.Trailer
+            }.Select(h => new object[] { h.Name }).ToArray();
         }
 
         public static IEnumerable<object[]> AllowedTrailingHeaders()

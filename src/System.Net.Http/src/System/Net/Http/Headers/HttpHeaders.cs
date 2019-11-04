@@ -997,11 +997,11 @@ namespace System.Net.Http.Headers
             return info.ParsedValue;
         }
 
-        internal virtual bool IsAllowedHeaderName(string headerName) => true;
+        internal virtual bool IsAllowedHeaderName(HeaderDescriptor descriptor) => true;
 
         private void PrepareHeaderInfoForAdd(HeaderDescriptor descriptor, out HeaderStoreItemInfo info, out bool addToStore)
         {
-            if (!IsAllowedHeaderName(descriptor.Name))
+            if (!IsAllowedHeaderName(descriptor))
             {
                 throw new InvalidOperationException(SR.net_http_headers_not_allowed_header_name);
             }

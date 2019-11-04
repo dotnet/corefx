@@ -42,7 +42,6 @@ namespace System.Net.Http
         private static readonly byte[] s_http1DotBytes = Encoding.ASCII.GetBytes("HTTP/1.");
         private static readonly ulong s_http10Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.0"));
         private static readonly ulong s_http11Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.1"));
-        private static readonly HashSet<KnownHeader> s_disallowedTrailers = new HashSet<KnownHeader>(KnownHeaders.TrailerDisallowedHeaders);
 
         private readonly HttpConnectionPool _pool;
         private readonly Socket _socket; // used for polling; _stream should be used for all reading/writing. _stream owns disposal.
@@ -899,7 +898,7 @@ namespace System.Net.Http
                 throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_header_name, Encoding.ASCII.GetString(line.Slice(0, pos))));
             }
 
-            if (isFromTrailer && descriptor.KnownHeader != null && s_disallowedTrailers.Contains(descriptor.KnownHeader))
+            if (isFromTrailer && descriptor.KnownHeader != null && (descriptor.KnownHeader.HeaderType & HttpHeaderType.NonTrailing) == HttpHeaderType.NonTrailing)
             {
                 // Disallowed trailer fields.
                 // A recipient MUST ignore fields that are forbidden to be sent in a trailer.
@@ -936,15 +935,15 @@ namespace System.Net.Http
             // Request headers returned on the response must be treated as custom headers.
             if (isFromTrailer)
             {
-                response.TrailingHeaders.TryAddWithoutValidation(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
+                response.TrailingHeaders.TryAddWithoutValidation((descriptor.HeaderType & HttpHeaderType.Request) == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
             }
-            else if (descriptor.HeaderType == HttpHeaderType.Content)
+            else if ((descriptor.HeaderType & HttpHeaderType.Content) == HttpHeaderType.Content)
             {
                 response.Content.Headers.TryAddWithoutValidation(descriptor, headerValue);
             }
             else
             {
-                response.Headers.TryAddWithoutValidation(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
+                response.Headers.TryAddWithoutValidation((descriptor.HeaderType & HttpHeaderType.Request) == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
             }
         }
 
