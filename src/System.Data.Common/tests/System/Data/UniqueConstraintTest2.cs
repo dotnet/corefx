@@ -322,7 +322,7 @@ namespace System.Data.Tests
             uc = new UniqueConstraint(dtParent.Columns[0]);
             PropertyCollection pc = uc.ExtendedProperties;
 
-            // Checking ExtendedProperties default 
+            // Checking ExtendedProperties default
             Assert.NotNull(pc);
 
             // Checking ExtendedProperties count

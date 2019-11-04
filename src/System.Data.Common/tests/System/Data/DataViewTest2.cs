@@ -640,7 +640,7 @@ namespace System.Data.Tests
             //-------------------------------------------------------------
 
             //-------------------------------------------------------------
-            //Get excpected result 
+            //Get expected result
             list.Clear();
             foreach (DataRow dr in dt.Rows)
                 if ((int)dr["ChildId"] == 1 && dr["String1"].ToString() == "1-String1")

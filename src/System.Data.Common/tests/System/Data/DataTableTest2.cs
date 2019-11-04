@@ -2033,8 +2033,8 @@ namespace System.Data.Tests
             table3.Merge(table2, false, MissingSchemaAction.Ignore);
             Assert.Equal(0, table3.Constraints.Count);
 
-            //FIXME : If both source and target have PK, then 
-            // shud be the exception raised when schema is merged? 
+            //FIXME : If both source and target have PK, then
+            // shud be the exception raised when schema is merged?
             // ms.net throws a nullreference exception.
             // If any data is merged, exception is anyways raised.
             /*

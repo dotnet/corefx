@@ -396,7 +396,7 @@ namespace System.Data.Tests
 
             PropertyCollection pc = fc.ExtendedProperties;
 
-            // Checking ExtendedProperties default 
+            // Checking ExtendedProperties default
             Assert.NotNull(pc);
 
             // Checking ExtendedProperties count
