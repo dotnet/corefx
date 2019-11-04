@@ -40,7 +40,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Memory" />
-    <Reference Include="System.Runtime" />
     <Reference Include="System.Resources.ResourceManager" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
