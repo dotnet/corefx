@@ -37,6 +37,10 @@ namespace System.IO.Tests
                         watcher.Created += (s, e) => { } ;
                         watcher.EnableRaisingEvents = true;
                     }
+
+                    // On some OSes system resource is released in finalizer.
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
                 }
             }
             catch (Exception e)
