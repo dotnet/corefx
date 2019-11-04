@@ -443,8 +443,7 @@ namespace System.IO
                         }
                         if (((eventType & WatcherChangeTypes.Renamed) > 0))
                         {
-                            // Find the rename that is paired to this rename, which should be the next rename in the list with id increased by one.
-                            // There is a Radar related to this pairing: http://www.openradar.me/13461247.
+                            // Find the rename that is paired to this rename.
                             int? pairedId = FindRenameChangePairedChange(i, eventFlags, eventIds);
                             if (!pairedId.HasValue)
                             {
@@ -595,6 +594,12 @@ namespace System.IO
                 int currentIndex,
                 Span<FSEventStreamEventFlags> flags, Span<FSEventStreamEventId> ids)
             {
+                // The rename event can be composed of two events. The first contains the original file name the second contains the new file name.
+                // Each of the events is delivered only when the corresponding folder is watched. It means both events are delivered when the rename/move
+                // occurs inside the watched folder. When the move has origin o final destination outside, only one event is delivered. To distinguish
+                // between two nonrelated events and the event which belong together the event ID is tested. Only related rename events differ in ID by one.
+                // This behavior isn't documented and there is an open radar http://www.openradar.me/13461247.
+
                 int nextIndex = currentIndex + 1;
 
                 if (nextIndex >= flags.Length)
