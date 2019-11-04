@@ -1613,84 +1613,84 @@ namespace System.Data.Tests
             dr = dt.Rows[0];
             Assert.Equal(addressA, dr[dc0, DataRowVersion.Current]);
             Assert.Equal(addressA, dr[dc0, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Original));
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc0, DataRowVersion.Original);
+            AssertNotFound(dr, dc0, DataRowVersion.Proposed);
             Assert.Same(personA, dr[dc1, DataRowVersion.Current]);
             Assert.Same(personA, dr[dc1, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Original));
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc1, DataRowVersion.Original);
+            AssertNotFound(dr, dc1, DataRowVersion.Proposed);
 
             dr = dt.Rows[1];
             Assert.Equal(addressB, dr[dc0, DataRowVersion.Current]);
             Assert.Equal(addressB, dr[dc0, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Original));
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc0, DataRowVersion.Original);
+            AssertNotFound(dr, dc0, DataRowVersion.Proposed);
             Assert.Same(personB, dr[dc1, DataRowVersion.Current]);
             Assert.Same(personB, dr[dc1, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Original));
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc1, DataRowVersion.Original);
+            AssertNotFound(dr, dc1, DataRowVersion.Proposed);
 
             dr = dt.Rows[0];
             dr[dc0] = addressC;
             Assert.Equal(addressC, dr[dc0, DataRowVersion.Current]);
             Assert.Equal(addressC, dr[dc0, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Original));
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc0, DataRowVersion.Original);
+            AssertNotFound(dr, dc0, DataRowVersion.Proposed);
             Assert.Same(personA, dr[dc1, DataRowVersion.Current]);
             Assert.Same(personA, dr[dc1, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Original));
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc1, DataRowVersion.Original);
+            AssertNotFound(dr, dc1, DataRowVersion.Proposed);
 
             dr = dt.Rows[1];
             dr.BeginEdit();
             dr[dc1] = personC;
             Assert.Equal(addressB, dr[dc0, DataRowVersion.Current]);
             Assert.Equal(addressB, dr[dc0, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Original));
+            AssertNotFound(dr, dc0, DataRowVersion.Original);
             Assert.Equal(addressB, dr[dc0, DataRowVersion.Proposed]);
             Assert.Same(personB, dr[dc1, DataRowVersion.Current]);
             Assert.Same(personC, dr[dc1, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Original));
+            AssertNotFound(dr, dc1, DataRowVersion.Original);
             Assert.Same(personC, dr[dc1, DataRowVersion.Proposed]);
             dr.EndEdit();
             Assert.Equal(addressB, dr[dc0, DataRowVersion.Current]);
             Assert.Equal(addressB, dr[dc0, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Original));
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc0, DataRowVersion.Original);
+            AssertNotFound(dr, dc0, DataRowVersion.Proposed);
             Assert.Same(personC, dr[dc1, DataRowVersion.Current]);
             Assert.Same(personC, dr[dc1, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Original));
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc1, DataRowVersion.Original);
+            AssertNotFound(dr, dc1, DataRowVersion.Proposed);
             dr.AcceptChanges();
             Assert.Equal(addressB, dr[dc0, DataRowVersion.Current]);
             Assert.Equal(addressB, dr[dc0, DataRowVersion.Default]);
             Assert.Equal(addressB, dr[dc0, DataRowVersion.Original]);
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc0, DataRowVersion.Proposed);
             Assert.Same(personC, dr[dc1, DataRowVersion.Current]);
             Assert.Same(personC, dr[dc1, DataRowVersion.Default]);
             Assert.Equal(personC, dr[dc1, DataRowVersion.Original]);
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc1, DataRowVersion.Proposed);
 
             dr = dt.Rows[0];
             dr.BeginEdit();
             dr[dc0] = addressA;
             Assert.Equal(addressC, dr[dc0, DataRowVersion.Current]);
             Assert.Equal(addressA, dr[dc0, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Original));
+            AssertNotFound(dr, dc0, DataRowVersion.Original);
             Assert.Equal(addressA, dr[dc0, DataRowVersion.Proposed]);
             Assert.Same(personA, dr[dc1, DataRowVersion.Current]);
             Assert.Same(personA, dr[dc1, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Original));
+            AssertNotFound(dr, dc1, DataRowVersion.Original);
             Assert.Same(personA, dr[dc1, DataRowVersion.Proposed]);
             dr.CancelEdit();
             Assert.Equal(addressC, dr[dc0, DataRowVersion.Current]);
             Assert.Equal(addressC, dr[dc0, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Original));
-            Assert.True(AssertNotFound(dr, dc0, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc0, DataRowVersion.Original);
+            AssertNotFound(dr, dc0, DataRowVersion.Proposed);
             Assert.Same(personA, dr[dc1, DataRowVersion.Current]);
             Assert.Same(personA, dr[dc1, DataRowVersion.Default]);
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Original));
-            Assert.True(AssertNotFound(dr, dc1, DataRowVersion.Proposed));
+            AssertNotFound(dr, dc1, DataRowVersion.Original);
+            AssertNotFound(dr, dc1, DataRowVersion.Proposed);
         }
 
         [Fact]
@@ -2702,17 +2702,9 @@ namespace System.Data.Tests
             public EventArgs Args { get; }
         }
 
-        private static bool AssertNotFound(DataRow rc, DataColumn dc, DataRowVersion version)
+        private static void AssertNotFound(DataRow rc, DataColumn dc, DataRowVersion version)
         {
-            try
-            {
-                _ = rc[dc, version];
-                return false;
-            }
-            catch (VersionNotFoundException)
-            {
-                return true;
-            }
+            Assert.Throws<VersionNotFoundException>(() => rc[dc, version]);
         }
 
         private class Person
