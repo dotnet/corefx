@@ -29,7 +29,7 @@ namespace System.IO.Tests
         public void CopyToAsync_PrecanceledToken_Cancels()
         {
             using var src = new MemoryStream();
-            Assert.Equal(TaskStatus.Canceled, src.CopyToAsync((_, __, ___) => new ValueTask(Task.CompletedTask), null, 4096, new CancellationToken(true)).AsTask().Status);
+            Assert.Equal(TaskStatus.Canceled, src.CopyToAsync((_, __, ___) => new ValueTask(Task.CompletedTask), null, 4096, new CancellationToken(true)).Status);
         }
 
         [Theory]
