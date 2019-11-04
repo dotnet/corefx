@@ -21,8 +21,5 @@ internal static partial class Interop
 
         [DllImport(Libraries.Kernel32, SetLastError = true)]
         internal static extern bool ReleaseMutex(SafeWaitHandle handle);
-
-        [DllImport(Libraries.Kernel32, EntryPoint = "CreateMutexW", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
-        internal static extern SafeWaitHandle CreateMutex(ref SECURITY_ATTRIBUTES lpMutexAttributes, bool bInitialOwner, string? name);
     }
 }

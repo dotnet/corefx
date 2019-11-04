@@ -11,32 +11,22 @@ namespace System.Threading
 {
     public static class MutexAcl
     {
-        /// <summary>Creates a new <see cref="Mutex" /> instance, indicating whether the calling thread should have initial ownership of the mutex, the name of the system mutex, a boolean that, when the method returns, indicates whether the calling thread was granted initial ownership of the mutex, allowing specifying the mutex security.</summary>
+        /// <summary>Gets or creates <see cref="Mutex" /> instance, allowing a <see cref="MutexSecurity" /> to be optionally specified to set it during the mutex creation.</summary>
         /// <param name="initiallyOwned"><see langword="true" /> to give the calling thread initial ownership of the named system mutex if the named system mutex is created as a result of this call; otherwise, <see langword="false" />.</param>
-        /// <param name="name">The name of the system mutex.</param>
-        /// <param name="createdNew">When this method returns, it is set to <see langword="true" /> if a local mutex was created (that is, if name is <see langword="null" /> or an empty string) or if the specified named system mutex was created; <see langword="false" /> if the specified named system mutex already existed. This parameter is passed uninitialized.</param>
-        /// <param name="mutexSecurity">An object that represents the access control security to be applied to the named system mutex.</param>
-        /// <returns>An object that represents the named system mutex.</returns>
-        /// <exception cref="ArgumentException">Argument cannot be null or empty.
-        /// -or-
-        /// The length of the name exceeds the maximum limit.
-        /// </exception>
-        /// <exception cref="ArgumentNullException"><paramref name="mutexSecurity" /> is <see langword="null" />.</exception>
-        /// <exception cref="WaitHandleCannotBeOpenedException">A mutex handle with the system-wide <paramref name="name" /> cannot be created. A mutex handle of a different type might have the same name.</exception>
+        /// <param name="name">The optional name of the system mutex. If this argument is set to <see langword="null" /> or <see cref="string.Empty" />, a local mutex is created.</param>
+        /// <param name="createdNew">When this method returns, this argument is always set to <see langword="true" /> if a local mutex is created; that is, when <paramref name="name" /> is <see langword="null" /> or <see cref="string.Empty" />. If <paramref name="name" /> has a valid non-empty value, this argument is set to <see langword="true" /> when the system mutex is created, or it is set to <see langword="false" /> if an existing system mutex is found with that name. This parameter is passed uninitialized.</param>
+        /// <param name="mutexSecurity">The optional mutex access control security to apply.</param>
+        /// <returns>An object that represents a system mutex.</returns>
+        /// <exception cref="ArgumentException">.NET Framework only: The length of the name exceeds the maximum limit.</exception>
+        /// <exception cref="WaitHandleCannotBeOpenedException">A mutex handle with system-wide <paramref name="name" /> cannot be created. A mutex handle of a different type might have the same name.</exception>
         public static unsafe Mutex Create(bool initiallyOwned, string name, out bool createdNew, MutexSecurity mutexSecurity)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentException(SR.Format(SR.Argument_CannotBeNullOrEmpty), nameof(name));
-            }
-            if (name.Length > Interop.Kernel32.MAX_PATH)
-            {
-                throw new ArgumentException(SR.Format(SR.Argument_WaitHandleNameTooLong, name), nameof(name));
-            }
             if (mutexSecurity == null)
             {
-                throw new ArgumentNullException(nameof(mutexSecurity));
+                return new Mutex(initiallyOwned, name, out createdNew);
             }
+
+            uint mutexFlags = initiallyOwned ? Interop.Kernel32.CREATE_MUTEX_INITIAL_OWNER : 0;
 
             fixed (byte* pSecurityDescriptor = mutexSecurity.GetSecurityDescriptorBinaryForm())
             {
@@ -46,19 +36,21 @@ namespace System.Threading
                     lpSecurityDescriptor = (IntPtr)pSecurityDescriptor
                 };
 
-                using SafeWaitHandle mutexHandle = Interop.Kernel32.CreateMutex(ref secAttrs, initiallyOwned, name);
+                SafeWaitHandle handle = Interop.Kernel32.CreateMutexEx(
+                    (IntPtr)(&secAttrs),
+                    name,
+                    mutexFlags,
+                    (uint)MutexRights.FullControl // Equivalent to MUTEX_ALL_ACCESS
+                );
 
-                ValidateMutexHandle(mutexHandle, name, out createdNew);
+                ValidateMutexHandle(handle, name, out createdNew);
 
-                try
-                {
-                    return Mutex.OpenExisting(name);
-                }
-                finally
-                {
-                    // Close our handle as the Mutex will have it's own.
-                    mutexHandle.Dispose();
-                }
+                var mutex = new Mutex(initiallyOwned);
+                var old = mutex.SafeWaitHandle;
+                mutex.SafeWaitHandle = handle;
+                old.Dispose();
+
+                return mutex;
             }
         }
 
