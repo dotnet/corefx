@@ -18,10 +18,7 @@ namespace System.Threading
         /// <param name="createdNew">When this method returns, it is set to <see langword="true" /> if a local event was created (that is, if name is <see langword="null" /> or an empty string) or if the specified named system event was created; <see langword="false" /> if the specified named system event already existed. This parameter is passed uninitialized.</param>
         /// <param name="eventSecurity">The Windows access control security to apply.</param>
         /// <returns>An object that represents the named event wait handle.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="eventSecurity" /> is <see langword="null" />.
-        /// -or-
-        /// .NET Framework only: The <paramref name="name" /> length is beyond MAX_PATH (260 characters).
-        /// </exception>
+        /// <exception cref="ArgumentNullException">.NET Framework only: The <paramref name="name" /> length is beyond MAX_PATH (260 characters).</exception>
         /// <exception cref="ArgumentOutOfRangeException">The <paramref name="mode" /> enum value was out of legal range.</exception>
         /// <exception cref="DirectoryNotFoundException">Could not find a part of the path specified in <paramref name="name" />.</exception>
         /// <exception cref="WaitHandleCannotBeOpenedException">A system-wide synchronization event with the provided <paramref name="name" /> was not found.
