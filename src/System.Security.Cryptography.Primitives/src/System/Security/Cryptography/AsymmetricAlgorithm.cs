@@ -40,10 +40,8 @@ namespace System.Security.Cryptography
         {
             get
             {
-                Debug.Assert(LegalKeySizesValue != null);
-
                 // Desktop compat: No null check is performed
-                return (KeySizes[])LegalKeySizesValue.Clone();
+                return (KeySizes[])LegalKeySizesValue!.Clone();
             }
         }
 

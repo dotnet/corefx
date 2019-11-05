@@ -123,10 +123,8 @@ namespace System.Security.Cryptography
         {
             get
             {
-                Debug.Assert(LegalBlockSizesValue != null);
-
                 // Desktop compat: No null check is performed.
-                return (KeySizes[])LegalBlockSizesValue.Clone();
+                return (KeySizes[])LegalBlockSizesValue!.Clone();
             }
         }
 
@@ -134,10 +132,8 @@ namespace System.Security.Cryptography
         {
             get
             {
-                Debug.Assert(LegalKeySizesValue != null);
-
                 // Desktop compat: No null check is performed.
-                return (KeySizes[])LegalKeySizesValue.Clone();
+                return (KeySizes[])LegalKeySizesValue!.Clone();
             }
         }
 
