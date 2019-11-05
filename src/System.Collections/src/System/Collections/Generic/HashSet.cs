@@ -1434,11 +1434,11 @@ namespace System.Collections.Generic
             int bucket = hashCode % _buckets!.Length;
 
 #if DEBUG
-            IEqualityComparer<T>? comparer = _comparer;
+            IEqualityComparer<T> comparer = _comparer ?? EqualityComparer<T>.Default;
             Debug.Assert(InternalGetHashCode(value, comparer) == hashCode);
             for (int i = _buckets[bucket] - 1; i >= 0; i = _slots[i].next)
             {
-                Debug.Assert(!InternalEquals(_slots[i].value, value, comparer));
+                Debug.Assert(!comparer.Equals(_slots[i].value, value));
             }
 #endif
 
@@ -1748,7 +1748,7 @@ namespace System.Collections.Generic
             Slot[] slots = _slots;
             for (int i = _buckets[bucket] - 1; i >= 0; i = slots[i].next)
             {
-                if (slots[i].hashCode == hashCode && InternalEquals(slots[i].value, value, comparer))
+                if (slots[i].hashCode == hashCode && (comparer?.Equals(slots[i].value, value) ?? EqualityComparer<T>.Default.Equals(slots[i].value, value)))
                 {
                     location = i;
                     return false; //already present
@@ -1973,12 +1973,6 @@ namespace System.Collections.Generic
         private int InternalGetHashCode(int hashCode)
         {
             return hashCode & Lower31BitMask;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool InternalEquals(T x, T y, IEqualityComparer<T>? comparer)
-        {
-            return comparer?.Equals(x, y) ?? EqualityComparer<T>.Default.Equals(x, y);
         }
 
         #endregion
