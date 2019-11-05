@@ -305,17 +305,14 @@ namespace System.Collections.Tests
             collection.CopyTo(array, startIndex);
             for (int i = 0; i < startIndex; i++)
             {
-                //Assert.Equal(def, array[i]);
                 Assert.True(def.Equals(array[i]), $"Elements before the start index have been modified. Expected {def} at index {i}, actual {array[i]}");
             }
             for (int i = 0; i < expected.Length; i++)
             {
-                //Assert.Equal(expected[i], array[i + startIndex]);
                 Assert.True(expected[i].Equals(array[i + startIndex]), $"Elements that are copied over does not match the expected value. Expected {expected[i]} at index {i + startIndex}, actual {array[i]}");
             }
             for (int i = startIndex + expected.Length; i < array.Length; i++)
             {
-                //Assert.Equal(def, array[i]);
                 Assert.True(def.Equals(array[i]), $"Elements after the copied area have been modified. Expected {def} at index {i}, actual {array[i]}");
             }
         }

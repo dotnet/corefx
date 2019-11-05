@@ -132,7 +132,7 @@ namespace System.Collections
 
             // Comparing with 1s would get rid of the final negation, however this would not work for some CLR bools
             // (true for any non-zero values, false for 0) - any values between 2-255 will be interpreted as false.
-            // Instead, We compare with zeroes then negate the result to ensure compatibility.
+            // Instead, We compare with zeroes (== false) then negate the result to ensure compatibility.
 
             if (Avx2.IsSupported)
             {
@@ -155,12 +155,13 @@ namespace System.Collections
                     {
                         Vector128<byte> lowerVector = Sse2.LoadVector128((byte*)ptr + i);
                         Vector128<byte> lowerIsFalse = Sse2.CompareEqual(lowerVector, Vector128<byte>.Zero);
-                        int lower = Sse2.MoveMask(lowerIsFalse) ^ 0xFFFF; // Negate only the lower 16 bits to leave the upper bits zeroed.
-                                                                          // Otherwise, the OR'ed end result will be affected.
+                        int lowerPackedIsFalse = Sse2.MoveMask(lowerIsFalse);
+
                         Vector128<byte> upperVector = Sse2.LoadVector128((byte*)ptr + i + Vector128<byte>.Count);
                         Vector128<byte> upperIsFalse = Sse2.CompareEqual(upperVector, Vector128<byte>.Zero);
-                        int upper = ~Sse2.MoveMask(upperIsFalse);
-                        m_array[i / 32] = (upper << 16) | lower;
+                        int upperPackedIsFalse = Sse2.MoveMask(upperIsFalse);
+
+                        m_array[i / 32] = ~((upperPackedIsFalse << 16) | lowerPackedIsFalse);
                     }
                 }
             }
@@ -827,7 +828,7 @@ namespace System.Collections
 
                 int i = 0;
 
-                if (m_length < 32)
+                if (m_length < BitsPerInt32)
                     goto LessThan32;
 
                 if (Avx2.IsSupported)
@@ -878,6 +879,7 @@ namespace System.Collections
                         }
                     }
                 }
+
             LessThan32:
                 for (; i < m_length; i++)
                 {
