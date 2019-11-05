@@ -59,8 +59,8 @@ namespace System.Threading
 
                 ValidateHandle(handle, name, out createdNew);
 
-                var ewh = new EventWaitHandle(initialState, mode);
-                var old = ewh.SafeWaitHandle;
+                EventWaitHandle ewh = new EventWaitHandle(initialState, mode);
+                SafeWaitHandle old = ewh.SafeWaitHandle;
                 ewh.SafeWaitHandle = handle;
                 old.Dispose();
 
