@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
@@ -9,16 +13,14 @@ namespace System.Threading.Tests
     public class MutexAclTests : AclTests
     {
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void Mutex_Create_NullSecurity()
         {
-            using Mutex _ = CreateAndVerifyMutex(initiallyOwned: true, GetRandomName(), expectedSecurity: null, expectedCreatedNew: true);
+            CreateAndVerifyMutex(initiallyOwned: true, GetRandomName(), expectedSecurity: null, expectedCreatedNew: true).Dispose();
         }
 
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void Mutex_Create_NameMultipleNew(string name)
         {
             var security = GetBasicMutexSecurity();
@@ -28,7 +30,6 @@ namespace System.Threading.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void Mutex_Create_CreateNewExisting()
         {
             string name = GetRandomName();
@@ -39,7 +40,6 @@ namespace System.Threading.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void Mutex_Create_BeyondMaxPathLength()
         {
             string name = new string('x', Interop.Kernel32.MAX_PATH + 100);
@@ -48,19 +48,18 @@ namespace System.Threading.Tests
             {
                 Assert.Throws<ArgumentException>(() =>
                 {
-                    using Mutex _ = CreateAndVerifyMutex(initiallyOwned: true, name, GetBasicMutexSecurity(), expectedCreatedNew: true);
+                    CreateAndVerifyMutex(initiallyOwned: true, name, GetBasicMutexSecurity(), expectedCreatedNew: true).Dispose();
                 });
             }
             else
             {
-                using Mutex mutex = CreateAndVerifyMutex(initiallyOwned: true, name, GetBasicMutexSecurity(), expectedCreatedNew: true);
+                using Mutex created = CreateAndVerifyMutex(initiallyOwned: true, name, GetBasicMutexSecurity(), expectedCreatedNew: true);
                 using Mutex openedByName = Mutex.OpenExisting(name);
                 Assert.NotNull(openedByName);
             }
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
         [InlineData(true, MutexRights.FullControl, AccessControlType.Allow)]
         [InlineData(true, MutexRights.FullControl, AccessControlType.Deny)]
         [InlineData(true, MutexRights.Synchronize, AccessControlType.Allow)]
@@ -78,7 +77,7 @@ namespace System.Threading.Tests
         public void Mutex_Create_SpecificParameters(bool initiallyOwned, MutexRights rights, AccessControlType accessControl)
         {
             var security = GetMutexSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
-            CreateAndVerifyMutex(initiallyOwned, GetRandomName(), security, expectedCreatedNew: true);
+            CreateAndVerifyMutex(initiallyOwned, GetRandomName(), security, expectedCreatedNew: true).Dispose();
 
         }
 

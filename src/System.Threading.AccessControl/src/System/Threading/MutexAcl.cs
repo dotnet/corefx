@@ -16,7 +16,7 @@ namespace System.Threading
         /// <param name="name">The optional name of the system mutex. If this argument is set to <see langword="null" /> or <see cref="string.Empty" />, a local mutex is created.</param>
         /// <param name="createdNew">When this method returns, this argument is always set to <see langword="true" /> if a local mutex is created; that is, when <paramref name="name" /> is <see langword="null" /> or <see cref="string.Empty" />. If <paramref name="name" /> has a valid non-empty value, this argument is set to <see langword="true" /> when the system mutex is created, or it is set to <see langword="false" /> if an existing system mutex is found with that name. This parameter is passed uninitialized.</param>
         /// <param name="mutexSecurity">The optional mutex access control security to apply.</param>
-        /// <returns>An object that represents a system mutex.</returns>
+        /// <returns>An object that represents a system mutex, if named, or a local mutex, if nameless.</returns>
         /// <exception cref="ArgumentException">.NET Framework only: The length of the name exceeds the maximum limit.</exception>
         /// <exception cref="WaitHandleCannotBeOpenedException">A mutex handle with system-wide <paramref name="name" /> cannot be created. A mutex handle of a different type might have the same name.</exception>
         public static unsafe Mutex Create(bool initiallyOwned, string name, out bool createdNew, MutexSecurity mutexSecurity)
