@@ -118,8 +118,9 @@ namespace System.Runtime.Serialization.Formatters.Binary
             int assemId;
             int objectId = (int)nameInfo._objectId;
 
+            Debug.Assert(typeNameInfo != null); //Explicitly called with null, asserting for now https://github.com/dotnet/corefx/issues/42393
             string? objectName = objectId < 0 ?
-                typeNameInfo!.NIname : // Nested Object
+                typeNameInfo.NIname : // Nested Object
                 nameInfo.NIname; // Non-Nested
 
             if (_objectMapTable == null)
@@ -140,54 +141,50 @@ namespace System.Runtime.Serialization.Formatters.Binary
                 _binaryObject.Set(objectId, objectMapInfo._objectId);
                 _binaryObject.Write(this);
             }
+            else if (!typeNameInfo._transmitTypeOnObject)
+            {
+                // ObjectWithMap
+                if (_binaryObjectWithMap == null)
+                {
+                    _binaryObjectWithMap = new BinaryObjectWithMap();
+                }
+
+                // BCL types are not placed into table
+                assemId = (int)typeNameInfo._assemId;
+                _binaryObjectWithMap.Set(objectId, objectName, numMembers, memberNames, assemId);
+
+                _binaryObjectWithMap.Write(this);
+                if (objectMapInfo == null)
+                {
+                    _objectMapTable.Add(objectName, new ObjectMapInfo(objectId, numMembers, memberNames, memberTypes));
+                }
+            }
             else
             {
-                Debug.Assert(typeNameInfo != null);
-                if (!typeNameInfo._transmitTypeOnObject)
+                // ObjectWithMapTyped
+                var binaryTypeEnumA = new BinaryTypeEnum[numMembers];
+                var typeInformationA = new object?[numMembers];
+                var assemIdA = new int[numMembers];
+                for (int i = 0; i < numMembers; i++)
                 {
-                    // ObjectWithMap
-                    if (_binaryObjectWithMap == null)
-                    {
-                        _binaryObjectWithMap = new BinaryObjectWithMap();
-                    }
-
-                    // BCL types are not placed into table
-                    assemId = (int)typeNameInfo._assemId;
-                    _binaryObjectWithMap.Set(objectId, objectName, numMembers, memberNames, assemId);
-
-                    _binaryObjectWithMap.Write(this);
-                    if (objectMapInfo == null)
-                    {
-                        _objectMapTable.Add(objectName, new ObjectMapInfo(objectId, numMembers, memberNames, memberTypes));
-                    }
+                    object? typeInformation = null;
+                    binaryTypeEnumA[i] = BinaryTypeConverter.GetBinaryTypeInfo(memberTypes[i], memberObjectInfos[i], null, _objectWriter, out typeInformation, out assemId);
+                    typeInformationA[i] = typeInformation;
+                    assemIdA[i] = assemId;
                 }
-                else
+
+                if (_binaryObjectWithMapTyped == null)
                 {
-                    // ObjectWithMapTyped
-                    var binaryTypeEnumA = new BinaryTypeEnum[numMembers];
-                    var typeInformationA = new object?[numMembers];
-                    var assemIdA = new int[numMembers];
-                    for (int i = 0; i < numMembers; i++)
-                    {
-                        object? typeInformation = null;
-                        binaryTypeEnumA[i] = BinaryTypeConverter.GetBinaryTypeInfo(memberTypes[i], memberObjectInfos[i], null, _objectWriter, out typeInformation, out assemId);
-                        typeInformationA[i] = typeInformation;
-                        assemIdA[i] = assemId;
-                    }
+                    _binaryObjectWithMapTyped = new BinaryObjectWithMapTyped();
+                }
 
-                    if (_binaryObjectWithMapTyped == null)
-                    {
-                        _binaryObjectWithMapTyped = new BinaryObjectWithMapTyped();
-                    }
-
-                    // BCL types are not placed in table
-                    assemId = (int)typeNameInfo._assemId;
-                    _binaryObjectWithMapTyped.Set(objectId, objectName, numMembers, memberNames, binaryTypeEnumA, typeInformationA, assemIdA, assemId);
-                    _binaryObjectWithMapTyped.Write(this);
-                    if (objectMapInfo == null)
-                    {
-                        _objectMapTable.Add(objectName, new ObjectMapInfo(objectId, numMembers, memberNames, memberTypes));
-                    }
+                // BCL types are not placed in table
+                assemId = (int)typeNameInfo._assemId;
+                _binaryObjectWithMapTyped.Set(objectId, objectName, numMembers, memberNames, binaryTypeEnumA, typeInformationA, assemIdA, assemId);
+                _binaryObjectWithMapTyped.Write(this);
+                if (objectMapInfo == null)
+                {
+                    _objectMapTable.Add(objectName, new ObjectMapInfo(objectId, numMembers, memberNames, memberTypes));
                 }
             }
         }
