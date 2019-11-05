@@ -40,18 +40,18 @@
     <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19554.3</MicrosoftDotNetBuildTasksFeedVersion>
     <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19554.3</MicrosoftDotNetVersionToolsTasksVersion>
     <!-- Core-setup dependencies -->
-    <MicrosoftNETCoreAppVersion>5.0.0-alpha.1.19554.1</MicrosoftNETCoreAppVersion>
-    <MicrosoftNETCoreDotNetHostVersion>5.0.0-alpha.1.19554.1</MicrosoftNETCoreDotNetHostVersion>
-    <MicrosoftNETCoreDotNetHostPolicyVersion>5.0.0-alpha.1.19554.1</MicrosoftNETCoreDotNetHostPolicyVersion>
+    <MicrosoftNETCoreAppVersion>5.0.0-alpha.1.19554.7</MicrosoftNETCoreAppVersion>
+    <MicrosoftNETCoreDotNetHostVersion>5.0.0-alpha.1.19554.7</MicrosoftNETCoreDotNetHostVersion>
+    <MicrosoftNETCoreDotNetHostPolicyVersion>5.0.0-alpha.1.19554.7</MicrosoftNETCoreDotNetHostPolicyVersion>
     <!-- Coreclr dependencies -->
     <MicrosoftNETCoreILAsmVersion>5.0.0-alpha1.19554.1</MicrosoftNETCoreILAsmVersion>
     <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19554.1</MicrosoftNETCoreRuntimeCoreCLRVersion>
     <MicrosoftNETSdkILVersion>5.0.0-alpha1.19554.1</MicrosoftNETSdkILVersion>
     <!-- Corefx dependencies -->
-    <MicrosoftNETCorePlatformsVersion>5.0.0-alpha.1.19553.8</MicrosoftNETCorePlatformsVersion>
-    <runtimenativeSystemIOPortsVersion>5.0.0-alpha.1.19553.8</runtimenativeSystemIOPortsVersion>
+    <MicrosoftNETCorePlatformsVersion>5.0.0-alpha.1.19554.10</MicrosoftNETCorePlatformsVersion>
+    <runtimenativeSystemIOPortsVersion>5.0.0-alpha.1.19554.10</runtimenativeSystemIOPortsVersion>
     <!-- Standard dependencies -->
-    <NETStandardLibraryVersion>2.2.0-prerelease.19553.1</NETStandardLibraryVersion>
+    <NETStandardLibraryVersion>2.2.0-prerelease.19554.1</NETStandardLibraryVersion>
     <!-- dotnet-optimization dependencies -->
     <optimizationwindows_ntx64IBCCoreFxVersion>99.99.99-master-20190716.1</optimizationwindows_ntx64IBCCoreFxVersion>
     <!-- sni -->
