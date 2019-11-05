@@ -2,12 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+
 namespace System.Security.Cryptography
 {
     public abstract class AsymmetricAlgorithm : IDisposable
     {
         protected int KeySizeValue;
-        protected KeySizes[] LegalKeySizesValue = null!;
+        [MaybeNull] protected KeySizes[] LegalKeySizesValue = null!;
 
         protected AsymmetricAlgorithm() { }
 
@@ -37,6 +40,8 @@ namespace System.Security.Cryptography
         {
             get
             {
+                Debug.Assert(LegalKeySizesValue != null);
+
                 // Desktop compat: No null check is performed
                 return (KeySizes[])LegalKeySizesValue.Clone();
             }

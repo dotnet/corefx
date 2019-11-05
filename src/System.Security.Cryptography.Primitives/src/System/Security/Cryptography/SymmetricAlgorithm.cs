@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography
@@ -121,6 +123,8 @@ namespace System.Security.Cryptography
         {
             get
             {
+                Debug.Assert(LegalBlockSizesValue != null);
+
                 // Desktop compat: No null check is performed.
                 return (KeySizes[])LegalBlockSizesValue.Clone();
             }
@@ -130,6 +134,8 @@ namespace System.Security.Cryptography
         {
             get
             {
+                Debug.Assert(LegalKeySizesValue != null);
+
                 // Desktop compat: No null check is performed.
                 return (KeySizes[])LegalKeySizesValue.Clone();
             }
@@ -227,7 +233,7 @@ namespace System.Security.Cryptography
         protected int BlockSizeValue;
         protected int FeedbackSizeValue;
         protected int KeySizeValue;
-        protected KeySizes[] LegalBlockSizesValue = null!;
-        protected KeySizes[] LegalKeySizesValue = null!;
+        [MaybeNull] protected KeySizes[] LegalBlockSizesValue = null!;
+        [MaybeNull] protected KeySizes[] LegalKeySizesValue = null!;
     }
 }
