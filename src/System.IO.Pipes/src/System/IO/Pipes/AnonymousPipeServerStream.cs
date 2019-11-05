@@ -65,9 +65,14 @@ namespace System.IO.Pipes
             State = PipeState.Connected;
         }
 
+        public AnonymousPipeServerStream(PipeDirection direction, HandleInheritability inheritability, int bufferSize)
+            : this(direction, inheritability, bufferSize, null)
+        {
+        }
+
         // bufferSize is used as a suggestion; specify 0 to let OS decide
         // This constructor instantiates the PipeSecurity using just the inheritability flag
-        public AnonymousPipeServerStream(PipeDirection direction, HandleInheritability inheritability, int bufferSize)
+        internal AnonymousPipeServerStream(PipeDirection direction, HandleInheritability inheritability, int bufferSize, PipeSecurity pipeSecurity)
             : base(direction, bufferSize)
         {
             if (direction == PipeDirection.InOut)
@@ -79,7 +84,7 @@ namespace System.IO.Pipes
                 throw new ArgumentOutOfRangeException(nameof(inheritability), SR.ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable);
             }
 
-            Create(direction, inheritability, bufferSize);
+            Create(direction, inheritability, bufferSize, pipeSecurity);
         }
 
         ~AnonymousPipeServerStream()
