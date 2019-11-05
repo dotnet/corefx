@@ -248,7 +248,7 @@ namespace System.Text.Json
             {
                 // If IList, add the members as we create them.
                 JsonClassInfo collectionClassInfo;
-                
+
                 if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
                 {
                     collectionClassInfo = jsonPropertyInfo.RuntimeClassInfo;

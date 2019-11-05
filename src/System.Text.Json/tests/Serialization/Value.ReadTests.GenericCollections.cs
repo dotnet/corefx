@@ -1151,6 +1151,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadReadOnlyCollections_Throws()
         {
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyWrapperForIList>(@"[""1"", ""2""]"));
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]"));
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]"));
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}"));
