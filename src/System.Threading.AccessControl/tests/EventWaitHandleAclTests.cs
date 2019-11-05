@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,21 +17,19 @@ namespace System.Threading.Tests
     public class EventWaitHandleAclTests : AclTests
     {
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void EventWaitHandle_Create_NullSecurity()
         {
-            using EventWaitHandle _ = CreateAndVerifyEventWaitHandle(
+            CreateAndVerifyEventWaitHandle(
                 initialState: true,
                 mode: EventResetMode.AutoReset,
                 name: GetRandomName(),
                 expectedSecurity: null,
-                expectedCreatedNew: true);
+                expectedCreatedNew: true).Dispose();
         }
 
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void EventWaitHandle_Create_NameMultipleNew(string name)
         {
             var security = GetBasicEventWaitHandleSecurity();
@@ -48,7 +50,6 @@ namespace System.Threading.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void EventWaitHandle_Create_CreateNewExisting()
         {
             string name = GetRandomName();
@@ -70,19 +71,18 @@ namespace System.Threading.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void EventWaitHandle_Create_GlobalPrefixNameNotFound()
         {
             Assert.Throws<DirectoryNotFoundException>(() =>
             {
                 string prefixedName = @"GLOBAL\" + GetRandomName();
 
-                using EventWaitHandle _ = CreateAndVerifyEventWaitHandle(
+                CreateAndVerifyEventWaitHandle(
                     initialState: true,
                     mode: EventResetMode.AutoReset,
                     prefixedName,
                     expectedSecurity: GetBasicEventWaitHandleSecurity(),
-                    expectedCreatedNew: true);
+                    expectedCreatedNew: true).Dispose();
             });
         }
 
@@ -93,7 +93,6 @@ namespace System.Threading.Tests
         // The .NET Framework constructor throws:
         // https://referencesource.microsoft.com/#mscorlib/system/threading/eventwaithandle.cs,59
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void EventWaitHandle_Create_BeyondMaxPathLength()
         {
             string name = new string('x', Interop.Kernel32.MAX_PATH + 100);
@@ -104,17 +103,17 @@ namespace System.Threading.Tests
             {
                 Assert.Throws<ArgumentException>(() =>
                 {
-                    using EventWaitHandle _ = CreateAndVerifyEventWaitHandle(
+                    CreateAndVerifyEventWaitHandle(
                         initialState: true,
                         mode,
                         name,
                         security,
-                        expectedCreatedNew: true);
+                        expectedCreatedNew: true).Dispose();
                 });
             }
             else
             {
-                using EventWaitHandle handle = CreateAndVerifyEventWaitHandle(
+                using EventWaitHandle created = CreateAndVerifyEventWaitHandle(
                         initialState: true,
                         mode,
                         name,
@@ -127,7 +126,6 @@ namespace System.Threading.Tests
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
         [InlineData((EventResetMode)int.MinValue)]
         [InlineData((EventResetMode)(-1))]
         [InlineData((EventResetMode)2)]
@@ -138,30 +136,29 @@ namespace System.Threading.Tests
             {
                 Assert.Throws<ArgumentException>(() =>
                 {
-                    using EventWaitHandle _ = CreateAndVerifyEventWaitHandle(
+                    CreateAndVerifyEventWaitHandle(
                         initialState: true,
                         mode,
                         GetRandomName(),
                         GetBasicEventWaitHandleSecurity(),
-                        expectedCreatedNew: true);
+                        expectedCreatedNew: true).Dispose();
                 });
             }
             else
             {
                 Assert.Throws<ArgumentOutOfRangeException>("mode", () =>
                 {
-                    using EventWaitHandle _ = CreateAndVerifyEventWaitHandle(
+                    CreateAndVerifyEventWaitHandle(
                         initialState: true,
                         mode,
                         GetRandomName(),
                         GetBasicEventWaitHandleSecurity(),
-                        expectedCreatedNew: true);
+                        expectedCreatedNew: true).Dispose();
                 });
             }
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
         [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.FullControl, AccessControlType.Allow)]
         [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.FullControl, AccessControlType.Deny)]
         [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
@@ -202,7 +199,7 @@ namespace System.Threading.Tests
                 mode,
                 GetRandomName(),
                 security,
-                expectedCreatedNew: true);
+                expectedCreatedNew: true).Dispose();
 
         }
 
