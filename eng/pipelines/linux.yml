@@ -95,7 +95,7 @@ stages:
                 _helixQueues: $(alpineArm64Queues)
                 _dockerContainer: alpine_37_arm64_container
                 _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
-                _buildExtraArguments: -warnAsError false /p:BuildNativeCompiler=--clang5.0 /p:RuntimeOS=linux-musl
+                _buildExtraArguments: -warnAsError false /p:RuntimeOS=linux-musl
                 _publishTests: true
 
               arm64_Release:
@@ -166,7 +166,7 @@ stages:
                   _framework: netcoreapp
                   _dockerContainer: alpine_37_arm64_container
                   _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
-                  _buildExtraArguments: -warnAsError false /p:BuildNativeCompiler=--clang5.0 /p:RuntimeOS=linux-musl
+                  _buildExtraArguments: -warnAsError false /p:RuntimeOS=linux-musl
 
                 arm64_Debug:
                   _BuildConfig: Debug
