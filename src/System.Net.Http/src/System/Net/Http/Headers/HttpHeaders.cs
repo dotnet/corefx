@@ -1003,7 +1003,7 @@ namespace System.Net.Http.Headers
         {
             if (!IsAllowedHeaderName(descriptor))
             {
-                throw new InvalidOperationException(SR.net_http_headers_not_allowed_header_name);
+                throw new InvalidOperationException(string.Format(SR.net_http_headers_not_allowed_header_name, descriptor.Name));
             }
 
             info = null;
@@ -1098,7 +1098,7 @@ namespace System.Net.Http.Headers
                 return descriptor.AsCustomHeader();
             }
 
-            throw new InvalidOperationException(SR.net_http_headers_not_allowed_header_name);
+            throw new InvalidOperationException(string.Format(SR.net_http_headers_not_allowed_header_name, name));
         }
 
         private bool TryGetHeaderDescriptor(string name, out HeaderDescriptor descriptor)
