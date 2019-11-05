@@ -15,7 +15,7 @@ namespace System.Threading
         /// <param name="initialCount">The initial number of requests for the semaphore that can be satisfied concurrently.</param>
         /// <param name="maximumCount">The maximum number of requests for the semaphore that can be satisfied concurrently.</param>
         /// <param name="name">Optional argument to create a system semaphore. Set to <see langword="null" /> or <see cref="string.Empty" /> to create a local semaphore.</param>
-        /// <param name="createdNew">>When this method returns, this argument is always set to <see langword="true" /> if a local semaphore is created; that is, when <paramref name="name" /> is <see langword="null" /> or <see cref="string.Empty" />. If <paramref name="name" /> has a valid, non-empty value, this argument is set to <see langword="true" /> when the system semaphore is created, or it is set to <see langword="false" /> if an existing system semaphore is found with that name. This parameter is passed uninitialized.</param>
+        /// <param name="createdNew">When this method returns, this argument is always set to <see langword="true" /> if a local semaphore is created; that is, when <paramref name="name" /> is <see langword="null" /> or <see cref="string.Empty" />. If <paramref name="name" /> has a valid, non-empty value, this argument is set to <see langword="true" /> when the system semaphore is created, or it is set to <see langword="false" /> if an existing system semaphore is found with that name. This parameter is passed uninitialized.</param>
         /// <param name="semaphoreSecurity"></param>
         /// <returns>The optional semaphore access control security to apply.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="initialCount" /> is a negative number.
@@ -58,7 +58,7 @@ namespace System.Threading
                     initialCount,
                     maximumCount,
                     name,
-                    0, //This parameter is reserved and must be 0.
+                    0, // This parameter is reserved and must be 0.
                     (uint)SemaphoreRights.FullControl // Equivalent to SEMAPHORE_ALL_ACCESS
                 );
 
