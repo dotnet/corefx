@@ -166,8 +166,7 @@ namespace System.Net.Http.Functional.Tests
 
             // For other Unix-based systems it's true if (and only if) the currect openssl backend
             // is used with libcurl.
-            bool hasAnyOpenSsl =
-                Interop.Http.GetSslVersionDescription()?.StartsWith(Interop.Http.OpenSslDescriptionPrefix, StringComparison.OrdinalIgnoreCase) ?? false;
+            bool hasAnyOpenSsl = false;
 
             if (!hasAnyOpenSsl)
             {

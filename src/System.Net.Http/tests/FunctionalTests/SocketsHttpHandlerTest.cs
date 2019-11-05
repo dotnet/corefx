@@ -2089,6 +2089,8 @@ namespace System.Net.Http.Functional.Tests
         }
     }
 
+    // Test only WinHttpHandler since the curl handler was remove
+    [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class SocketsHttpHandler_ExternalConfiguration_Test : HttpClientHandlerTestBase
     {
         public SocketsHttpHandler_ExternalConfiguration_Test(ITestOutputHelper output) : base(output) { }

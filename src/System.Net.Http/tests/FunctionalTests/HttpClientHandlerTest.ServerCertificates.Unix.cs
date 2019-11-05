@@ -42,10 +42,6 @@ namespace System.Net.Http.Functional.Tests
                 //     MustNotCheck,
                 // }
 
-                if (Interop.Http.GetSslVersionDescription() == "SecureTransport")
-                {
-                    return true;
-                }
                 return false;
             }
         }
