@@ -264,6 +264,10 @@ namespace System.Memory.Tests.SequenceReader
             Assert.True(reader.TryPeek(2, out T lastElementFirstSegment));
             Assert.Equal(InputData[4], lastElementFirstSegment);
 
+            // We're on element 3 we peek first element of first segment
+            Assert.True(reader.TryPeek(3, out T fistElementSecondSegment));
+            Assert.Equal(InputData[5], fistElementSecondSegment);
+
             // We're on element 3 we peek last element of second segment
             Assert.True(reader.TryPeek(7, out T lastElementSecondSegment));
             Assert.Equal(InputData[9], lastElementSecondSegment);

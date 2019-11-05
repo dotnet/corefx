@@ -132,40 +132,43 @@ namespace System.Buffers
                 ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
             // if we've data and offset is not out of bounds
-            if (_moreData && Remaining > offset)
+            if (!_moreData || Remaining <= offset)
             {
-                int currentIndex = CurrentSpanIndex;
-                long currentOffset = offset;
-                ReadOnlySpan<T> currentSpan = CurrentSpan;
-                SequencePosition nextPosition = _nextPosition;
+                value = default;
+                return false;
+            }
 
-                // if offset doesn't fall inside current segment move to next until we found correct one
-                while ((currentIndex + currentOffset) > currentSpan.Length - 1)
-                {
-                    // subtract current non consumed data
-                    currentOffset -= currentSpan.Length - currentIndex;
-
-                    // move index to start of next span
-                    currentIndex = 0;
-
-                    // get next segment
-                    if (Sequence.TryGet(ref nextPosition, out ReadOnlyMemory<T> memory, true))
-                    {
-                        currentSpan = memory.Span;
-                    }
-                    else
-                    {
-                        Debug.Fail("Unexpected, if offset is in bounds we should find a segment");
-                    }
-                }
-
-                value = currentSpan[currentIndex + (int)currentOffset];
+            // if offset doesn't fall inside current segment move to next until we found correct one
+            if ((CurrentSpanIndex + offset) <= CurrentSpan.Length - 1)
+            {
+                value = CurrentSpan[CurrentSpanIndex + (int)offset];
                 return true;
             }
             else
             {
-                value = default;
-                return false;
+                long currentOffset = offset - (CurrentSpan.Length - CurrentSpanIndex);
+                SequencePosition nextPosition = _nextPosition;
+                ReadOnlyMemory<T> currentMemory = default;
+
+                while (Sequence.TryGet(ref nextPosition, out currentMemory, true))
+                {
+                    // skip empty segment
+                    if (currentMemory.Length > 0)
+                    {
+                        if (currentOffset > currentMemory.Length - 1)
+                        {
+                            // subtract current non consumed data
+                            currentOffset -= currentMemory.Length;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                value = currentMemory.Span[(int)currentOffset];
+                return true;
             }
         }
 
