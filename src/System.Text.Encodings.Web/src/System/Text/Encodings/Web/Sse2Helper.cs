@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
@@ -17,11 +16,17 @@ namespace System.Text.Encodings.Web
         {
             Debug.Assert(Sse2.IsSupported);
 
-            // Space ' ', anything in the control characters range, and anything above short.MaxValue but less than or equal char.MaxValue
-            Vector128<short> mask = Sse2.CompareLessThan(sourceValue, s_mask_UInt16_0x20);
+            // Anything in the control characters range, and anything above short.MaxValue but less than or equal char.MaxValue
+            // That's because anything between 32768 and 65535 (inclusive) will overflow and become negative.
+            Vector128<short> mask = Sse2.CompareLessThan(sourceValue, s_spaceMaskInt16);
 
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x22)); // Quotation Mark '"'
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x5C)); // Reverse Solidus '\'
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_quotationMarkMaskInt16));
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_reverseSolidusMaskInt16));
+
+            // Anything above the ASCII range, and also including the leftover control character in the ASCII range - 0x7F
+            // When this method is called with only ASCII data, 0x7F is the only value that would meet this comparison.
+            // However, when called from "Default", the source could contain characters outside the ASCII range.
+            mask = Sse2.Or(mask, Sse2.CompareGreaterThan(sourceValue, s_tildeMaskInt16));
 
             return mask;
         }
@@ -31,29 +36,16 @@ namespace System.Text.Encodings.Web
         {
             Debug.Assert(Sse2.IsSupported);
 
-            Vector128<sbyte> mask = Sse2.CompareLessThan(sourceValue, s_mask_SByte_0x20); // Control characters, and anything above 0x7E since sbyte.MaxValue is 0x7E
+            // Anything in the control characters range (except 0x7F), and anything above sbyte.MaxValue but less than or equal byte.MaxValue
+            // That's because anything between 128 and 255 (inclusive) will overflow and become negative.
+            Vector128<sbyte> mask = Sse2.CompareLessThan(sourceValue, s_spaceMaskSByte);
 
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x22)); // Quotation Mark "
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x5C)); // Reverse Solidus \
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_quotationMarkMaskSByte));
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_reverseSolidusMaskSByte));
 
-            return mask;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector128<short> CreateEscapingMask_DefaultJavaScriptEncoderBasicLatin(Vector128<short> sourceValue)
-        {
-            Debug.Assert(Sse2.IsSupported);
-
-            Vector128<short> mask = CreateEscapingMask_UnsafeRelaxedJavaScriptEncoder(sourceValue);
-
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x26)); // Ampersand '&'
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x27)); // Apostrophe '''
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x2B)); // Plus sign '+'
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x3C)); // Less Than Sign '<'
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x3E)); // Greater Than Sign '>'
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x60)); // Grave Access '`'
-
-            mask = Sse2.Or(mask, Sse2.CompareGreaterThan(sourceValue, s_mask_UInt16_0x7E)); // Tilde '~', anything above the ASCII range
+            // Leftover control character in the ASCII range - 0x7F
+            // Since we are dealing with sbytes, 0x7F is the only value that would meet this comparison.
+            mask = Sse2.Or(mask, Sse2.CompareGreaterThan(sourceValue, s_tildeMaskSByte));
 
             return mask;
         }
@@ -65,12 +57,12 @@ namespace System.Text.Encodings.Web
 
             Vector128<sbyte> mask = CreateEscapingMask_UnsafeRelaxedJavaScriptEncoder(sourceValue);
 
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x26)); // Ampersand &
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x27)); // Apostrophe '
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x2B)); // Plus sign +
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x3C)); // Less Than Sign <
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x3E)); // Greater Than Sign >
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x60)); // Grave Access `
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_ampersandMaskSByte));
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_apostropheMaskSByte));
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_plusSignMaskSByte));
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_lessThanSignMaskSByte));
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_greaterThanSignMaskSByte));
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_graveAccentMaskSByte));
 
             return mask;
         }
@@ -80,48 +72,32 @@ namespace System.Text.Encodings.Web
         {
             Debug.Assert(Sse2.IsSupported);
 
-            Vector128<short> mask = Sse2.CompareLessThan(sourceValue, s_mask_UInt16_0x00); // Null, anything above short.MaxValue but less than or equal char.MaxValue
-            mask = Sse2.Or(mask, Sse2.CompareGreaterThan(sourceValue, s_mask_UInt16_0x7E)); // Tilde '~', anything above the ASCII range
+            // Anything above short.MaxValue but less than or equal char.MaxValue
+            // That's because anything between 32768 and 65535 (inclusive) will overflow and become negative.
+            Vector128<short> mask = Sse2.CompareLessThan(sourceValue, s_nullMaskInt16);
+
+            // Anything above the ASCII range
+            mask = Sse2.Or(mask, Sse2.CompareGreaterThan(sourceValue, s_maxAsciiCharacterMaskInt16));
 
             return mask;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector128<sbyte> CreateAsciiMask(Vector128<sbyte> sourceValue)
-        {
-            Debug.Assert(Sse2.IsSupported);
+        private static readonly Vector128<short> s_nullMaskInt16 = Vector128<short>.Zero;
+        private static readonly Vector128<short> s_spaceMaskInt16 = Vector128.Create((short)' ');
+        private static readonly Vector128<short> s_quotationMarkMaskInt16 = Vector128.Create((short)'"');
+        private static readonly Vector128<short> s_reverseSolidusMaskInt16 = Vector128.Create((short)'\\');
+        private static readonly Vector128<short> s_tildeMaskInt16 = Vector128.Create((short)'~');
+        private static readonly Vector128<short> s_maxAsciiCharacterMaskInt16 = Vector128.Create((short)0x7F); // Delete control character
 
-            // Null, anything above sbyte.MaxValue but less than or equal byte.MaxValue (i.e. anything above the ASCII range)
-            Vector128<sbyte> mask = Sse2.CompareLessThan(sourceValue, s_mask_SByte_0x00);
-            return mask;
-        }
-
-        private static readonly Vector128<short> s_mask_UInt16_0x00 = Vector128<short>.Zero; // Null
-
-        private static readonly Vector128<short> s_mask_UInt16_0x20 = Vector128.Create((short)0x20); // Space ' '
-
-        private static readonly Vector128<short> s_mask_UInt16_0x22 = Vector128.Create((short)0x22); // Quotation Mark '"'
-        private static readonly Vector128<short> s_mask_UInt16_0x26 = Vector128.Create((short)0x26); // Ampersand '&'
-        private static readonly Vector128<short> s_mask_UInt16_0x27 = Vector128.Create((short)0x27); // Apostrophe '''
-        private static readonly Vector128<short> s_mask_UInt16_0x2B = Vector128.Create((short)0x2B); // Plus sign '+'
-        private static readonly Vector128<short> s_mask_UInt16_0x3C = Vector128.Create((short)0x3C); // Less Than Sign '<'
-        private static readonly Vector128<short> s_mask_UInt16_0x3E = Vector128.Create((short)0x3E); // Greater Than Sign '>'
-        private static readonly Vector128<short> s_mask_UInt16_0x5C = Vector128.Create((short)0x5C); // Reverse Solidus '\'
-        private static readonly Vector128<short> s_mask_UInt16_0x60 = Vector128.Create((short)0x60); // Grave Access '`'
-
-        private static readonly Vector128<short> s_mask_UInt16_0x7E = Vector128.Create((short)0x7E); // Tilde '~'
-
-        private static readonly Vector128<sbyte> s_mask_SByte_0x00 = Vector128<sbyte>.Zero; // Null
-
-        private static readonly Vector128<sbyte> s_mask_SByte_0x20 = Vector128.Create((sbyte)0x20); // Space ' '
-
-        private static readonly Vector128<sbyte> s_mask_SByte_0x22 = Vector128.Create((sbyte)0x22); // Quotation Mark '"'
-        private static readonly Vector128<sbyte> s_mask_SByte_0x26 = Vector128.Create((sbyte)0x26); // Ampersand '&'
-        private static readonly Vector128<sbyte> s_mask_SByte_0x27 = Vector128.Create((sbyte)0x27); // Apostrophe '''
-        private static readonly Vector128<sbyte> s_mask_SByte_0x2B = Vector128.Create((sbyte)0x2B); // Plus sign '+'
-        private static readonly Vector128<sbyte> s_mask_SByte_0x3C = Vector128.Create((sbyte)0x3C); // Less Than Sign '<'
-        private static readonly Vector128<sbyte> s_mask_SByte_0x3E = Vector128.Create((sbyte)0x3E); // Greater Than Sign '>'
-        private static readonly Vector128<sbyte> s_mask_SByte_0x5C = Vector128.Create((sbyte)0x5C); // Reverse Solidus '\'
-        private static readonly Vector128<sbyte> s_mask_SByte_0x60 = Vector128.Create((sbyte)0x60); // Grave Access '`'
+        private static readonly Vector128<sbyte> s_spaceMaskSByte = Vector128.Create((sbyte)' ');
+        private static readonly Vector128<sbyte> s_quotationMarkMaskSByte = Vector128.Create((sbyte)'"');
+        private static readonly Vector128<sbyte> s_ampersandMaskSByte = Vector128.Create((sbyte)'&');
+        private static readonly Vector128<sbyte> s_apostropheMaskSByte = Vector128.Create((sbyte)'\'');
+        private static readonly Vector128<sbyte> s_plusSignMaskSByte = Vector128.Create((sbyte)'+');
+        private static readonly Vector128<sbyte> s_lessThanSignMaskSByte = Vector128.Create((sbyte)'<');
+        private static readonly Vector128<sbyte> s_greaterThanSignMaskSByte = Vector128.Create((sbyte)'>');
+        private static readonly Vector128<sbyte> s_reverseSolidusMaskSByte = Vector128.Create((sbyte)'\\');
+        private static readonly Vector128<sbyte> s_graveAccentMaskSByte = Vector128.Create((sbyte)'`');
+        private static readonly Vector128<sbyte> s_tildeMaskSByte = Vector128.Create((sbyte)'~');
     }
 }
