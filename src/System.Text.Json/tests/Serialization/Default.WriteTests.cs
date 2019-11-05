@@ -51,7 +51,6 @@ namespace System.Text.Json.Serialization.Tests
 
             // Roundtrip to verify serialize is accurate.
             TestClassWithInitializedProperties newObj = JsonSerializer.Deserialize<TestClassWithInitializedProperties>(json);
-            Assert.Null(newObj.MyInt);
             Assert.Null(newObj.MyDateTime);
             Assert.Equal(1, newObj.MyIntArray[0]);
             Assert.Equal(1, newObj.MyIntList[0]);
