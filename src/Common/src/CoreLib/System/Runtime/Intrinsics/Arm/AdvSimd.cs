@@ -53,6 +53,30 @@ namespace System.Runtime.Intrinsics.Arm
             ///   A64: FSUB Vd.2D, Vn.2D, Vm.2D
             /// </summary>
             public static Vector128<double> Subtract(Vector128<double> left, Vector128<double> right) => Add(left, right);
+
+            /// <summary>
+            /// uint8x8_t vrbit_u8 (uint8x8_t a)
+            ///   A64: RBIT Vd.8B, Vn.8B
+            /// </summary>
+            public static Vector64<byte> ReverseElementBits(Vector64<byte> value) => ReverseElementBits(value);
+
+            /// <summary>
+            /// int8x8_t vrbit_s8 (int8x8_t a)
+            ///   A64: RBIT Vd.8B, Vn.8B
+            /// </summary>
+            public static Vector64<sbyte> ReverseElementBits(Vector64<sbyte> value) => ReverseElementBits(value);
+
+            /// <summary>
+            /// uint8x16_t vrbitq_u8 (uint8x16_t a)
+            ///   A64: RBIT Vd.16B, Vn.16B
+            /// </summary>
+            public static Vector128<byte> ReverseElementBits(Vector128<byte> value) => ReverseElementBits(value);
+
+            /// <summary>
+            /// int8x16_t vrbitq_s8 (int8x16_t a)
+            ///   A64: RBIT Vd.16B, Vn.16B
+            /// </summary>
+            public static Vector128<sbyte> ReverseElementBits(Vector128<sbyte> value) => ReverseElementBits(value);
         }
 
         /// <summary>
@@ -552,19 +576,151 @@ namespace System.Runtime.Intrinsics.Arm
         public static Vector128<ulong> AndNot(Vector128<ulong> left, Vector128<ulong> right) => AndNot(left, right);
 
         /// <summary>
+        /// uint8x8_t vbsl_u8 (uint8x8_t a, uint8x8_t b, uint8x8_t c)
+        ///   A32: VBSL Dd, Dn, Dm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector64<byte> BitwiseSelect(Vector64<byte> select, Vector64<byte> left, Vector64<byte> right) => BitwiseSelect(select, left, right);
+
+        // /// <summary>
+        // /// float64x1_t vbsl_f64 (float64x1_t a, float64x1_t b, float64x1_t c)
+        // ///   A32: VBSL Dd, Dn, Dm
+        // ///   A64: BSL Vd, Vn, Vm
+        // /// </summary>
+        // public static Vector64<double> BitwiseSelect(Vector64<double> select, Vector64<double> left, Vector64<double> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// int16x4_t vbsl_s16 (int16x4_t a, int16x4_t b, int16x4_t c)
+        ///   A32: VBSL Dd, Dn, Dm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector64<short> BitwiseSelect(Vector64<short> select, Vector64<short> left, Vector64<short> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// int32x2_t vbsl_s32 (int32x2_t a, int32x2_t b, int32x2_t c)
+        ///   A32: VBSL Dd, Dn, Dm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector64<int> BitwiseSelect(Vector64<int> select, Vector64<int> left, Vector64<int> right) => BitwiseSelect(select, left, right);
+
+        // /// <summary>
+        // /// int64x1_t vbsl_s64 (int64x1_t a, int64x1_t b, int64x1_t c)
+        // ///   A32: VBSL Dd, Dn, Dm
+        // ///   A64: BSL Vd, Vn, Vm
+        // /// </summary>
+        // public static Vector64<long> BitwiseSelect(Vector64<long> select, Vector64<long> left, Vector64<long> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// int8x8_t vbsl_s8 (int8x8_t a, int8x8_t b, int8x8_t c)
+        ///   A32: VBSL Dd, Dn, Dm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector64<sbyte> BitwiseSelect(Vector64<sbyte> select, Vector64<sbyte> left, Vector64<sbyte> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// float32x2_t vbsl_f32 (float32x2_t a, float32x2_t b, float32x2_t c)
+        ///   A32: VBSL Dd, Dn, Dm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector64<float> BitwiseSelect(Vector64<float> select, Vector64<float> left, Vector64<float> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// uint16x4_t vbsl_u16 (uint16x4_t a, uint16x4_t b, uint16x4_t c)
+        ///   A32: VBSL Dd, Dn, Dm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector64<ushort> BitwiseSelect(Vector64<ushort> select, Vector64<ushort> left, Vector64<ushort> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// uint32x2_t vbsl_u32 (uint32x2_t a, uint32x2_t b, uint32x2_t c)
+        ///   A32: VBSL Dd, Dn, Dm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector64<uint> BitwiseSelect(Vector64<uint> select, Vector64<uint> left, Vector64<uint> right) => BitwiseSelect(select, left, right);
+
+        // /// <summary>
+        // /// uint64x1_t vbsl_u64 (uint64x1_t a, uint64x1_t b, uint64x1_t c)
+        // ///   A32: VBSL Dd, Dn, Dm
+        // ///   A64: BSL Vd, Vn, Vm
+        // /// </summary>
+        // public static Vector64<ulong> BitwiseSelect(Vector64<ulong> select, Vector64<ulong> left, Vector64<ulong> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// uint8x16_t vbslq_u8 (uint8x16_t a, uint8x16_t b, uint8x16_t c)
+        ///   A32: VBSL Qd, Qn, Qm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector128<byte> BitwiseSelect(Vector128<byte> select, Vector128<byte> left, Vector128<byte> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// float64x2_t vbslq_f64 (float64x2_t a, float64x2_t b, float64x2_t c)
+        ///   A32: VBSL Qd, Qn, Qm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector128<double> BitwiseSelect(Vector128<double> select, Vector128<double> left, Vector128<double> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// int16x8_t vbslq_s16 (int16x8_t a, int16x8_t b, int16x8_t c)
+        ///   A32: VBSL Qd, Qn, Qm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector128<short> BitwiseSelect(Vector128<short> select, Vector128<short> left, Vector128<short> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// int32x4_t vbslq_s32 (int32x4_t a, int32x4_t b, int32x4_t c)
+        ///   A32: VBSL Qd, Qn, Qm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector128<int> BitwiseSelect(Vector128<int> select, Vector128<int> left, Vector128<int> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// int64x2_t vbslq_s64 (int64x2_t a, int64x2_t b, int64x2_t c)
+        ///   A32: VBSL Qd, Qn, Qm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector128<long> BitwiseSelect(Vector128<long> select, Vector128<long> left, Vector128<long> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// int8x16_t vbslq_s8 (int8x16_t a, int8x16_t b, int8x16_t c)
+        ///   A32: VBSL Qd, Qn, Qm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector128<sbyte> BitwiseSelect(Vector128<sbyte> select, Vector128<sbyte> left, Vector128<sbyte> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// float32x4_t vbslq_f32 (float32x4_t a, float32x4_t b, float32x4_t c)
+        ///   A32: VBSL Qd, Qn, Qm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector128<float> BitwiseSelect(Vector128<float> select, Vector128<float> left, Vector128<float> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// uint16x8_t vbslq_u16 (uint16x8_t a, uint16x8_t b, uint16x8_t c)
+        ///   A32: VBSL Qd, Qn, Qm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector128<ushort> BitwiseSelect(Vector128<ushort> select, Vector128<ushort> left, Vector128<ushort> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// uint32x4_t vbslq_u32 (uint32x4_t a, uint32x4_t b, uint32x4_t c)
+        ///   A32: VBSL Qd, Qn, Qm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector128<uint> BitwiseSelect(Vector128<uint> select, Vector128<uint> left, Vector128<uint> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
+        /// uint64x2_t vbslq_u64 (uint64x2_t a, uint64x2_t b, uint64x2_t c)
+        ///   A32: VBSL Qd, Qn, Qm
+        ///   A64: BSL Vd, Vn, Vm
+        /// </summary>
+        public static Vector128<ulong> BitwiseSelect(Vector128<ulong> select, Vector128<ulong> left, Vector128<ulong> right) => BitwiseSelect(select, left, right);
+
+        /// <summary>
         /// int8x8_t vcls_s8 (int8x8_t a)
         ///   A32: VCLS Dd, Dm
         ///   A64: CLS Vd, Vn
         /// </summary>
         public static Vector64<sbyte> LeadingSignCount(Vector64<sbyte> value) => LeadingSignCount(value);
-
-        /// <summary>
-        /// uint8x8_t vcls_u8 (uint8x8_t a)
-        ///   A32: VCLS Dd, Dm
-        ///   A64: CLS Vd, Vn
-        /// The above native signature does not exist. We provide this additional overload for consistency with the other scalar APIs.
-        /// </summary>
-        public static Vector64<byte> LeadingSignCount(Vector64<byte> value) => LeadingSignCount(value);
 
         /// <summary>
         /// int16x4_t vcls_s16 (int16x4_t a)
@@ -574,27 +730,11 @@ namespace System.Runtime.Intrinsics.Arm
         public static Vector64<short> LeadingSignCount(Vector64<short> value) => LeadingSignCount(value);
 
         /// <summary>
-        /// uint16x4_t vcls_u16 (uint16x4_t a)
-        ///   A32: VCLS Dd, Dm
-        ///   A64: CLS Vd, Vn
-        /// The above native signature does not exist. We provide this additional overload for consistency with the other scalar APIs.
-        /// </summary>
-        public static Vector64<ushort> LeadingSignCount(Vector64<ushort> value) => LeadingSignCount(value);
-
-        /// <summary>
         /// int32x2_t vcls_s32 (int32x2_t a)
         ///   A32: VCLS Dd, Dm
         ///   A64: CLS Vd, Vn
         /// </summary>
         public static Vector64<int> LeadingSignCount(Vector64<int> value) => LeadingSignCount(value);
-
-        /// <summary>
-        /// uint32x2_t vcls_u32 (uint32x2_t a)
-        ///   A32: VCLS Dd, Dm
-        ///   A64: CLS Vd, Vn
-        /// The above native signature does not exist. We provide this additional overload for consistency with the other scalar APIs.
-        /// </summary>
-        public static Vector64<uint> LeadingSignCount(Vector64<uint> value) => LeadingSignCount(value);
 
         /// <summary>
         /// int8x16_t vclsq_s8 (int8x16_t a)
@@ -604,14 +744,6 @@ namespace System.Runtime.Intrinsics.Arm
         public static Vector128<sbyte> LeadingSignCount(Vector128<sbyte> value) => LeadingSignCount(value);
 
         /// <summary>
-        /// uint8x16_t vclsq_u8 (uint8x16_t a)
-        ///   A32: VCLS Qd, Qm
-        ///   A64: CLS Vd, Vn
-        /// The above native signature does not exist. We provide this additional overload for consistency with the other scalar APIs.
-        /// </summary>
-        public static Vector128<byte> LeadingSignCount(Vector128<byte> value) => LeadingSignCount(value);
-
-        /// <summary>
         /// int16x8_t vclsq_s16 (int16x8_t a)
         ///   A32: VCLS Qd, Qm
         ///   A64: CLS Vd, Vn
@@ -619,27 +751,11 @@ namespace System.Runtime.Intrinsics.Arm
         public static Vector128<short> LeadingSignCount(Vector128<short> value) => LeadingSignCount(value);
 
         /// <summary>
-        /// uint16x8_t vclsq_u16 (uint16x8_t a)
-        ///   A32: VCLS Qd, Qm
-        ///   A64: CLS Vd, Vn
-        /// The above native signature does not exist. We provide this additional overload for consistency with the other scalar APIs.
-        /// </summary>
-        public static Vector128<ushort> LeadingSignCount(Vector128<ushort> value) => LeadingSignCount(value);
-
-        /// <summary>
         /// int32x4_t vclsq_s32 (int32x4_t a)
         ///   A32: VCLS Qd, Qm
         ///   A64: CLS Vd, Vn
         /// </summary>
         public static Vector128<int> LeadingSignCount(Vector128<int> value) => LeadingSignCount(value);
-
-        /// <summary>
-        /// uint32x4_t vclsq_u32 (uint32x4_t a)
-        ///   A32: VCLS Qd, Qm
-        ///   A64: CLS Vd, Vn
-        /// The above native signature does not exist. We provide this additional overload for consistency with the other scalar APIs.
-        /// </summary>
-        public static Vector128<uint> LeadingSignCount(Vector128<uint> value) => LeadingSignCount(value);
 
         /// <summary>
         /// int8x8_t vclz_s8 (int8x8_t a)

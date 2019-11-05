@@ -410,7 +410,7 @@ namespace System.Text.Encodings.Web
                     if (UnicodeUtility.IsAsciiCodePoint(nextScalarValue))
                     {
                         // Check Ascii cache.
-                        byte[] encodedBytes = GetAsciiEncoding((byte)nextScalarValue);
+                        byte[]? encodedBytes = GetAsciiEncoding((byte)nextScalarValue);
 
                         if (ReferenceEquals(encodedBytes, s_noEscape))
                         {
@@ -615,7 +615,7 @@ namespace System.Text.Encodings.Web
 
         private unsafe void EncodeCore(TextWriter output, char* value, int valueLength)
         {
-            Debug.Assert(value != null & output != null);
+            Debug.Assert(value != null && output != null);
             Debug.Assert(valueLength >= 0);
 
             int bufferLength = MaxOutputCharactersPerInputCharacter;
@@ -714,8 +714,9 @@ namespace System.Text.Encodings.Web
                         // Load the next 16 bytes.
                         Vector128<sbyte> sourceValue = Sse2.LoadVector128(startingAddress);
 
-                        Vector128<sbyte> mask = Sse2Helper.CreateAsciiMask(sourceValue);
-                        int index = Sse2.MoveMask(mask);
+                        // Check for ASCII text. Any byte that's not in the ASCII range will already be negative when
+                        // casted to signed byte.
+                        int index = Sse2.MoveMask(sourceValue);
 
                         if (index != 0)
                         {
@@ -812,6 +813,7 @@ namespace System.Text.Encodings.Web
                         idx += utf8BytesConsumedForScalar;
                     }
                 }
+                Debug.Assert(idx == utf8Text.Length);
 
                 idx = -1; // All bytes are allowed.
 
@@ -879,7 +881,7 @@ namespace System.Text.Encodings.Web
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private byte[] GetAsciiEncoding(byte value)
+        private byte[]? GetAsciiEncoding(byte value)
         {
             byte[] encoding = _asciiEscape[value];
             if (encoding == null)

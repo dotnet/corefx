@@ -34,18 +34,6 @@ namespace System.Runtime.Intrinsics.Arm
             public static int LeadingSignCount(long value) { throw new PlatformNotSupportedException(); }
 
             /// <summary>
-            ///   A64: CLS Wd, Wn
-            /// The above native signature does not exist. We provide this additional overload for consistency with the other scalar APIs.
-            /// </summary>
-            public static int LeadingSignCount(uint value) { throw new PlatformNotSupportedException(); }
-
-            /// <summary>
-            ///   A64: CLS Xd, Xn
-            /// The above native signature does not exist. We provide this additional overload for consistency with the other scalar APIs.
-            /// </summary>
-            public static int LeadingSignCount(ulong value) { throw new PlatformNotSupportedException(); }
-
-            /// <summary>
             ///   A64: CLZ Xd, Xn
             /// </summary>
             public static int LeadingZeroCount(long value) { throw new PlatformNotSupportedException(); }
@@ -54,6 +42,16 @@ namespace System.Runtime.Intrinsics.Arm
             ///   A64: CLZ Xd, Xn
             /// </summary>
             public static int LeadingZeroCount(ulong value) { throw new PlatformNotSupportedException(); }
+
+            /// <summary>
+            ///   A64: RBIT Xd, Xn
+            /// </summary>
+            public static int ReverseElementBits(long value) { throw new PlatformNotSupportedException(); }
+
+            /// <summary>
+            ///   A64: RBIT Xd, Xn
+            /// </summary>
+            public static int ReverseElementBits(ulong value) { throw new PlatformNotSupportedException(); }
         }
 
         /// <summary>
@@ -67,5 +65,17 @@ namespace System.Runtime.Intrinsics.Arm
         ///   A64: CLZ Wd, Wn
         /// </summary>
         public static int LeadingZeroCount(uint value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        ///   A32: RBIT Rd, Rm
+        ///   A64: RBIT Wd, Wn
+        /// </summary>
+        public static int ReverseElementBits(int value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        ///   A32: RBIT Rd, Rm
+        ///   A64: RBIT Wd, Wn
+        /// </summary>
+        public static int ReverseElementBits(uint value) { throw new PlatformNotSupportedException(); }
     }
 }
