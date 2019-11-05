@@ -150,11 +150,6 @@ namespace System.Threading
 
     public static class SemaphoreAcl
     {
-        public static System.Threading.Semaphore Create(
-            int initialCount,
-            int maximumCount,
-            string name,
-            out bool createdNew,
-            System.Security.AccessControl.SemaphoreSecurity semaphoreSecurity) { throw null; }
+        public static System.Threading.Semaphore Create(int initialCount, int maximumCount, string name, out bool createdNew, System.Security.AccessControl.SemaphoreSecurity semaphoreSecurity) { throw null; }
     }
 }

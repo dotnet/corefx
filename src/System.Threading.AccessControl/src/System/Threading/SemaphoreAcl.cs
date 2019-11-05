@@ -16,8 +16,8 @@ namespace System.Threading
         /// <param name="maximumCount">The maximum number of requests for the semaphore that can be satisfied concurrently.</param>
         /// <param name="name">Optional argument to create a system semaphore. Set to <see langword="null" /> or <see cref="string.Empty" /> to create a local semaphore.</param>
         /// <param name="createdNew">When this method returns, this argument is always set to <see langword="true" /> if a local semaphore is created; that is, when <paramref name="name" /> is <see langword="null" /> or <see cref="string.Empty" />. If <paramref name="name" /> has a valid, non-empty value, this argument is set to <see langword="true" /> when the system semaphore is created, or it is set to <see langword="false" /> if an existing system semaphore is found with that name. This parameter is passed uninitialized.</param>
-        /// <param name="semaphoreSecurity"></param>
-        /// <returns>The optional semaphore access control security to apply.</returns>
+        /// <param name="semaphoreSecurity">The optional semaphore access control security to apply.</param>
+        /// <returns>An object that represents a system semaphore, if named, or a local semaphore, if nameless.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="initialCount" /> is a negative number.
         /// -or-
         /// <paramref name="maximumCount" /> is not a positive number.</exception>
@@ -64,8 +64,8 @@ namespace System.Threading
 
                 ValidateHandle(handle, name, out createdNew);
 
-                var semaphore = new Semaphore(initialCount, maximumCount);
-                var old = semaphore.SafeWaitHandle;
+                Semaphore semaphore = new Semaphore(initialCount, maximumCount);
+                SafeWaitHandle old = semaphore.SafeWaitHandle;
                 semaphore.SafeWaitHandle = handle;
                 old.Dispose();
 

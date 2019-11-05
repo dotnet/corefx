@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
@@ -8,41 +12,38 @@ namespace System.Threading.Tests
 {
     public class SemaphoreAclTests : AclTests
     {
-        private int _defaultInitialCount = 0;
-        private int _defaultMaximumCount = 1;
+        private const int DefaultInitialCount = 0;
+        private const int DefaultMaximumCount = 1;
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void Semaphore_Create_NullSecurity()
         {
-            using Semaphore _ = CreateAndVerifySemaphore(
-                _defaultInitialCount,
-                _defaultMaximumCount,
+            CreateAndVerifySemaphore(
+                DefaultInitialCount,
+                DefaultMaximumCount,
                 name: GetRandomName(),
                 expectedSecurity: null,
-                expectedCreatedNew: true);
+                expectedCreatedNew: true).Dispose();
         }
 
         [Theory]
         [InlineData(-1, 1)]
         [InlineData(0, 0)]
         [InlineData(1, 0)]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void Semaphore_Create_InvalidCounts(int initialCount, int maximumCount)
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                using Semaphore _ = CreateAndVerifySemaphore(
+                CreateAndVerifySemaphore(
                     initialCount,
                     maximumCount,
                     name: GetRandomName(),
                     expectedSecurity: GetBasicSemaphoreSecurity(),
-                    expectedCreatedNew: true);
+                    expectedCreatedNew: true).Dispose();
             });
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
         [InlineData(null)]
         [InlineData("")]
         public void Semaphore_Create_NameMultipleNew(string name)
@@ -51,44 +52,42 @@ namespace System.Threading.Tests
             bool expectedCreatedNew = true;
 
             using Semaphore semaphore1 = CreateAndVerifySemaphore(
-                _defaultInitialCount,
-                _defaultMaximumCount,
+                DefaultInitialCount,
+                DefaultMaximumCount,
                 name,
                 security,
                 expectedCreatedNew);
 
             using Semaphore semaphore2 = CreateAndVerifySemaphore(
-                _defaultInitialCount,
-                _defaultMaximumCount,
+                DefaultInitialCount,
+                DefaultMaximumCount,
                 name,
                 security,
                 expectedCreatedNew);
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void Semaphore_Create_CreateNewExisting()
         {
             string name = GetRandomName();
             var security = GetBasicSemaphoreSecurity();
 
             using Semaphore SemaphoreNew = CreateAndVerifySemaphore(
-                _defaultInitialCount,
-                _defaultMaximumCount,
+                DefaultInitialCount,
+                DefaultMaximumCount,
                 name,
                 security,
                 expectedCreatedNew: true);
 
             using Semaphore SemaphoreExisting = CreateAndVerifySemaphore(
-                _defaultInitialCount,
-                _defaultMaximumCount,
+                DefaultInitialCount,
+                DefaultMaximumCount,
                 name,
                 security,
                 expectedCreatedNew: false);
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void Semaphore_Create_BeyondMaxPathLength()
         {
             string name = new string('x', Interop.Kernel32.MAX_PATH + 100);
@@ -97,19 +96,19 @@ namespace System.Threading.Tests
             {
                 Assert.Throws<ArgumentException>(() =>
                 {
-                    using Semaphore _ = CreateAndVerifySemaphore(
-                        _defaultInitialCount,
-                        _defaultMaximumCount,
+                    CreateAndVerifySemaphore(
+                        DefaultInitialCount,
+                        DefaultMaximumCount,
                         name,
                         GetBasicSemaphoreSecurity(),
-                        expectedCreatedNew: true);
+                        expectedCreatedNew: true).Dispose();
                 });
             }
             else
             {
-                using Semaphore Semaphore = CreateAndVerifySemaphore(
-                    _defaultInitialCount,
-                    _defaultMaximumCount,
+                using Semaphore created = CreateAndVerifySemaphore(
+                    DefaultInitialCount,
+                    DefaultMaximumCount,
                     name,
                     GetBasicSemaphoreSecurity(),
                     expectedCreatedNew: true);
@@ -120,7 +119,6 @@ namespace System.Threading.Tests
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.Windows)]
         [InlineData(SemaphoreRights.FullControl, AccessControlType.Allow)]
         [InlineData(SemaphoreRights.FullControl, AccessControlType.Deny)]
         [InlineData(SemaphoreRights.Synchronize, AccessControlType.Allow)]
@@ -134,11 +132,11 @@ namespace System.Threading.Tests
             var security = GetSemaphoreSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
 
             CreateAndVerifySemaphore(
-                _defaultInitialCount,
-                _defaultMaximumCount,
+                DefaultInitialCount,
+                DefaultMaximumCount,
                 GetRandomName(),
                 security,
-                expectedCreatedNew: true);
+                expectedCreatedNew: true).Dispose();
 
         }
 
