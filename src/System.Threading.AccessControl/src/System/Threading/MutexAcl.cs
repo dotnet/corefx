@@ -45,8 +45,8 @@ namespace System.Threading
 
                 ValidateMutexHandle(handle, name, out createdNew);
 
-                var mutex = new Mutex(initiallyOwned);
-                var old = mutex.SafeWaitHandle;
+                Mutex mutex = new Mutex(initiallyOwned);
+                SafeWaitHandle old = mutex.SafeWaitHandle;
                 mutex.SafeWaitHandle = handle;
                 old.Dispose();
 
