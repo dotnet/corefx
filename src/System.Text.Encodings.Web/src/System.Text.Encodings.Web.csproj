@@ -35,7 +35,7 @@
       <Link>System\Text\UnicodeUtility.cs</Link>
     </Compile>
     </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNetCoreApp)' != 'true'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' != 'true' And !$(Configuration.Contains('netstandard2.1'))">
     <Compile Include="$(CommonPath)\CoreLib\System\Diagnostics\CodeAnalysis\NullableAttributes.cs" Link="System\Diagnostics\CodeAnalysis\NullableAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
