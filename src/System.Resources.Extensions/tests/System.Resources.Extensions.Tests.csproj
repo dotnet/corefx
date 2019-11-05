@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release</Configurations>
-    <TestDataPackageVersion>1.0.9</TestDataPackageVersion>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
   </PropertyGroup>
   <PropertyGroup>
@@ -20,14 +19,14 @@
     <EmbeddedResource Include="TestData.resources" WithCulture="false" Type="Non-Resx" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common.TestData" Version="$(SystemDrawingCommonTestDataPackageVersion)" />    
+    <PackageReference Include="System.Drawing.Common.TestData" Version="$(SystemDrawingCommonTestDataVersion)" />    
   </ItemGroup>
   <!-- use the following target to regenerate the test resources file
        This is done from a test application and checked in so that we don't run
        product code during the build -->
   <Target Name="GenerateTestResourcesFile">
     <PropertyGroup>
-      <_executor>Microsoft.DotNet.RemoteExecutorHost.dll</_executor>
+      <_executor>Microsoft.DotNet.RemoteExecutor.dll</_executor>
     </PropertyGroup>
     <ItemGroup>
       <ExecuteMethod Class="System.Resources.Extensions.Tests.TestData" Include="WriteResources" Parameters="$(MSBuildProjectDirectory)\TestData.resources" />
@@ -35,7 +34,7 @@
         <ExceptionFile>$(TargetDir)%(Class)%(Identity).exception.txt</ExceptionFile>
       </ExecuteMethod>
       <ExecuteMethod>
-        <Command>$(TestHostRootPath)dotnet $(_executor) $(AssemblyName) %(Class) %(Identity) %(ExceptionFile) %(Parameters)</Command>
+        <Command>$(TestHostRootPath)dotnet exec --runtimeconfig $(TargetDir)$(TargetName).runtimeconfig.json $(_executor) $(AssemblyName) %(Class) %(Identity) %(ExceptionFile) %(Parameters)</Command>
       </ExecuteMethod>
     </ItemGroup>
     <Exec Command="%(ExecuteMethod.Command)" WorkingDirectory="$(TargetDir)" />

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
@@ -53,6 +54,9 @@ namespace System.Text.Json.Serialization
         }
 
         /// <inheritdoc />
+        [PreserveDependency(
+            ".ctor(System.Text.Json.Serialization.Converters.EnumConverterOptions, System.Text.Json.JsonNamingPolicy)",
+            "System.Text.Json.Serialization.Converters.JsonConverterEnum`1")]
         public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
         {
             JsonConverter converter = (JsonConverter)Activator.CreateInstance(
