@@ -350,7 +350,7 @@ namespace System.Net
             Console.WriteLine("GetHostEntryOrAddressesCore finished with {0} enabled {1}", errorCode, NetEventSource.IsEnabled);
 
             NetEventSource.Info(hostName, $"{hostName} DNS lookup failed with {errorCode}");
-            NetEventSource.Error(hostName, formattableString: $"{hostName} DNS lookup failed with {errorCode}");
+            NetEventSource.Error(hostName, memberName: "GetHostEntryOrAddressesCore", message: $"{hostName} DNS lookup failed with {errorCode}");
             NetEventSource.Error(hostName, $"{hostName} DNS lookup failed with {errorCode}");
 
             if (errorCode != SocketError.Success)
