@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -3835,7 +3836,17 @@ namespace System.CodeDom.Compiler.Tests
 
         protected override void GenerateCommentStatements(CodeCommentStatementCollection e)
         {
-            GenerateCommentStatementsAction(e, base.GenerateCommentStatements);
+            if (e != null)
+            {
+                if (e.GetEnumerator().MoveNext())
+                {
+                    GenerateCommentStatementsAction(e, base.GenerateCommentStatements);
+                }
+            }
+            else
+            {
+                GenerateCommentStatementsAction(e, base.GenerateCommentStatements);
+            }
         }
 
         public Action<CodeCompileUnit, Action<CodeCompileUnit>> GenerateCompileUnitAction { get; set; }
@@ -3912,7 +3923,10 @@ namespace System.CodeDom.Compiler.Tests
 
         protected override void GenerateDirectives(CodeDirectiveCollection directives)
         {
-            GenerateDirectivesAction(directives, base.GenerateDirectives);
+            if (directives != null && directives.GetEnumerator().MoveNext())
+            {
+                GenerateDirectivesAction(directives, base.GenerateDirectives);
+            }
         }
 
         public Action<double, Action<double>> GenerateDoubleValueAction { get; set; }

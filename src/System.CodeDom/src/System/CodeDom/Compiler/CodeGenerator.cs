@@ -58,10 +58,7 @@ namespace System.CodeDom.Compiler
                 GenerateDirectives(e.StartDirectives);
             }
 
-            if (e.Comments.Count > 0)
-            {
-                GenerateCommentStatements(e.Comments);
-            }
+            GenerateCommentStatements(e.Comments);
 
             if (e.LinePragma != null)
             {
@@ -131,10 +128,7 @@ namespace System.CodeDom.Compiler
                 GenerateDirectives(member.StartDirectives);
             }
 
-            if (member.Comments.Count > 0)
-            {
-                GenerateCommentStatements(member.Comments);
-            }
+            GenerateCommentStatements(member.Comments);
 
             if (member.LinePragma != null)
             {
@@ -724,10 +718,7 @@ namespace System.CodeDom.Compiler
                 throw new ArgumentNullException(nameof(e));
             }
 
-            if (e.StartDirectives.Count > 0)
-            {
-                GenerateDirectives(e.StartDirectives);
-            }
+            GenerateDirectives(e.StartDirectives);
 
             if (e.LinePragma != null)
             {
@@ -817,21 +808,13 @@ namespace System.CodeDom.Compiler
                 throw new ArgumentNullException(nameof(e));
             }
 
-            if (e.Comments.Count > 0)
-            {
-                GenerateCommentStatements(e.Comments);
-            }
-
+            GenerateCommentStatements(e.Comments);
             GenerateNamespaceStart(e);
 
             GenerateNamespaceImports(e);
             Output.WriteLine();
 
-            if (e.Types.Count > 0)
-            {
-                GenerateTypes(e);
-            }
-
+            GenerateTypes(e);
             GenerateNamespaceEnd(e);
         }
 
