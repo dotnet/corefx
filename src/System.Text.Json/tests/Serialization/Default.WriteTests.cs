@@ -69,7 +69,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.DoesNotContain(@"""MyDateTime"":null", json);
             Assert.Contains(@"""MyIntArray"":[1]", json);
             Assert.Contains(@"""MyIntList"":[1]", json);
-            Assert.Contains(@"""MyStringDictionary"":{""key"":""value""}", json);
+            Assert.Contains(@"""MyStringDictionary"":{""key"":null}", json);
         }
 
         class WrapperForTestClassWithInitializedDefaultValueProperties
