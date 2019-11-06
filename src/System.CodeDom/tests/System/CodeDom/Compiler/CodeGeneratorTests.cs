@@ -771,6 +771,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateDirectionExpression_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -1729,6 +1730,7 @@ namespace System.CodeDom.Compiler.Tests
 
         [Theory]
         [MemberData(nameof(GeneratePrimitiveExpression_InvalidEValue_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GeneratePrimitiveExpression_InvalidE_ThrowsArgumentException(object value)
         {
             CodeGeneratorTests generator = this;
@@ -1776,7 +1778,7 @@ namespace System.CodeDom.Compiler.Tests
             {
                 generator.GenerateSingleFloatValueAction = (actualS, baseMethod) => baseMethod(actualS);
                 generator.GenerateSingleFloatValue(float.MaxValue);
-                Assert.Equal("3.4028235E+38", writer.ToString());
+                Assert.Equal(float.MaxValue.ToString(), writer.ToString());
             });
         }
 
@@ -2658,6 +2660,7 @@ namespace System.CodeDom.Compiler.Tests
         [InlineData("a\r", false)]
         [InlineData("\n", false)]
         [InlineData("a\n", false)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void IsValidLanguageIndependentIdentifier_Invoke_ReturnsExpected(string value, bool expected)
         {
             Assert.Equal(expected, CodeGenerator.IsValidLanguageIndependentIdentifier(value));
@@ -2682,6 +2685,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void OutputAttributeArgument_NullArg_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -3556,6 +3560,7 @@ namespace System.CodeDom.Compiler.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("value")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void ValidateIdentifier_InvokeInvalid_ThrowsArgumentException(string value)
         {
             CodeGeneratorTests generator = this;
@@ -3725,6 +3730,7 @@ namespace System.CodeDom.Compiler.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("value")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void ICodeGeneratorValidateIdentifier_InvokeInvalid_ThrowsArgumentException(string value)
         {
             CodeGeneratorTests generator = this;
