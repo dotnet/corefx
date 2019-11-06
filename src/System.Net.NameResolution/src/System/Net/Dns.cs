@@ -25,7 +25,7 @@ namespace System.Net
 
         public static IPHostEntry GetHostEntry(IPAddress address)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null, address);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(address, address);
             NameResolutionPal.EnsureSocketsAreInitialized();
 
             if (address is null)
@@ -35,12 +35,13 @@ namespace System.Net
 
             if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
             {
+                if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"Invalid address {address}");
                 throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, nameof(address)));
             }
 
             IPHostEntry ipHostEntry = GetHostEntryCore(address);
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(null, ipHostEntry);
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(address, ipHostEntry);
             return ipHostEntry;
         }
 
@@ -74,12 +75,8 @@ namespace System.Net
             return ipHostEntry;
         }
 
-        public static Task<IPHostEntry> GetHostEntryAsync(string hostNameOrAddress)
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.Info(hostNameOrAddress, hostNameOrAddress);
-
-            return GetHostEntryCoreAsync(hostNameOrAddress, justReturnParsedIp: false, throwOnIIPAny: true);
-        }
+        public static Task<IPHostEntry> GetHostEntryAsync(string hostNameOrAddress) =>
+            GetHostEntryCoreAsync(hostNameOrAddress, justReturnParsedIp: false, throwOnIIPAny: true);
 
         public static Task<IPHostEntry> GetHostEntryAsync(IPAddress address)
         {
@@ -125,7 +122,6 @@ namespace System.Net
 
             IPHostEntry ipHostEntry = TaskToApm.End<IPHostEntry>(asyncResult ?? throw new ArgumentNullException(nameof(asyncResult)));
 
-            //if (NetEventSource.IsEnabled) NetEventSource.Exit(null, ipHostEntry);
             if (NetEventSource.IsEnabled) NetEventSource.Exit(asyncResult, ipHostEntry, $"got number of {ipHostEntry.AddressList.Length} entries" );
             return ipHostEntry;
         }
@@ -347,11 +343,6 @@ namespace System.Net
             ValidateHostName(hostName);
 
             SocketError errorCode = NameResolutionPal.TryGetAddrInfo(hostName, justAddresses, out string newHostName, out string[] aliases, out IPAddress[] addresses, out int nativeErrorCode);
-            Console.WriteLine("GetHostEntryOrAddressesCore finished with {0} enabled {1}", errorCode, NetEventSource.IsEnabled);
-
-            NetEventSource.Info(hostName, $"{hostName} DNS lookup failed with {errorCode}");
-            NetEventSource.Error(hostName, memberName: "GetHostEntryOrAddressesCore", message: $"{hostName} DNS lookup failed with {errorCode}");
-            NetEventSource.Error(hostName, $"{hostName} DNS lookup failed with {errorCode}");
 
             if (errorCode != SocketError.Success)
             {
@@ -368,7 +359,6 @@ namespace System.Net
                     Aliases = aliases
                 };
 
-            Console.WriteLine("GetHostEntryOrAddressesCore start: {0} {1}",  hostName, hostName.GetHashCode());
             if (NetEventSource.IsEnabled) NetEventSource.Exit(hostName, result, addresses.Length);
             return result;
         }
@@ -382,7 +372,7 @@ namespace System.Net
         // Does internal IPAddress reverse and then forward lookups (for Legacy and current public methods).
         private static object GetHostEntryOrAddressesCore(IPAddress address, bool justAddresses)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Info(null, address);
+            if (NetEventSource.IsEnabled) NetEventSource.Info(address, address);
 
             // Try to get the data for the host from its address.
             // We need to call getnameinfo first, because getaddrinfo w/ the ipaddress string
@@ -392,6 +382,7 @@ namespace System.Net
             string name = NameResolutionPal.TryGetNameInfo(address, out SocketError errorCode, out int nativeErrorCode);
             if (errorCode != SocketError.Success)
             {
+                if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"{address} DNS lookup failed with {errorCode}");
                 throw SocketExceptionFactory.CreateSocketException(errorCode, nativeErrorCode);
             }
 
@@ -400,7 +391,7 @@ namespace System.Net
 
             if (errorCode != SocketError.Success)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(null, SocketExceptionFactory.CreateSocketException(errorCode, nativeErrorCode));
+                if (NetEventSource.IsEnabled) NetEventSource.Error(address, SocketExceptionFactory.CreateSocketException(errorCode, nativeErrorCode));
             }
 
             // One of three things happened:
@@ -411,7 +402,7 @@ namespace System.Net
             //      adapter's advanced dns settings.
             // Return whatever we got.
 
-            return justAddresses ?
+            object result = justAddresses ?
                 (object)addresses :
                 new IPHostEntry
                 {
@@ -419,6 +410,9 @@ namespace System.Net
                     Aliases = aliases,
                     AddressList = addresses
                 };
+
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(address, result, addresses.Length);
+            return result;
         }
 
         private static Task<IPHostEntry> GetHostEntryCoreAsync(string hostName, bool justReturnParsedIp, bool throwOnIIPAny) =>
