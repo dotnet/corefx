@@ -1525,7 +1525,6 @@ namespace System.CodeDom.Compiler
             {
                 throw new ArgumentException(SR.Format(SR.Argument_NullComment, nameof(e)), nameof(e));
             }
-
             GenerateComment(e.Comment);
         }
 
