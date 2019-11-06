@@ -35,7 +35,7 @@ namespace System.CodeDom.Compiler.Tests
             var results = new CompilerResults(null) { PathToAssembly = typeof(CompilerResultsTests).Assembly.Location };
 
             Assert.NotNull(results.CompiledAssembly);
-//            Assert.Equal(typeof(CompilerResultsTests).Assembly, results.CompiledAssembly);
+            Assert.Equal(typeof(CompilerResultsTests).Assembly.FullName, results.CompiledAssembly.FullName);
             Assert.Same(results.CompiledAssembly, results.CompiledAssembly);
         }
 
