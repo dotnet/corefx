@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Tests;
 using System.Threading;
 using Xunit;
 
@@ -447,104 +448,107 @@ namespace System.Linq.Tests
         [Fact]
         public void CultureOrderBy()
         {
-            CultureInfo current = CultureInfo.CurrentCulture;
-            try
+            string[] source = new[] { "Apple0", "Æble0", "Apple1", "Æble1", "Apple2", "Æble2" };
+
+            CultureInfo dk = new CultureInfo("da-DK");
+            CultureInfo au = new CultureInfo("en-AU");
+
+            StringComparer comparerDk = StringComparer.Create(dk, false);
+            StringComparer comparerAu = StringComparer.Create(au, false);
+
+            // we don't provide a defined sorted result set because the Windows culture sorting
+            // provides a different result set to the Linux culture sorting. But as we're really just
+            // concerned that OrderBy default string ordering matches current culture then this
+            // should be sufficient
+            string[] resultDK = source.ToArray();
+            Array.Sort(resultDK, comparerDk);
+            string[] resultAU = source.ToArray();
+            Array.Sort(resultAU, comparerAu);
+
+            string[] check;
+
+            using (new ThreadCultureChange(dk))
             {
-                string[] source = new[] { "Apple0", "Æble0", "Apple1", "Æble1", "Apple2", "Æble2" };
-
-                CultureInfo dk = new CultureInfo("da-DK");
-                CultureInfo au = new CultureInfo("en-AU");
-
-                StringComparer comparerDk = StringComparer.Create(dk, false);
-                StringComparer comparerAu = StringComparer.Create(au, false);
-
-                // we don't provide a defined sorted result set because the Windows culture sorting
-                // provides a different result set to the Linux culture sorting. But as we're really just
-                // concerned that OrderBy default string ordering matches current culture then this
-                // should be sufficient
-                string[] resultDK = source.ToArray();
-                Array.Sort(resultDK, comparerDk);
-                string[] resultAU = source.ToArray();
-                Array.Sort(resultAU, comparerAu);
-
-                string[] check;
-
-                CultureInfo.CurrentCulture = dk;
                 check = source.OrderBy(x => x).ToArray();
-                Assert.Equal(check, resultDK, StringComparer.Ordinal);
+                Assert.Equal(resultDK, check, StringComparer.Ordinal);
+            }
 
-                CultureInfo.CurrentCulture = au;
+            using (new ThreadCultureChange(au))
+            {
                 check = source.OrderBy(x => x).ToArray();
-                Assert.Equal(check, resultAU, StringComparer.Ordinal);
+                Assert.Equal(resultAU, check, StringComparer.Ordinal);
+            }
 
-                IEnumerator<string> s;
-                int idx;
-
-                CultureInfo.CurrentCulture = dk;
-                s = source.OrderBy(x => x).GetEnumerator(); // "dk" whilst GetEnumerator
-                CultureInfo.CurrentCulture = au; // but "au" whilst accessing...
-                idx = 0;
-                while (s.MoveNext()) // sort is done on first MoveNext, so should have "au" sorting
+            using (new ThreadCultureChange(dk)) // "dk" whilst GetEnumerator
+            {
+                IEnumerator<string> s = source.OrderBy(x => x).GetEnumerator(); 
+                using (new ThreadCultureChange(au)) // but "au" whilst accessing...
                 {
-                    Assert.Equal(s.Current, resultAU[idx++], StringComparer.Ordinal);
-                }
-
-                CultureInfo.CurrentCulture = au;
-                s = source.OrderBy(x => x).GetEnumerator(); // "au" whilst GetEnumerator
-                CultureInfo.CurrentCulture = dk; // but "dk" whilst accessing...
-                idx = 0;
-                while (s.MoveNext()) // sort is done on first MoveNext, so should have "dk" sorting
-                {
-                    Assert.Equal(s.Current, resultDK[idx++], StringComparer.Ordinal);
-
-                    // ensure changing culture whilst enumerating doesn't affect sort
-                    CultureInfo.CurrentCulture = au;
+                    int idx = 0;
+                    while (s.MoveNext()) // sort is done on first MoveNext, so should have "au" sorting
+                    {
+                        Assert.Equal(resultAU[idx++], s.Current, StringComparer.Ordinal);
+                    }
                 }
             }
-            finally
+
+            using (new ThreadCultureChange(au))
             {
-                // be polite and restore previous culture
-                CultureInfo.CurrentCulture = current;
+                // "au" whilst GetEnumerator
+                IEnumerator<string> s = source.OrderBy(x => x).GetEnumerator(); 
+                
+                using (new ThreadCultureChange(dk)) 
+                {
+                    // but "dk" on first MoveNext
+                    var moveNext = s.MoveNext(); 
+                    Assert.True(moveNext);
+
+                    // ensure changing culture after MoveNext doesn't affect sort
+                    using (new ThreadCultureChange(au)) // "au" whilst GetEnumerator
+                    {
+                        int idx = 0;
+                        while (moveNext) // sort is done on first MoveNext, so should have "dk" sorting
+                        {
+                            Assert.Equal(resultDK[idx++], s.Current, StringComparer.Ordinal);
+                            moveNext = s.MoveNext();
+                        }
+                    }
+                }
             }
         }
 
         [Fact]
         public void CultureOrderByElementAt()
         {
-            CultureInfo current = CultureInfo.CurrentCulture;
-            try
+            string[] source = new[] { "Apple0", "Æble0", "Apple1", "Æble1", "Apple2", "Æble2" };
+
+            CultureInfo dk = new CultureInfo("da-DK");
+            CultureInfo au = new CultureInfo("en-AU");
+
+            StringComparer comparerDk = StringComparer.Create(dk, false);
+            StringComparer comparerAu = StringComparer.Create(au, false);
+
+            // we don't provide a defined sorted result set because the Windows culture sorting
+            // provides a different result set to the Linux culture sorting. But as we're really just
+            // concerned that OrderBy default string ordering matches current culture then this
+            // should be sufficient
+            string[] resultDK = source.ToArray();
+            Array.Sort(resultDK, comparerDk);
+            string[] resultAU = source.ToArray();
+            Array.Sort(resultAU, comparerAu);
+
+            IEnumerable<string> delaySortedSource = source.OrderBy(x => x);
+            for (int i = 0; i < source.Length; ++i)
             {
-                string[] source = new[] { "Apple0", "Æble0", "Apple1", "Æble1", "Apple2", "Æble2" };
-
-                CultureInfo dk = new CultureInfo("da-DK");
-                CultureInfo au = new CultureInfo("en-AU");
-
-                StringComparer comparerDk = StringComparer.Create(dk, false);
-                StringComparer comparerAu = StringComparer.Create(au, false);
-
-                // we don't provide a defined sorted result set because the Windows culture sorting
-                // provides a different result set to the Linux culture sorting. But as we're really just
-                // concerned that OrderBy default string ordering matches current culture then this
-                // should be sufficient
-                string[] resultDK = source.ToArray();
-                Array.Sort(resultDK, comparerDk);
-                string[] resultAU = source.ToArray();
-                Array.Sort(resultAU, comparerAu);
-
-                IEnumerable<string> delaySortedSource = source.OrderBy(x => x);
-                for (int i = 0; i < source.Length; ++i)
+                using (new ThreadCultureChange(dk))
                 {
-                    CultureInfo.CurrentCulture = dk;
-                    Assert.Equal(delaySortedSource.ElementAt(i), resultDK[i], StringComparer.Ordinal);
-
-                    CultureInfo.CurrentCulture = au;
-                    Assert.Equal(delaySortedSource.ElementAt(i), resultAU[i], StringComparer.Ordinal);
+                    Assert.Equal(resultDK[i], delaySortedSource.ElementAt(i), StringComparer.Ordinal);
                 }
-            }
-            finally
-            {
-                // be polite and restore previous culture
-                CultureInfo.CurrentCulture = current;
+
+                using (new ThreadCultureChange(au))
+                {
+                    Assert.Equal(resultAU[i], delaySortedSource.ElementAt(i), StringComparer.Ordinal);
+                }
             }
         }
     }
