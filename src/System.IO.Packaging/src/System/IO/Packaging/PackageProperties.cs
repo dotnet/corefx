@@ -5,7 +5,7 @@
 //-----------------------------------------------------------------------------
 //
 // Description:
-//  This abstract class provides access to the "core properties" an XPS document.
+//  This abstract class provides access to the "core properties" of an XPS document.
 //  The "core properties" are a subset of the standard OLE property sets
 //  SummaryInformation and DocumentSummaryInformation, and include such properties
 //  as Title and Subject.
