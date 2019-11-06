@@ -28,6 +28,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Contains(@"""MyDateTime"":null", json);
             Assert.Contains(@"""MyIntArray"":null", json);
             Assert.Contains(@"""MyIntList"":null", json);
+            Assert.Contains(@"""MyStringDictionary"":{""key"":""value""}", json);
         }
 
         [Fact]
@@ -40,6 +41,7 @@ namespace System.Text.Json.Serialization.Tests
 
             var obj = new TestClassWithInitializedDefaultValueProperties
             {
+                MyString = "Hello",
                 MyInt = 1,
                 MyDateTime = null,
                 MyIntArray = new int[] { 1 },
@@ -48,13 +50,13 @@ namespace System.Text.Json.Serialization.Tests
             };
 
             string json = JsonSerializer.Serialize(obj, options);
-
-            // Roundtrip to verify serialize is accurate.
-            TestClassWithInitializedProperties newObj = JsonSerializer.Deserialize<TestClassWithInitializedProperties>(json);
-            // Assert.Null(newObj.MyDateTime);
-            Assert.Equal(1, newObj.MyIntArray[0]);
-            Assert.Equal(1, newObj.MyIntList[0]);
-            Assert.Null(newObj.MyStringDictionary["key"]);
+                
+            Assert.DoesNotContain(@"""MyString"":""Hello""", json);
+            Assert.DoesNotContain(@"""MyInt"":1", json);
+            Assert.DoesNotContain(@"""MyDateTime"":null", json);
+            Assert.Contains(@"""MyIntArray"":[1]", json);
+            Assert.Contains(@"""MyIntList"":[1]", json);
+            Assert.Contains(@"""MyStringDictionary"":{""key"":null}", json);
 
             var parentObj = new WrapperForTestClassWithInitializedDefaultValueProperties
             {
@@ -62,15 +64,12 @@ namespace System.Text.Json.Serialization.Tests
             };
             json = JsonSerializer.Serialize(parentObj, options);
 
-            // Roundtrip to ensure serialize is accurate.
-            WrapperForTestClassWithInitializedDefaultValueProperties newParentObj = JsonSerializer.Deserialize<WrapperForTestClassWithInitializedDefaultValueProperties>(json);
-            TestClassWithInitializedDefaultValueProperties nestedObj = newParentObj.MyClass;
-            // Assert.Null(nestedObj.MyString);
-            // Assert.Null(nestedObj.MyInt);
-            // Assert.Null(nestedObj.MyDateTime);
-            Assert.Equal(1, nestedObj.MyIntArray[0]);
-            Assert.Equal(1, nestedObj.MyIntList[0]);
-            Assert.Null(nestedObj.MyStringDictionary["key"]);
+            Assert.DoesNotContain(@"""MyString"":""Hello""", json);
+            Assert.DoesNotContain(@"""MyInt"":1", json);
+            Assert.DoesNotContain(@"""MyDateTime"":null", json);
+            Assert.Contains(@"""MyIntArray"":[1]", json);
+            Assert.Contains(@"""MyIntList"":[1]", json);
+            Assert.Contains(@"""MyStringDictionary"":{""key"":""value""}", json);
         }
 
         class WrapperForTestClassWithInitializedDefaultValueProperties
