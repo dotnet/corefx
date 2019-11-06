@@ -54,8 +54,8 @@ namespace System.Net.Http.Headers
             // Should be no overlap
             Debug.Assert((allowedHeaderTypes & treatAsCustomHeaderTypes) == 0);
 
-            _allowedHeaderTypes = allowedHeaderTypes;
-            _treatAsCustomHeaderTypes = treatAsCustomHeaderTypes;
+            _allowedHeaderTypes = allowedHeaderTypes & ~HttpHeaderType.NonTrailing;
+            _treatAsCustomHeaderTypes = treatAsCustomHeaderTypes & ~HttpHeaderType.NonTrailing;
         }
 
         internal Dictionary<HeaderDescriptor, HeaderStoreItemInfo> HeaderStore => _headerStore;
@@ -1089,11 +1089,11 @@ namespace System.Net.Http.Headers
                 throw new FormatException(SR.net_http_headers_invalid_header_name);
             }
 
-            if ((descriptor.HeaderType & _allowedHeaderTypes & HttpHeaderType.NonTrailing) != 0 || (descriptor.HeaderType & _allowedHeaderTypes) != 0)
+            if (((descriptor.HeaderType & ~HttpHeaderType.NonTrailing) & _allowedHeaderTypes) != 0)
             {
                 return descriptor;
             }
-            else if ((descriptor.HeaderType & _treatAsCustomHeaderTypes & HttpHeaderType.NonTrailing) != 0 || (descriptor.HeaderType & _treatAsCustomHeaderTypes) != 0)
+            else if (((descriptor.HeaderType & ~HttpHeaderType.NonTrailing) & _treatAsCustomHeaderTypes) != 0)
             {
                 return descriptor.AsCustomHeader();
             }
@@ -1114,11 +1114,11 @@ namespace System.Net.Http.Headers
                 return false;
             }
 
-            if ((descriptor.HeaderType & _allowedHeaderTypes & HttpHeaderType.NonTrailing) != 0 || (descriptor.HeaderType & _allowedHeaderTypes) != 0)
+            if (((descriptor.HeaderType & ~HttpHeaderType.NonTrailing) & _allowedHeaderTypes) != 0)
             {
                 return true;
             }
-            else if ((descriptor.HeaderType & _treatAsCustomHeaderTypes & HttpHeaderType.NonTrailing) != 0 || (descriptor.HeaderType & _treatAsCustomHeaderTypes) != 0)
+            else if (((descriptor.HeaderType & ~HttpHeaderType.NonTrailing) & _treatAsCustomHeaderTypes) != 0)
             {
                 descriptor = descriptor.AsCustomHeader();
                 return true;
