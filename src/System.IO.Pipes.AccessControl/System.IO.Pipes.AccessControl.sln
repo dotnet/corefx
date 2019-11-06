@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27213.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.138
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.IO.Pipes.AccessControl.Tests", "tests\System.IO.Pipes.AccessControl.Tests.csproj", "{A0356E61-19E1-4722-A53D-5D2616E16312}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -15,6 +15,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.IO.Pipes.AccessControl", "ref\System.IO.Pipes.AccessControl.csproj", "{994DCE47-4CF6-479D-AB1D-4EA6A2809C34}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1A2F9F4A-A032-433E-B914-ADD5992BB178}"
+	ProjectSection(SolutionItems) = preProject
+		C:\Users\carlo\.nuget\packages\microsoft.dotnet.codeanalysis\5.0.0-beta.19554.3\content\PinvokeAnalyzer_Win32Apis.txt = C:\Users\carlo\.nuget\packages\microsoft.dotnet.codeanalysis\5.0.0-beta.19554.3\content\PinvokeAnalyzer_Win32Apis.txt
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E893-4E87-987E-04EF0DCEAEFD}"
 EndProject

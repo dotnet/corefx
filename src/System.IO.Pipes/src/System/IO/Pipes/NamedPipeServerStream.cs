@@ -73,10 +73,38 @@ namespace System.IO.Pipes
         /// </param>
         /// <param name="outBufferSize">Outgoing buffer size, 0 or higher (see above)</param>
         /// <param name="inheritability">Whether handle is inheritable</param>
-        private NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances,
-                PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize,
-                HandleInheritability inheritability)
+        private NamedPipeServerStream(string pipeName,
+            PipeDirection direction,
+            int maxNumberOfServerInstances,
+            PipeTransmissionMode transmissionMode,
+            PipeOptions options,
+            int inBufferSize,
+            int outBufferSize,
+            HandleInheritability inheritability)
             : base(direction, transmissionMode, outBufferSize)
+        {
+            ValidateParameters(
+                pipeName,
+                maxNumberOfServerInstances,
+                options,
+                inBufferSize,
+                inheritability);
+
+            Create(pipeName,
+                direction,
+                maxNumberOfServerInstances,
+                transmissionMode,
+                options,
+                inBufferSize,
+                outBufferSize,
+                inheritability);
+        }
+
+        private void ValidateParameters(string pipeName,
+            int maxNumberOfServerInstances,
+            PipeOptions options,
+            int inBufferSize,
+            HandleInheritability inheritability)
         {
             if (pipeName == null)
             {
@@ -114,9 +142,6 @@ namespace System.IO.Pipes
             {
                 IsCurrentUserOnly = true;
             }
-
-            Create(pipeName, direction, maxNumberOfServerInstances, transmissionMode,
-            options, inBufferSize, outBufferSize, inheritability);
         }
 
         // Create a NamedPipeServerStream from an existing server pipe handle.
