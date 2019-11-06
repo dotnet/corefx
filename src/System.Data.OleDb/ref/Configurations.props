@@ -6,7 +6,7 @@
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
-      netfx
+      _netfx
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
