@@ -103,6 +103,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateBinaryOperatorExpression_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -110,6 +111,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateBinaryOperatorExpression_NullLeftE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -123,6 +125,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateBinaryOperatorExpression_NullRightE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -387,6 +390,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateCodeFromMember_NullMember_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -394,6 +398,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateCodeFromMember_NullWriter_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -419,6 +424,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateCommentStatement_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -465,6 +471,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateCommentStatements_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -588,6 +595,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateCompileUnit_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -637,6 +645,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateCompileUnitEnd_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -674,6 +683,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateCompileUnitStart_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -1203,6 +1213,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateExpression_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -1307,6 +1318,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateNamespace_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -1450,6 +1462,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateNamespaceImports_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -1575,6 +1588,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateParameterDeclarationExpression_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -1694,6 +1708,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GeneratePrimitiveExpression_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -1836,6 +1851,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateSnippetCompileUnit_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -1867,6 +1883,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateSnippetStatement_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -2135,6 +2152,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateStatement_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -2203,6 +2221,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateStatements_NullStmts_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -2250,6 +2269,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateTypeOfExpression_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -2288,6 +2308,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateTypeReferenceExpression_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -2552,6 +2573,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void GenerateTypes_NullE_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -2747,6 +2769,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void OutputAttributeDeclarations_NullAttributes_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
@@ -3348,6 +3371,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Not fixed on NetFX")]
         public void OutputParameters_NullParameters_ThrowsArgumentNullException()
         {
             CodeGeneratorTests generator = this;
