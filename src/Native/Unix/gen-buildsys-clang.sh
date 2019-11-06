@@ -58,7 +58,7 @@ if [[ -n "$CROSSCOMPILE" ]]; then
         CONFIG_DIR=$repo_root/cross
     fi
     export TARGET_BUILD_ARCH=$build_arch
-    cmake_extra_defines="$cmake_extra_defines -C $CONFIG_DIR/tryrun.cmake"
+    cmake_extra_defines="$cmake_extra_defines -C tryrun.cmake"
     cmake_extra_defines="$cmake_extra_defines -DCMAKE_TOOLCHAIN_FILE=$CONFIG_DIR/toolchain.cmake"
 fi
 if [ "$build_arch" == "armel" ]; then
