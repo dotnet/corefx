@@ -105,44 +105,43 @@ namespace System.Net.NetworkInformation
 
         public static PhysicalAddress Parse(string address)
         {
-            int validCount = 0;
-            int validSegmentLength = 0;
+            int validSegmentLength;
             char? delimiter = null;
-            byte[] buffer = null;
+            byte[] buffer;
 
             if (address == null)
             {
-                return PhysicalAddress.None;
+                return None;
             }
 
             if (address.Contains('-'))
             {
                 if ((address.Length + 1) % 3 != 0)
                 {
-                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                    ThrowBadAddressException(address);
                 }
 
                 delimiter = '-';
-                buffer = new byte[(address.Length + 1) / 3]; // Allow any length that's a multiple of 3
+                buffer = new byte[(address.Length + 1) / 3]; // allow any length that's a multiple of 3
                 validSegmentLength = 2;
             }
             else if (address.Contains(':'))
             {
                 delimiter = ':';
-                validSegmentLength = GetValidSegmentLength(address, delimiter);
+                validSegmentLength = GetValidSegmentLength(address, ':');
                 if (validSegmentLength != 2 && validSegmentLength != 4)
                 {
-                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                    ThrowBadAddressException(address);
                 }
                 buffer = new byte[6];
             }
             else if (address.Contains('.'))
             {
                 delimiter = '.';
-                validSegmentLength = GetValidSegmentLength(address, delimiter);
+                validSegmentLength = GetValidSegmentLength(address, '.');
                 if (validSegmentLength != 4)
                 {
-                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                    ThrowBadAddressException(address);
                 }
                 buffer = new byte[6];
             }
@@ -150,51 +149,46 @@ namespace System.Net.NetworkInformation
             {
                 if (address.Length % 2 > 0)
                 {
-                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                    ThrowBadAddressException(address);
                 }
 
                 validSegmentLength = address.Length;
                 buffer = new byte[address.Length / 2];
             }
 
+            int validCount = 0;
             int j = 0;
             for (int i = 0; i < address.Length; i++)
             {
-                int value = (int)address[i];
+                int value = address[i];
 
-                if (value >= (int)'0' && value <= (int)'9')
+                if (value >= '0' && value <= '9')
                 {
-                    value -= (int)'0';
+                    value -= '0';
                 }
-                else if (value >= (int)'A' && value <= (int)'F')
+                else if (value >= 'A' && value <= 'F')
                 {
-                    value -= ((int)'A' - 10);
+                    value -= ('A' - 10);
                 }
-                else if (value >= (int)'a' && value <= (int)'f')
+                else if (value >= 'a' && value <= 'f')
                 {
-                    value -= ((int)'a' - 10);
+                    value -= ('a' - 10);
                 }
-                else if (delimiter != null && value == delimiter)
+                else
                 {
-                    if (validCount == validSegmentLength)
+                    if (delimiter == value && validCount == validSegmentLength)
                     {
                         validCount = 0;
                         continue;
                     }
-                    else
-                    {
-                        throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
-                    }
-                }
-                else
-                {
-                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+
+                    ThrowBadAddressException(address);
                 }
 
                 // we had too many characters after the last delimiter
                 if (validCount >= validSegmentLength)
                 {
-                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                    ThrowBadAddressException(address);
                 }
 
                 if (validCount % 2 == 0)
@@ -209,16 +203,19 @@ namespace System.Net.NetworkInformation
                 validCount++;
             }
 
-            // we too few characters after the last delimiter
+            // we had too few characters after the last delimiter
             if (validCount < validSegmentLength)
             {
-                throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                ThrowBadAddressException(address);
             }
 
             return new PhysicalAddress(buffer);
+
+            static void ThrowBadAddressException(string address) =>
+                throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
         }
 
-        private static int GetValidSegmentLength(string address, char? delimiter)
+        private static int GetValidSegmentLength(string address, char delimiter)
         {
             int segments = 1;
             int validSegmentLength = 0;
@@ -235,6 +232,7 @@ namespace System.Net.NetworkInformation
                         // segments - 1 = num of delimeters. Throw if new segment isn't the validSegmentLength
                         throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                     }
+
                     segments++;
                 }
             }
