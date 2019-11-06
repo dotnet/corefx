@@ -44,9 +44,9 @@
     <MicrosoftNETCoreDotNetHostVersion>5.0.0-alpha.1.19554.7</MicrosoftNETCoreDotNetHostVersion>
     <MicrosoftNETCoreDotNetHostPolicyVersion>5.0.0-alpha.1.19554.7</MicrosoftNETCoreDotNetHostPolicyVersion>
     <!-- Coreclr dependencies -->
-    <MicrosoftNETCoreILAsmVersion>5.0.0-alpha1.19554.1</MicrosoftNETCoreILAsmVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19554.1</MicrosoftNETCoreRuntimeCoreCLRVersion>
-    <MicrosoftNETSdkILVersion>5.0.0-alpha1.19554.1</MicrosoftNETSdkILVersion>
+    <MicrosoftNETCoreILAsmVersion>5.0.0-alpha1.19555.2</MicrosoftNETCoreILAsmVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19555.2</MicrosoftNETCoreRuntimeCoreCLRVersion>
+    <MicrosoftNETSdkILVersion>5.0.0-alpha1.19555.2</MicrosoftNETSdkILVersion>
     <!-- Corefx dependencies -->
     <MicrosoftNETCorePlatformsVersion>5.0.0-alpha.1.19554.10</MicrosoftNETCorePlatformsVersion>
     <runtimenativeSystemIOPortsVersion>5.0.0-alpha.1.19554.10</runtimenativeSystemIOPortsVersion>
