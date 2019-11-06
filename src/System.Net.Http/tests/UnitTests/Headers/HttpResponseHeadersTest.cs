@@ -637,7 +637,7 @@ namespace System.Net.Http.Tests
         [Theory, MemberData(nameof(AllowedTrailingHeaders))]
         public void Trailer_AddAndGetAllowedContentHeader_Success(string name, string value)
         {
-            var trailingHeaders = new HttpResponseHeaders(true);
+            var trailingHeaders = new HttpResponseHeaders(containsTrailingHeaders: true);
 
             trailingHeaders.Add(name, value);
 
@@ -650,7 +650,7 @@ namespace System.Net.Http.Tests
         [Theory, MemberData(nameof(ProhibitedTrailingHeaders))]
         public void Trailer_AddProhibitedHeader_ThrowsException(string header)
         {
-            var trailingHeaders = new HttpResponseHeaders(true);
+            var trailingHeaders = new HttpResponseHeaders(containsTrailingHeaders: true);
 
             Assert.Throws<InvalidOperationException>(() => trailingHeaders.Add(header, "ABC"));
         }
