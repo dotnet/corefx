@@ -648,9 +648,9 @@ namespace Internal.Cryptography.Pal
         {
             T[] oldRent = array;
 
-            if (idx >= array.Length)
+            if (idx >= oldRent.Length)
             {
-                T[] newRent = ArrayPool<T>.Shared.Rent(array.Length * 2);
+                T[] newRent = ArrayPool<T>.Shared.Rent(oldRent.Length * 2);
                 Array.Copy(oldRent, 0, newRent, 0, idx);
                 array = newRent;
                 ArrayPool<T>.Shared.Return(oldRent, clearArray: true);
