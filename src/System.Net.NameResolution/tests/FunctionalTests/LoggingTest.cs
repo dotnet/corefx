@@ -66,6 +66,7 @@ namespace System.Net.NameResolution.Tests
         }
 
         [ConditionalFact]
+        [PlatformSpecific(~TestPlatforms.Windows)]  // Unreliable on Windows.
         public void GetHostEntryAsync_InvalidHost_LogsError()
         {
             using (var listener = new TestEventListener("Microsoft-System-Net-NameResolution", EventLevel.Error))
