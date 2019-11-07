@@ -1779,7 +1779,7 @@ namespace System.CodeDom.Compiler.Tests
             {
                 generator.GenerateSingleFloatValueAction = (actualS, baseMethod) => baseMethod(actualS);
                 generator.GenerateSingleFloatValue(float.MaxValue);
-                Assert.Equal(float.MaxValue.ToString(CultureInfo.InvariantCulture.NumberFormat), writer.ToString());
+                Assert.Equal(float.MaxValue.ToString("R", CultureInfo.InvariantCulture.NumberFormat), writer.ToString());
             });
         }
 
