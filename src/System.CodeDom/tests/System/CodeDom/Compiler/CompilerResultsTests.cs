@@ -30,13 +30,21 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
-        public void CompiledAssembly_GetWithPathToAssembly_ReturnsExpected()
+        public void CompiledAssembly_GetWithPathToAssemblySet_ReturnsExpectedAssembly()
         {
             var results = new CompilerResults(null) { PathToAssembly = typeof(CompilerResultsTests).Assembly.Location };
 
             Assert.NotNull(results.CompiledAssembly);
             Assert.Equal(typeof(CompilerResultsTests).Assembly.FullName, results.CompiledAssembly.FullName);
             Assert.Same(results.CompiledAssembly, results.CompiledAssembly);
+        }
+
+        [Fact]
+        public void CompiledAssembly_GetWithPathToAssemblyNotSet_ReturnsNull()
+        {
+            var results = new CompilerResults(null);
+
+            Assert.Null(results.CompiledAssembly);
         }
 
         public static IEnumerable<object[]> CompiledAssembly_Set_TestData()
