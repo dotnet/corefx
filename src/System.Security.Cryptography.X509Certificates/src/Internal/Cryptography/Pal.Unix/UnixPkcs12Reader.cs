@@ -40,12 +40,14 @@ namespace Internal.Cryptography.Pal
                 reader = new AsnReader(encodedData, AsnEncodingRules.BER);
             }
 
-            PfxAsn.Decode(reader, out _pfxAsn);
+            PfxAsn.Decode(reader, out PfxAsn pfxAsn);
 
-            if (_pfxAsn.AuthSafe.ContentType != Oids.Pkcs7Data)
+            if (pfxAsn.AuthSafe.ContentType != Oids.Pkcs7Data)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
+
+            _pfxAsn = pfxAsn;
         }
 
         internal CertAndKey GetSingleCert()
