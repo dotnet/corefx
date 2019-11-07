@@ -150,6 +150,8 @@ internal static partial class Interop
                 {
                     importPassword.DangerousRelease();
                 }
+
+                cfPassphrase?.Dispose();
             }
         }
 
@@ -163,33 +165,22 @@ internal static partial class Interop
         {
             SafeSecCertificateHandle certHandle;
             int osStatus;
-            int ret;
 
             SafeCreateHandle cfPassphrase = importPassword ?? s_nullExportString;
 
-            try
-            {
-                ret = AppleCryptoNative_X509ImportCertificate(
-                    bytes,
-                    bytes.Length,
-                    contentType,
-                    cfPassphrase,
-                    keychain,
-                    exportable ? 1 : 0,
-                    out certHandle,
-                    out identityHandle,
-                    out osStatus);
+            int ret = AppleCryptoNative_X509ImportCertificate(
+                bytes,
+                bytes.Length,
+                contentType,
+                cfPassphrase,
+                keychain,
+                exportable ? 1 : 0,
+                out certHandle,
+                out identityHandle,
+                out osStatus);
 
-                SafeTemporaryKeychainHandle.TrackItem(certHandle);
-                SafeTemporaryKeychainHandle.TrackItem(identityHandle);
-            }
-            finally
-            {
-                if (cfPassphrase != s_nullExportString)
-                {
-                    cfPassphrase.Dispose();
-                }
-            }
+            SafeTemporaryKeychainHandle.TrackItem(certHandle);
+            SafeTemporaryKeychainHandle.TrackItem(identityHandle);
 
             if (ret == 1)
             {
