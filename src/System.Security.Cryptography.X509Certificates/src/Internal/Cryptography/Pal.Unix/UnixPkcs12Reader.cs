@@ -119,7 +119,7 @@ namespace Internal.Cryptography.Pal
                             Debug.Fail("Couldn't unpack decrypted buffer.");
                         }
 
-                        CryptoPool.Return(segment.Array, segment.Count);
+                        CryptoPool.Return(segment);
                         rentedContents[0].Content = default;
                     }
                 }
@@ -238,7 +238,7 @@ namespace Internal.Cryptography.Pal
             CertBagAsn[] certBags = ArrayPool<CertBagAsn>.Shared.Rent(10);
             AttributeAsn[][] certBagAttrs = ArrayPool<AttributeAsn[]>.Shared.Rent(10);
             SafeBagAsn[] keyBags = ArrayPool<SafeBagAsn>.Shared.Rent(10);
-            SubjectPublicKeyInfoAsn[] publicKeyInfos = null;
+            RentedSubjectPublicKeyInfo[] publicKeyInfos = null;
             AsymmetricAlgorithm[] keys = null;
             CertAndKey[] certs = null;
             int certBagIdx = 0;
@@ -260,7 +260,7 @@ namespace Internal.Cryptography.Pal
                 keys = ArrayPool<AsymmetricAlgorithm>.Shared.Rent(keyBagIdx);
                 keys.AsSpan().Clear();
 
-                publicKeyInfos = ArrayPool<SubjectPublicKeyInfoAsn>.Shared.Rent(keyBagIdx);
+                publicKeyInfos = ArrayPool<RentedSubjectPublicKeyInfo>.Shared.Rent(keyBagIdx);
                 publicKeyInfos.AsSpan().Clear();
 
                 ExtractPrivateKeys(password, keyBags, keyBagIdx, keys, publicKeyInfos);
@@ -305,7 +305,12 @@ namespace Internal.Cryptography.Pal
 
                 if (publicKeyInfos != null)
                 {
-                    ArrayPool<SubjectPublicKeyInfoAsn>.Shared.Return(publicKeyInfos, clearArray: true);
+                    for (int i = 0; i < keyBagIdx; i++)
+                    {
+                        publicKeyInfos[i].Dispose();
+                    }
+
+                    ArrayPool<RentedSubjectPublicKeyInfo>.Shared.Return(publicKeyInfos, clearArray: true);
                 }
 
                 ArrayPool<CertBagAsn>.Shared.Return(certBags, clearArray: true);
@@ -383,19 +388,18 @@ namespace Internal.Cryptography.Pal
             SafeBagAsn[] keyBags,
             int keyBagIdx,
             AsymmetricAlgorithm[] keys,
-            SubjectPublicKeyInfoAsn[] publicKeyInfos)
+            RentedSubjectPublicKeyInfo[] publicKeyInfos)
         {
             byte[] spkiBuf = null;
 
             for (int i = keyBagIdx - 1; i >= 0; i--)
             {
-                byte[] publicKeyBytes = null;
+                ref RentedSubjectPublicKeyInfo cur = ref publicKeyInfos[i];
 
                 try
                 {
                     SafeBagAsn keyBag = keyBags[i];
                     AsymmetricAlgorithm key = LoadKey(keyBag, password);
-                    publicKeyBytes = CryptoPool.Rent(keyBag.BagValue.Length);
 
                     int pubLength;
 
@@ -411,12 +415,13 @@ namespace Internal.Cryptography.Pal
                         }
                     }
 
-                    publicKeyInfos[i] = SubjectPublicKeyInfoAsn.Decode(
+                    cur.Value = SubjectPublicKeyInfoAsn.Decode(
                         spkiBuf.AsMemory(0, pubLength),
                         AsnEncodingRules.DER);
 
                     keys[i] = key;
-                    publicKeyBytes = null;
+                    cur.TrackArray(spkiBuf, clearSize: 0);
+                    spkiBuf = null;
                 }
                 catch (CryptographicException)
                 {
@@ -427,10 +432,10 @@ namespace Internal.Cryptography.Pal
                 }
                 finally
                 {
-                    if (publicKeyBytes != null)
+                    if (spkiBuf != null)
                     {
                         // Public key data doesn't need to be cleared.
-                        CryptoPool.Return(publicKeyBytes, clearSize: 0);
+                        CryptoPool.Return(spkiBuf, clearSize: 0);
                     }
                 }
             }
@@ -442,7 +447,7 @@ namespace Internal.Cryptography.Pal
             CertAndKey[] certs,
             int certBagIdx,
             SafeBagAsn[] keyBags,
-            SubjectPublicKeyInfoAsn[] publicKeyInfos,
+            RentedSubjectPublicKeyInfo[] publicKeyInfos,
             AsymmetricAlgorithm[] keys,
             int keyBagIdx)
         {
@@ -480,7 +485,7 @@ namespace Internal.Cryptography.Pal
 
                     for (int i = 0; i < keyBagIdx; i++)
                     {
-                        if (PublicKeyMatches(algorithm, keyParams, keyValue, ref publicKeyInfos[i]))
+                        if (PublicKeyMatches(algorithm, keyParams, keyValue, ref publicKeyInfos[i].Value))
                         {
                             matchingKeyIdx = i;
                             break;
@@ -611,16 +616,27 @@ namespace Internal.Cryptography.Pal
             }
 
             int encryptedValueLength = encryptedData.EncryptedContentInfo.EncryptedContent.Value.Length;
-
             byte[] destination = CryptoPool.Rent(encryptedValueLength);
+            int written;
 
-            int written = PasswordBasedEncryption.Decrypt(
-                encryptedData.EncryptedContentInfo.ContentEncryptionAlgorithm,
-                password,
-                default,
-                encryptedData.EncryptedContentInfo.EncryptedContent.Value.Span,
-                destination);
+            try
+            {
+                written = PasswordBasedEncryption.Decrypt(
+                    encryptedData.EncryptedContentInfo.ContentEncryptionAlgorithm,
+                    password,
+                    default,
+                    encryptedData.EncryptedContentInfo.EncryptedContent.Value.Span,
+                    destination);
+            }
+            catch
+            {
+                // Clear the whole thing, since we don't know what state we're in.
+                CryptoPool.Return(destination);
+                throw;
+            }
 
+            // The DecryptedSentiel content type value will cause Dispose to return
+            // `destination` to the pool.
             safeContentsAsn.Content = destination.AsMemory(0, written);
             safeContentsAsn.ContentType = DecryptedSentinel;
         }
@@ -720,6 +736,31 @@ namespace Internal.Cryptography.Pal
             {
                 Cert?.Dispose();
                 Key?.Dispose();
+            }
+        }
+
+        private struct RentedSubjectPublicKeyInfo
+        {
+            private byte[] _rented;
+            private int _clearSize;
+            internal SubjectPublicKeyInfoAsn Value;
+
+            internal void TrackArray(byte[] rented, int clearSize = CryptoPool.ClearAll)
+            {
+                Debug.Assert(_rented == null);
+
+                _rented = rented;
+                _clearSize = clearSize;
+            }
+
+            public void Dispose()
+            {
+                byte[] rented = Interlocked.Exchange(ref _rented, null);
+
+                if (rented != null)
+                {
+                    CryptoPool.Return(rented, _clearSize);
+                }
             }
         }
     }
