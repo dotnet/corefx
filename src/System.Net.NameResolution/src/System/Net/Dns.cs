@@ -41,7 +41,7 @@ namespace System.Net
 
             IPHostEntry ipHostEntry = GetHostEntryCore(address);
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(address, ipHostEntry);
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(address, $"{ipHostEntry} with {ipHostEntry.AddressList.Length} entries");
             return ipHostEntry;
         }
 
@@ -61,6 +61,7 @@ namespace System.Net
             {
                 if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
                 {
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(hostNameOrAddress, $"Invalid address {address}");
                     throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, nameof(hostNameOrAddress)));
                 }
 
@@ -71,16 +72,30 @@ namespace System.Net
                 ipHostEntry = GetHostEntryCore(hostNameOrAddress);
             }
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(hostNameOrAddress, ipHostEntry);
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(hostNameOrAddress, $"{ipHostEntry} with {ipHostEntry.AddressList.Length} entries");
             return ipHostEntry;
         }
 
-        public static Task<IPHostEntry> GetHostEntryAsync(string hostNameOrAddress) =>
-            GetHostEntryCoreAsync(hostNameOrAddress, justReturnParsedIp: false, throwOnIIPAny: true);
+        public static Task<IPHostEntry> GetHostEntryAsync(string hostNameOrAddress)
+        {
+            if (NetEventSource.IsEnabled)
+            {
+                NetEventSource.Enter(hostNameOrAddress, hostNameOrAddress);
+                Task<IPHostEntry> t = GetHostEntryCoreAsync(hostNameOrAddress, justReturnParsedIp: false, throwOnIIPAny: true);
+                t.ContinueWith((t, o) => NetEventSource.Exit(hostNameOrAddress, $"{t.Result} with {((IPHostEntry)t.Result).AddressList.Length} entries"),
+                    null, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+                return t;
+            }
+            else
+            {
+                return GetHostEntryCoreAsync(hostNameOrAddress, justReturnParsedIp: false, throwOnIIPAny: true);
+            }
+        }
 
         public static Task<IPHostEntry> GetHostEntryAsync(IPAddress address)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Info(null, address);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(address, address);
+
             NameResolutionPal.EnsureSocketsAreInitialized();
 
             if (address is null)
@@ -90,25 +105,30 @@ namespace System.Net
 
             if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
             {
+                if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"Invalid address {address}");
                 throw new ArgumentException(SR.net_invalid_ip_addr, nameof(address));
             }
 
-            return RunAsync(s => GetHostEntryCore((IPAddress)s), address);
+            return RunAsync(s => {
+                    IPHostEntry ipHostEntry = GetHostEntryCore((IPAddress)s);
+                    if (NetEventSource.IsEnabled) NetEventSource.Exit(address, $"{ipHostEntry} with {ipHostEntry.AddressList.Length} entries");
+                    return ipHostEntry;
+                }, address);
         }
 
         public static IAsyncResult BeginGetHostEntry(IPAddress address, AsyncCallback requestCallback, object stateObject)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null, address);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(address, address);
 
             IAsyncResult asyncResult = TaskToApm.Begin(GetHostEntryAsync(address), requestCallback, stateObject);
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(null, asyncResult);
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(address, asyncResult);
             return asyncResult;
         }
 
         public static IAsyncResult BeginGetHostEntry(string hostNameOrAddress, AsyncCallback requestCallback, object stateObject)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null, hostNameOrAddress);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(hostNameOrAddress, hostNameOrAddress);
 
             IAsyncResult asyncResult = TaskToApm.Begin(GetHostEntryAsync(hostNameOrAddress), requestCallback, stateObject);
 
@@ -118,17 +138,17 @@ namespace System.Net
 
         public static IPHostEntry EndGetHostEntry(IAsyncResult asyncResult)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null, asyncResult);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(asyncResult, asyncResult);
 
             IPHostEntry ipHostEntry = TaskToApm.End<IPHostEntry>(asyncResult ?? throw new ArgumentNullException(nameof(asyncResult)));
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(asyncResult, ipHostEntry, $"got number of {ipHostEntry.AddressList.Length} entries" );
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(asyncResult, $"{ipHostEntry} with {ipHostEntry.AddressList.Length} entries" );
             return ipHostEntry;
         }
 
         public static IPAddress[] GetHostAddresses(string hostNameOrAddress)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null, hostNameOrAddress);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(hostNameOrAddress, hostNameOrAddress);
             NameResolutionPal.EnsureSocketsAreInitialized();
 
             if (hostNameOrAddress is null)
@@ -142,6 +162,7 @@ namespace System.Net
             {
                 if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
                 {
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"Invalid address {address}");
                     throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, nameof(hostNameOrAddress)));
                 }
 
@@ -152,7 +173,7 @@ namespace System.Net
                 addresses = GetHostAddressesCore(hostNameOrAddress);
             }
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(null, addresses);
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(hostNameOrAddress, addresses);
             return addresses;
         }
 
@@ -161,21 +182,21 @@ namespace System.Net
 
         public static IAsyncResult BeginGetHostAddresses(string hostNameOrAddress, AsyncCallback requestCallback, object state)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null, hostNameOrAddress);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(hostNameOrAddress, hostNameOrAddress);
 
             IAsyncResult asyncResult = TaskToApm.Begin(GetHostAddressesAsync(hostNameOrAddress), requestCallback, state);
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(null, asyncResult);
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(hostNameOrAddress, asyncResult);
             return asyncResult;
         }
 
         public static IPAddress[] EndGetHostAddresses(IAsyncResult asyncResult)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null, asyncResult);
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(asyncResult, asyncResult);
 
             IPAddress[] addresses = TaskToApm.End<IPAddress[]>(asyncResult ?? throw new ArgumentNullException(nameof(asyncResult)));
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(null, addresses);
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(asyncResult, addresses);
             return addresses;
         }
 
@@ -337,9 +358,6 @@ namespace System.Net
 
         private static object GetHostEntryOrAddressesCore(string hostName, bool justAddresses)
         {
-            int hash = hostName.GetHashCode();
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(hostName, hostName);
-
             ValidateHostName(hostName);
 
             SocketError errorCode = NameResolutionPal.TryGetAddrInfo(hostName, justAddresses, out string newHostName, out string[] aliases, out IPAddress[] addresses, out int nativeErrorCode);
@@ -359,7 +377,6 @@ namespace System.Net
                     Aliases = aliases
                 };
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(hostName, result, addresses.Length);
             return result;
         }
 
@@ -372,8 +389,6 @@ namespace System.Net
         // Does internal IPAddress reverse and then forward lookups (for Legacy and current public methods).
         private static object GetHostEntryOrAddressesCore(IPAddress address, bool justAddresses)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Info(address, address);
-
             // Try to get the data for the host from its address.
             // We need to call getnameinfo first, because getaddrinfo w/ the ipaddress string
             // will only return that address and not the full list.
@@ -391,7 +406,7 @@ namespace System.Net
 
             if (errorCode != SocketError.Success)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(address, SocketExceptionFactory.CreateSocketException(errorCode, nativeErrorCode));
+                if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"forward lookup for {name} failed with {errorCode}");
             }
 
             // One of three things happened:
@@ -402,7 +417,7 @@ namespace System.Net
             //      adapter's advanced dns settings.
             // Return whatever we got.
 
-            object result = justAddresses ?
+            return justAddresses ?
                 (object)addresses :
                 new IPHostEntry
                 {
@@ -410,9 +425,6 @@ namespace System.Net
                     Aliases = aliases,
                     AddressList = addresses
                 };
-
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(address, result, addresses.Length);
-            return result;
         }
 
         private static Task<IPHostEntry> GetHostEntryCoreAsync(string hostName, bool justReturnParsedIp, bool throwOnIIPAny) =>
@@ -421,7 +433,6 @@ namespace System.Net
         // If hostName is an IPString and justReturnParsedIP==true then no reverse lookup will be attempted, but the original address is returned.
         private static Task GetHostEntryOrAddressesCoreAsync(string hostName, bool justReturnParsedIp, bool throwOnIIPAny, bool justAddresses)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Info(hostName, hostName);
             NameResolutionPal.EnsureSocketsAreInitialized();
 
             if (hostName is null)
@@ -434,6 +445,7 @@ namespace System.Net
             {
                 if (throwOnIIPAny && (ipAddress.Equals(IPAddress.Any) || ipAddress.Equals(IPAddress.IPv6Any)))
                 {
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(hostName, $"Invalid address {ipAddress}");
                     throw new ArgumentException(SR.net_invalid_ip_addr, nameof(hostName));
                 }
 
