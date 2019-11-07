@@ -39,10 +39,18 @@ namespace Internal.Cryptography.Pal
                     // PKCS#12 in a normalized form, and ask the OS to import it.
                     if (!exportable && safeSecKeyRefHandle != null)
                     {
-                        return ImportPkcs12NonExportable(pal, safeSecKeyRefHandle, password, keychain);
+                        using (pal)
+                        {
+                            return ImportPkcs12NonExportable(pal, safeSecKeyRefHandle, password, keychain);
+                        }
                     }
 
                     newPal = pal.MoveToKeychain(keychain, safeSecKeyRefHandle);
+
+                    if (newPal != null)
+                    {
+                        pal.Dispose();
+                    }
                 }
 
                 // If no new PAL came back, it means we moved the cert, but had no private key.
