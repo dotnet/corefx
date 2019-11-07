@@ -101,30 +101,7 @@ namespace Internal.Cryptography.Pal
 
             if (rentedContents != null)
             {
-                for (int i = 0; i < rentedContents.Length; i++)
-                {
-                    string contentType = rentedContents[i].ContentType;
-
-                    if (contentType == null)
-                    {
-                        break;
-                    }
-
-                    if (contentType == DecryptedSentinel)
-                    {
-                        ReadOnlyMemory<byte> content = rentedContents[i].Content;
-
-                        if (!MemoryMarshal.TryGetArray(content, out ArraySegment<byte> segment))
-                        {
-                            Debug.Fail("Couldn't unpack decrypted buffer.");
-                        }
-
-                        CryptoPool.Return(segment);
-                        rentedContents[0].Content = default;
-                    }
-                }
-
-                ArrayPool<ContentInfoAsn>.Shared.Return(rentedContents, clearArray: true);
+                ReturnRentedContentInfos(rentedContents);
             }
 
             if (rentedCerts != null)
@@ -136,6 +113,34 @@ namespace Internal.Cryptography.Pal
 
                 ArrayPool<CertAndKey>.Shared.Return(rentedCerts, clearArray: true);
             }
+        }
+
+        private static void ReturnRentedContentInfos(ContentInfoAsn[] rentedContents)
+        {
+            for (int i = 0; i < rentedContents.Length; i++)
+            {
+                string contentType = rentedContents[i].ContentType;
+
+                if (contentType == null)
+                {
+                    break;
+                }
+
+                if (contentType == DecryptedSentinel)
+                {
+                    ReadOnlyMemory<byte> content = rentedContents[i].Content;
+
+                    if (!MemoryMarshal.TryGetArray(content, out ArraySegment<byte> segment))
+                    {
+                        Debug.Fail("Couldn't unpack decrypted buffer.");
+                    }
+
+                    CryptoPool.Return(segment);
+                    rentedContents[0].Content = default;
+                }
+            }
+
+            ArrayPool<ContentInfoAsn>.Shared.Return(rentedContents, clearArray: true);
         }
 
         public void Decrypt(SafePasswordHandle password)
@@ -172,7 +177,7 @@ namespace Internal.Cryptography.Pal
 
                         if (partialSuccess != null)
                         {
-                            ArrayPool<ContentInfoAsn>.Shared.Return(partialSuccess);
+                            ReturnRentedContentInfos(partialSuccess);
                         }
 
                         Decrypt(null, authSafeContents);
