@@ -103,7 +103,7 @@ namespace Internal.Cryptography.Pal
             {
                 for (int i = 0; i < rentedContents.Length; i++)
                 {
-                    string contentType = rentedContents[0].ContentType;
+                    string contentType = rentedContents[i].ContentType;
 
                     if (contentType == null)
                     {
@@ -112,7 +112,7 @@ namespace Internal.Cryptography.Pal
 
                     if (contentType == DecryptedSentinel)
                     {
-                        ReadOnlyMemory<byte> content = rentedContents[0].Content;
+                        ReadOnlyMemory<byte> content = rentedContents[i].Content;
 
                         if (!MemoryMarshal.TryGetArray(content, out ArraySegment<byte> segment))
                         {
