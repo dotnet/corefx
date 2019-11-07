@@ -1089,11 +1089,11 @@ namespace System.Net.Http.Headers
                 throw new FormatException(SR.net_http_headers_invalid_header_name);
             }
 
-            if (((descriptor.HeaderType & ~HttpHeaderType.NonTrailing) & _allowedHeaderTypes) != 0)
+            if ((descriptor.HeaderType & _allowedHeaderTypes) != 0)
             {
                 return descriptor;
             }
-            else if (((descriptor.HeaderType & ~HttpHeaderType.NonTrailing) & _treatAsCustomHeaderTypes) != 0)
+            else if ((descriptor.HeaderType & _treatAsCustomHeaderTypes) != 0)
             {
                 return descriptor.AsCustomHeader();
             }
@@ -1114,11 +1114,11 @@ namespace System.Net.Http.Headers
                 return false;
             }
 
-            if (((descriptor.HeaderType & ~HttpHeaderType.NonTrailing) & _allowedHeaderTypes) != 0)
+            if ((descriptor.HeaderType & _allowedHeaderTypes) != 0)
             {
                 return true;
             }
-            else if (((descriptor.HeaderType & ~HttpHeaderType.NonTrailing) & _treatAsCustomHeaderTypes) != 0)
+            else if ((descriptor.HeaderType & _treatAsCustomHeaderTypes) != 0)
             {
                 descriptor = descriptor.AsCustomHeader();
                 return true;
