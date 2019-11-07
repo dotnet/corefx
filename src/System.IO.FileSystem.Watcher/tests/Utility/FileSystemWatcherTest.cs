@@ -99,6 +99,7 @@ namespace System.IO.Tests
                     catch (Exception ex)
                     {
                         _output?.WriteLine(ex.ToString());
+                        throw;
                     }
                 }
                 eventOccurred.Set();
@@ -133,6 +134,7 @@ namespace System.IO.Tests
                     catch (Exception ex)
                     {
                         _output?.WriteLine(ex.ToString());
+                        throw;
                     }
                 }
                 eventOccurred.Set();
