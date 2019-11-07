@@ -12,9 +12,9 @@
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>818b35978a1681690988b2c9c3f0b6a034d91e82</Sha>
     </Dependency>
-    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19556.1">
+    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19557.1">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>0fb4605e96dbf9eb2cd4472eda32ab2bbe179484</Sha>
+      <Sha>742b71402b3f6c88fc22956a819d7ea00408f42c</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
