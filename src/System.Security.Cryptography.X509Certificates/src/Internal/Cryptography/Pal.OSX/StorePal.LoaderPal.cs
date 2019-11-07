@@ -6,6 +6,7 @@ using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Apple;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
 namespace Internal.Cryptography.Pal
@@ -61,7 +62,7 @@ namespace Internal.Cryptography.Pal
         {
             private readonly ApplePkcs12Reader _pkcs12;
             private readonly SafeKeychainHandle _keychain;
-            private readonly SafePasswordHandle _password;
+            private SafePasswordHandle _password;
             private readonly bool _exportable;
 
             public ApplePkcs12CertLoader(
@@ -86,7 +87,8 @@ namespace Internal.Cryptography.Pal
                 // Only dispose the keychain if it's a temporary handle.
                 (_keychain as SafeTemporaryKeychainHandle)?.Dispose();
 
-                _password.DangerousRelease();
+                SafePasswordHandle password = Interlocked.Exchange(ref _password, null);
+                password?.DangerousRelease();
             }
 
             public void MoveTo(X509Certificate2Collection collection)
