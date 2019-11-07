@@ -31,7 +31,7 @@ namespace System.Net.NameResolution.Tests
             Assert.NotEmpty(EventSource.GenerateManifest(esType, "assemblyPathToIncludeInManifest"));
         }
 
-        [Fact]
+        [ConditionalFact]
         public void GetHostEntry_InvalidHost_LogsError()
         {
             using (var listener = new TestEventListener("Microsoft-System-Net-NameResolution", EventLevel.Error))
@@ -64,7 +64,8 @@ namespace System.Net.NameResolution.Tests
                 }
             }
         }
-        [Fact]
+
+        [ConditionalFact]
         public void GetHostEntryAsync_InvalidHost_LogsError()
         {
             using (var listener = new TestEventListener("Microsoft-System-Net-NameResolution", EventLevel.Error))
@@ -98,7 +99,7 @@ namespace System.Net.NameResolution.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact]
         public void GetHostEntry_ValidName_NoErrors()
         {
             using (var listener = new TestEventListener("Microsoft-System-Net-NameResolution", EventLevel.Verbose))
