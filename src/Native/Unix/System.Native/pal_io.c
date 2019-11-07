@@ -1223,16 +1223,35 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
 
 #if HAVE_CLONEFILE
         // For clonefile we need to unlink the destination file first but we need to
-        // check permission first to ensure we don't try to unlink read-only file.
-        if (access(destPath, W_OK) != 0)
+        // check permissions first to ensure we don't try to unlink read-only file. Also,
+        // we need to check the advisory locks to align with the behavior of regular
+        // code path.
+        openFlags = O_WRONLY | O_TRUNC | O_CREAT | O_EXCL;
+#if HAVE_O_CLOEXEC
+        openFlags |= O_CLOEXEC;
+#endif
+        while ((outFd = open(destPath, openFlags, sourceStat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))) < 0 && errno == EINTR);
+        if (outFd >= 0)
+        {
+            while ((ret = flock(outFd, LOCK_EX | LOCK_NB) < 0) && errno == EINTR);
+            if (ret < 0 && errno == EWOULDBLOCK)
+            {
+                close(outFd);
+                errno = EWOULDBLOCK;
+                return -1;
+            }
+
+            close(outFd);
+
+            while ((ret = unlink(destPath)) < 0 && errno == EINTR);
+            if (ret != 0)
+            {
+                return ret;
+            }
+        }
+        else if (errno == EACCES || errno == EPERM)
         {
             return -1;
-        }
-        
-        ret = unlink(destPath);
-        if (ret != 0)
-        {
-            return ret;
         }
 #endif
     }
@@ -1264,6 +1283,14 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
 #if !HAVE_O_CLOEXEC
     fcntl(outFd, F_SETFD, FD_CLOEXEC);
 #endif
+
+    while ((ret = flock(outFd, LOCK_EX | LOCK_NB) < 0) && errno == EINTR);
+    if (ret < 0 && errno == EWOULDBLOCK)
+    {
+        close(outFd);
+        errno = EWOULDBLOCK;
+        return -1;
+    }
 
     // Get the stats on the source file.
     bool copied = false;
