@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -1778,7 +1779,7 @@ namespace System.CodeDom.Compiler.Tests
             {
                 generator.GenerateSingleFloatValueAction = (actualS, baseMethod) => baseMethod(actualS);
                 generator.GenerateSingleFloatValue(float.MaxValue);
-                Assert.Equal(float.MaxValue.ToString(), writer.ToString());
+                Assert.Equal(float.MaxValue.ToString(CultureInfo.InvariantCulture.NumberFormat), writer.ToString());
             });
         }
 
