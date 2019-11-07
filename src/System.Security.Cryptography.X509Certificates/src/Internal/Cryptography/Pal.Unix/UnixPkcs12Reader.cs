@@ -227,24 +227,7 @@ namespace Internal.Cryptography.Pal
         {
             if (_safeContentsValues == null)
             {
-                // The expected number of ContentInfoAsns to read is 2, one encrypted (contains certs),
-                // and one plain (contains encrypted keys)
-                ContentInfoAsn[] rented = ArrayPool<ContentInfoAsn>.Shared.Rent(10);
-
-                AsnReader outer = new AsnReader(authSafeContents, AsnEncodingRules.BER);
-                AsnReader reader = outer.ReadSequence();
-                outer.ThrowIfNotEmpty();
-                int i = 0;
-
-                while (reader.HasData)
-                {
-                    GrowIfNeeded(ref rented, i);
-                    ContentInfoAsn.Decode(reader, out rented[i]);
-                    i++;
-                }
-
-                rented.AsSpan(i).Clear();
-                _safeContentsValues = rented;
+                _safeContentsValues = DecodeSafeContents(authSafeContents);
             }
 
             // The average PFX contains one cert, and one key.
@@ -257,46 +240,22 @@ namespace Internal.Cryptography.Pal
             SafeBagAsn[] keyBags = ArrayPool<SafeBagAsn>.Shared.Rent(10);
             SubjectPublicKeyInfoAsn[] publicKeyInfos = null;
             AsymmetricAlgorithm[] keys = null;
+            CertAndKey[] certs = null;
             int certBagIdx = 0;
             int keyBagIdx = 0;
 
             try
             {
-                for (int i = 0; i < _safeContentsValues.Length; i++)
-                {
-                    string contentType = _safeContentsValues[i].ContentType;
-                    bool process = false;
+                DecryptAndProcessSafeContents(
+                    password,
+                    ref certBags,
+                    ref certBagAttrs,
+                    ref certBagIdx,
+                    ref keyBags,
+                    ref keyBagIdx);
 
-                    if (contentType == null)
-                    {
-                        break;
-                    }
-
-                    // Should enveloped throw here?
-                    if (contentType == Oids.Pkcs7Data)
-                    {
-                        process = true;
-                    }
-                    else if (contentType == Oids.Pkcs7Encrypted)
-                    {
-                        DecryptSafeContents(password, ref _safeContentsValues[i]);
-                        process = true;
-                    }
-
-                    if (process)
-                    {
-                        ProcessSafeContents(
-                            _safeContentsValues[i],
-                            ref certBags,
-                            ref certBagAttrs,
-                            ref certBagIdx,
-                            ref keyBags,
-                            ref keyBagIdx);
-                    }
-                }
-
-                _certs = ArrayPool<CertAndKey>.Shared.Rent(certBagIdx);
-                _certs.AsSpan().Clear();
+                certs = ArrayPool<CertAndKey>.Shared.Rent(certBagIdx);
+                certs.AsSpan().Clear();
 
                 keys = ArrayPool<AsymmetricAlgorithm>.Shared.Rent(keyBagIdx);
                 keys.AsSpan().Clear();
@@ -304,120 +263,28 @@ namespace Internal.Cryptography.Pal
                 publicKeyInfos = ArrayPool<SubjectPublicKeyInfoAsn>.Shared.Rent(keyBagIdx);
                 publicKeyInfos.AsSpan().Clear();
 
-                byte[] spkiBuf = null;
+                ExtractPrivateKeys(password, keyBags, keyBagIdx, keys, publicKeyInfos);
 
-                for (int i = keyBagIdx - 1; i >= 0; i--)
-                {
-                    byte[] publicKeyBytes = null;
+                BuildCertsWithKeys(
+                    certBags,
+                    certBagAttrs,
+                    certs,
+                    certBagIdx,
+                    keyBags,
+                    publicKeyInfos,
+                    keys,
+                    keyBagIdx);
 
-                    try
-                    {
-                        SafeBagAsn keyBag = keyBags[i];
-                        AsymmetricAlgorithm key = LoadKey(keyBag, password);
-                        publicKeyBytes = CryptoPool.Rent(keyBag.BagValue.Length);
-
-                        int pubLength;
-
-                        while (!key.TryExportSubjectPublicKeyInfo(spkiBuf, out pubLength))
-                        {
-                            byte[] toReturn = spkiBuf;
-                            spkiBuf = CryptoPool.Rent((toReturn?.Length ?? 128) * 2);
-
-                            if (toReturn != null)
-                            {
-                                // public key info doesn't need to be cleared
-                                CryptoPool.Return(toReturn, clearSize: 0);
-                            }
-                        }
-
-                        publicKeyInfos[i] = SubjectPublicKeyInfoAsn.Decode(
-                            spkiBuf.AsMemory(0, pubLength),
-                            AsnEncodingRules.DER);
-
-                        keys[i] = key;
-                        publicKeyBytes = null;
-                    }
-                    catch (CryptographicException)
-                    {
-                        // Windows 10 compatibility:
-                        // If anything goes wrong loading this key, just ignore it.
-                        // If no one ended up needing it, no harm/no foul.
-                        // If this has a LocalKeyId and something references it, then it'll fail.
-                    }
-                    finally
-                    {
-                        if (publicKeyBytes != null)
-                        {
-                            // Public key data doesn't need to be cleared.
-                            CryptoPool.Return(publicKeyBytes, clearSize: 0);
-                        }
-                    }
-                }
-
-                int certsCount = certBagIdx;
-
-                for (certBagIdx--; certBagIdx >= 0; certBagIdx--)
-                {
-                    int matchingKeyIdx = -1;
-
-                    foreach (AttributeAsn attr in certBagAttrs[certBagIdx] ?? Array.Empty<AttributeAsn>())
-                    {
-                        if (attr.AttrType.Value == Oids.LocalKeyId && attr.AttrValues.Length > 0)
-                        {
-                            matchingKeyIdx = FindMatchingKey(
-                                keyBags,
-                                keyBagIdx,
-                                Helpers.DecodeOctetStringAsMemory(attr.AttrValues[0]).Span);
-
-                            // Only try the first one.
-                            break;
-                        }
-                    }
-
-                    ReadOnlyMemory<byte> x509Data =
-                        Helpers.DecodeOctetStringAsMemory(certBags[certBagIdx].CertValue);
-
-                    _certs[certBagIdx].Cert = ReadX509Der(x509Data);
-
-                    // If no matching key was found, but there are keys,
-                    // compare SubjectPublicKeyInfo values
-                    if (matchingKeyIdx == -1 && keyBagIdx > 0)
-                    {
-                        ICertificatePalCore cert = _certs[certBagIdx].Cert;
-                        string algorithm = cert.KeyAlgorithm;
-                        byte[] keyParams = cert.KeyAlgorithmParameters;
-                        byte[] keyValue = cert.PublicKeyValue;
-
-                        for (int i = 0; i < keyBagIdx; i++)
-                        {
-                            if (PublicKeyMatches(algorithm, keyParams, keyValue, ref publicKeyInfos[i]))
-                            {
-                                matchingKeyIdx = i;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (matchingKeyIdx != -1)
-                    {
-                        if (keys[matchingKeyIdx] == null)
-                        {
-                            throw new CryptographicException(SR.Cryptography_Pfx_BadKeyReference);
-                        }
-
-                        _certs[certBagIdx].Key = keys[matchingKeyIdx];
-                        keys[matchingKeyIdx] = null;
-                    }
-                }
-
-                _certCount = certsCount;
+                _certCount = certBagIdx;
+                _certs = certs;
             }
             catch
             {
-                if (_certs != null)
+                if (certs != null)
                 {
-                    foreach (CertAndKey certAndKey in _certs)
+                    for (int i = 0; i < certBagIdx; i++)
                     {
+                        CertAndKey certAndKey = certs[i];
                         certAndKey.Dispose();
                     }
                 }
@@ -444,6 +311,193 @@ namespace Internal.Cryptography.Pal
                 ArrayPool<CertBagAsn>.Shared.Return(certBags, clearArray: true);
                 ArrayPool<AttributeAsn[]>.Shared.Return(certBagAttrs, clearArray: true);
                 ArrayPool<SafeBagAsn>.Shared.Return(keyBags, clearArray: true);
+            }
+        }
+
+        private static ContentInfoAsn[] DecodeSafeContents(ReadOnlyMemory<byte> authSafeContents)
+        {
+            // The expected number of ContentInfoAsns to read is 2, one encrypted (contains certs),
+            // and one plain (contains encrypted keys)
+            ContentInfoAsn[] rented = ArrayPool<ContentInfoAsn>.Shared.Rent(10);
+
+            AsnReader outer = new AsnReader(authSafeContents, AsnEncodingRules.BER);
+            AsnReader reader = outer.ReadSequence();
+            outer.ThrowIfNotEmpty();
+            int i = 0;
+
+            while (reader.HasData)
+            {
+                GrowIfNeeded(ref rented, i);
+                ContentInfoAsn.Decode(reader, out rented[i]);
+                i++;
+            }
+
+            rented.AsSpan(i).Clear();
+            return rented;
+        }
+
+        private void DecryptAndProcessSafeContents(
+            ReadOnlySpan<char> password,
+            ref CertBagAsn[] certBags,
+            ref AttributeAsn[][] certBagAttrs,
+            ref int certBagIdx,
+            ref SafeBagAsn[] keyBags,
+            ref int keyBagIdx)
+        {
+            for (int i = 0; i < _safeContentsValues.Length; i++)
+            {
+                string contentType = _safeContentsValues[i].ContentType;
+                bool process = false;
+
+                if (contentType == null)
+                {
+                    break;
+                }
+
+                // Should enveloped throw here?
+                if (contentType == Oids.Pkcs7Data)
+                {
+                    process = true;
+                }
+                else if (contentType == Oids.Pkcs7Encrypted)
+                {
+                    DecryptSafeContents(password, ref _safeContentsValues[i]);
+                    process = true;
+                }
+
+                if (process)
+                {
+                    ProcessSafeContents(
+                        _safeContentsValues[i],
+                        ref certBags,
+                        ref certBagAttrs,
+                        ref certBagIdx,
+                        ref keyBags,
+                        ref keyBagIdx);
+                }
+            }
+        }
+
+        private void ExtractPrivateKeys(
+            ReadOnlySpan<char> password,
+            SafeBagAsn[] keyBags,
+            int keyBagIdx,
+            AsymmetricAlgorithm[] keys,
+            SubjectPublicKeyInfoAsn[] publicKeyInfos)
+        {
+            byte[] spkiBuf = null;
+
+            for (int i = keyBagIdx - 1; i >= 0; i--)
+            {
+                byte[] publicKeyBytes = null;
+
+                try
+                {
+                    SafeBagAsn keyBag = keyBags[i];
+                    AsymmetricAlgorithm key = LoadKey(keyBag, password);
+                    publicKeyBytes = CryptoPool.Rent(keyBag.BagValue.Length);
+
+                    int pubLength;
+
+                    while (!key.TryExportSubjectPublicKeyInfo(spkiBuf, out pubLength))
+                    {
+                        byte[] toReturn = spkiBuf;
+                        spkiBuf = CryptoPool.Rent((toReturn?.Length ?? 128) * 2);
+
+                        if (toReturn != null)
+                        {
+                            // public key info doesn't need to be cleared
+                            CryptoPool.Return(toReturn, clearSize: 0);
+                        }
+                    }
+
+                    publicKeyInfos[i] = SubjectPublicKeyInfoAsn.Decode(
+                        spkiBuf.AsMemory(0, pubLength),
+                        AsnEncodingRules.DER);
+
+                    keys[i] = key;
+                    publicKeyBytes = null;
+                }
+                catch (CryptographicException)
+                {
+                    // Windows 10 compatibility:
+                    // If anything goes wrong loading this key, just ignore it.
+                    // If no one ended up needing it, no harm/no foul.
+                    // If this has a LocalKeyId and something references it, then it'll fail.
+                }
+                finally
+                {
+                    if (publicKeyBytes != null)
+                    {
+                        // Public key data doesn't need to be cleared.
+                        CryptoPool.Return(publicKeyBytes, clearSize: 0);
+                    }
+                }
+            }
+        }
+
+        private void BuildCertsWithKeys(
+            CertBagAsn[] certBags,
+            AttributeAsn[][] certBagAttrs,
+            CertAndKey[] certs,
+            int certBagIdx,
+            SafeBagAsn[] keyBags,
+            SubjectPublicKeyInfoAsn[] publicKeyInfos,
+            AsymmetricAlgorithm[] keys,
+            int keyBagIdx)
+        {
+            for (certBagIdx--; certBagIdx >= 0; certBagIdx--)
+            {
+                int matchingKeyIdx = -1;
+
+                foreach (AttributeAsn attr in certBagAttrs[certBagIdx] ?? Array.Empty<AttributeAsn>())
+                {
+                    if (attr.AttrType.Value == Oids.LocalKeyId && attr.AttrValues.Length > 0)
+                    {
+                        matchingKeyIdx = FindMatchingKey(
+                            keyBags,
+                            keyBagIdx,
+                            Helpers.DecodeOctetStringAsMemory(attr.AttrValues[0]).Span);
+
+                        // Only try the first one.
+                        break;
+                    }
+                }
+
+                ReadOnlyMemory<byte> x509Data =
+                    Helpers.DecodeOctetStringAsMemory(certBags[certBagIdx].CertValue);
+
+                certs[certBagIdx].Cert = ReadX509Der(x509Data);
+
+                // If no matching key was found, but there are keys,
+                // compare SubjectPublicKeyInfo values
+                if (matchingKeyIdx == -1 && keyBagIdx > 0)
+                {
+                    ICertificatePalCore cert = certs[certBagIdx].Cert;
+                    string algorithm = cert.KeyAlgorithm;
+                    byte[] keyParams = cert.KeyAlgorithmParameters;
+                    byte[] keyValue = cert.PublicKeyValue;
+
+                    for (int i = 0; i < keyBagIdx; i++)
+                    {
+                        if (PublicKeyMatches(algorithm, keyParams, keyValue, ref publicKeyInfos[i]))
+                        {
+                            matchingKeyIdx = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (matchingKeyIdx != -1)
+                {
+                    if (keys[matchingKeyIdx] == null)
+                    {
+                        throw new CryptographicException(SR.Cryptography_Pfx_BadKeyReference);
+                    }
+
+                    certs[certBagIdx].Key = keys[matchingKeyIdx];
+                    keys[matchingKeyIdx] = null;
+                }
             }
         }
 
