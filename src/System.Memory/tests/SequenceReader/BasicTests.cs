@@ -200,7 +200,8 @@ namespace System.Memory.Tests.SequenceReader
             Assert.True(reader.TryPeek(7, out T value));
             Assert.Equal(InputData[9], value);
 
-            Assert.False(reader.TryPeek(8, out T _));
+            Assert.False(reader.TryPeek(8, out T defaultValue));
+            Assert.Equal(default, defaultValue);
 
             Assert.Equal(2, reader.Consumed);
             Assert.Equal(8, reader.Remaining);
@@ -217,7 +218,8 @@ namespace System.Memory.Tests.SequenceReader
             Assert.Equal(InputData[1], value);
             Assert.Equal(1, reader.Remaining);
 
-            Assert.False(reader.TryPeek(1, out T _));
+            Assert.False(reader.TryPeek(1, out T defaultValue));
+            Assert.Equal(default, defaultValue);
         }
 
         [Fact]
@@ -227,14 +229,16 @@ namespace System.Memory.Tests.SequenceReader
             Assert.True(reader.TryRead(out T first));
             Assert.Equal(InputData[0], first);
             Assert.Equal(0, reader.Remaining);
-            Assert.False(reader.TryPeek(0, out T _));
+            Assert.False(reader.TryPeek(0, out T defaultValue));
+            Assert.Equal(default, defaultValue);
         }
 
         [Fact]
         public void TryPeekOffset_Empty()
         {
             SequenceReader<T> reader = new SequenceReader<T>(Factory.CreateWithContent(GetInputData(0)));
-            Assert.False(reader.TryPeek(0, out T _));
+            Assert.False(reader.TryPeek(0, out T defaultValue));
+            Assert.Equal(default, defaultValue);
         }
 
 
@@ -273,7 +277,8 @@ namespace System.Memory.Tests.SequenceReader
             Assert.Equal(InputData[9], lastElementSecondSegment);
 
             // 3 + 8 out of bounds
-            Assert.False(reader.TryPeek(8, out T _));
+            Assert.False(reader.TryPeek(8, out T defaultValue));
+            Assert.Equal(default, defaultValue);
 
             Assert.Equal(2, reader.Consumed);
             Assert.Equal(8, reader.Remaining);

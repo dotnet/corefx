@@ -131,14 +131,14 @@ namespace System.Buffers
             if (offset < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
-            // if we've data and offset is not out of bounds
+            // If we've got data and offset is not out of bounds
             if (!_moreData || Remaining <= offset)
             {
                 value = default;
                 return false;
             }
 
-            // if offset doesn't fall inside current segment move to next until we found correct one
+            // If offset doesn't fall inside current segment move to next until we find correct one
             if ((CurrentSpanIndex + offset) <= CurrentSpan.Length - 1)
             {
                 value = CurrentSpan[CurrentSpanIndex + (int)offset];
@@ -146,7 +146,7 @@ namespace System.Buffers
             }
             else
             {
-                long currentOffset = offset - (CurrentSpan.Length - CurrentSpanIndex);
+                long remainingOffset = offset - (CurrentSpan.Length - CurrentSpanIndex);
                 SequencePosition nextPosition = _nextPosition;
                 ReadOnlyMemory<T> currentMemory = default;
 
@@ -155,10 +155,10 @@ namespace System.Buffers
                     // skip empty segment
                     if (currentMemory.Length > 0)
                     {
-                        if (currentOffset > currentMemory.Length - 1)
+                        if (remainingOffset > currentMemory.Length - 1)
                         {
                             // subtract current non consumed data
-                            currentOffset -= currentMemory.Length;
+                            remainingOffset -= currentMemory.Length;
                         }
                         else
                         {
@@ -167,7 +167,7 @@ namespace System.Buffers
                     }
                 }
 
-                value = currentMemory.Span[(int)currentOffset];
+                value = currentMemory.Span[(int)remainingOffset];
                 return true;
             }
         }
