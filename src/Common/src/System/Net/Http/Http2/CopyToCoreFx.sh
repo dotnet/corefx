@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
-if [[ -n "$1" ]]; then
+if [ -n "$1" ]; then
     remote_repo="$1"
 else
     remote_repo="$COREFX_REPO"
 fi
 
-if [[ -z "$remote_repo" ]]; then
+if [ -z "$remote_repo" ]; then
     echo The 'COREFX_REPO' environment variable or command line paramter is not set, aborting.
     exit 1
 fi
