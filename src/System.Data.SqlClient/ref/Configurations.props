@@ -6,7 +6,6 @@
     <BuildConfigurations>
       $(PackageConfigurations)
       netcoreapp;
-      _netfx;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
