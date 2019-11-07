@@ -453,8 +453,8 @@ namespace System.Linq.Tests
             CultureInfo dk = new CultureInfo("da-DK");
             CultureInfo au = new CultureInfo("en-AU");
 
-            StringComparer comparerDk = StringComparer.Create(dk, false);
-            StringComparer comparerAu = StringComparer.Create(au, false);
+            StringComparer comparerDk = StringComparer.Create(dk, ignoreCase: false);
+            StringComparer comparerAu = StringComparer.Create(au, ignoreCase: false);
 
             // we don't provide a defined sorted result set because the Windows culture sorting
             // provides a different result set to the Linux culture sorting. But as we're really just
@@ -500,7 +500,7 @@ namespace System.Linq.Tests
                 using (new ThreadCultureChange(dk)) 
                 {
                     // but "dk" on first MoveNext
-                    var moveNext = s.MoveNext(); 
+                    bool moveNext = s.MoveNext(); 
                     Assert.True(moveNext);
 
                     // ensure changing culture after MoveNext doesn't affect sort
@@ -525,8 +525,8 @@ namespace System.Linq.Tests
             CultureInfo dk = new CultureInfo("da-DK");
             CultureInfo au = new CultureInfo("en-AU");
 
-            StringComparer comparerDk = StringComparer.Create(dk, false);
-            StringComparer comparerAu = StringComparer.Create(au, false);
+            StringComparer comparerDk = StringComparer.Create(dk, ignoreCase: false);
+            StringComparer comparerAu = StringComparer.Create(au, ignoreCase: false);
 
             // we don't provide a defined sorted result set because the Windows culture sorting
             // provides a different result set to the Linux culture sorting. But as we're really just
