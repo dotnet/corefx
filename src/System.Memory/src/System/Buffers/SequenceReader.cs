@@ -152,12 +152,12 @@ namespace System.Buffers
 
                 while (Sequence.TryGet(ref nextPosition, out currentMemory, true))
                 {
-                    // skip empty segment
+                    // Skip empty segment
                     if (currentMemory.Length > 0)
                     {
                         if (remainingOffset > currentMemory.Length - 1)
                         {
-                            // subtract current non consumed data
+                            // Subtract current non consumed data
                             remainingOffset -= currentMemory.Length;
                         }
                         else
