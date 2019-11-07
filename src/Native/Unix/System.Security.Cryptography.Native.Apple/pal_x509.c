@@ -776,6 +776,13 @@ int32_t AppleCryptoNative_X509MoveToKeychain(SecCertificateRef cert,
         if (status == errSecNoSuchKeychain)
         {
             status = AddKeyToKeychain(privateKey, targetKeychain, &importedKey);
+
+            // A duplicate key import will be the only time that status is noErr
+            // and importedKey is NULL.
+            if (status == errSecDuplicateItem)
+            {
+                status = noErr;
+            }
         }
         else
         {
@@ -796,6 +803,11 @@ int32_t AppleCryptoNative_X509MoveToKeychain(SecCertificateRef cert,
     if (status == noErr)
     {
         status = SecCertificateAddToKeychain(cert, targetKeychain);
+
+        if (status == errSecDuplicateItem)
+        {
+            status = noErr;
+        }
     }
 
     if (status == noErr && privateKey != NULL)
@@ -863,7 +875,7 @@ int32_t AppleCryptoNative_X509MoveToKeychain(SecCertificateRef cert,
                 }
             }
 
-            if (status == errSecItemNotFound)
+            if (status == errSecItemNotFound && importedKey != NULL)
             {
                 // An identity can't be found.
                 // That means that the private key does not match the certificate public key.
