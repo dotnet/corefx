@@ -86,7 +86,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             AssertMessageContains("password", ex);
         }
 
-        protected override void ReadUnreadablePfx(byte[] pfxBytes, string bestPassword, int win32Error)
+        protected override void ReadUnreadablePfx(
+            byte[] pfxBytes,
+            string bestPassword,
+            int win32Error,
+            int altWin32Error)
         {
             X509Certificate2Collection coll = new X509Certificate2Collection();
 
@@ -95,7 +99,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Assert.Equal(win32Error, ex.HResult);
+                if (altWin32Error != 0 && ex.HResult != altWin32Error)
+                {
+                    Assert.Equal(win32Error, ex.HResult);
+                }
             }
             else
             {

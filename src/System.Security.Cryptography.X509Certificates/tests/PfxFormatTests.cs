@@ -59,7 +59,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             byte[] pfxBytes,
             string bestPassword,
             // NTE_FAIL
-            int win32Error = -2146893792);
+            int win32Error = -2146893792,
+            int altWin32Error = 0);
 
         [Fact]
         public void EmptyPfx_NoMac()
@@ -177,8 +178,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 if (s_loaderFailsKeysEarly || associateKey || encryptKeySafe)
                 {
-                    ReadUnreadablePfx(pfxBytes, null);
-                    ReadUnreadablePfx(pfxBytes, string.Empty);
+                    // NTE_FAIL, falling back to CRYPT_E_BAD_ENCODE if padding happened to work out.
+                    ReadUnreadablePfx(pfxBytes, null, altWin32Error: -2146885630);
+                    ReadUnreadablePfx(pfxBytes, string.Empty, altWin32Error: -2146885630);
                 }
                 else
                 {
