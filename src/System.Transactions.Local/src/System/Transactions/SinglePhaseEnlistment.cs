@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Transactions
 {
     public class SinglePhaseEnlistment : Enlistment
@@ -30,7 +32,7 @@ namespace System.Transactions
             }
         }
 
-        public void Aborted(Exception e)
+        public void Aborted(Exception? e)
         {
             TransactionsEtwProvider etwLog = TransactionsEtwProvider.Log;
             if (etwLog.IsEnabled())
@@ -97,7 +99,7 @@ namespace System.Transactions
         }
 
 
-        public void InDoubt(Exception e)
+        public void InDoubt(Exception? e)
         {
             TransactionsEtwProvider etwLog = TransactionsEtwProvider.Log;
             if (etwLog.IsEnabled())

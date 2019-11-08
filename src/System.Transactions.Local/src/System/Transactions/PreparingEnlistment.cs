@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Transactions
 {
     public class PreparingEnlistment : Enlistment
@@ -52,7 +54,7 @@ namespace System.Transactions
             }
         }
 
-        public void ForceRollback(Exception e)
+        public void ForceRollback(Exception? e)
         {
             TransactionsEtwProvider etwLog = TransactionsEtwProvider.Log;
             if (etwLog.IsEnabled())

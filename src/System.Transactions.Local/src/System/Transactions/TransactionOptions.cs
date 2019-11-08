@@ -23,7 +23,7 @@ namespace System.Transactions
 
         public override int GetHashCode() => base.GetHashCode();  // Don't have anything better to do.
 
-        public override bool Equals(object obj) => obj is TransactionOptions && Equals((TransactionOptions)obj);
+        public override bool Equals(object? obj) => obj is TransactionOptions && Equals((TransactionOptions)obj);
 
         private bool Equals(TransactionOptions other) =>
             _timeout == other._timeout &&

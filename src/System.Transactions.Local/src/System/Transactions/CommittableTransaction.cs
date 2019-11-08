@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Threading;
 
 namespace System.Transactions
@@ -26,7 +27,7 @@ namespace System.Transactions
         {
         }
 
-        internal CommittableTransaction(IsolationLevel isoLevel, TimeSpan timeout) : base(isoLevel, (InternalTransaction)null)
+        internal CommittableTransaction(IsolationLevel isoLevel, TimeSpan timeout) : base(isoLevel, (InternalTransaction?)null)
         {
             // object to use for synchronization rather than locking on a public object
             _internalTransaction = new InternalTransaction(timeout, this);
@@ -42,7 +43,7 @@ namespace System.Transactions
             }
         }
 
-        public IAsyncResult BeginCommit(AsyncCallback asyncCallback, object asyncState)
+        public IAsyncResult BeginCommit(AsyncCallback? asyncCallback, object? asyncState)
         {
             TransactionsEtwProvider etwLog = TransactionsEtwProvider.Log;
             if (etwLog.IsEnabled())
@@ -188,7 +189,7 @@ namespace System.Transactions
             }
         }
 
-        object IAsyncResult.AsyncState => _internalTransaction._asyncState;
+        object? IAsyncResult.AsyncState => _internalTransaction._asyncState;
 
         bool IAsyncResult.CompletedSynchronously => _completedSynchronously;
 

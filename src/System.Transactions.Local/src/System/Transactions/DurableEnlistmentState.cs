@@ -10,14 +10,14 @@ namespace System.Transactions
     // Base class for all durable enlistment states
     internal abstract class DurableEnlistmentState : EnlistmentState
     {
-        private static DurableEnlistmentActive s_durableEnlistmentActive;
-        private static DurableEnlistmentAborting s_durableEnlistmentAborting;
-        private static DurableEnlistmentCommitting s_durableEnlistmentCommitting;
-        private static DurableEnlistmentDelegated s_durableEnlistmentDelegated;
-        private static DurableEnlistmentEnded s_durableEnlistmentEnded;
+        private static DurableEnlistmentActive? s_durableEnlistmentActive;
+        private static DurableEnlistmentAborting? s_durableEnlistmentAborting;
+        private static DurableEnlistmentCommitting? s_durableEnlistmentCommitting;
+        private static DurableEnlistmentDelegated? s_durableEnlistmentDelegated;
+        private static DurableEnlistmentEnded? s_durableEnlistmentEnded;
 
         // Object for synchronizing access to the entire class( avoiding lock( typeof( ... )) )
-        private static object s_classSyncObject;
+        private static object? s_classSyncObject;
 
         internal static DurableEnlistmentActive DurableEnlistmentActive =>
             LazyInitializer.EnsureInitialized(ref s_durableEnlistmentActive, ref s_classSyncObject, () => new DurableEnlistmentActive());
@@ -116,7 +116,7 @@ namespace System.Transactions
             }
         }
 
-        internal override void Aborted(InternalEnlistment enlistment, Exception e)
+        internal override void Aborted(InternalEnlistment enlistment, Exception? e)
         {
             if (enlistment.Transaction._innerException == null)
             {
@@ -196,7 +196,7 @@ namespace System.Transactions
             enlistment.Transaction.State.ChangeStateTransactionCommitted(enlistment.Transaction);
         }
 
-        internal override void Aborted(InternalEnlistment enlistment, Exception e)
+        internal override void Aborted(InternalEnlistment enlistment, Exception? e)
         {
             // Transition to the ended state
             DurableEnlistmentEnded.EnterState(enlistment);
@@ -205,7 +205,7 @@ namespace System.Transactions
             enlistment.Transaction.State.ChangeStateTransactionAborted(enlistment.Transaction, e);
         }
 
-        internal override void InDoubt(InternalEnlistment enlistment, Exception e)
+        internal override void InDoubt(InternalEnlistment enlistment, Exception? e)
         {
             // Transition to the ended state
             DurableEnlistmentEnded.EnterState(enlistment);
@@ -243,7 +243,7 @@ namespace System.Transactions
             enlistment.Transaction.State.ChangeStatePromotedCommitted(enlistment.Transaction);
         }
 
-        internal override void Aborted(InternalEnlistment enlistment, Exception e)
+        internal override void Aborted(InternalEnlistment enlistment, Exception? e)
         {
             // Transition to the ended state
             DurableEnlistmentEnded.EnterState(enlistment);
@@ -257,7 +257,7 @@ namespace System.Transactions
             enlistment.Transaction.State.ChangeStatePromotedAborted(enlistment.Transaction);
         }
 
-        internal override void InDoubt(InternalEnlistment enlistment, Exception e)
+        internal override void InDoubt(InternalEnlistment enlistment, Exception? e)
         {
             // Transition to the ended state
             DurableEnlistmentEnded.EnterState(enlistment);
@@ -292,7 +292,7 @@ namespace System.Transactions
             // it already knows.  Eat this message.
         }
 
-        internal override void InDoubt(InternalEnlistment enlistment, Exception e)
+        internal override void InDoubt(InternalEnlistment enlistment, Exception? e)
         {
             // Ignore this in case the enlistment gets here before
             // the transaction tells it to do so
