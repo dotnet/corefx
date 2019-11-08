@@ -19,11 +19,10 @@ namespace System.Transactions
         // static elements of TransactionState derived from TransactionState.
         protected TransactionState? _transactionState;
 
-        internal TransactionState State
+        internal TransactionState? State
         {
             get
             {
-                Debug.Assert(_transactionState != null);
                 return _transactionState;
             }
             set { _transactionState = value; }
@@ -169,7 +168,14 @@ namespace System.Transactions
         // Object for synchronizing access to the entire class( avoiding lock( typeof( ... )) )
         private static object? s_classSyncObject;
 
-        internal Guid DistributedTxId => State.get_Identifier(this);
+        internal Guid DistributedTxId
+        {
+            get
+            {
+                Debug.Assert(State != null);
+                return State.get_Identifier(this);
+            }
+        }
 
         private static string? s_instanceIdentifier;
         internal static string InstanceIdentifier =>
@@ -305,6 +311,7 @@ namespace System.Transactions
                     tx._innerException = tx.PromotedTransaction.InnerException;
                 }
 
+                Debug.Assert(tx.State! != null);
                 switch (status)
                 {
                     case TransactionStatus.Committed:

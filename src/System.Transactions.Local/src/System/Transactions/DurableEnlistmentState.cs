@@ -183,6 +183,7 @@ namespace System.Transactions
             // Transition to the ended state
             DurableEnlistmentEnded.EnterState(enlistment);
 
+            Debug.Assert(enlistment.Transaction.State != null);
             // Make the transaction commit
             enlistment.Transaction.State.ChangeStateTransactionCommitted(enlistment.Transaction);
         }
@@ -192,6 +193,7 @@ namespace System.Transactions
             // Transition to the ended state
             DurableEnlistmentEnded.EnterState(enlistment);
 
+            Debug.Assert(enlistment.Transaction.State != null);
             // Make the transaction commit
             enlistment.Transaction.State.ChangeStateTransactionCommitted(enlistment.Transaction);
         }
@@ -201,6 +203,7 @@ namespace System.Transactions
             // Transition to the ended state
             DurableEnlistmentEnded.EnterState(enlistment);
 
+            Debug.Assert(enlistment.Transaction.State != null);
             // Start the transaction aborting
             enlistment.Transaction.State.ChangeStateTransactionAborted(enlistment.Transaction, e);
         }
@@ -215,6 +218,7 @@ namespace System.Transactions
                 enlistment.Transaction._innerException = e;
             }
 
+            Debug.Assert(enlistment.Transaction.State != null);
             // Make the transaction in dobut
             enlistment.Transaction.State.InDoubtFromEnlistment(enlistment.Transaction);
         }
@@ -239,6 +243,7 @@ namespace System.Transactions
             // Transition to the ended state
             DurableEnlistmentEnded.EnterState(enlistment);
 
+            Debug.Assert(enlistment.Transaction.State != null);
             // Change the transaction to committed.
             enlistment.Transaction.State.ChangeStatePromotedCommitted(enlistment.Transaction);
         }
@@ -253,6 +258,7 @@ namespace System.Transactions
                 enlistment.Transaction._innerException = e;
             }
 
+            Debug.Assert(enlistment.Transaction.State != null);
             // Start the transaction aborting
             enlistment.Transaction.State.ChangeStatePromotedAborted(enlistment.Transaction);
         }
@@ -267,6 +273,7 @@ namespace System.Transactions
                 enlistment.Transaction._innerException = e;
             }
 
+            Debug.Assert(enlistment.Transaction.State != null);
             // Tell the transaction that the enlistment is InDoubt.  Note that
             // for a transaction that has been delegated and then promoted there
             // are two chances to get a better answer than indoubt.  So it may be that

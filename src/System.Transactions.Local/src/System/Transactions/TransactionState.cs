@@ -550,7 +550,7 @@ namespace System.Transactions
             tx._promoteState.EnterState(tx);
             // Note that just because we did an EnterState above does not mean that the state will be
             // the same when the next method is called.
-            return tx.State.EnlistDurable(tx, resourceManagerIdentifier, enlistmentNotification, enlistmentOptions, atomicTransaction);
+            return tx.State!.EnlistDurable(tx, resourceManagerIdentifier, enlistmentNotification, enlistmentOptions, atomicTransaction);
         }
 
         internal override Enlistment EnlistDurable(
@@ -566,7 +566,7 @@ namespace System.Transactions
             {
                 // These circumstances cause promotion
                 tx._promoteState.EnterState(tx);
-                return tx.State.EnlistDurable(tx, resourceManagerIdentifier, enlistmentNotification, enlistmentOptions, atomicTransaction);
+                return tx.State!.EnlistDurable(tx, resourceManagerIdentifier, enlistmentNotification, enlistmentOptions, atomicTransaction);
             }
 
             // Create a durable enlistment
@@ -604,7 +604,7 @@ namespace System.Transactions
             tx._promoteState.EnterState(tx);
 
             // Forward this call
-            tx.State.GetObjectData(tx, serializationInfo, context);
+            tx.State!.GetObjectData(tx, serializationInfo, context);
         }
 
         internal override void CompleteBlockingClone(InternalTransaction tx)
@@ -623,7 +623,7 @@ namespace System.Transactions
             if (tx._phase0Volatiles._preparedVolatileEnlistments ==
                 tx._phase0VolatileWaveCount + tx._phase0Volatiles._dependentClones)
             {
-                tx.State.Phase0VolatilePrepareDone(tx);
+                tx.State!.Phase0VolatilePrepareDone(tx);
             }
         }
 
@@ -652,7 +652,7 @@ namespace System.Transactions
         internal override void Promote(InternalTransaction tx)
         {
             tx._promoteState.EnterState(tx);
-            tx.State.CheckForFinishedTransaction(tx);
+            tx.State!.CheckForFinishedTransaction(tx);
         }
 
         internal override byte[] PromotedToken(InternalTransaction tx)
@@ -660,7 +660,7 @@ namespace System.Transactions
             if (tx.promotedToken == null)
             {
                 tx._promoteState.EnterState(tx);
-                tx.State.CheckForFinishedTransaction(tx);
+                tx.State!.CheckForFinishedTransaction(tx);
             }
             Debug.Assert(tx.promotedToken != null);
             return tx.promotedToken;
@@ -820,7 +820,7 @@ namespace System.Transactions
 
         internal override void DisposeRoot(InternalTransaction tx)
         {
-            tx.State.Rollback(tx, null);
+            tx.State!.Rollback(tx, null);
         }
     }
 
@@ -862,7 +862,7 @@ namespace System.Transactions
             )
         {
             tx._promoteState.EnterState(tx);
-            return tx.State.EnlistVolatile(tx, enlistmentNotification, enlistmentOptions, atomicTransaction);
+            return tx.State!.EnlistVolatile(tx, enlistmentNotification, enlistmentOptions, atomicTransaction);
         }
 
         internal override Enlistment EnlistVolatile(
@@ -873,20 +873,20 @@ namespace System.Transactions
             )
         {
             tx._promoteState.EnterState(tx);
-            return tx.State.EnlistVolatile(tx, enlistmentNotification, enlistmentOptions, atomicTransaction);
+            return tx.State!.EnlistVolatile(tx, enlistmentNotification, enlistmentOptions, atomicTransaction);
         }
 
         // Every state derived from the base must override status
         internal override TransactionStatus get_Status(InternalTransaction tx)
         {
             tx._promoteState.EnterState(tx);
-            return tx.State.get_Status(tx);
+            return tx.State!.get_Status(tx);
         }
 
         internal override void AddOutcomeRegistrant(InternalTransaction tx, TransactionCompletedEventHandler? transactionCompletedDelegate)
         {
             tx._promoteState.EnterState(tx);
-            tx.State.AddOutcomeRegistrant(tx, transactionCompletedDelegate);
+            tx.State!.AddOutcomeRegistrant(tx, transactionCompletedDelegate);
         }
 
         internal override bool EnlistPromotableSinglePhase(
@@ -902,14 +902,14 @@ namespace System.Transactions
         internal override void CreateBlockingClone(InternalTransaction tx)
         {
             tx._promoteState.EnterState(tx);
-            tx.State.CreateBlockingClone(tx);
+            tx.State!.CreateBlockingClone(tx);
         }
 
 
         internal override void CreateAbortingClone(InternalTransaction tx)
         {
             tx._promoteState.EnterState(tx);
-            tx.State.CreateAbortingClone(tx);
+            tx.State!.CreateAbortingClone(tx);
         }
     }
 
@@ -939,7 +939,7 @@ namespace System.Transactions
                 for (int i = 0; i < volatileCount; i++)
                 {
                     tx._phase0Volatiles._volatileEnlistments[i]._twoPhaseState!.ChangeStatePreparing(tx._phase0Volatiles._volatileEnlistments[i]);
-                    if (!tx.State.ContinuePhase0Prepares())
+                    if (!tx.State!.ContinuePhase0Prepares())
                     {
                         break;
                     }
@@ -966,7 +966,7 @@ namespace System.Transactions
                 enlistmentOptions, atomicTransaction);
 
             // Calling durable enlist in Phase0 may cause the transaction to promote.  Leverage the promoted
-            tx.State.RestartCommitIfNeeded(tx);
+            tx.State!.RestartCommitIfNeeded(tx);
             return en;
         }
 
@@ -984,7 +984,7 @@ namespace System.Transactions
                 enlistmentOptions, atomicTransaction);
 
             // Calling durable enlist in Phase0 may cause the transaction to promote.  Leverage the promoted
-            tx.State.RestartCommitIfNeeded(tx);
+            tx.State!.RestartCommitIfNeeded(tx);
             return en;
         }
 
@@ -1119,7 +1119,7 @@ namespace System.Transactions
                 for (int i = 0; i < volatileCount; i++)
                 {
                     tx._phase0Volatiles._volatileEnlistments[i]._twoPhaseState!.ChangeStatePreparing(tx._phase0Volatiles._volatileEnlistments[i]);
-                    if (!tx.State.ContinuePhase0Prepares())
+                    if (!tx.State!.ContinuePhase0Prepares())
                     {
                         break;
                     }
@@ -1150,7 +1150,7 @@ namespace System.Transactions
         internal override void Promote(InternalTransaction tx)
         {
             tx._promoteState.EnterState(tx);
-            tx.State.CheckForFinishedTransaction(tx);
+            tx.State!.CheckForFinishedTransaction(tx);
             tx.State.RestartCommitIfNeeded(tx);
         }
 
@@ -1173,7 +1173,7 @@ namespace System.Transactions
             tx._promoteState.EnterState(tx);
 
             // Forward this call
-            tx.State.GetObjectData(tx, serializationInfo, context);
+            tx.State!.GetObjectData(tx, serializationInfo, context);
 
             // Restart the commit process.
             tx.State.RestartCommitIfNeeded(tx);
@@ -1213,7 +1213,7 @@ namespace System.Transactions
                 for (int i = 0; i < tx._phase1Volatiles._volatileEnlistmentCount; i++)
                 {
                     tx._phase1Volatiles._volatileEnlistments[i]._twoPhaseState!.ChangeStatePreparing(tx._phase1Volatiles._volatileEnlistments[i]);
-                    if (!tx.State.ContinuePhase1Prepares())
+                    if (!tx.State!.ContinuePhase1Prepares())
                     {
                         break;
                     }
@@ -1909,7 +1909,7 @@ namespace System.Transactions
                 if (tx._phase0Volatiles._preparedVolatileEnlistments ==
                     tx._phase0VolatileWaveCount + tx._phase0Volatiles._dependentClones)
                 {
-                    tx.State.Phase0VolatilePrepareDone(tx);
+                    tx.State!.Phase0VolatilePrepareDone(tx);
                 }
             }
             else
@@ -2240,7 +2240,7 @@ namespace System.Transactions
                 {
                     // There was an exception trying to create the distributed transaction abort
                     // the local transaction and exit.
-                    tx.State.ChangeStateAbortedDuringPromotion(tx);
+                    tx.State!.ChangeStateAbortedDuringPromotion(tx);
                 }
             }
 
@@ -2328,6 +2328,7 @@ namespace System.Transactions
             // Tell the real transaction that we want a callback for the outcome.
             tx.PromotedTransaction.RealTransaction.InternalTransaction = tx;
 
+            Debug.Assert(tx.State != null);
             // Promote Phase 0 Volatiles
             try
             {
@@ -2419,7 +2420,7 @@ namespace System.Transactions
 
         internal override void DisposeRoot(InternalTransaction tx)
         {
-            tx.State.Rollback(tx, null);
+            tx.State!.Rollback(tx, null);
         }
     }
 
@@ -2554,7 +2555,7 @@ namespace System.Transactions
                     tx._phase0Volatiles._volatileEnlistments[i]._twoPhaseState!.ChangeStatePreparing(
                         tx._phase0Volatiles._volatileEnlistments[i]);
 
-                    if (!tx.State.ContinuePhase0Prepares())
+                    if (!tx.State!.ContinuePhase0Prepares())
                     {
                         break;
                     }
@@ -2625,7 +2626,7 @@ namespace System.Transactions
             // If at this point there are phase1 dependent clones abort the transaction
             if (tx._phase1Volatiles._dependentClones != 0)
             {
-                tx.State.ChangeStateTransactionAborted(tx, null);
+                tx.State!.ChangeStateTransactionAborted(tx, null);
                 return;
             }
 
@@ -2643,7 +2644,7 @@ namespace System.Transactions
                 {
                     tx._phase1Volatiles._volatileEnlistments[i]._twoPhaseState!.ChangeStatePreparing(
                         tx._phase1Volatiles._volatileEnlistments[i]);
-                    if (!tx.State.ContinuePhase1Prepares())
+                    if (!tx.State!.ContinuePhase1Prepares())
                     {
                         break;
                     }
@@ -3334,7 +3335,7 @@ namespace System.Transactions
                 {
                     // There was an exception trying to create the distributed transaction abort
                     // the local transaction and exit.
-                    tx.State.ChangeStateAbortedDuringPromotion(tx);
+                    tx.State!.ChangeStateAbortedDuringPromotion(tx);
                 }
             }
 
@@ -3587,7 +3588,7 @@ namespace System.Transactions
                 if (tx._phase0Volatiles._preparedVolatileEnlistments ==
                     tx._phase0VolatileWaveCount + tx._phase0Volatiles._dependentClones)
                 {
-                    tx.State.Phase0VolatilePrepareDone(tx);
+                    tx.State!.Phase0VolatilePrepareDone(tx);
                 }
             }
         }
@@ -3687,7 +3688,7 @@ namespace System.Transactions
 
         internal override void DisposeRoot(InternalTransaction tx)
         {
-            tx.State.Rollback(tx, null);
+            tx.State!.Rollback(tx, null);
         }
     }
 
@@ -3716,7 +3717,7 @@ namespace System.Transactions
                 for (int i = 0; i < volatileCount; i++)
                 {
                     tx._phase0Volatiles._volatileEnlistments[i]._twoPhaseState!.ChangeStatePreparing(tx._phase0Volatiles._volatileEnlistments[i]);
-                    if (!tx.State.ContinuePhase0Prepares())
+                    if (!tx.State!.ContinuePhase0Prepares())
                     {
                         break;
                     }
@@ -3760,7 +3761,7 @@ namespace System.Transactions
                 for (int i = 0; i < volatileCount; i++)
                 {
                     tx._phase0Volatiles._volatileEnlistments[i]._twoPhaseState!.ChangeStatePreparing(tx._phase0Volatiles._volatileEnlistments[i]);
-                    if (!tx.State.ContinuePhase0Prepares())
+                    if (!tx.State!.ContinuePhase0Prepares())
                     {
                         break;
                     }
@@ -3811,7 +3812,7 @@ namespace System.Transactions
                 for (int i = 0; i < tx._phase1Volatiles._volatileEnlistmentCount; i++)
                 {
                     tx._phase1Volatiles._volatileEnlistments[i]._twoPhaseState!.ChangeStatePreparing(tx._phase1Volatiles._volatileEnlistments[i]);
-                    if (!tx.State.ContinuePhase1Prepares())
+                    if (!tx.State!.ContinuePhase1Prepares())
                     {
                         break;
                     }
@@ -4336,7 +4337,7 @@ namespace System.Transactions
                 if (tx.promotedToken == null)
                 {
                     // There was an exception trying to promote the transaction.
-                    tx.State.ChangeStateAbortedDuringPromotion(tx);
+                    tx.State!.ChangeStateAbortedDuringPromotion(tx);
                 }
             }
         }
@@ -4457,7 +4458,7 @@ namespace System.Transactions
         {
             bool changeToReturnState = true;
 
-            TransactionState returnState = tx.State;
+            TransactionState? returnState = tx.State;
             Debug.Assert(returnState == TransactionStateDelegated ||
                 returnState == TransactionStateDelegatedSubordinate ||
                 returnState == TransactionStateDelegatedNonMSDTC,
@@ -4614,7 +4615,7 @@ namespace System.Transactions
 
             // Now we need to create the durable enlistment that will replace the PSPE enlistment. Use the internalEnlistment of
             // this newly created durable enlistment as the tx.durableEnlistment.
-            enlistment = tx.State.EnlistDurable(tx, resourceManagerIdentifier, enlistmentNotification, enlistmentOptions, atomicTransaction);
+            enlistment = tx.State!.EnlistDurable(tx, resourceManagerIdentifier, enlistmentNotification, enlistmentOptions, atomicTransaction);
             tx._durableEnlistment = enlistment.InternalEnlistment;
 
             return enlistment;

@@ -258,7 +258,7 @@ namespace System.Transactions
             if (Transaction._phase0Volatiles._preparedVolatileEnlistments ==
                 Transaction._phase0VolatileWaveCount + Transaction._phase0Volatiles._dependentClones)
             {
-                Transaction.State.Phase0VolatilePrepareDone(Transaction);
+                Transaction.State!.Phase0VolatilePrepareDone(Transaction);
             }
         }
 
@@ -422,7 +422,7 @@ namespace System.Transactions
                 _transaction._phase1Volatiles._volatileEnlistmentCount +
                 _transaction._phase1Volatiles._dependentClones)
             {
-                _transaction.State.Phase1VolatilePrepareDone(_transaction);
+                _transaction.State!.Phase1VolatilePrepareDone(_transaction);
             }
         }
     }

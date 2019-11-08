@@ -177,6 +177,7 @@ namespace System.Transactions
             // Change enlistment state to aborting
             VolatileEnlistmentEnded.EnterState(enlistment);
 
+            Debug.Assert(enlistment.Transaction.State != null);
             // Start the transaction aborting
             enlistment.Transaction.State.ChangeStateTransactionAborted(enlistment.Transaction, e);
 
@@ -238,19 +239,21 @@ namespace System.Transactions
         internal override void EnlistmentDone(InternalEnlistment enlistment)
         {
             VolatileEnlistmentEnded.EnterState(enlistment);
+            Debug.Assert(enlistment.Transaction.State != null);
             enlistment.Transaction.State.ChangeStateTransactionCommitted(enlistment.Transaction);
         }
 
         internal override void Committed(InternalEnlistment enlistment)
         {
             VolatileEnlistmentEnded.EnterState(enlistment);
+            Debug.Assert(enlistment.Transaction.State != null);
             enlistment.Transaction.State.ChangeStateTransactionCommitted(enlistment.Transaction);
         }
 
         internal override void Aborted(InternalEnlistment enlistment, Exception? e)
         {
             VolatileEnlistmentEnded.EnterState(enlistment);
-
+            Debug.Assert(enlistment.Transaction.State != null);
             enlistment.Transaction.State.ChangeStateTransactionAborted(enlistment.Transaction, e);
         }
 
@@ -262,7 +265,7 @@ namespace System.Transactions
             {
                 enlistment.Transaction._innerException = e;
             }
-
+            Debug.Assert(enlistment.Transaction.State != null);
             enlistment.Transaction.State.InDoubtFromEnlistment(enlistment.Transaction);
         }
     }

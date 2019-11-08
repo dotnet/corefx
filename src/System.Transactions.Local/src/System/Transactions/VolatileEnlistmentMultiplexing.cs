@@ -256,7 +256,7 @@ namespace System.Transactions
 
         protected override void InternalPrepare()
         {
-            Debug.Assert(_promotedEnlistment != null);
+            Debug.Assert(_promotedEnlistment != null && _transaction.State != null);
             try
             {
                 _transaction.State.ChangeStatePromotedPhase0(_transaction);
@@ -283,7 +283,7 @@ namespace System.Transactions
 
         protected override void InternalCommit()
         {
-            Debug.Assert(_promotedEnlistment != null);
+            Debug.Assert(_promotedEnlistment != null && _transaction.State != null);
 
             // Respond immediately to the TM
             _promotedEnlistment.EnlistmentDone();
@@ -293,7 +293,7 @@ namespace System.Transactions
 
         protected override void InternalRollback()
         {
-            Debug.Assert(_promotedEnlistment != null);
+            Debug.Assert(_promotedEnlistment != null && _transaction.State != null);
 
             // Respond immediately to the TM
             _promotedEnlistment.EnlistmentDone();
@@ -303,6 +303,7 @@ namespace System.Transactions
 
         protected override void InternalInDoubt()
         {
+            Debug.Assert(_transaction.State != null);
             _transaction.State.InDoubtFromDtc(_transaction);
         }
 
@@ -346,7 +347,7 @@ namespace System.Transactions
 
         protected override void InternalPrepare()
         {
-            Debug.Assert(_promotedEnlistment != null);
+            Debug.Assert(_promotedEnlistment != null && _transaction.State != null);
             try
             {
                 _transaction.State.ChangeStatePromotedPhase1(_transaction);
@@ -374,7 +375,7 @@ namespace System.Transactions
 
         protected override void InternalCommit()
         {
-            Debug.Assert(_promotedEnlistment != null);
+            Debug.Assert(_promotedEnlistment != null && _transaction.State != null);
 
             // Respond immediately to the TM
             _promotedEnlistment.EnlistmentDone();
@@ -385,7 +386,7 @@ namespace System.Transactions
 
         protected override void InternalRollback()
         {
-            Debug.Assert(_promotedEnlistment != null);
+            Debug.Assert(_promotedEnlistment != null && _transaction.State != null);
 
             // Respond immediately to the TM
             _promotedEnlistment.EnlistmentDone();
@@ -396,6 +397,7 @@ namespace System.Transactions
 
         protected override void InternalInDoubt()
         {
+            Debug.Assert(_transaction.State != null);
             _transaction.State.InDoubtFromDtc(_transaction);
         }
 

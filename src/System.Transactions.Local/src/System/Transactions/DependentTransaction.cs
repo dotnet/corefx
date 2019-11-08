@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 
+using System.Diagnostics;
+
 namespace System.Transactions
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229", Justification = "Serialization not yet supported and will be done using DistributedTransaction")]
@@ -18,6 +20,7 @@ namespace System.Transactions
             _blocking = blocking;
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 if (blocking)
                 {
                     _internalTransaction.State.CreateBlockingClone(_internalTransaction);
@@ -51,6 +54,7 @@ namespace System.Transactions
 
                 _complete = true;
 
+                Debug.Assert(_internalTransaction.State != null);
                 if (_blocking)
                 {
                     _internalTransaction.State.CompleteBlockingClone(_internalTransaction);

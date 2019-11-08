@@ -632,7 +632,7 @@ namespace System.Transactions
                 {
                     lock (tx)
                     {
-                        tx.State.Timeout(tx);
+                        tx.State!.Timeout(tx);
                     }
                 }
             }
@@ -676,7 +676,7 @@ namespace System.Transactions
                 {
                     lock (tx)
                     {
-                        tx.State.Timeout(tx);
+                        tx.State!.Timeout(tx);
                     }
                 }
             }

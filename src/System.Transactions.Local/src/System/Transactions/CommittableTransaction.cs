@@ -64,6 +64,7 @@ namespace System.Transactions
                     throw TransactionException.CreateTransactionCompletedException(DistributedTxId);
                 }
 
+                Debug.Assert(_internalTransaction.State != null);
                 // this.complete will get set to true when the transaction enters a state that is
                 // beyond Phase0.
                 _internalTransaction.State.BeginCommit(_internalTransaction, true, asyncCallback, asyncState);
@@ -100,6 +101,7 @@ namespace System.Transactions
                     throw TransactionException.CreateTransactionCompletedException(DistributedTxId);
                 }
 
+                Debug.Assert(_internalTransaction.State != null);
                 _internalTransaction.State.BeginCommit(_internalTransaction, false, null, null);
 
                 // now that commit has started wait for the monitor on the transaction to know
@@ -135,6 +137,7 @@ namespace System.Transactions
                 return;
             }
 
+            Debug.Assert(_internalTransaction.State != null);
             if (_internalTransaction.State.get_Status(_internalTransaction) == TransactionStatus.Active)
             {
                 lock (_internalTransaction)
@@ -174,6 +177,7 @@ namespace System.Transactions
             {
                 do
                 {
+                    Debug.Assert(_internalTransaction.State != null);
                     if (_internalTransaction.State.IsCompleted(_internalTransaction))
                     {
                         break;
@@ -203,6 +207,7 @@ namespace System.Transactions
                     {
                         if (_internalTransaction._asyncResultEvent == null)
                         {
+                            Debug.Assert(_internalTransaction.State != null);
                             // Demand create an event that is already signaled if the transaction has completed.
                             ManualResetEvent temp = new ManualResetEvent(
                                 _internalTransaction.State.get_Status(_internalTransaction) != TransactionStatus.Active);
@@ -222,6 +227,7 @@ namespace System.Transactions
             {
                 lock (_internalTransaction)
                 {
+                    Debug.Assert(_internalTransaction.State != null);
                     return _internalTransaction.State.get_Status(_internalTransaction) != TransactionStatus.Active;
                 }
             }

@@ -481,6 +481,7 @@ namespace System.Transactions
             byte[] internalPromotedToken;
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 internalPromotedToken = _internalTransaction.State.PromotedToken(_internalTransaction);
             }
 
@@ -527,6 +528,7 @@ namespace System.Transactions
 
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 Enlistment enlistment = _internalTransaction.State.EnlistDurable(_internalTransaction,
                     resourceManagerIdentifier, enlistmentNotification, enlistmentOptions, this);
 
@@ -580,6 +582,7 @@ namespace System.Transactions
 
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 Enlistment enlistment = _internalTransaction.State.EnlistDurable(_internalTransaction,
                     resourceManagerIdentifier, singlePhaseNotification, enlistmentOptions, this);
 
@@ -608,6 +611,7 @@ namespace System.Transactions
 
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 _internalTransaction.State.Rollback(_internalTransaction, null);
             }
 
@@ -634,6 +638,7 @@ namespace System.Transactions
 
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 _internalTransaction.State.Rollback(_internalTransaction, e);
             }
 
@@ -676,6 +681,7 @@ namespace System.Transactions
 
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 Enlistment enlistment = _internalTransaction.State.EnlistVolatile(_internalTransaction,
                     enlistmentNotification, enlistmentOptions, this);
 
@@ -720,6 +726,7 @@ namespace System.Transactions
 
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 Enlistment enlistment = _internalTransaction.State.EnlistVolatile(_internalTransaction,
                     singlePhaseNotification, enlistmentOptions, this);
 
@@ -849,6 +856,7 @@ namespace System.Transactions
 
                 lock (_internalTransaction)
                 {
+                    Debug.Assert(_internalTransaction.State != null);
                     // Register for completion with the inner transaction
                     _internalTransaction.State.AddOutcomeRegistrant(_internalTransaction, value);
                 }
@@ -1008,6 +1016,7 @@ namespace System.Transactions
 
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 succeeded = _internalTransaction.State.EnlistPromotableSinglePhase(_internalTransaction, promotableSinglePhaseNotification, this, promoterType);
             }
 
@@ -1062,6 +1071,7 @@ namespace System.Transactions
 
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 Enlistment enlistment = _internalTransaction.State.PromoteAndEnlistDurable(_internalTransaction,
                     resourceManagerIdentifier, promotableNotification, enlistmentNotification, enlistmentOptions, this);
 
@@ -1105,6 +1115,7 @@ namespace System.Transactions
 
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 _internalTransaction.State.SetDistributedTransactionId(_internalTransaction,
                     promotableNotification,
                     distributedTransactionIdentifier);
@@ -1121,6 +1132,7 @@ namespace System.Transactions
         {
             lock (_internalTransaction)
             {
+                Debug.Assert(_internalTransaction.State != null);
                 // This method is only called when we expect to be promoting to MSDTC.
                 _internalTransaction.ThrowIfPromoterTypeIsNotMSDTC();
                 _internalTransaction.State.Promote(_internalTransaction);
