@@ -1324,6 +1324,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
             if (errno != EINVAL && errno != ENOSYS)
             {
                 tmpErrno = errno;
+                while ((ret = flock(outFd, LOCK_UN)) < 0 && errno == EINTR);
                 while ((ret = close(outFd)) < 0 && errno == EINTR);
                 errno = tmpErrno;
                 return -1;
