@@ -1241,6 +1241,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
                 return -1;
             }
 
+            while ((ret = flock(outFd, LOCK_UN)) < 0 && errno == EINTR);
             while ((ret = close(outFd)) < 0 && errno == EINTR);
 
             while ((ret = unlink(destPath)) < 0 && errno == EINTR);
@@ -1351,6 +1352,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     if (!copied && CopyFile_ReadWrite(inFd, outFd) != 0)
     {
         tmpErrno = errno;
+        while ((ret = flock(outFd, LOCK_UN)) < 0 && errno == EINTR);
         while ((ret = close(outFd)) < 0 && errno == EINTR);
         errno = tmpErrno;
         return -1;
@@ -1378,6 +1380,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
 #endif
 
     tmpErrno = errno;
+    while ((ret = flock(outFd, LOCK_UN)) < 0 && errno == EINTR);
     while ((ret = close(outFd)) < 0 && errno == EINTR);
     errno = tmpErrno;
     return 0;
