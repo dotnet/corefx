@@ -2,14 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Threading.Tests
@@ -32,7 +29,7 @@ namespace System.Threading.Tests
         [InlineData("")]
         public void EventWaitHandle_Create_NameMultipleNew(string name)
         {
-            var security = GetBasicEventWaitHandleSecurity();
+            EventWaitHandleSecurity security = GetBasicEventWaitHandleSecurity();
 
             using EventWaitHandle handle1 = CreateAndVerifyEventWaitHandle(
                 initialState: true,
@@ -53,7 +50,7 @@ namespace System.Threading.Tests
         public void EventWaitHandle_Create_CreateNewExisting()
         {
             string name = GetRandomName();
-            var security = GetBasicEventWaitHandleSecurity();
+            EventWaitHandleSecurity security = GetBasicEventWaitHandleSecurity();
 
             using EventWaitHandle handle1 = CreateAndVerifyEventWaitHandle(
                 initialState: true,
@@ -73,11 +70,11 @@ namespace System.Threading.Tests
         [Fact]
         public void EventWaitHandle_Create_GlobalPrefixNameNotFound()
         {
+            string prefixedName = @"GLOBAL\" + GetRandomName();
+
             Assert.Throws<DirectoryNotFoundException>(() =>
             {
-                string prefixedName = @"GLOBAL\" + GetRandomName();
-
-                CreateAndVerifyEventWaitHandle(
+                CreateEventWaitHandle(
                     initialState: true,
                     mode: EventResetMode.AutoReset,
                     prefixedName,
@@ -96,14 +93,14 @@ namespace System.Threading.Tests
         public void EventWaitHandle_Create_BeyondMaxPathLength()
         {
             string name = new string('x', Interop.Kernel32.MAX_PATH + 100);
-            var security = GetBasicEventWaitHandleSecurity();
-            var mode = EventResetMode.AutoReset;
+            EventWaitHandleSecurity security = GetBasicEventWaitHandleSecurity();
+            EventResetMode mode = EventResetMode.AutoReset;
 
             if (PlatformDetection.IsFullFramework)
             {
                 Assert.Throws<ArgumentException>(() =>
                 {
-                    CreateAndVerifyEventWaitHandle(
+                    CreateEventWaitHandle(
                         initialState: true,
                         mode,
                         name,
@@ -136,7 +133,7 @@ namespace System.Threading.Tests
             {
                 Assert.Throws<ArgumentException>(() =>
                 {
-                    CreateAndVerifyEventWaitHandle(
+                    CreateEventWaitHandle(
                         initialState: true,
                         mode,
                         GetRandomName(),
@@ -148,7 +145,7 @@ namespace System.Threading.Tests
             {
                 Assert.Throws<ArgumentOutOfRangeException>("mode", () =>
                 {
-                    CreateAndVerifyEventWaitHandle(
+                    CreateEventWaitHandle(
                         initialState: true,
                         mode,
                         GetRandomName(),
@@ -158,42 +155,18 @@ namespace System.Threading.Tests
             }
         }
 
+        public static IEnumerable<object[]> EventWaitHandle_Create_SpecificParameters_MemberData() =>
+            from initialState in new[] { true, false }
+            from mode in new[] { EventResetMode.AutoReset, EventResetMode.ManualReset }
+            from rights in new[] { EventWaitHandleRights.FullControl, EventWaitHandleRights.Synchronize, EventWaitHandleRights.Modify, EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize }
+            from accessControl in new[] { AccessControlType.Allow, AccessControlType.Deny }
+            select new object[] { initialState, mode, rights, accessControl };
+
         [Theory]
-        [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.FullControl, AccessControlType.Allow)]
-        [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.FullControl, AccessControlType.Deny)]
-        [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
-        [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
-        [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.Modify,      AccessControlType.Allow)]
-        [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.Modify,      AccessControlType.Deny)]
-        [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
-        [InlineData(true, EventResetMode.AutoReset,    EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
-        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.FullControl, AccessControlType.Allow)]
-        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.FullControl, AccessControlType.Deny)]
-        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
-        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
-        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Modify,      AccessControlType.Allow)]
-        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Modify,      AccessControlType.Deny)]
-        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
-        [InlineData(true, EventResetMode.ManualReset,  EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
-        [InlineData(false, EventResetMode.AutoReset,   EventWaitHandleRights.FullControl, AccessControlType.Allow)]
-        [InlineData(false, EventResetMode.AutoReset,   EventWaitHandleRights.FullControl, AccessControlType.Deny)]
-        [InlineData(false, EventResetMode.AutoReset,   EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
-        [InlineData(false, EventResetMode.AutoReset,   EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
-        [InlineData(false, EventResetMode.AutoReset,   EventWaitHandleRights.Modify,      AccessControlType.Allow)]
-        [InlineData(false, EventResetMode.AutoReset,   EventWaitHandleRights.Modify,      AccessControlType.Deny)]
-        [InlineData(false, EventResetMode.AutoReset,   EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
-        [InlineData(false, EventResetMode.AutoReset,   EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
-        [InlineData(false, EventResetMode.ManualReset, EventWaitHandleRights.FullControl, AccessControlType.Allow)]
-        [InlineData(false, EventResetMode.ManualReset, EventWaitHandleRights.FullControl, AccessControlType.Deny)]
-        [InlineData(false, EventResetMode.ManualReset, EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
-        [InlineData(false, EventResetMode.ManualReset, EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
-        [InlineData(false, EventResetMode.ManualReset, EventWaitHandleRights.Modify,      AccessControlType.Allow)]
-        [InlineData(false, EventResetMode.ManualReset, EventWaitHandleRights.Modify,      AccessControlType.Deny)]
-        [InlineData(false, EventResetMode.ManualReset, EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Allow)]
-        [InlineData(false, EventResetMode.ManualReset, EventWaitHandleRights.Modify | EventWaitHandleRights.Synchronize, AccessControlType.Deny)]
+        [MemberData(nameof(EventWaitHandle_Create_SpecificParameters_MemberData))]
         public void EventWaitHandle_Create_SpecificParameters(bool initialState, EventResetMode mode, EventWaitHandleRights rights, AccessControlType accessControl)
         {
-            var security = GetEventWaitHandleSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
+            EventWaitHandleSecurity security = GetEventWaitHandleSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
             CreateAndVerifyEventWaitHandle(
                 initialState,
                 mode,
@@ -213,18 +186,23 @@ namespace System.Threading.Tests
 
         private EventWaitHandleSecurity GetEventWaitHandleSecurity(WellKnownSidType sid, EventWaitHandleRights rights, AccessControlType accessControl)
         {
-            var security = new EventWaitHandleSecurity();
+            EventWaitHandleSecurity security = new EventWaitHandleSecurity();
             SecurityIdentifier identity = new SecurityIdentifier(sid, null);
-            var accessRule = new EventWaitHandleAccessRule(identity, rights, accessControl);
+            EventWaitHandleAccessRule accessRule = new EventWaitHandleAccessRule(identity, rights, accessControl);
             security.AddAccessRule(accessRule);
             return security;
+        }
+        private EventWaitHandle CreateEventWaitHandle(bool initialState, EventResetMode mode, string name, EventWaitHandleSecurity expectedSecurity, bool expectedCreatedNew)
+        {
+            EventWaitHandle handle = EventWaitHandleAcl.Create(initialState, mode, name, out bool createdNew, expectedSecurity);
+            Assert.NotNull(handle);
+            Assert.Equal(expectedCreatedNew, createdNew);
+            return handle;
         }
 
         private EventWaitHandle CreateAndVerifyEventWaitHandle(bool initialState, EventResetMode mode, string name, EventWaitHandleSecurity expectedSecurity, bool expectedCreatedNew)
         {
-            EventWaitHandle eventHandle = EventWaitHandleAcl.Create(initialState, mode, name, out bool createdNew, expectedSecurity);
-            Assert.NotNull(eventHandle);
-            Assert.Equal(expectedCreatedNew, createdNew);
+            EventWaitHandle eventHandle = CreateEventWaitHandle(initialState, mode, name, expectedSecurity, expectedCreatedNew);
 
             if (expectedSecurity != null)
             {
