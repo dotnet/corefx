@@ -74,7 +74,7 @@
       <Link>Common\Interop\Unix\Interop.PathConf.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsLinux)' == 'true' OR '$(TargetsFreeBSD)' == 'true'">
+  <ItemGroup Condition=" '$(TargetsLinux)' == 'true' or '$(TargetsFreeBSD)' == 'true'">
     <Compile Include="System\IO\FileSystemWatcher.Linux.cs" />
     <Compile Include="$(CommonPath)\Interop\Linux\System.Native\Interop.INotify.cs">
       <Link>Common\Interop\Linux\Interop.inotify.cs</Link>
