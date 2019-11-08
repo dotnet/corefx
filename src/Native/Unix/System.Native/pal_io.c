@@ -1236,17 +1236,17 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
             while ((ret = flock(outFd, LOCK_EX | LOCK_NB)) < 0 && errno == EINTR);
             if (ret < 0 && errno == EWOULDBLOCK)
             {
-                close(outFd);
+                while ((ret = close(outFd)) < 0 && errno == EINTR);
                 errno = EWOULDBLOCK;
                 return -1;
             }
 
-            close(outFd);
+            while ((ret = close(outFd)) < 0 && errno == EINTR);
 
             while ((ret = unlink(destPath)) < 0 && errno == EINTR);
-            if (ret != 0)
+            if (ret < 0)
             {
-                return ret;
+                return -1;
             }
         }
         else if (errno == EACCES || errno == EPERM)
