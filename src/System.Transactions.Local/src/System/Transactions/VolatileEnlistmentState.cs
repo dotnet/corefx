@@ -253,6 +253,7 @@ namespace System.Transactions
         internal override void Aborted(InternalEnlistment enlistment, Exception? e)
         {
             VolatileEnlistmentEnded.EnterState(enlistment);
+
             Debug.Assert(enlistment.Transaction.State != null);
             enlistment.Transaction.State.ChangeStateTransactionAborted(enlistment.Transaction, e);
         }
@@ -265,6 +266,7 @@ namespace System.Transactions
             {
                 enlistment.Transaction._innerException = e;
             }
+
             Debug.Assert(enlistment.Transaction.State != null);
             enlistment.Transaction.State.InDoubtFromEnlistment(enlistment.Transaction);
         }

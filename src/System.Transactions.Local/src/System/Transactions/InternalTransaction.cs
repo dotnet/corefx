@@ -21,10 +21,7 @@ namespace System.Transactions
 
         internal TransactionState? State
         {
-            get
-            {
-                return _transactionState;
-            }
+            get { return _transactionState; }
             set { _transactionState = value; }
         }
 
@@ -168,14 +165,7 @@ namespace System.Transactions
         // Object for synchronizing access to the entire class( avoiding lock( typeof( ... )) )
         private static object? s_classSyncObject;
 
-        internal Guid DistributedTxId
-        {
-            get
-            {
-                Debug.Assert(State != null);
-                return State.get_Identifier(this);
-            }
-        }
+        internal Guid DistributedTxId => State!.get_Identifier(this);
 
         private static string? s_instanceIdentifier;
         internal static string InstanceIdentifier =>
