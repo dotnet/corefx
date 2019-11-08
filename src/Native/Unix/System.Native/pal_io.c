@@ -1249,7 +1249,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
                 return -1;
             }
         }
-        else if (errno == EACCES || errno == EPERM)
+        else if (errno != ENOENT)
         {
             return -1;
         }
