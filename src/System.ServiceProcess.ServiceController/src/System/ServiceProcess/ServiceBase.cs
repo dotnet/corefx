@@ -308,10 +308,10 @@ namespace System.ServiceProcess
         /// </devdoc>
         protected override void Dispose(bool disposing)
         {
-            if (_handleName != (IntPtr)0)
+            IntPtr handleName = Interlocked.Exchange(ref _handleName, IntPtr.Zero);
+            if (handleName != IntPtr.Zero)
             {
-                Marshal.FreeHGlobal(_handleName);
-                _handleName = (IntPtr)0;
+                Marshal.FreeHGlobal(handleName);
             }
 
             _nameFrozen = false;
