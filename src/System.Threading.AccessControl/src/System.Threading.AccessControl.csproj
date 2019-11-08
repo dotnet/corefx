@@ -23,6 +23,7 @@
     <Compile Include="System\Security\AccessControl\MutexSecurity.cs" />
     <Compile Include="System\Security\AccessControl\EventWaitHandleSecurity.cs" />
     <Compile Include="System\Security\AccessControl\SemaphoreSecurity.cs" />
+    <Compile Include="System\Threading\EventWaitHandleAcl.cs" />
     <Compile Include="System\Threading\MutexAcl.cs" />
     <Compile Include="System\Threading\SemaphoreAcl.cs" />
     <Compile Include="System\Threading\ThreadingAclExtensions.cs" />
@@ -30,6 +31,7 @@
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
+    <Compile Include="System\Threading\EventWaitHandleAcl.net46.cs" />
     <Compile Include="System\Threading\MutexAcl.net46.cs" />
     <Compile Include="System\Threading\SemaphoreAcl.net46.cs" />
     <Compile Include="System\Threading\ThreadingAclExtensions.net46.cs" />
