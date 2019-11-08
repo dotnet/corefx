@@ -5,15 +5,15 @@
     <SkipValidatePackage>true</SkipValidatePackage>
   </PropertyGroup>
   <ItemGroup>
-    <IndexedDependency Include="runtime.win-x64.runtime.native.System.Data.SqlClient.sni">
+    <Dependency Include="runtime.win-x64.runtime.native.System.Data.SqlClient.sni">
       <Version>$(RuntimeWinX64RuntimeNativeSystemDataSqlClientSniVersion)</Version>
-    </IndexedDependency>
-    <IndexedDependency Include="runtime.win-x86.runtime.native.System.Data.SqlClient.sni">
+    </Dependency>
+    <Dependency Include="runtime.win-x86.runtime.native.System.Data.SqlClient.sni">
       <Version>$(RuntimeWinX64RuntimeNativeSystemDataSqlClientSniVersion)</Version>
-    </IndexedDependency>
-    <IndexedDependency Include="runtime.win-arm64.runtime.native.System.Data.SqlClient.sni">
+    </Dependency>
+    <Dependency Include="runtime.win-arm64.runtime.native.System.Data.SqlClient.sni">
       <Version>$(RuntimeWinX64RuntimeNativeSystemDataSqlClientSniVersion)</Version>
-    </IndexedDependency>
+    </Dependency>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>
