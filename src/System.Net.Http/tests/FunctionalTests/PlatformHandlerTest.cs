@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public class PlatformHandler_HttpClientHandler : HttpClientHandlerTestBase
     {
@@ -62,7 +62,7 @@ namespace System.Net.Http.Functional.Tests
         }
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_Asynchrony_Test : HttpClientHandler_Asynchrony_Test
     {
@@ -70,7 +70,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpProtocolTests : HttpProtocolTests
     {
@@ -78,7 +78,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpProtocolTests_Dribble : HttpProtocolTests_Dribble
     {
@@ -86,7 +86,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_DiagnosticsTest : DiagnosticsTest
     {
@@ -94,7 +94,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClient_SelectedSites_Test : HttpClient_SelectedSites_Test
     {
@@ -102,7 +102,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientEKUTest : HttpClientEKUTest
     {
@@ -111,7 +111,7 @@ namespace System.Net.Http.Functional.Tests
     }
 
 #if NETCOREAPP
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_Decompression_Tests : HttpClientHandler_Decompression_Test
     {
@@ -119,7 +119,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_DangerousAcceptAllCertificatesValidator_Test : HttpClientHandler_DangerousAcceptAllCertificatesValidator_Test
     {
@@ -128,7 +128,7 @@ namespace System.Net.Http.Functional.Tests
     }
 #endif
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_ClientCertificates_Test : HttpClientHandler_ClientCertificates_Test
     {
@@ -136,7 +136,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_DefaultProxyCredentials_Test : HttpClientHandler_DefaultProxyCredentials_Test
     {
@@ -144,7 +144,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_MaxConnectionsPerServer_Test : HttpClientHandler_MaxConnectionsPerServer_Test
     {
@@ -152,7 +152,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_ServerCertificates_Test : HttpClientHandler_ServerCertificates_Test
     {
@@ -160,7 +160,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_PostScenarioTest : PostScenarioTest
     {
@@ -168,7 +168,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_ResponseStreamTest : ResponseStreamTest
     {
@@ -176,7 +176,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_SslProtocols_Test : HttpClientHandler_SslProtocols_Test
     {
@@ -184,7 +184,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_Proxy_Test : HttpClientHandler_Proxy_Test
     {
@@ -192,7 +192,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_SchSendAuxRecordHttpTest : SchSendAuxRecordHttpTest
     {
@@ -200,7 +200,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandlerTest : HttpClientHandlerTest
     {
@@ -208,7 +208,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandlerTest_AutoRedirect : HttpClientHandlerTest_AutoRedirect
     {
@@ -216,7 +216,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_DefaultCredentialsTest : DefaultCredentialsTest
     {
@@ -224,7 +224,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_IdnaProtocolTests : IdnaProtocolTests
     {
@@ -234,7 +234,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool SupportsIdna => !PlatformDetection.IsWindows7;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpRetryProtocolTests : HttpRetryProtocolTests
     {
@@ -242,7 +242,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandlerTest_Cookies : HttpClientHandlerTest_Cookies
     {
@@ -250,7 +250,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandlerTest_Cookies_Http11 : HttpClientHandlerTest_Cookies_Http11
     {
@@ -258,7 +258,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientHandler_MaxResponseHeadersLength_Test
     {
@@ -266,7 +266,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_Cancellation_Test : HttpClientHandler_Cancellation_Test
     {
@@ -274,7 +274,7 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => false;
     }
 
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandler_HttpClientHandler_Authentication_Test : HttpClientHandler_Authentication_Test
     {
@@ -284,14 +284,14 @@ namespace System.Net.Http.Functional.Tests
 
     // Enable this to run HTTP2 tests on platform handler
 #if PLATFORM_HANDLER_HTTP2_TESTS
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class PlatformHandlerTest_Http2 : HttpClientHandlerTest_Http2
     {
         protected override bool UseSocketsHttpHandler => false;
     }
     
-    // Test only WinHttpHandler since the curl handler was remove
+    // Test only WinHttpHandler since the CurlHandler was removed
     [PlatformSpecific(TestPlatforms.Windows)]
     [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.SupportsAlpn))]
     public sealed class PlatformHandlerTest_Cookies_Http2 : HttpClientHandlerTest_Cookies
