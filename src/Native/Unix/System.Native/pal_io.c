@@ -1226,14 +1226,14 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
         // check permissions first to ensure we don't try to unlink read-only file. Also,
         // we need to check the advisory locks to align with the behavior of regular
         // code path.
-        openFlags = O_WRONLY | O_TRUNC | O_CREAT | O_EXCL;
+        openFlags = O_WRONLY;
 #if HAVE_O_CLOEXEC
         openFlags |= O_CLOEXEC;
 #endif
         while ((outFd = open(destPath, openFlags, sourceStat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))) < 0 && errno == EINTR);
         if (outFd >= 0)
         {
-            while ((ret = flock(outFd, LOCK_EX | LOCK_NB) < 0) && errno == EINTR);
+            while ((ret = flock(outFd, LOCK_EX | LOCK_NB)) < 0 && errno == EINTR);
             if (ret < 0 && errno == EWOULDBLOCK)
             {
                 close(outFd);
@@ -1271,7 +1271,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     (void)srcPath;
 #endif
 
-    openFlags = O_WRONLY | O_TRUNC | O_CREAT | (overwrite ? 0 : O_EXCL);
+    openFlags = O_WRONLY | O_CREAT | (overwrite ? 0 : O_EXCL);
 #if HAVE_O_CLOEXEC
     openFlags |= O_CLOEXEC;
 #endif
@@ -1284,11 +1284,20 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     fcntl(outFd, F_SETFD, FD_CLOEXEC);
 #endif
 
-    while ((ret = flock(outFd, LOCK_EX | LOCK_NB) < 0) && errno == EINTR);
+    while ((ret = flock(outFd, LOCK_EX | LOCK_NB)) < 0 && errno == EINTR);
     if (ret < 0 && errno == EWOULDBLOCK)
     {
         close(outFd);
         errno = EWOULDBLOCK;
+        return -1;
+    }
+
+    while ((ret = ftruncate(outFd, 0)) < 0 && errno == EINTR);
+    if (ret < 0)
+    {
+        tmpErrno = errno;
+        while ((ret = close(outFd)) < 0 && errno == EINTR);
+        errno = tmpErrno;
         return -1;
     }
 
@@ -1314,7 +1323,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
             if (errno != EINVAL && errno != ENOSYS)
             {
                 tmpErrno = errno;
-                close(outFd);
+                while ((ret = close(outFd)) < 0 && errno == EINTR);
                 errno = tmpErrno;
                 return -1;
             }
@@ -1342,7 +1351,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     if (!copied && CopyFile_ReadWrite(inFd, outFd) != 0)
     {
         tmpErrno = errno;
-        close(outFd);
+        while ((ret = close(outFd)) < 0 && errno == EINTR);
         errno = tmpErrno;
         return -1;
     }
@@ -1369,7 +1378,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
 #endif
 
     tmpErrno = errno;
-    close(outFd);
+    while ((ret = close(outFd)) < 0 && errno == EINTR);
     errno = tmpErrno;
     return 0;
 }
