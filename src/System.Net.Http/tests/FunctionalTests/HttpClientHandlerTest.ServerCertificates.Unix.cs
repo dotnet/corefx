@@ -18,34 +18,6 @@ namespace System.Net.Http.Functional.Tests
 {
     public abstract partial class HttpClientHandler_ServerCertificates_Test
     {
-        private static bool ShouldSuppressRevocationException
-        {
-            get
-            {
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    return false;
-                }
-
-                // If a run on a clean macOS ever fails we need to consider that "false"
-                // for CheckCertificateRevocationList is actually "use a system default" now,
-                // and may require changing how this option is exposed. Considering the variety of
-                // systems this should probably be complex like
-                // enum RevocationCheckingOption {
-                //     // Use it if able
-                //     BestPlatformSecurity = 0,
-                //     // Don't use it, if that's an option.
-                //     BestPlatformPerformance,
-                //     // Required
-                //     MustCheck,
-                //     // Prohibited
-                //     MustNotCheck,
-                // }
-
-                return false;
-            }
-        }
-
         internal bool BackendSupportsCustomCertificateHandling
         {
             get

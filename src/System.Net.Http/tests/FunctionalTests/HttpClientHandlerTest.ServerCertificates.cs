@@ -321,7 +321,7 @@ namespace System.Net.Http.Functional.Tests
             }
             catch (HttpRequestException)
             {
-                if (UseSocketsHttpHandler || !ShouldSuppressRevocationException)
+                if (UseSocketsHttpHandler)
                     throw;
             }
         }

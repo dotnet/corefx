@@ -6,8 +6,6 @@ namespace System.Net.Http.Functional.Tests
 {
     public abstract partial class HttpClientHandler_ServerCertificates_Test
     {
-        private static bool ShouldSuppressRevocationException => false;
-
         internal bool BackendSupportsCustomCertificateHandling => true;
     }
 }
