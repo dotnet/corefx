@@ -129,9 +129,6 @@
   <data name="Argument_CannotBeNullOrEmpty" xml:space="preserve">
     <value>Argument cannot be null or empty.</value>
   </data>
-  <data name="Argument_CannotBeNullOrEmpty" xml:space="preserve">
-    <value>Argument cannot be null or empty.</value>
-  </data>
   <data name="Argument_WaitHandleNameTooLong" xml:space="preserve">
     <value>The length of the name exceeds the maximum limit.</value>
   </data>
