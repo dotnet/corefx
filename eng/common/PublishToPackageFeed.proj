@@ -26,7 +26,7 @@
     <Error Condition="'$(ArtifactsCategory)' == ''" Text="ArtifactsCategory: The artifacts' category produced by the build wasn't provided." />
     <Error Condition="'$(AccountKeyToStaticFeed)' == ''" Text="AccountKeyToStaticFeed: Account key for target feed wasn't provided." />
     <Error Condition="'$(ManifestsBasePath)' == ''" Text="Full path to asset manifests directory wasn't provided." />
-    <Error Condition="'$(BlobBasePath)' == '' and '$(PackageBasePath)' == ''" Text="A valid full path to BlobBasePath of PackageBasePath is required." />
+    <Error Condition="'$(BlobBasePath)' == '' AND '$(PackageBasePath)' == ''" Text="A valid full path to BlobBasePath of PackageBasePath is required." />
 
     <ItemGroup>
       <!-- Include all manifests found in the manifest folder. -->
