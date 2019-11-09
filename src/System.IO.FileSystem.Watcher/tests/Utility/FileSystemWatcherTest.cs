@@ -58,17 +58,32 @@ namespace System.IO.Tests
         /// Watches the Created WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Created event is thrown by the watcher.
         /// </summary>
-        public static (AutoResetEvent EventOccured, FileSystemEventHandler Handler) WatchCreated(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent EventOccured, FileSystemEventHandler Handler) WatchCreated(FileSystemWatcher watcher, string[] expectedPaths = null, ITestOutputHelper _output = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
             FileSystemEventHandler handler = (o, e) =>
             {
+                if (e.ChangeType != WatcherChangeTypes.Created)
+                {
+                    _output?.WriteLine("Unexpected event {0} while waiting for {1}", e.ChangeType, WatcherChangeTypes.Created);
+                    Assert.Equal(WatcherChangeTypes.Created, e.ChangeType);
+                }
+
                 Assert.Equal(WatcherChangeTypes.Created, e.ChangeType);
                 if (expectedPaths != null)
                 {
-                    Assert.Contains(Path.GetFullPath(e.FullPath), expectedPaths);
+                    try
+                    {
+                        Assert.Contains(Path.GetFullPath(e.FullPath), expectedPaths);
+                    }
+                    catch (Exception ex)
+                    {
+                        _output?.WriteLine(ex.ToString());
+                        throw;
+                    }
                 }
+
                 eventOccurred.Set();
             };
 
@@ -93,7 +108,8 @@ namespace System.IO.Tests
 
                 if (expectedPaths != null)
                 {
-                    try {
+                    try
+                    {
                         Assert.Contains(Path.GetFullPath(e.FullPath), expectedPaths);
                     }
                     catch (Exception ex)
