@@ -599,6 +599,8 @@ namespace System.ServiceProcess
             {
                 bool multipleServices = services.Length > 1;
 
+                // The members of the last entry in the table must have NULL values to designate the end of the table.
+                // Leave the last element in the entries span to be zeroed out.
                 for (int index = 0; index < services.Length; ++index)
                 {
                     ServiceBase service = services[index];
@@ -606,9 +608,6 @@ namespace System.ServiceProcess
                     // This method allocates on unmanaged heap; Make sure that the contents are freed after use.
                     entries[index] = service.GetEntry();
                 }
-
-                // The members of the last entry in the table must have NULL values to designate the end of the table.
-                entries[entries.Length - 1] = default;
 
                 // While the service is running, this function will never return. It will return when the service
                 // is stopped.
@@ -647,8 +646,7 @@ namespace System.ServiceProcess
             finally
             {
                 // Free the pointer to the name of the service on the unmanaged heap.
-                // We don't need to free the last element in the unmanaged array since the last element have null values (denotes the end of the table).
-                for (int i = 0; i < services.Length; i++)
+                for (int i = 0; i < entries.Length; i++)
                 {
                     Marshal.FreeHGlobal(entries[i].name);
                 }
