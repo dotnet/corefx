@@ -8,7 +8,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Internal.Runtime.CompilerServices;
 
 namespace System
@@ -17,7 +16,7 @@ namespace System
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public abstract partial class Array : ICloneable, IList, IStructuralComparable, IStructuralEquatable
     {
-        // We impose limits on maximum array lenght in each dimension to allow efficient
+        // We impose limits on maximum array length in each dimension to allow efficient
         // implementation of advanced range check elimination in future.
         // Keep in sync with vm\gcscan.cpp and HashHelpers.MaxPrimeArrayLength.
         // The constants are defined in this method: inline SIZE_T MaxArrayLength(SIZE_T componentSize) from gcscan
@@ -25,9 +24,8 @@ namespace System
         internal const int MaxArrayLength = 0X7FEFFFFF;
         internal const int MaxByteArrayLength = 0x7FFFFFC7;
 
-        // This ctor exists solely to prevent C# from generating a protected .ctor that violates the surface area. I really want this to be a
-        // "protected-and-internal" rather than "internal" but C# has no keyword for the former.
-        internal Array() { }
+        // This ctor exists solely to prevent C# from generating a protected .ctor that violates the surface area.
+        private protected Array() { }
 
         public static ReadOnlyCollection<T> AsReadOnly<T>(T[] array)
         {
@@ -237,32 +235,32 @@ namespace System
 
         public long GetLongLength(int dimension)
         {
-            //This method should throw an IndexOufOfRangeException for compat if dimension < 0 or >= Rank
+            // This method should throw an IndexOufOfRangeException for compat if dimension < 0 or >= Rank
             return GetLength(dimension);
         }
 
         // Number of elements in the Array.
-        int ICollection.Count { get { return Length; } }
+        int ICollection.Count => Length;
 
         // Returns an object appropriate for synchronizing access to this
         // Array.
-        public object SyncRoot { get { return this; } }
+        public object SyncRoot => this;
 
         // Is this Array read-only?
-        public bool IsReadOnly { get { return false; } }
+        public bool IsReadOnly => false;
 
-        public bool IsFixedSize { get { return true; } }
+        public bool IsFixedSize => true;
 
         // Is this Array synchronized (i.e., thread-safe)?  If you want a synchronized
         // collection, you can use SyncRoot as an object to synchronize your
         // collection with.  You could also call GetSynchronized()
         // to get a synchronized wrapper around the Array.
-        public bool IsSynchronized { get { return false; } }
+        public bool IsSynchronized => false;
 
         object? IList.this[int index]
         {
-            get { return GetValue(index); }
-            set { SetValue(value, index); }
+            get => GetValue(index);
+            set => SetValue(value, index);
         }
 
         int IList.Add(object? value)
@@ -370,11 +368,6 @@ namespace System
             return true;
         }
 
-        private static int CombineHashCodes(int h1, int h2)
-        {
-            return (((h1 << 5) + h1) ^ h2);
-        }
-
         int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
         {
             if (comparer == null)
@@ -384,7 +377,7 @@ namespace System
 
             for (int i = (this.Length >= 8 ? this.Length - 8 : 0); i < this.Length; i++)
             {
-                ret = CombineHashCodes(ret, comparer.GetHashCode(GetValue(i)!));
+                ret = HashCode.Combine(ret, comparer.GetHashCode(GetValue(i)!));
             }
 
             return ret;
@@ -478,8 +471,8 @@ namespace System
             if (array.Rank != 1)
                 ThrowHelper.ThrowRankException(ExceptionResource.Rank_MultiDimNotSupported);
 
-            if (comparer == null) comparer = Comparer.Default;
-#if CORECLR
+            comparer ??= Comparer.Default;
+#if !CORERT
             if (comparer == Comparer.Default)
             {
                 int retval;
@@ -771,7 +764,7 @@ namespace System
             int endIndex = startIndex + count;
             for (int i = startIndex; i < endIndex; i++)
             {
-                if (match!(array[i]))
+                if (match(array[i]))
                     return i;
             }
             return -1;
@@ -928,7 +921,7 @@ namespace System
             if (count < 0 || count > array.Length - startIndex + lb)
                 ThrowHelper.ThrowCountArgumentOutOfRange_ArgumentOutOfRange_Count();
 
-#if CORECLR
+#if !CORERT
             // Try calling a quick native method to handle primitive types.
             int retVal;
             bool r = TrySZIndexOf(array, startIndex, count, value, out retVal);
@@ -1054,7 +1047,7 @@ namespace System
                 }
             }
 
-#if CORECLR
+#if !CORERT
             return EqualityComparer<T>.Default.IndexOf(array, value, startIndex, count);
 #else
             return IndexOfImpl(array, value, startIndex, count);
@@ -1111,7 +1104,7 @@ namespace System
             if (array.Rank != 1)
                 ThrowHelper.ThrowRankException(ExceptionResource.Rank_MultiDimNotSupported);
 
-#if CORECLR
+#if !CORERT
             // Try calling a quick native method to handle primitive types.
             int retVal;
             bool r = TrySZLastIndexOf(array, startIndex, count, value, out retVal);
@@ -1262,7 +1255,7 @@ namespace System
                 }
             }
 
-#if CORECLR
+#if !CORERT
             return EqualityComparer<T>.Default.LastIndexOf(array, value, startIndex, count);
 #else
             return LastIndexOfImpl(array, value, startIndex, count);
@@ -1305,7 +1298,7 @@ namespace System
             if (length <= 1)
                 return;
 
-#if CORECLR
+#if !CORERT
             bool r = TrySZReverse(array, index, length);
             if (r)
                 return;
@@ -1417,7 +1410,7 @@ namespace System
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            Sort(array!, null, array!.GetLowerBound(0), array.Length, comparer);
+            Sort(array, null, array.GetLowerBound(0), array.Length, comparer);
         }
 
         // Sorts the elements of two arrays based on the keys in the first array.
@@ -1473,7 +1466,124 @@ namespace System
 
             if (length > 1)
             {
-                SortImpl(keys, items, index, length, comparer ?? Comparer.Default);
+                comparer ??= Comparer.Default;
+
+                if (comparer == Comparer.Default)
+                {
+                    switch (Type.GetTypeCode(keys.GetType().GetElementType()))
+                    {
+                        case TypeCode.Boolean:
+                            if (TryGenericSort(keys as bool[], items, index, length)) return;
+                            break;
+                        case TypeCode.Byte:
+                            if (TryGenericSort(keys as byte[], items, index, length)) return;
+                            break;
+                        case TypeCode.Char:
+                            if (TryGenericSort(keys as char[], items, index, length)) return;
+                            break;
+                        case TypeCode.Double:
+                            if (TryGenericSort(keys as double[], items, index, length)) return;
+                            break;
+                        case TypeCode.Int16:
+                            if (TryGenericSort(keys as short[], items, index, length)) return;
+                            break;
+                        case TypeCode.Int32:
+                            if (TryGenericSort(keys as int[], items, index, length)) return;
+                            break;
+                        case TypeCode.Int64:
+                            if (TryGenericSort(keys as long[], items, index, length)) return;
+                            break;
+                        case TypeCode.SByte:
+                            if (TryGenericSort(keys as sbyte[], items, index, length)) return;
+                            break;
+                        case TypeCode.Single:
+                            if (TryGenericSort(keys as float[], items, index, length)) return;
+                            break;
+                        case TypeCode.String:
+                            if (TryGenericSort(keys as string[], items, index, length)) return;
+                            break;
+                        case TypeCode.UInt16:
+                            if (TryGenericSort(keys as ushort[], items, index, length)) return;
+                            break;
+                        case TypeCode.UInt32:
+                            if (TryGenericSort(keys as uint[], items, index, length)) return;
+                            break;
+                        case TypeCode.UInt64:
+                            if (TryGenericSort(keys as ulong[], items, index, length)) return;
+                            break;
+                    }
+
+                    static bool TryGenericSort<TKey>(TKey[]? keys, Array? items, int index, int length)
+                    {
+                        if (keys != null)
+                        {
+                            if (items is null)
+                            {
+                                Sort(keys, index, length);
+                                return true;
+                            }
+
+                            switch (Type.GetTypeCode(items.GetType().GetElementType()))
+                            {
+                                case TypeCode.Boolean:
+                                    if (items is bool[] boolItems) { Sort(keys, boolItems, index, length); return true; }
+                                    break;
+                                case TypeCode.Byte:
+                                    if (items is byte[] byteItems) { Sort(keys, byteItems, index, length); return true; }
+                                    break;
+                                case TypeCode.Char:
+                                    if (items is char[] charItems) { Sort(keys, charItems, index, length); return true; }
+                                    break;
+                                case TypeCode.Double:
+                                    if (items is double[] doubleItems) { Sort(keys, doubleItems, index, length); return true; }
+                                    break;
+                                case TypeCode.Int16:
+                                    if (items is short[] shortItems) { Sort(keys, shortItems, index, length); return true; }
+                                    break;
+                                case TypeCode.Int32:
+                                    if (items is int[] intItems) { Sort(keys, intItems, index, length); return true; }
+                                    break;
+                                case TypeCode.Int64:
+                                    if (items is long[] longItems) { Sort(keys, longItems, index, length); return true; }
+                                    break;
+                                case TypeCode.SByte:
+                                    if (items is sbyte[] sbyteItems) { Sort(keys, sbyteItems, index, length); return true; }
+                                    break;
+                                case TypeCode.Single:
+                                    if (items is float[] floatItems) { Sort(keys, floatItems, index, length); return true; }
+                                    break;
+                                case TypeCode.String:
+                                    if (items is string[] stringItems) { Sort(keys, stringItems, index, length); return true; }
+                                    break;
+                                case TypeCode.UInt16:
+                                    if (items is ushort[] ushortItems) { Sort(keys, ushortItems, index, length); return true; }
+                                    break;
+                                case TypeCode.UInt32:
+                                    if (items is uint[] uintItems) { Sort(keys, uintItems, index, length); return true; }
+                                    break;
+                                case TypeCode.UInt64:
+                                    if (items is ulong[] ulongItems) { Sort(keys, ulongItems, index, length); return true; }
+                                    break;
+                            }
+                        }
+
+                        return false;
+                    }
+                }
+
+                object[]? objKeys = keys as object[];
+                object[]? objItems = null;
+                if (objKeys != null)
+                    objItems = items as object[];
+
+                if (objKeys != null && (items == null || objItems != null))
+                {
+                    new SorterObjectArray(objKeys, objItems, comparer).Sort(index, length);
+                }
+                else
+                {
+                    new SorterGenericArray(keys, items, comparer).Sort(index, length);
+                }
             }
         }
 
@@ -1481,7 +1591,12 @@ namespace System
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            Sort<T>(array, 0, array.Length, null);
+
+            if (array.Length > 1)
+            {
+                var span = new Span<T>(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()), array.Length);
+                ArraySortHelper<T>.Default.Sort(span, null);
+            }
         }
 
         public static void Sort<TKey, TValue>(TKey[] keys, TValue[]? items)
@@ -1528,17 +1643,8 @@ namespace System
 
             if (length > 1)
             {
-#if CORECLR
-                if (comparer == null || comparer == Comparer<T>.Default)
-                {
-                    if (TrySZSort(array, null, index, index + length - 1))
-                    {
-                        return;
-                    }
-                }
-#endif
-
-                ArraySortHelper<T>.Default.Sort(array, index, length, comparer);
+                var span = new Span<T>(ref Unsafe.Add(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()), index), length);
+                ArraySortHelper<T>.Default.Sort(span, comparer);
             }
         }
 
@@ -1555,23 +1661,15 @@ namespace System
 
             if (length > 1)
             {
-#if CORECLR
-                if (comparer == null || comparer == Comparer<TKey>.Default)
-                {
-                    if (TrySZSort(keys, items, index, index + length - 1))
-                    {
-                        return;
-                    }
-                }
-#endif
-
                 if (items == null)
                 {
                     Sort<TKey>(keys, index, length, comparer);
                     return;
                 }
 
-                ArraySortHelper<TKey, TValue>.Default.Sort(keys, items, index, length, comparer);
+                var spanKeys = new Span<TKey>(ref Unsafe.Add(ref Unsafe.As<byte, TKey>(ref keys.GetRawSzArrayData()), index), length);
+                var spanItems = new Span<TValue>(ref Unsafe.Add(ref Unsafe.As<byte, TValue>(ref items.GetRawSzArrayData()), index), length);
+                ArraySortHelper<TKey, TValue>.Default.Sort(spanKeys, spanItems, comparer);
             }
         }
 
@@ -1587,7 +1685,8 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.comparison);
             }
 
-            ArraySortHelper<T>.Sort(array, 0, array.Length, comparison!);
+            var span = new Span<T>(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()), array.Length);
+            ArraySortHelper<T>.Sort(span, comparison);
         }
 
         public static bool TrueForAll<T>(T[] array, Predicate<T> match)
@@ -1750,18 +1849,18 @@ namespace System
                 }
 
                 // Put pivot in the right location.
-                Swap(left, (hi - 1));
+                Swap(left, hi - 1);
                 return left;
             }
 
             private void Heapsort(int lo, int hi)
             {
                 int n = hi - lo + 1;
-                for (int i = n / 2; i >= 1; i = i - 1)
+                for (int i = n / 2; i >= 1; i--)
                 {
                     DownHeap(i, n, lo);
                 }
-                for (int i = n; i > 1; i = i - 1)
+                for (int i = n; i > 1; i--)
                 {
                     Swap(lo, lo + i - 1);
 
@@ -1772,7 +1871,7 @@ namespace System
             private void DownHeap(int i, int n, int lo)
             {
                 object d = keys[lo + i - 1];
-                object? dt = (items != null) ? items[lo + i - 1] : null;
+                object? dt = items?[lo + i - 1];
                 int child;
                 while (i <= n / 2)
                 {
@@ -1802,7 +1901,7 @@ namespace System
                 {
                     j = i;
                     t = keys[i + 1];
-                    ti = (items != null) ? items[i + 1] : null;
+                    ti = items?[i + 1];
                     while (j >= lo && comparer.Compare(t, keys[j]) < 0)
                     {
                         keys[j + 1] = keys[j];
@@ -1956,18 +2055,18 @@ namespace System
                 }
 
                 // Put pivot in the right location.
-                Swap(left, (hi - 1));
+                Swap(left, hi - 1);
                 return left;
             }
 
             private void Heapsort(int lo, int hi)
             {
                 int n = hi - lo + 1;
-                for (int i = n / 2; i >= 1; i = i - 1)
+                for (int i = n / 2; i >= 1; i--)
                 {
                     DownHeap(i, n, lo);
                 }
-                for (int i = n; i > 1; i = i - 1)
+                for (int i = n; i > 1; i--)
                 {
                     Swap(lo, lo + i - 1);
 
@@ -1978,7 +2077,7 @@ namespace System
             private void DownHeap(int i, int n, int lo)
             {
                 object? d = keys.GetValue(lo + i - 1);
-                object? dt = (items != null) ? items.GetValue(lo + i - 1) : null;
+                object? dt = items?.GetValue(lo + i - 1);
                 int child;
                 while (i <= n / 2)
                 {
@@ -2010,7 +2109,7 @@ namespace System
                 {
                     j = i;
                     t = keys.GetValue(i + 1);
-                    dt = (items != null) ? items.GetValue(i + 1) : null;
+                    dt = items?.GetValue(i + 1);
 
                     while (j >= lo && comparer.Compare(t, keys.GetValue(j)) < 0)
                     {

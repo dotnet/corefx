@@ -14,10 +14,8 @@ using Internal.Runtime.CompilerServices;
 
 #pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
-using nint = System.Int64;
 using nuint = System.UInt64;
 #else // BIT64
-using nint = System.Int32;
 using nuint = System.UInt32;
 #endif // BIT64
 
@@ -219,7 +217,7 @@ namespace System
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                ref T refToReturn = ref Unsafe.AsRef<T>(null);
+                ref T refToReturn = ref Unsafe.NullRef<T>();
                 int lengthOfUnderlyingSpan = 0;
 
                 // Copy this field into a local so that it can't change out from under us mid-operation.

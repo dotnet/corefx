@@ -1682,7 +1682,6 @@ namespace System.Net.Http.Functional.Tests
                     await releaseServer.Task;
                 }),
                 new LoopbackServer.Options { UseSsl = bool.Parse(secureString) });
-                return RemoteExecutor.SuccessExitCode;
             }, secure.ToString(), UseHttp2.ToString()).Dispose();
         }
 
@@ -1728,7 +1727,6 @@ namespace System.Net.Http.Functional.Tests
             public bool IsBypassed(Uri host) => true;
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
         [Fact]
         public async Task ProxyAuth_SameConnection_Succeeds()
         {
@@ -2091,6 +2089,8 @@ namespace System.Net.Http.Functional.Tests
         }
     }
 
+    // Test only WinHttpHandler since the CurlHandler was removed
+    [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class SocketsHttpHandler_ExternalConfiguration_Test : HttpClientHandlerTestBase
     {
         public SocketsHttpHandler_ExternalConfiguration_Test(ITestOutputHelper output) : base(output) { }
@@ -2119,7 +2119,6 @@ namespace System.Net.Http.Functional.Tests
                 {
                     Assert.Equal(bool.Parse(innerExpectedUseSocketsHandler), IsSocketsHttpHandler(handler));
                 }
-                return RemoteExecutor.SuccessExitCode;
             }, envVarValue, expectedUseSocketsHandler.ToString()).Dispose();
         }
 
@@ -2139,8 +2138,6 @@ namespace System.Net.Http.Functional.Tests
                 {
                     Assert.False(IsSocketsHttpHandler(handler));
                 }
-
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -2167,8 +2164,6 @@ namespace System.Net.Http.Functional.Tests
                 {
                     Assert.True(IsSocketsHttpHandler(handler));
                 }
-
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
     }

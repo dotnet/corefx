@@ -11,7 +11,6 @@
 **
 ===========================================================*/
 
-using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 
@@ -85,45 +84,35 @@ namespace System
                 if ((_fileName == null) &&
                     (HResult == HResults.COR_E_EXCEPTION))
                     _message = SR.Arg_BadImageFormatException;
-
                 else
                     _message = FileLoadException.FormatFileLoadExceptionMessage(_fileName, HResult);
             }
         }
 
-        public string? FileName
-        {
-            get { return _fileName; }
-        }
+        public string? FileName => _fileName;
 
         public override string ToString()
         {
             string s = GetType().ToString() + ": " + Message;
 
-            if (_fileName != null && _fileName.Length != 0)
-                s += Environment.NewLine + SR.Format(SR.IO_FileName_Name, _fileName);
+            if (!string.IsNullOrEmpty(_fileName))
+                s += Environment.NewLineConst + SR.Format(SR.IO_FileName_Name, _fileName);
 
             if (InnerException != null)
-                s = s + InnerExceptionPrefix + InnerException.ToString();
+                s += InnerExceptionPrefix + InnerException.ToString();
 
             if (StackTrace != null)
-                s += Environment.NewLine + StackTrace;
+                s += Environment.NewLineConst + StackTrace;
 
             if (_fusionLog != null)
             {
-                if (s == null)
-                    s = " ";
-                s += Environment.NewLine;
-                s += Environment.NewLine;
-                s += _fusionLog;
+                s ??= " ";
+                s += Environment.NewLineConst + Environment.NewLineConst + _fusionLog;
             }
 
             return s;
         }
 
-        public string? FusionLog
-        {
-            get { return _fusionLog; }
-        }
+        public string? FusionLog => _fusionLog;
     }
 }

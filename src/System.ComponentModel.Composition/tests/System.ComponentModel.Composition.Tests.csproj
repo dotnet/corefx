@@ -1,9 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- TODO: Add netfx configuration after OOB package bug is fixed: https://github.com/dotnet/corefx/issues/23889 -->
   <PropertyGroup>
-    <ProjectGuid>{59F4682D-C41D-45A7-9798-16C75525BB1D}</ProjectGuid>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
@@ -171,9 +170,6 @@
     <Compile Include="System\UnitTesting\ExtendedAssert.cs" />
     <Compile Include="System\UnitTesting\RetryMode.cs" />
     <Compile Include="System\UnitTesting\TestServices.cs" />
-    <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
-      <Link>Common\System\ThreadCultureChange.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="System.ComponentModel.Composition.Noop.Assembly/System.ComponentModel.Composition.Noop.Assembly.csproj">

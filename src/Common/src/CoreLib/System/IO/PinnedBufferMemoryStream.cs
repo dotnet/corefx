@@ -14,7 +14,6 @@
 **
 ===========================================================*/
 
-using System;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
@@ -38,7 +37,7 @@ namespace System.IO
                 Initialize(ptr, len, len, FileAccess.Read);
         }
 
-#if !netstandard
+#if !NETSTANDARD2_0
         public override int Read(Span<byte> buffer) => ReadCore(buffer);
 
         public override void Write(ReadOnlySpan<byte> buffer) => WriteCore(buffer);

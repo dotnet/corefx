@@ -280,7 +280,7 @@ namespace System.Diagnostics
         {
             int[] processIds = new int[256];
             int size;
-            for (; ; )
+            while (true)
             {
                 if (!Interop.Kernel32.EnumProcesses(processIds, processIds.Length * 4, out size))
                     throw new Win32Exception();
@@ -292,7 +292,7 @@ namespace System.Diagnostics
                 break;
             }
             int[] ids = new int[size / 4];
-            Array.Copy(processIds, 0, ids, 0, ids.Length);
+            Array.Copy(processIds, ids, ids.Length);
             return ids;
         }
 

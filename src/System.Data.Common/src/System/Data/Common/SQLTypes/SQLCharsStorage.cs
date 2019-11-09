@@ -31,7 +31,7 @@ namespace System.Data.Common
                         {
                             return _values[records[0]];
                         }
-                        return null;// no data => null
+                        return null; // no data => null
 
                     case AggregateType.Count:
                         int count = 0;
@@ -94,7 +94,7 @@ namespace System.Data.Common
             SqlChars[] newValues = new SqlChars[capacity];
             if (null != _values)
             {
-                Array.Copy(_values, 0, newValues, 0, Math.Min(capacity, _values.Length));
+                Array.Copy(_values, newValues, Math.Min(capacity, _values.Length));
             }
             _values = newValues;
         }

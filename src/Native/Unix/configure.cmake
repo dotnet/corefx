@@ -1,6 +1,6 @@
+include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
-include(CheckFunctionExists)
 include(CheckIncludeFiles)
 include(CheckPrototypeDefinition)
 include(CheckStructHasMember)
@@ -18,6 +18,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 elseif (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
     set(PAL_UNIX_NAME \"FREEBSD\")
     include_directories(SYSTEM /usr/local/include)
+    set(CMAKE_REQUIRED_INCLUDES /usr/local/include)
 elseif (CMAKE_SYSTEM_NAME STREQUAL NetBSD)
     set(PAL_UNIX_NAME \"NETBSD\")
 elseif (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
@@ -30,6 +31,15 @@ endif ()
 # Older CMake versions (3.8) do not assign the result of their tests, causing unused-value errors
 # which are not distinguished from the test failing. So no error for that one.
 set(CMAKE_REQUIRED_FLAGS "-Werror -Wno-error=unused-value")
+
+# Apple platforms like macOS/iOS allow targeting older operating system versions with a single SDK,
+# the mere presence of a symbol in the SDK doesn't tell us whether the deployment target really supports it.
+# The compiler raises a warning when using an unsupported API, turn that into an error so check_symbol_exists()
+# can correctly identify whether the API is supported on the target.
+check_c_compiler_flag("-Wunguarded-availability" "C_SUPPORTS_WUNGUARDED_AVAILABILITY")
+if(C_SUPPORTS_WUNGUARDED_AVAILABILITY)
+  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Wunguarded-availability")
+endif()
 
 # in_pktinfo: Find whether this struct exists
 check_include_files(
@@ -89,8 +99,9 @@ check_symbol_exists(
     fcntl.h
     HAVE_F_DUPFD_CLOEXEC)
 
-check_function_exists(
+check_symbol_exists(
     getifaddrs
+    ifaddrs.h
     HAVE_GETIFADDRS)
 
 check_symbol_exists(
@@ -138,16 +149,19 @@ check_symbol_exists(
     string.h
     HAVE_STRCPY_S)
 
-check_function_exists(
+check_symbol_exists(
     strlcpy
+    string.h
     HAVE_STRLCPY)
 
-check_function_exists(
+check_symbol_exists(
     posix_fadvise
+    fcntl.h
     HAVE_POSIX_ADVISE)
 
-check_function_exists(
+check_symbol_exists(
     ioctl
+    sys/ioctl.h
     HAVE_IOCTL)
 
 check_symbol_exists(
@@ -170,12 +184,14 @@ check_symbol_exists(
     "sys/ioctl.h"
     HAVE_TIOCGWINSZ)
 
-check_function_exists(
+check_symbol_exists(
     tcgetattr
+    termios.h
     HAVE_TCGETATTR)
 
-check_function_exists(
+check_symbol_exists(
     tcsetattr
+    termios.h
     HAVE_TCSETATTR)
 
 check_symbol_exists(
@@ -263,7 +279,7 @@ set(CMAKE_EXTRA_INCLUDE_FILES ${STATFS_INCLUDES})
 
 check_symbol_exists(
     "statfs"
-    STATFS_INCLUDES
+    ${STATFS_INCLUDES}
     HAVE_STATFS
 )
 
@@ -344,24 +360,30 @@ check_c_source_compiles(
     HAVE_SENDFILE_6)
 
 check_symbol_exists(
-    fcopyfile
-    copyfile.h
-    HAVE_FCOPYFILE)
+    clonefile
+    "sys/clonefile.h"
+    HAVE_CLONEFILE)
 
 check_include_files(
      "sys/sockio.h"
      HAVE_SYS_SOCKIO_H)
 
 check_include_files(
+     "linux/ethtool.h"
+     HAVE_ETHTOOL_H)
+
+check_include_files(
      "sys/poll.h"
      HAVE_SYS_POLL_H)
 
-check_function_exists(
+check_symbol_exists(
     epoll_create1
+    sys/epoll.h
     HAVE_EPOLL)
 
-check_function_exists(
+check_symbol_exists(
     accept4
+    sys/socket.h
     HAVE_ACCEPT4)
 
 check_symbol_exists(
@@ -374,6 +396,7 @@ check_symbol_exists(
     "sys/socket.h"
     HAVE_DISCONNECTX)
 
+set(PREVIOUS_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
 set(CMAKE_REQUIRED_FLAGS "-Werror -Wsign-conversion")
 check_c_source_compiles(
      "
@@ -394,7 +417,7 @@ check_c_source_compiles(
      }
      "
      HAVE_GETNAMEINFO_SIGNED_FLAGS)
-set(CMAKE_REQUIRED_FLAGS -Werror)
+set(CMAKE_REQUIRED_FLAGS ${PREVIOUS_CMAKE_REQUIRED_FLAGS})
 
 set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 0)
 
@@ -444,16 +467,19 @@ check_symbol_exists(
     mach/mach_time.h
     HAVE_MACH_ABSOLUTE_TIME)
 
-check_function_exists(
+check_symbol_exists(
     futimes
+    sys/time.h
     HAVE_FUTIMES)
 
-check_function_exists(
+check_symbol_exists(
     futimens
+    sys/stat.h
     HAVE_FUTIMENS)
 
-check_function_exists(
+check_symbol_exists(
     utimensat
+    sys/stat.h
     HAVE_UTIMENSAT)
 
 set (PREVIOUS_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
@@ -491,6 +517,10 @@ check_c_source_compiles(
     "
     IPV6MR_INTERFACE_UNSIGNED
 )
+
+check_include_files(
+    "sys/inotify.h"
+    HAVE_SYS_INOTIFY_H)
 
 check_c_source_compiles(
     "
@@ -580,6 +610,7 @@ check_c_source_compiles(
     "
     #include <sys/types.h>
     #include <sys/socketvar.h>
+    #include <sys/queue.h>
     #include <netinet/in.h>
     #include <netinet/ip.h>
     #include <netinet/tcp.h>
@@ -646,17 +677,23 @@ check_include_files(
     linux/rtnetlink.h
     HAVE_LINUX_RTNETLINK_H)
 
+check_include_files(
+    linux/can.h
+    HAVE_LINUX_CAN_H)
+
 check_symbol_exists(
     getpeereid
     unistd.h
     HAVE_GETPEEREID)
 
-check_function_exists(
+check_symbol_exists(
     getdomainname
+    unistd.h
     HAVE_GETDOMAINNAME)
 
-check_function_exists(
+check_symbol_exists(
     uname
+    sys/utsname.h
     HAVE_UNAME)
 
 # getdomainname on OSX takes an 'int' instead of a 'size_t'
@@ -672,17 +709,26 @@ check_c_source_compiles(
 )
 set (CMAKE_REQUIRED_FLAGS ${PREVIOUS_CMAKE_REQUIRED_FLAGS})
 
-check_function_exists(
+set (PREVIOUS_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+if (HAVE_SYS_INOTIFY_H AND CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+set (CMAKE_REQUIRED_LIBRARIES "-linotify -L/usr/local/lib")
+endif()
+
+check_symbol_exists(
     inotify_init
+    sys/inotify.h
     HAVE_INOTIFY_INIT)
 
-check_function_exists(
+check_symbol_exists(
     inotify_add_watch
+    sys/inotify.h
     HAVE_INOTIFY_ADD_WATCH)
 
-check_function_exists(
+check_symbol_exists(
     inotify_rm_watch
+    sys/inotify.h
     HAVE_INOTIFY_RM_WATCH)
+set (CMAKE_REQUIRED_LIBRARIES ${PREVIOUS_CMAKE_REQUIRED_LIBRARIES})
 
 set (HAVE_INOTIFY 0)
 if (HAVE_INOTIFY_INIT AND HAVE_INOTIFY_ADD_WATCH AND HAVE_INOTIFY_RM_WATCH)
@@ -690,40 +736,6 @@ if (HAVE_INOTIFY_INIT AND HAVE_INOTIFY_ADD_WATCH AND HAVE_INOTIFY_RM_WATCH)
 elseif (CMAKE_SYSTEM_NAME STREQUAL Linux)
     message(FATAL_ERROR "Cannot find inotify functions on a Linux platform.")
 endif()
-
-check_c_source_compiles(
-    "
-    #include <curl/multi.h>
-    int main(void) { int i = CURLM_ADDED_ALREADY; return 0; }
-    "
-    HAVE_CURLM_ADDED_ALREADY)
-
-check_c_source_compiles(
-    "
-    #include <curl/multi.h>
-    int main(void) { int i = CURL_HTTP_VERSION_2TLS; return 0; }
-    "
-    HAVE_CURL_HTTP_VERSION_2TLS)
-
-check_c_source_compiles(
-    "
-    #include <curl/multi.h>
-    int main(void) { int i = CURLPIPE_MULTIPLEX; return 0; }
-    "
-    HAVE_CURLPIPE_MULTIPLEX)
-
-check_c_source_compiles(
-    "
-    #include <curl/curl.h>
-    int main(void)
-    {
-        int i = CURL_SSLVERSION_TLSv1_0;
-        i = CURL_SSLVERSION_TLSv1_1;
-        i = CURL_SSLVERSION_TLSv1_2;
-        return 0;
-    }
-    "
-    HAVE_CURL_SSLVERSION_TLSv1_012)
 
 option(HeimdalGssApi "use heimdal implementation of GssApi" OFF)
 

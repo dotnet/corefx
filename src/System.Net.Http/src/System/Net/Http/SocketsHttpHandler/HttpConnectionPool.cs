@@ -311,7 +311,7 @@ namespace System.Net.Http
 
             // We are at the connection limit. Wait for an available connection or connection count (indicated by null).
             if (NetEventSource.IsEnabled) Trace("Connection limit reached, waiting for available connection.");
-            return new ValueTask<HttpConnection>(waiter.WaitWithCancellationAsync(cancellationToken));
+            return waiter.WaitWithCancellationAsync(cancellationToken);
         }
 
         private async ValueTask<(HttpConnectionBase connection, bool isNewConnection, HttpResponseMessage failureResponse)>
@@ -387,7 +387,7 @@ namespace System.Net.Http
             TransportContext transportContext = null;
 
             // Serialize creation attempt
-            await _http2ConnectionCreateLock.WaitAsync().ConfigureAwait(false);
+            await _http2ConnectionCreateLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 if (_http2Connection != null)
@@ -540,7 +540,7 @@ namespace System.Net.Http
                         return await connection.SendAsync(request, cancellationToken).ConfigureAwait(false);
                     }
                 }
-                catch (HttpRequestException e) when (!isNewConnection && e.AllowRetry)
+                catch (HttpRequestException e) when (!isNewConnection && e.AllowRetry == RequestRetryType.RetryOnSameOrNextProxy)
                 {
                     if (NetEventSource.IsEnabled)
                     {

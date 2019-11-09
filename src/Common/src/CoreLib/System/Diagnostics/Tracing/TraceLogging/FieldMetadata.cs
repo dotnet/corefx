@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
 using System.Diagnostics;
-using System.Resources;
-using Encoding = System.Text.Encoding;
+#endif
+using System.Text;
 
 #if ES_BUILD_STANDALONE
 using Environment = Microsoft.Diagnostics.Tracing.Internal.Environment;
@@ -114,7 +115,7 @@ namespace System.Diagnostics.Tracing
             }
 
             Statics.CheckName(name);
-            var coreType = (int)dataType & Statics.InTypeMask;
+            int coreType = (int)dataType & Statics.InTypeMask;
             this.name = name;
             this.nameSize = Encoding.UTF8.GetByteCount(this.name) + 1;
             this.inType = (byte)(coreType | countFlags);
@@ -184,7 +185,7 @@ namespace System.Diagnostics.Tracing
             {
                 metadata[pos] = this.inType;
             }
-            pos += 1;
+            pos++;
 
             // If InTypeChainFlag set, then write out the outType
             if (0 != (this.inType & Statics.InTypeChainFlag))
@@ -193,7 +194,7 @@ namespace System.Diagnostics.Tracing
                 {
                     metadata[pos] = this.outType;
                 }
-                pos += 1;
+                pos++;
 
                 // If OutTypeChainFlag set, then write out tags
                 if (0 != (this.outType & Statics.OutTypeChainFlag))

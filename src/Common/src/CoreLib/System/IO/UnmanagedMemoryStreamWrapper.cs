@@ -28,20 +28,11 @@ namespace System.IO
             _unmanagedStream = stream;
         }
 
-        public override bool CanRead
-        {
-            get { return _unmanagedStream.CanRead; }
-        }
+        public override bool CanRead => _unmanagedStream.CanRead;
 
-        public override bool CanSeek
-        {
-            get { return _unmanagedStream.CanSeek; }
-        }
+        public override bool CanSeek => _unmanagedStream.CanSeek;
 
-        public override bool CanWrite
-        {
-            get { return _unmanagedStream.CanWrite; }
-        }
+        public override bool CanWrite => _unmanagedStream.CanWrite;
 
         protected override void Dispose(bool disposing)
         {
@@ -74,34 +65,16 @@ namespace System.IO
 
         public override int Capacity
         {
-            get
-            {
-                return (int)_unmanagedStream.Capacity;
-            }
-            set
-            {
-                throw new IOException(SR.IO_FixedCapacity);
-            }
+            get => (int)_unmanagedStream.Capacity;
+            set => throw new IOException(SR.IO_FixedCapacity);
         }
 
-        public override long Length
-        {
-            get
-            {
-                return _unmanagedStream.Length;
-            }
-        }
+        public override long Length => _unmanagedStream.Length;
 
         public override long Position
         {
-            get
-            {
-                return _unmanagedStream.Position;
-            }
-            set
-            {
-                _unmanagedStream.Position = value;
-            }
+            get => _unmanagedStream.Position;
+            set => _unmanagedStream.Position = value;
         }
 
         public override int Read(byte[] buffer, int offset, int count)

@@ -67,17 +67,12 @@ namespace System.Data.SqlTypes
         {
             get
             {
-                switch (m_value)
+                return m_value switch
                 {
-                    case x_True:
-                        return true;
-
-                    case x_False:
-                        return false;
-
-                    default:
-                        throw new SqlNullValueException();
-                }
+                    x_True => true,
+                    x_False => false,
+                    _ => throw new SqlNullValueException(),
+                };
             }
         }
 
@@ -111,7 +106,7 @@ namespace System.Data.SqlTypes
         /// <summary>
         /// Converts a <see cref='SqlBoolean'/> to a boolean.
         /// </summary>
-        public static explicit operator bool (SqlBoolean x)
+        public static explicit operator bool(SqlBoolean x)
         {
             return x.Value;
         }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime.Serialization;
 
 namespace System.Globalization
 {
@@ -407,7 +406,7 @@ namespace System.Globalization
             int dayForJan1 = (int)GetDayOfWeek(time) - (dayOfYear % 7);
             int offset = (dayForJan1 - firstDayOfWeek + 14) % 7;
             Debug.Assert(offset >= 0, "Calendar.GetFirstDayWeekOfYear(): offset >= 0");
-            return ((dayOfYear + offset) / 7 + 1);
+            return (dayOfYear + offset) / 7 + 1;
         }
 
         private int GetWeekOfYearFullDays(DateTime time, int firstDayOfWeek, int fullDays)
@@ -649,7 +648,7 @@ namespace System.Globalization
 
         internal virtual bool IsValidYear(int year, int era)
         {
-            return (year >= GetYear(MinSupportedDateTime) && year <= GetYear(MaxSupportedDateTime));
+            return year >= GetYear(MinSupportedDateTime) && year <= GetYear(MaxSupportedDateTime);
         }
 
         internal virtual bool IsValidMonth(int year, int month, int era)

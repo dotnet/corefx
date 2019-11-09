@@ -32,15 +32,16 @@ namespace System
             {
                 return 1;
             }
-            if (value is ulong)
+
+            // Need to use compare because subtraction will wrap
+            // to positive for very large neg numbers, etc.
+            if (value is ulong i)
             {
-                // Need to use compare because subtraction will wrap
-                // to positive for very large neg numbers, etc.
-                ulong i = (ulong)value;
                 if (m_value < i) return -1;
                 if (m_value > i) return 1;
                 return 0;
             }
+
             throw new ArgumentException(SR.Arg_MustBeUInt64);
         }
 
@@ -76,7 +77,7 @@ namespace System
 
         public override string ToString()
         {
-            return Number.FormatUInt64(m_value, null, null);
+            return Number.UInt64ToDecStr(m_value, -1);
         }
 
         public string ToString(IFormatProvider? provider)

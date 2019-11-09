@@ -369,7 +369,7 @@ namespace System.Numerics
             return left.m_real != right.m_real || left.m_imaginary != right.m_imaginary;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is Complex)) return false;
             return Equals((Complex)obj);
@@ -394,17 +394,17 @@ namespace System.Numerics
             return string.Format(CultureInfo.CurrentCulture, "({0}, {1})", m_real, m_imaginary);
         }
 
-        public string ToString(string format)
+        public string ToString(string? format)
         {
             return string.Format(CultureInfo.CurrentCulture, "({0}, {1})", m_real.ToString(format, CultureInfo.CurrentCulture), m_imaginary.ToString(format, CultureInfo.CurrentCulture));
         }
 
-        public string ToString(IFormatProvider provider)
+        public string ToString(IFormatProvider? provider)
         {
             return string.Format(provider, "({0}, {1})", m_real, m_imaginary);
         }
 
-        public string ToString(string format, IFormatProvider provider)
+        public string ToString(string? format, IFormatProvider? provider)
         {
             return string.Format(provider, "({0}, {1})", m_real.ToString(format, provider), m_imaginary.ToString(format, provider));
         }
@@ -453,7 +453,8 @@ namespace System.Numerics
             return new Complex(u, v);
         }
 
-        public static Complex Cos(Complex value) {
+        public static Complex Cos(Complex value)
+        {
             double p = Math.Exp(value.m_imaginary);
             double q = 1.0 / p;
             double sinh = (p - q) * 0.5;
@@ -532,7 +533,8 @@ namespace System.Numerics
             return (ImaginaryOne / two) * (Log(One - ImaginaryOne * value) - Log(One + ImaginaryOne * value));
         }
 
-        private static void Asin_Internal (double x, double y, out double b, out double bPrime, out double v) {
+        private static void Asin_Internal(double x, double y, out double b, out double bPrime, out double v)
+        {
 
             // This method for the inverse complex sine (and cosine) is described in Hull, Fairgrieve,
             // and Tang, "Implementing the Complex Arcsine and Arccosine Functions Using Exception Handling",

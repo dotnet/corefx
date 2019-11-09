@@ -86,10 +86,7 @@ namespace System.Threading
         /// Gets the current count of the <see cref="SemaphoreSlim"/>.
         /// </summary>
         /// <value>The current count of the <see cref="SemaphoreSlim"/>.</value>
-        public int CurrentCount
-        {
-            get { return m_currentCount; }
-        }
+        public int CurrentCount => m_currentCount;
 
         /// <summary>
         /// Returns a <see cref="System.Threading.WaitHandle"/> that can be used to wait on the semaphore.
@@ -114,7 +111,7 @@ namespace System.Threading
                 if (m_waitHandle != null)
                     return m_waitHandle;
 
-                //lock the count to avoid multiple threads initializing the handle if it is null
+                // lock the count to avoid multiple threads initializing the handle if it is null
                 lock (m_lockObjAndDisposed)
                 {
                     if (m_waitHandle == null)
@@ -164,7 +161,7 @@ namespace System.Threading
                     nameof(initialCount), initialCount, SR.SemaphoreSlim_ctor_InitialCountWrong);
             }
 
-            //validate input
+            // validate input
             if (maxCount <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxCount), maxCount, SR.SemaphoreSlim_ctor_MaxCountWrong);
@@ -276,7 +273,6 @@ namespace System.Threading
             return Wait(millisecondsTimeout, new CancellationToken());
         }
 
-
         /// <summary>
         /// Blocks the current thread until it can enter the <see cref="SemaphoreSlim"/>,
         /// using a 32-bit signed integer to measure the time interval,
@@ -319,8 +315,8 @@ namespace System.Threading
             Task<bool>? asyncWaitTask = null;
             bool lockTaken = false;
 
-            //Register for cancellation outside of the main lock.
-            //NOTE: Register/unregister inside the lock can deadlock as different lock acquisition orders could
+            // Register for cancellation outside of the main lock.
+            // NOTE: Register/unregister inside the lock can deadlock as different lock acquisition orders could
             //      occur for (1)this.m_lockObjAndDisposed and (2)cts.internalLock
             CancellationTokenRegistration cancellationTokenRegistration = cancellationToken.UnsafeRegister(s_cancellationTokenCanceledEventHandler, this);
             try
@@ -448,7 +444,7 @@ namespace System.Threading
         {
             int remainingWaitMilliseconds = Timeout.Infinite;
 
-            //Wait on the monitor as long as the count is zero
+            // Wait on the monitor as long as the count is zero
             while (m_currentCount == 0)
             {
                 // If cancelled, we throw. Trying to wait could lead to deadlock.
@@ -643,7 +639,7 @@ namespace System.Threading
                 else
                 {
                     Debug.Assert(m_currentCount == 0, "m_currentCount should never be negative");
-                    var asyncWaiter = CreateAndAddAsyncWaiter();
+                    TaskNode asyncWaiter = CreateAndAddAsyncWaiter();
                     return (millisecondsTimeout == Timeout.Infinite && !cancellationToken.CanBeCanceled) ?
                         asyncWaiter :
                         WaitUntilCountOrTimeoutAsync(asyncWaiter, millisecondsTimeout, cancellationToken);
@@ -851,7 +847,7 @@ namespace System.Threading
                         --maxAsyncToRelease;
 
                         // Get the next async waiter to release and queue it to be completed
-                        var waiterTask = m_asyncHead;
+                        TaskNode waiterTask = m_asyncHead;
                         RemoveAsyncWaiter(waiterTask); // ensures waiterTask.Next/Prev are null
                         waiterTask.TrySetResult(result: true);
                     }
@@ -921,7 +917,7 @@ namespace System.Threading
             SemaphoreSlim semaphore = (SemaphoreSlim)obj;
             lock (semaphore.m_lockObjAndDisposed)
             {
-                Monitor.PulseAll(semaphore.m_lockObjAndDisposed); //wake up all waiters.
+                Monitor.PulseAll(semaphore.m_lockObjAndDisposed); // wake up all waiters.
             }
         }
 

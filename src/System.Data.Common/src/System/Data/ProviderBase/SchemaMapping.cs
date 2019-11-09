@@ -108,19 +108,13 @@ namespace System.Data.ProviderBase
                     }
                     else
                     {
-                        switch (mappingAction)
+                        _tableMapping = mappingAction switch
                         {
-                            case MissingMappingAction.Passthrough:
-                                _tableMapping = new DataTableMapping(_dataTable.TableName, _dataTable.TableName);
-                                break;
-                            case MissingMappingAction.Ignore:
-                                _tableMapping = null;
-                                break;
-                            case MissingMappingAction.Error:
-                                throw ADP.MissingTableMappingDestination(_dataTable.TableName);
-                            default:
-                                throw ADP.InvalidMissingMappingAction(mappingAction);
-                        }
+                            MissingMappingAction.Passthrough => new DataTableMapping(_dataTable.TableName, _dataTable.TableName),
+                            MissingMappingAction.Ignore => null,
+                            MissingMappingAction.Error => throw ADP.MissingTableMappingDestination(_dataTable.TableName),
+                            _ => throw ADP.InvalidMissingMappingAction(mappingAction),
+                        };
                     }
                 }
             }
@@ -329,16 +323,13 @@ namespace System.Data.ProviderBase
                             }
                             else
                             {
-                                switch (_xmlMap[i])
+                                _readerDataValues[i] = _xmlMap[i] switch
                                 {
-                                    case SqlXml:
-                                        // map strongly typed SqlString.Null to SqlXml.Null
-                                        _readerDataValues[i] = System.Data.SqlTypes.SqlXml.Null;
-                                        break;
-                                    default:
-                                        _readerDataValues[i] = DBNull.Value;
-                                        break;
-                                }
+                                    // map strongly typed SqlString.Null to SqlXml.Null
+                                    SqlXml => System.Data.SqlTypes.SqlXml.Null,
+
+                                    _ => DBNull.Value,
+                                };
                             }
                         }
                         if (null != xml)
@@ -527,7 +518,7 @@ namespace System.Data.ProviderBase
             Debug.Assert(rgcol != null, "invalid call to ResizeArray");
             Debug.Assert(len <= rgcol.Length, "invalid len passed to ResizeArray");
             var tmp = new DataColumn[len];
-            Array.Copy(rgcol, 0, tmp, 0, len);
+            Array.Copy(rgcol, tmp, len);
             return tmp;
         }
 
@@ -865,12 +856,6 @@ namespace System.Data.ProviderBase
                         // if the column is not mapped and it is a key, then don't add any key information
                         if (schemaRow.IsKey)
                         {
-#if DEBUG
-                            if (AdapterSwitches.DataSchema.TraceVerbose)
-                            {
-                                Debug.WriteLine("SetupSchema: partial primary key detected");
-                            }
-#endif
                             // if the hidden key comes from a different table - don't throw away the primary key
                             // example SELECT [T2].[ID], [T2].[ProdID], [T2].[VendorName] FROM [Vendor] AS [T2], [Prod] AS [T1] WHERE (([T1].[ProdID] = [T2].[ProdID]))
                             if (keyFromMultiTable || (schemaRow.BaseTableName == keyBaseTable))
@@ -1031,22 +1016,11 @@ namespace System.Data.ProviderBase
                             keys = new DataColumn[schemaRows.Length];
                         }
                         keys[keyCount++] = dataColumn;
-#if DEBUG
-                        if (AdapterSwitches.DataSchema.TraceVerbose)
-                        {
-                            Debug.WriteLine("SetupSchema: building list of " + ((isPrimary) ? "PrimaryKey" : "UniqueConstraint"));
-                        }
-#endif
+
                         // see case 3 above, we do want dataColumn.AllowDBNull not schemaRow.AllowDBNull
                         // otherwise adding PrimaryKey will change AllowDBNull to false
                         if (isPrimary && dataColumn.AllowDBNull)
                         {
-#if DEBUG
-                            if (AdapterSwitches.DataSchema.TraceVerbose)
-                            {
-                                Debug.WriteLine("SetupSchema: changing PrimaryKey into UniqueContraint");
-                            }
-#endif
                             isPrimary = false;
                         }
                     }
@@ -1101,12 +1075,6 @@ namespace System.Data.ProviderBase
 
                         if (isPrimary)
                         {
-#if DEBUG
-                            if (AdapterSwitches.DataSchema.TraceVerbose)
-                            {
-                                Debug.WriteLine("SetupSchema: set_PrimaryKey");
-                            }
-#endif
                             _dataTable.PrimaryKey = keys;
                         }
                         else
@@ -1118,24 +1086,12 @@ namespace System.Data.ProviderBase
                             {
                                 if (unique.Equals(constraints[i]))
                                 {
-#if DEBUG
-                                    if (AdapterSwitches.DataSchema.TraceVerbose)
-                                    {
-                                        Debug.WriteLine("SetupSchema: duplicate Contraint detected");
-                                    }
-#endif
                                     unique = null;
                                     break;
                                 }
                             }
                             if (null != unique)
                             {
-#if DEBUG
-                                if (AdapterSwitches.DataSchema.TraceVerbose)
-                                {
-                                    Debug.WriteLine("SetupSchema: adding new UniqueConstraint");
-                                }
-#endif
                                 constraints.Add(unique);
                             }
                         }

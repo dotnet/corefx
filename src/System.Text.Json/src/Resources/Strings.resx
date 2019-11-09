@@ -297,9 +297,6 @@
   <data name="ZeroDepthAtEnd" xml:space="preserve">
     <value>Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed.</value>
   </data>
-  <data name="DeserializeDataRemaining" xml:space="preserve">
-    <value>The provided data of length {0} has remaining bytes {1}.</value>
-  </data>
   <data name="DeserializeUnableToConvertValue" xml:space="preserve">
     <value>The JSON value could not be converted to {0}.</value>
   </data>
@@ -409,7 +406,7 @@
     <value>The attribute '{0}' cannot exist more than once on '{1}'.</value>
   </data>
   <data name="SerializeUnableToSerialize" xml:space="preserve">
-    <value>The object or value could not be serialized. Path: {0}.</value>
+    <value>The object or value could not be serialized.</value>
   </data>
   <data name="FormatByte" xml:space="preserve">
     <value>Either the JSON value is not in a supported format, or is out of bounds for an unsigned byte.</value>
@@ -440,5 +437,14 @@
   </data>
   <data name="InvalidDuplicatePropertyNameHandling" xml:space="preserve">
     <value>The DuplicatePropertyNameHandling enum must be set to one of the supported values.</value>
+  </data>
+  <data name="InvalidLeadingZeroInNumber" xml:space="preserve">
+    <value>Invalid leading zero before '{0}'.</value>
+  </data>
+  <data name="ArrayModifiedDuringIteration" xml:space="preserve">
+    <value>The JSON array was modified during iteration.</value>
+  </data>
+  <data name="NotNodeJsonElementParent" xml:space="preserve">
+    <value>This JsonElement instance was not built from JsonNode</value>
   </data>
 </root>

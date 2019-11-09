@@ -1,12 +1,10 @@
 # .NET Core Libraries (CoreFX)
 
-[![Build Status](https://dev.azure.com/dnceng/internal/_apis/build/status/dotnet/corefx/corefx-official?branchName=master)](https://dev.azure.com/dnceng/internal/_build/latest?definitionId=283&branchName=master)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/dotnet/corefx/corefx-ci?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=196&branchName=master)
 
 This repo contains the library implementation (called "CoreFX") for .NET Core. It includes System.Collections, System.IO, System.Xml, and many other components.
 The corresponding [.NET Core Runtime repo](https://github.com/dotnet/coreclr) (called "CoreCLR") contains the runtime implementation for .NET Core. It includes RyuJIT, the .NET GC, and many other components.
 Runtime-specific library code ([System.Private.CoreLib](https://github.com/dotnet/coreclr/tree/master/src/System.Private.CoreLib)) lives in the CoreCLR repo. It needs to be built and versioned in tandem with the runtime. The rest of CoreFX is agnostic of runtime-implementation and can be run on any compatible .NET runtime (e.g. [CoreRT](https://github.com/dotnet/corert)).
-
-
 
 ## .NET Core
 
@@ -21,8 +19,6 @@ Official Starting Page: https://dotnet.microsoft.com/
 * [Releases](https://github.com/dotnet/core/tree/master/release-notes)
 * [Bringing more APIs to .NET Core](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/porting.md) (and why some APIs will be left out)
 
-
-
 ## How to Engage, Contribute and Provide Feedback
 
 Some of the best ways to contribute are to try things out, file bugs, join in design conversations, and fix issues.
@@ -34,13 +30,16 @@ If you are having issues with the "full" .NET Framework (also called "Desktop"),
 
 ### Issue Guide
 
-This section is **in progress** here: [New contributor Docs - Issues](https://github.com/dotnet/corefx/wiki/New-contributor-Docs#issue-guide) (feel free to make it better - it's easy-to-edit wiki with RW permissions to everyone!)
-
-Each issue area has one or more Microsoft owners, who are [listed here](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/issue-guide.md).
+Each issue area has one or more Microsoft owners, who are [listed here](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/issue-guide.md). There's also some information there about how we use issues in this repo.
 
 ### Contributing Guide
 
-This section is **in progress** here: [New contributor Docs - Contributing](https://github.com/dotnet/corefx/wiki/New-contributor-Docs#contributing-guide) (feel free to make it better - it's easy-to-edit wiki with RW permissions to everyone!)
+We welcome contributions! Many people all over the world have helped make this project better. You'll want to check out:
+
+* [What kind of contributions you might want to make](https://github.com/dotnet/coreclr/blob/master/Documentation/project-docs/contributing.md) and [guidelines specific to this repo](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/contributing.md)
+* [How you can make a change happen!](https://github.com/dotnet/coreclr/blob/master/Documentation/project-docs/contributing-workflow.md)
+* [How to build and test your change](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md)
+* More information in the [detailed readme here](https://github.com/dotnet/corefx/blob/master/Documentation/README.md)
 
 ### Useful Links
 
@@ -63,12 +62,6 @@ Security issues and bugs should be reported privately, via email, to the Microso
 
 Also see info about related [Microsoft .NET Core and ASP.NET Core Bug Bounty Program](https://www.microsoft.com/msrc/bounty-dot-net-core).
 
-## License
-
-.NET Core (including the corefx repo) is licensed under the [MIT license](LICENSE.TXT).
-
-
-
 ## .NET Foundation
 
 .NET Core is a [.NET Foundation](https://www.dotnetfoundation.org/projects) project.
@@ -77,8 +70,6 @@ There are many .NET related projects on GitHub.
 
 - [.NET home repo](https://github.com/Microsoft/dotnet) - links to 100s of .NET projects, from Microsoft and the community.
 - [ASP.NET Core home](https://github.com/aspnet/home) - the best place to start learning about ASP.NET Core.
-
-
 
 ## CoreFX Project
 
@@ -89,3 +80,7 @@ The latest version number of each library can be seen in that feed.
 Currently, there is no website to visualize the contents of the feed, so in order to do so, you have to use a NuGet feed explorer, like Visual Studio.
 
 Note: See officially supported [OS versions](https://github.com/dotnet/core/blob/master/os-lifecycle-policy.md).
+
+## License
+
+.NET (including the runtime repo) is licensed under the [MIT](LICENSE.TXT) license.

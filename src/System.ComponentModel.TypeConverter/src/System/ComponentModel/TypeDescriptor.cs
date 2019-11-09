@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace System.ComponentModel
@@ -84,7 +85,11 @@ namespace System.ComponentModel
         /// AddProvider methods to define a type description provider for interface types.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static Type InterfaceType => typeof(TypeDescriptorInterface);
+        public static Type InterfaceType
+        {
+            [PreserveDependency(".ctor", "System.ComponentModel.TypeDescriptor/TypeDescriptorInterface")]
+            get => typeof(TypeDescriptorInterface);
+        }
 
         /// <summary>
         /// This value increments each time someone refreshes or changes metadata.
@@ -565,7 +570,7 @@ namespace System.ComponentModel
             {
                 // Check our association table for a match.
                 Hashtable assocTable = AssociationTable;
-                IList associations = (IList) assocTable?[primary];
+                IList associations = (IList)assocTable?[primary];
                 if (associations != null)
                 {
                     lock (associations)
@@ -2312,7 +2317,12 @@ namespace System.ComponentModel
         }
 
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public static Type ComObjectType => typeof(TypeDescriptorComObject);
+        public static Type ComObjectType
+        {
+            [PreserveDependency(".ctor", "System.ComponentModel.TypeDescriptor/TypeDescriptorComObject")]
+            [PreserveDependency(".ctor", "System.ComponentModel.TypeDescriptor/ComNativeDescriptorProxy")] // TODO: https://github.com/mono/linker/issues/801
+            get => typeof(TypeDescriptorComObject);
+        }
 
         public static IDesigner CreateDesigner(IComponent component, Type designerBaseType)
         {
@@ -2401,7 +2411,7 @@ namespace System.ComponentModel
             }
 
             Hashtable assocTable = AssociationTable;
-            IList associations = (IList) assocTable?[primary];
+            IList associations = (IList)assocTable?[primary];
             if (associations != null)
             {
                 lock (associations)
@@ -2604,7 +2614,7 @@ namespace System.ComponentModel
 
                 if (!objectType.IsInstanceOfType(instance))
                 {
-                    throw new ArgumentException(SR.Format(SR.ConvertToException, nameof(objectType), instance.GetType()) , nameof(instance));
+                    throw new ArgumentException(SR.Format(SR.ConvertToException, nameof(objectType), instance.GetType()), nameof(instance));
                 }
 
                 return new ComNativeTypeDescriptor(Handler, instance);
@@ -2760,7 +2770,7 @@ namespace System.ComponentModel
                     if (actualCount < newArray.Length)
                     {
                         finalAttr = new Attribute[actualCount];
-                        Array.Copy(newArray, 0, finalAttr, 0, actualCount);
+                        Array.Copy(newArray, finalAttr, actualCount);
                     }
                     else
                     {
@@ -2839,7 +2849,9 @@ namespace System.ComponentModel
 
             public int Compare(object left, object right)
             {
-                return CultureInfo.InvariantCulture.CompareInfo.Compare(((MemberDescriptor)left).Name, ((MemberDescriptor)right).Name);
+                MemberDescriptor leftMember = left as MemberDescriptor;
+                MemberDescriptor rightMember = right as MemberDescriptor;
+                return CultureInfo.InvariantCulture.CompareInfo.Compare(leftMember?.Name, rightMember?.Name);
             }
         }
 

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.Dynamic.Utils;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace System.Linq.Expressions.Interpreter
@@ -42,6 +43,7 @@ namespace System.Linq.Expressions.Interpreter
                 return new ActionCallInstruction(target);
             }
 
+            if (t.IsEnum) return SlowCreate(target, pi);
             switch (t.GetTypeCode())
             {
                 case TypeCode.Object:
@@ -84,6 +86,7 @@ namespace System.Linq.Expressions.Interpreter
                 return new FuncCallInstruction<T0>(target);
             }
 
+            if (t.IsEnum) return SlowCreate(target, pi);
             switch (t.GetTypeCode())
             {
                 case TypeCode.Object:
@@ -126,6 +129,7 @@ namespace System.Linq.Expressions.Interpreter
                 return new FuncCallInstruction<T0, T1>(target);
             }
 
+            if (t.IsEnum) return SlowCreate(target, pi);
             switch (t.GetTypeCode())
             {
                 case TypeCode.Object:
@@ -156,6 +160,16 @@ namespace System.Linq.Expressions.Interpreter
 #endif
 
 #if FEATURE_DLG_INVOKE
+        [PreserveDependency(".ctor", "System.Linq.Expressions.Interpreter.ActionCallInstruction")]
+        [PreserveDependency(".ctor", "System.Linq.Expressions.Interpreter.ActionCallInstruction`1")]
+        [PreserveDependency(".ctor", "System.Linq.Expressions.Interpreter.ActionCallInstruction`2")]
+        [PreserveDependency(".ctor", "System.Linq.Expressions.Interpreter.ActionCallInstruction`3")]
+        [PreserveDependency(".ctor", "System.Linq.Expressions.Interpreter.ActionCallInstruction`4")]
+        [PreserveDependency(".ctor", "System.Linq.Expressions.Interpreter.FuncCallInstruction`1")]
+        [PreserveDependency(".ctor", "System.Linq.Expressions.Interpreter.FuncCallInstruction`2")]
+        [PreserveDependency(".ctor", "System.Linq.Expressions.Interpreter.FuncCallInstruction`3")]
+        [PreserveDependency(".ctor", "System.Linq.Expressions.Interpreter.FuncCallInstruction`4")]
+        [PreserveDependency(".ctor", "System.Linq.Expressions.Interpreter.FuncCallInstruction`5")]
         private static Type GetHelperType(MethodInfo info, Type[] arrTypes)
         {
             Type t;

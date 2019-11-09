@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 #nullable enable
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,6 +17,7 @@ namespace System.Resources
 #if RESOURCES_EXTENSIONS
     using ResourceReader = DeserializingResourceReader;
 #endif
+
     // Provides the default implementation of IResourceReader, reading
     // .resources file from the system default binary format.  This class
     // can be treated as an enumerator once.
@@ -28,7 +28,7 @@ namespace System.Resources
 
     internal struct ResourceLocator
     {
-        internal object? _value;  // Can be null.  Consider WeakReference instead?
+        internal object? _value;  // Can be null.
         internal int _dataPos;
 
         internal ResourceLocator(int dataPos, object? value)
@@ -37,18 +37,14 @@ namespace System.Resources
             _value = value;
         }
 
-        internal int DataPosition
-        {
-            get { return _dataPos; }
-            //set { _dataPos = value; }
-        }
+        internal int DataPosition => _dataPos;
 
         // Allows adding in profiling data in a future version, or a special
         // resource profiling build.  We could also use WeakReference.
         internal object? Value
         {
-            get { return _value; }
-            set { _value = value; }
+            get => _value;
+            set => _value = value;
         }
 
         internal static bool CanCache(ResourceTypeCode value)
@@ -352,7 +348,6 @@ namespace System.Resources
 
                 // On 64-bit machines, these char*'s may be misaligned.  Use a
                 // byte-by-byte comparison instead.
-                //return FastResourceComparer.CompareOrdinal((char*)bytes, byteLen/2, name) == 0;
                 return FastResourceComparer.CompareOrdinal(bytes, byteLen, name) == 0;
             }
             else
@@ -496,8 +491,7 @@ namespace System.Resources
         {
             if (_version == 1)
                 return LoadObjectV1(pos);
-            ResourceTypeCode typeCode;
-            return LoadObjectV2(pos, out typeCode);
+            return LoadObjectV2(pos, out _);
         }
 
         internal object? LoadObject(int pos, out ResourceTypeCode typeCode)

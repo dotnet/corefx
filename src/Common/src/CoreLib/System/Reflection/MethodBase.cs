@@ -5,6 +5,7 @@
 using System.Globalization;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace System.Reflection
 {
@@ -20,16 +21,11 @@ namespace System.Reflection
         public virtual CallingConventions CallingConvention => CallingConventions.Standard;
 
         public bool IsAbstract => (Attributes & MethodAttributes.Abstract) != 0;
-        public bool IsConstructor
-        {
-            get
-            {
-                // To be backward compatible we only return true for instance RTSpecialName ctors.
-                return (this is ConstructorInfo &&
-                        !IsStatic &&
-                        ((Attributes & MethodAttributes.RTSpecialName) == MethodAttributes.RTSpecialName));
-            }
-        }
+        public bool IsConstructor =>
+            // To be backward compatible we only return true for instance RTSpecialName ctors.
+            this is ConstructorInfo &&
+            !IsStatic &&
+            (Attributes & MethodAttributes.RTSpecialName) == MethodAttributes.RTSpecialName;
         public bool IsFinal => (Attributes & MethodAttributes.Final) != 0;
         public bool IsHideBySig => (Attributes & MethodAttributes.HideBySig) != 0;
         public bool IsSpecialName => (Attributes & MethodAttributes.SpecialName) != 0;
@@ -56,9 +52,9 @@ namespace System.Reflection
 
         public abstract RuntimeMethodHandle MethodHandle { get; }
 
-        public virtual bool IsSecurityCritical { get { throw NotImplemented.ByDesign; } }
-        public virtual bool IsSecuritySafeCritical { get { throw NotImplemented.ByDesign; } }
-        public virtual bool IsSecurityTransparent { get { throw NotImplemented.ByDesign; } }
+        public virtual bool IsSecurityCritical => throw NotImplemented.ByDesign;
+        public virtual bool IsSecuritySafeCritical => throw NotImplemented.ByDesign;
+        public virtual bool IsSecurityTransparent => throw NotImplemented.ByDesign;
 
         public override bool Equals(object? obj) => base.Equals(obj);
         public override int GetHashCode() => base.GetHashCode();
@@ -84,5 +80,42 @@ namespace System.Reflection
         }
 
         public static bool operator !=(MethodBase? left, MethodBase? right) => !(left == right);
+
+        internal const int MethodNameBufferSize = 100;
+
+        internal static void AppendParameters(ref ValueStringBuilder sbParamList, Type[] parameterTypes, CallingConventions callingConvention)
+        {
+            string comma = "";
+
+            for (int i = 0; i < parameterTypes.Length; i++)
+            {
+                Type t = parameterTypes[i];
+
+                sbParamList.Append(comma);
+
+                string typeName = t.FormatTypeName();
+
+                // Legacy: Why use "ByRef" for by ref parameters? What language is this?
+                // VB uses "ByRef" but it should precede (not follow) the parameter name.
+                // Why don't we just use "&"?
+                if (t.IsByRef)
+                {
+                    sbParamList.Append(typeName.AsSpan().TrimEnd('&'));
+                    sbParamList.Append(" ByRef");
+                }
+                else
+                {
+                    sbParamList.Append(typeName);
+                }
+
+                comma = ", ";
+            }
+
+            if ((callingConvention & CallingConventions.VarArgs) == CallingConventions.VarArgs)
+            {
+                sbParamList.Append(comma);
+                sbParamList.Append("...");
+            }
+        }
     }
 }

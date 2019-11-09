@@ -8,6 +8,13 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+#pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
+#if BIT64
+using nuint = System.UInt64;
+#else
+using nuint = System.UInt32;
+#endif
+
 namespace System.IO
 {
     /*
@@ -195,26 +202,17 @@ namespace System.IO
         /// <summary>
         /// Returns true if the stream can be read; otherwise returns false.
         /// </summary>
-        public override bool CanRead
-        {
-            get { return _isOpen && (_access & FileAccess.Read) != 0; }
-        }
+        public override bool CanRead => _isOpen && (_access & FileAccess.Read) != 0;
 
         /// <summary>
         /// Returns true if the stream can seek; otherwise returns false.
         /// </summary>
-        public override bool CanSeek
-        {
-            get { return _isOpen; }
-        }
+        public override bool CanSeek => _isOpen;
 
         /// <summary>
         /// Returns true if the stream can be written to; otherwise returns false.
         /// </summary>
-        public override bool CanWrite
-        {
-            get { return _isOpen && (_access & FileAccess.Write) != 0; }
-        }
+        public override bool CanWrite => _isOpen && (_access & FileAccess.Write) != 0;
 
         /// <summary>
         /// Closes the stream. The stream's memory needs to be dealt with separately.
@@ -629,7 +627,7 @@ namespace System.IO
             {
                 unsafe
                 {
-                    Buffer.ZeroMemory(_mem + len, value - len);
+                    Buffer.ZeroMemory(_mem + len, (nuint)(value - len));
                 }
             }
             Interlocked.Exchange(ref _length, value);
@@ -699,7 +697,7 @@ namespace System.IO
                 // zero any memory in the middle.
                 if (pos > len)
                 {
-                    Buffer.ZeroMemory(_mem + len, pos - len);
+                    Buffer.ZeroMemory(_mem + len, (nuint)(pos - len));
                 }
 
                 // set length after zeroing memory to avoid race condition of accessing unzeroed memory
@@ -840,7 +838,7 @@ namespace System.IO
                     {
                         unsafe
                         {
-                            Buffer.ZeroMemory(_mem + len, pos - len);
+                            Buffer.ZeroMemory(_mem + len, (nuint)(pos - len));
                         }
                     }
 

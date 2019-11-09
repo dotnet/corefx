@@ -10,7 +10,7 @@ namespace System
 {
     internal static partial class Number
     {
-        //  We need 1 additional byte, per length, for the terminating null
+        // We need 1 additional byte, per length, for the terminating null
         internal const int DecimalNumberBufferLength = 29 + 1 + 1;  // 29 for the longest input + 1 for rounding
         internal const int DoubleNumberBufferLength = 767 + 1 + 1;  // 767 for the longest input + 1 for rounding: 4.9406564584124654E-324
         internal const int Int32NumberBufferLength = 10 + 1;    // 10 for the longest input: 2,147,483,647
@@ -102,11 +102,11 @@ namespace System
                 }
 
                 sb.Append('"');
-                sb.Append(", Length = " + DigitsCount);
-                sb.Append(", Scale = " + Scale);
-                sb.Append(", IsNegative = " + IsNegative);
-                sb.Append(", HasNonZeroTail = " + HasNonZeroTail);
-                sb.Append(", Kind = " + Kind);
+                sb.Append(", Length = ").Append(DigitsCount);
+                sb.Append(", Scale = ").Append(Scale);
+                sb.Append(", IsNegative = ").Append(IsNegative);
+                sb.Append(", HasNonZeroTail = ").Append(HasNonZeroTail);
+                sb.Append(", Kind = ").Append(Kind);
                 sb.Append(']');
 
                 return sb.ToString();

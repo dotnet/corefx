@@ -2,17 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32;
-using System;
 using System.Collections;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Security;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -727,7 +721,7 @@ namespace System.Security.Cryptography.Xml
             return collection;
         }
 
-        private static readonly char[] s_hexValues = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        private static readonly char[] s_hexValues = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
         internal static string EncodeHexString(byte[] sArray)
         {
             return EncodeHexString(sArray, 0, (uint)sArray.Length);

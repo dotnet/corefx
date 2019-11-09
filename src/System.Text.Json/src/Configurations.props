@@ -1,13 +1,13 @@
 ﻿<Project DefaultTargets="Build">
   <PropertyGroup>
     <PackageConfigurations>
-      netstandard;
-      netcoreapp;
-      uap-Windows_NT;
+      netstandard2.0;
+      netcoreapp3.0;
       net461;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
+      netcoreapp;
       netfx;
     </BuildConfigurations>
   </PropertyGroup>

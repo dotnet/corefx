@@ -173,6 +173,15 @@ namespace System.Diagnostics.Tests
                     Assert.Matches("^[0-9a-f][0-9a-f]-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f][0-9a-f]$", traceparent);
                     Assert.Null(startRequest.Headers["tracestate"]);
                     Assert.Null(startRequest.Headers["Request-Id"]);
+
+                    KeyValuePair<string, object> stopEvent;
+                    Assert.True(eventRecords.Records.TryDequeue(out stopEvent));
+                    Assert.Equal("System.Net.Http.Desktop.HttpRequestOut.Stop", stopEvent.Key);
+                    HttpWebRequest stopRequest = ReadPublicProperty<HttpWebRequest>(stopEvent.Value, "Request");
+                    Assert.NotNull(stopRequest);
+
+                    HttpWebResponse stopResponse = ReadPublicProperty<HttpWebResponse>(stopEvent.Value, "Response");
+                    Assert.NotNull(stopResponse);
                 }
             }
             finally
@@ -445,9 +454,9 @@ namespace System.Diagnostics.Tests
                 string[] correlationContext = thisRequest.Headers["Correlation-Context"].Split(',');
 
                 Assert.Equal(3, correlationContext.Length);
-                Assert.True(correlationContext.Contains("key=value"));
-                Assert.True(correlationContext.Contains("bad%2Fkey=value"));
-                Assert.True(correlationContext.Contains("goodkey=bad%2Fvalue"));
+                Assert.Contains("key=value", correlationContext);
+                Assert.Contains("bad%2Fkey=value", correlationContext);
+                Assert.Contains("goodkey=bad%2Fvalue", correlationContext);
             }
             parentActivity.Stop();
         }

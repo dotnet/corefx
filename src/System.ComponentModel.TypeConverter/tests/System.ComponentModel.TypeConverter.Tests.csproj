@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{3F0326A1-9E19-4A6C-95CE-63E65C9D2030}</ProjectGuid>
     <DefineConstants>$(DefineConstants);FUNCTIONAL_TESTS</DefineConstants>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <RootNamespace />
     <AssemblyVersion>9.9.9.9</AssemblyVersion>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="Drawing\ColorConverterTests.cs" />
@@ -54,6 +53,7 @@
     <Compile Include="CharConverterTests.cs" />
     <Compile Include="CollectionChangedEventArgsTests.cs" />
     <Compile Include="CollectionConverterTests.cs" />
+    <Compile Include="ComponentConverterTests.cs" />
     <Compile Include="ComplexBindingPropertiesAttributeTests.cs" />
     <Compile Include="ComponentResourceManagerTests.cs" />
     <Compile Include="ComponentEditorTests.cs" />
@@ -123,6 +123,7 @@
     <Compile Include="TypeConverterAttributeTests.cs" />
     <Compile Include="TypeConverterTests.cs" />
     <Compile Include="TypeConverterTestBase.cs" />
+    <Compile Include="TypeDescriptionProviderTests.cs" />
     <Compile Include="TypeDescriptionProviderAttributeTests.cs" />
     <Compile Include="TypeDescriptorTests.cs" />
     <Compile Include="TypeDescriptorTests.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
@@ -155,7 +156,8 @@
     <Compile Include="XTypeDescriptionProviderTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.ComponentModel.TypeConverter.TestData" Version="$(SystemComponentModelTypeConverterTestDataPackageVersion)" />
+    <PackageReference Include="System.ComponentModel.TypeConverter.TestData" Version="$(SystemComponentModelTypeConverterTestDataVersion)" />
+    <PackageReference Include="Moq" Version="$(MoqVersion)" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\TestResx.resx">

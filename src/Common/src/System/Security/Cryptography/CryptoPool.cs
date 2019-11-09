@@ -13,6 +13,14 @@ namespace System.Security.Cryptography
 
         internal static byte[] Rent(int minimumLength) => ArrayPool<byte>.Shared.Rent(minimumLength);
 
+        internal static void Return(ArraySegment<byte> arraySegment)
+        {
+            Debug.Assert(arraySegment.Array != null);
+            Debug.Assert(arraySegment.Offset == 0);
+
+            Return(arraySegment.Array, arraySegment.Count);
+        }
+
         internal static void Return(byte[] array, int clearSize = ClearAll)
         {
             Debug.Assert(clearSize <= array.Length);
@@ -20,7 +28,7 @@ namespace System.Security.Cryptography
 
             if (!clearWholeArray && clearSize != 0)
             {
-#if netcoreapp || uap || NETCOREAPP || netstandard21
+#if NETCOREAPP || NETSTANDARD2_1
                 CryptographicOperations.ZeroMemory(array.AsSpan(0, clearSize));
 #else
                 Array.Clear(array, 0, clearSize);

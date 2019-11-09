@@ -26,6 +26,54 @@ namespace System
 {
     public static partial class Buffer
     {
+        // Copies from one primitive array to another primitive array without
+        // respecting types.  This calls memmove internally.  The count and
+        // offset parameters here are in bytes.  If you want to use traditional
+        // array element indices and counts, use Array.Copy.
+        public static unsafe void BlockCopy(Array src, int srcOffset, Array dst, int dstOffset, int count)
+        {
+            if (src == null)
+                throw new ArgumentNullException(nameof(src));
+            if (dst == null)
+                throw new ArgumentNullException(nameof(dst));
+
+            nuint uSrcLen = (nuint)src.LongLength;
+            if (src.GetType() != typeof(byte[]))
+            {
+                if (!IsPrimitiveTypeArray(src))
+                    throw new ArgumentException(SR.Arg_MustBePrimArray, nameof(src));
+                uSrcLen *= (nuint)src.GetElementSize();
+            }
+
+            nuint uDstLen = uSrcLen;
+            if (src != dst)
+            {
+                uDstLen = (nuint)dst.LongLength;
+                if (dst.GetType() != typeof(byte[]))
+                {
+                    if (!IsPrimitiveTypeArray(dst))
+                        throw new ArgumentException(SR.Arg_MustBePrimArray, nameof(dst));
+                    uDstLen *= (nuint)dst.GetElementSize();
+                }
+            }
+
+            if (srcOffset < 0)
+                throw new ArgumentOutOfRangeException(nameof(srcOffset), SR.ArgumentOutOfRange_MustBeNonNegInt32);
+            if (dstOffset < 0)
+                throw new ArgumentOutOfRangeException(nameof(dstOffset), SR.ArgumentOutOfRange_MustBeNonNegInt32);
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_MustBeNonNegInt32);
+
+            nuint uCount = (nuint)count;
+            nuint uSrcOffset = (nuint)srcOffset;
+            nuint uDstOffset = (nuint)dstOffset;
+
+            if ((uSrcLen < uSrcOffset + uCount) || (uDstLen < uDstOffset + uCount))
+                throw new ArgumentException(SR.Argument_InvalidOffLen);
+
+            Memmove(ref Unsafe.AddByteOffset(ref dst.GetRawArrayData(), uDstOffset), ref Unsafe.AddByteOffset(ref src.GetRawArrayData(), uSrcOffset), uCount);
+        }
+
         public static int ByteLength(Array array)
         {
             // Is the array present?
@@ -36,21 +84,23 @@ namespace System
             if (!IsPrimitiveTypeArray(array))
                 throw new ArgumentException(SR.Arg_MustBePrimArray, nameof(array));
 
-            return _ByteLength(array);
+            nuint byteLength = (nuint)array.LongLength * (nuint)array.GetElementSize();
+
+            // This API is explosed both as Buffer.ByteLength and also used indirectly in argument
+            // checks for Buffer.GetByte/SetByte.
+            //
+            // If somebody called Get/SetByte on 2GB+ arrays, there is a decent chance that
+            // the computation of the index has overflowed. Thus we intentionally always
+            // throw on 2GB+ arrays in Get/SetByte argument checks (even for indicies <2GB)
+            // to prevent people from running into a trap silently.
+
+            return checked((int)byteLength);
         }
 
         public static byte GetByte(Array array, int index)
         {
-            // Is the array present?
-            if (array == null)
-                throw new ArgumentNullException(nameof(array));
-
-            // Is it of primitive types?
-            if (!IsPrimitiveTypeArray(array))
-                throw new ArgumentException(SR.Arg_MustBePrimArray, nameof(array));
-
-            // Is the index in valid range of the array?
-            if ((uint)index >= (uint)_ByteLength(array))
+            // array argument validation done via ByteLength
+            if ((uint)index >= (uint)ByteLength(array))
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             return Unsafe.Add<byte>(ref array.GetRawArrayData(), index);
@@ -58,26 +108,11 @@ namespace System
 
         public static void SetByte(Array array, int index, byte value)
         {
-            // Is the array present?
-            if (array == null)
-                throw new ArgumentNullException(nameof(array));
-
-            // Is it of primitive types?
-            if (!IsPrimitiveTypeArray(array))
-                throw new ArgumentException(SR.Arg_MustBePrimArray, nameof(array));
-
-            // Is the index in valid range of the array?
-            if ((uint)index >= (uint)_ByteLength(array))
+            // array argument validation done via ByteLength
+            if ((uint)index >= (uint)ByteLength(array))
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             Unsafe.Add<byte>(ref array.GetRawArrayData(), index) = value;
-        }
-
-        // This is currently used by System.IO.UnmanagedMemoryStream
-        internal static unsafe void ZeroMemory(byte* dest, long len)
-        {
-            Debug.Assert((ulong)(len) == (nuint)(len));
-            ZeroMemory(dest, (nuint)(len));
         }
 
         // This method has different signature for x64 and other platforms and is done for performance reasons.
@@ -88,7 +123,7 @@ namespace System
 
         // The attributes on this method are chosen for best JIT performance.
         // Please do not edit unless intentional.
-        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [CLSCompliant(false)]
         public static unsafe void MemoryCopy(void* source, void* destination, long destinationSizeInBytes, long sourceBytesToCopy)
         {
@@ -101,7 +136,7 @@ namespace System
 
         // The attributes on this method are chosen for best JIT performance.
         // Please do not edit unless intentional.
-        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [CLSCompliant(false)]
         public static unsafe void MemoryCopy(void* source, void* destination, ulong destinationSizeInBytes, ulong sourceBytesToCopy)
         {
@@ -110,34 +145,6 @@ namespace System
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.sourceBytesToCopy);
             }
             Memmove((byte*)destination, (byte*)source, checked((nuint)sourceBytesToCopy));
-        }
-
-        internal static unsafe void Memcpy(byte[] dest, int destIndex, byte* src, int srcIndex, int len)
-        {
-            Debug.Assert((srcIndex >= 0) && (destIndex >= 0) && (len >= 0), "Index and length must be non-negative!");
-            Debug.Assert(dest.Length - destIndex >= len, "not enough bytes in dest");
-            // If dest has 0 elements, the fixed statement will throw an
-            // IndexOutOfRangeException.  Special-case 0-byte copies.
-            if (len == 0)
-                return;
-            fixed (byte* pDest = dest)
-            {
-                Memcpy(pDest + destIndex, src + srcIndex, len);
-            }
-        }
-
-        internal static unsafe void Memcpy(byte* pDest, int destIndex, byte[] src, int srcIndex, int len)
-        {
-            Debug.Assert((srcIndex >= 0) && (destIndex >= 0) && (len >= 0), "Index and length must be non-negative!");
-            Debug.Assert(src.Length - srcIndex >= len, "not enough bytes in src");
-            // If dest has 0 elements, the fixed statement will throw an
-            // IndexOutOfRangeException.  Special-case 0-byte copies.
-            if (len == 0)
-                return;
-            fixed (byte* pSrc = src)
-            {
-                Memcpy(pDest + destIndex, pSrc + srcIndex, len);
-            }
         }
 
         // This method has different signature for x64 and other platforms and is done for performance reasons.
@@ -324,16 +331,10 @@ namespace System
             else
             {
                 // Non-blittable memmove
-
-                // Try to avoid calling RhBulkMoveWithWriteBarrier if we can get away
-                // with a no-op.
-                if (!Unsafe.AreSame(ref destination, ref source) && elementCount != 0)
-                {
-                    RuntimeImports.RhBulkMoveWithWriteBarrier(
-                        ref Unsafe.As<T, byte>(ref destination),
-                        ref Unsafe.As<T, byte>(ref source),
-                        elementCount * (nuint)Unsafe.SizeOf<T>());
-                }
+                BulkMoveWithWriteBarrier(
+                    ref Unsafe.As<T, byte>(ref destination),
+                    ref Unsafe.As<T, byte>(ref source),
+                    elementCount * (nuint)Unsafe.SizeOf<T>());
             }
         }
 
@@ -526,7 +527,7 @@ namespace System
 
         // Non-inlinable wrapper around the QCall that avoids polluting the fast path
         // with P/Invoke prolog/epilog.
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static unsafe void _Memmove(byte* dest, byte* src, nuint len)
         {
             __Memmove(dest, src, len);
@@ -534,7 +535,7 @@ namespace System
 
         // Non-inlinable wrapper around the QCall that avoids polluting the fast path
         // with P/Invoke prolog/epilog.
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static unsafe void _Memmove(ref byte dest, ref byte src, nuint len)
         {
             fixed (byte* pDest = &dest)

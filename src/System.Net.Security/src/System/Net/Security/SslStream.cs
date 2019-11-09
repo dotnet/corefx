@@ -754,7 +754,9 @@ namespace System.Net.Security
             ThrowIfExceptionalOrNotAuthenticated();
             ValidateParameters(buffer, offset, count);
             SslReadSync reader = new SslReadSync(this);
-            return ReadAsyncInternal(reader, new Memory<byte>(buffer, offset, count)).GetAwaiter().GetResult();
+            ValueTask<int> vt = ReadAsyncInternal(reader, new Memory<byte>(buffer, offset, count));
+            Debug.Assert(vt.IsCompleted, "Sync operation must have completed synchronously");
+            return vt.GetAwaiter().GetResult();
         }
 
         public void Write(byte[] buffer) => Write(buffer, 0, buffer.Length);
@@ -765,7 +767,9 @@ namespace System.Net.Security
             ValidateParameters(buffer, offset, count);
 
             SslWriteSync writeAdapter = new SslWriteSync(this);
-            WriteAsyncInternal(writeAdapter, new ReadOnlyMemory<byte>(buffer, offset, count)).GetAwaiter().GetResult();
+            ValueTask vt = WriteAsyncInternal(writeAdapter, new ReadOnlyMemory<byte>(buffer, offset, count));
+            Debug.Assert(vt.IsCompleted, "Sync operation must have completed synchronously");
+            vt.GetAwaiter().GetResult();
         }
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
@@ -803,7 +807,7 @@ namespace System.Net.Security
         {
             ThrowIfExceptionalOrNotAuthenticated();
             SslWriteAsync writeAdapter = new SslWriteAsync(this, cancellationToken);
-            return new ValueTask(WriteAsyncInternal(writeAdapter, buffer));
+            return WriteAsyncInternal(writeAdapter, buffer);
         }
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)

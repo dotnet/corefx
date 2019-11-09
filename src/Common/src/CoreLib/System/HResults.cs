@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-//=============================================================================
+// =============================================================================
 //
 //
 // Purpose: Define HResult constants. Every exception has one of these.
 //
 //
-//===========================================================================*/
+// ===========================================================================*/
 // Note: FACILITY_URT is defined as 0x13 (0x8013xxxx).  Within that
 // range, 0x1yyy is for Runtime errors (used for Security, Metadata, etc).
 // In that subrange, 0x15zz and 0x16zz have been allocated for classlib-type
@@ -17,8 +17,6 @@
 
 // Reflection will use 0x1600 -> 0x161f.  IO will use 0x1620 -> 0x163f.
 // Security will use 0x1640 -> 0x165f
-
-using System;
 
 namespace System
 {

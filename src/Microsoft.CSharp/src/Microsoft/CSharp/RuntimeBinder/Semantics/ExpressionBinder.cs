@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
@@ -594,7 +593,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol methCur = null;
             AggregateType atsCur = (AggregateType)typeSrc;
 
-            for (;;)
+            while (true)
             {
                 // Find the next operator.
                 methCur = (methCur == null
@@ -722,10 +721,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // invocation.
         private GroupToArgsBinderResult BindMethodGroupToArgumentsCore(BindingFlag bindFlags, ExprMemberGroup grp, Expr args, int carg, NamedArgumentsKind namedArgumentsKind)
         {
-            ArgInfos pargInfo = new ArgInfos {carg = carg};
+            ArgInfos pargInfo = new ArgInfos { carg = carg };
             FillInArgInfoFromArgList(pargInfo, args);
 
-            ArgInfos pOriginalArgInfo = new ArgInfos {carg = carg};
+            ArgInfos pOriginalArgInfo = new ArgInfos { carg = carg };
             FillInArgInfoFromArgList(pOriginalArgInfo, args);
 
             GroupToArgsBinder binder = new GroupToArgsBinder(this, bindFlags, grp, pargInfo, pOriginalArgInfo, namedArgumentsKind);
@@ -1069,7 +1068,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         [Conditional("DEBUG")]
         private static void AssertObjectIsLvalue(Expr pObject)
         {
-            Debug.Assert (
+            Debug.Assert(
                        pObject == null ||  // statics are always lvalues
                        (((pObject.Flags & EXPRFLAG.EXF_LVALUE) != 0) && (pObject.Kind != ExpressionKind.Property)) ||
                        // things marked as lvalues have props/fields which are lvalues, with one exception:  props of structs
@@ -1106,7 +1105,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             int iDst = 0;
             int argCount = ExpressionIterator.Count(argsPtr);
 
-            Debug.Assert(!@params.Items.Any(p => p is ArgumentListType)); // We should never have picked a varargs method to bind to.
+            Debug.Assert(!Array.Exists(@params.Items, p => p is ArgumentListType)); // We should never have picked a varargs method to bind to.
 
             bool bDontFixParamArray = false;
 
@@ -1319,7 +1318,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 return type;
 
-             NEXTI:
+            NEXTI:
                 ;
             }
 

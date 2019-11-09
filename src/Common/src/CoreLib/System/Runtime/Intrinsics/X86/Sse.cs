@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics;
 
 namespace System.Runtime.Intrinsics.X86
 {
@@ -45,7 +43,6 @@ namespace System.Runtime.Intrinsics.X86
             /// This intrinisc is only available on 64-bit processes
             /// </summary>
             public static long ConvertToInt64WithTruncation(Vector128<float> value) => ConvertToInt64WithTruncation(value);
-
         }
 
         /// <summary>

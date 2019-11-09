@@ -90,7 +90,7 @@ namespace System.Xml.Xsl.Xslt
                     newSize = position + 1;
                 }
                 Record[] tmp = new Record[newSize];
-                Array.Copy(_records, 0, tmp, 0, _records.Length);
+                Array.Copy(_records, tmp, _records.Length);
                 _records = tmp;
             }
         }
@@ -577,7 +577,7 @@ namespace System.Xml.Xsl.Xslt
                 _prefix = rec.prefix;
                 _localName = rec.localName;
             }
-            public static implicit operator string (DelayedQName qn)
+            public static implicit operator string(DelayedQName qn)
             {
                 return qn._prefix.Length == 0 ? qn._localName : (qn._prefix + ':' + qn._localName);
             }
@@ -1037,26 +1037,17 @@ namespace System.Xml.Xsl.Xslt
 
         // ----------------------- ISourceLineInfo -----------------------
 
-        private static int PositionAdjustment(XmlNodeType nt)
-        {
-            switch (nt)
+        private static int PositionAdjustment(XmlNodeType nt) =>
+            nt switch
             {
-                case XmlNodeType.Element:
-                    return 1;   // "<"
-                case XmlNodeType.CDATA:
-                    return 9;   // "<![CDATA["
-                case XmlNodeType.ProcessingInstruction:
-                    return 2;   // "<?"
-                case XmlNodeType.Comment:
-                    return 4;   // "<!--"
-                case XmlNodeType.EndElement:
-                    return 2;   // "</"
-                case XmlNodeType.EntityReference:
-                    return 1;   // "&"
-                default:
-                    return 0;
-            }
-        }
+                XmlNodeType.Element => 1,               // "<"
+                XmlNodeType.CDATA => 9,                 // "<![CDATA["
+                XmlNodeType.ProcessingInstruction => 2, // "<?"
+                XmlNodeType.Comment => 4,               // "<!--"
+                XmlNodeType.EndElement => 2,            // "</"
+                XmlNodeType.EntityReference => 1,       // "&"
+                _ => 0,
+            };
 
         public ISourceLineInfo BuildLineInfo()
         {

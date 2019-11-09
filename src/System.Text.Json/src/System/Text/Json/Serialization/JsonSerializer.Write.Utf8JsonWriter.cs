@@ -12,6 +12,9 @@ namespace System.Text.Json
         /// <param name="writer">The writer to write.</param>
         /// <param name="value">The value to convert and write.</param>
         /// <param name="options">Options to control the behavior.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="writer"/> is null.
+        /// </exception>
         public static void Serialize<TValue>(Utf8JsonWriter writer, TValue value, JsonSerializerOptions options = null)
         {
             WriteValueCore(writer, value, typeof(TValue), options);
@@ -22,12 +25,15 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="value">The value to convert and write.</param>
-        /// <param name="type">The type of the <paramref name="value"/> to convert.</param>
+        /// <param name="inputType">The type of the <paramref name="value"/> to convert.</param>
         /// <param name="options">Options to control the behavior.</param>
-        public static void Serialize(Utf8JsonWriter writer, object value, Type type, JsonSerializerOptions options = null)
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="writer"/> is null.
+        /// </exception>
+        public static void Serialize(Utf8JsonWriter writer, object value, Type inputType, JsonSerializerOptions options = null)
         {
-            VerifyValueAndType(value, type);
-            WriteValueCore(writer, value, type, options);
+            VerifyValueAndType(value, inputType);
+            WriteValueCore(writer, value, inputType, options);
         }
     }
 }

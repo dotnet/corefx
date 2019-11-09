@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
+#endif
 using System.Collections.Generic;
 using System.Reflection;
-
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -30,10 +31,10 @@ namespace System.Diagnostics.Tracing
             EventDataAttribute? eventAttrib,
             List<Type> recursionCheck)
         {
-            var propertyInfos = Statics.GetProperties(dataType);
+            IEnumerable<PropertyInfo> propertyInfos = Statics.GetProperties(dataType);
             var propertyList = new List<PropertyAnalysis>();
 
-            foreach (var propertyInfo in propertyInfos)
+            foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 if (Statics.HasCustomAttribute(propertyInfo, typeof(EventIgnoreAttribute)))
                 {
@@ -57,9 +58,9 @@ namespace System.Diagnostics.Tracing
                     continue;
                 }
 
-                var propertyType = propertyInfo.PropertyType;
+                Type propertyType = propertyInfo.PropertyType;
                 var propertyTypeInfo = TraceLoggingTypeInfo.GetInstance(propertyType, recursionCheck);
-                var fieldAttribute = Statics.GetCustomAttribute<EventFieldAttribute>(propertyInfo);
+                EventFieldAttribute? fieldAttribute = Statics.GetCustomAttribute<EventFieldAttribute>(propertyInfo);
 
                 string propertyName =
                     fieldAttribute != null && fieldAttribute.Name != null
@@ -76,9 +77,9 @@ namespace System.Diagnostics.Tracing
 
             this.properties = propertyList.ToArray();
 
-            foreach (var property in this.properties)
+            foreach (PropertyAnalysis property in this.properties)
             {
-                var typeInfo = property.typeInfo;
+                TraceLoggingTypeInfo typeInfo = property.typeInfo;
                 this.level = (EventLevel)Statics.Combine((int)typeInfo.Level, (int)this.level);
                 this.opcode = (EventOpcode)Statics.Combine((int)typeInfo.Opcode, (int)this.opcode);
                 this.keywords |= typeInfo.Keywords;

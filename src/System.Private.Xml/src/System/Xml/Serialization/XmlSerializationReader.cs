@@ -1269,26 +1269,17 @@ namespace System.Xml.Serialization
             }
         }
 
-        private string CurrentTag()
-        {
-            switch (_r.NodeType)
+        private string CurrentTag() =>
+            _r.NodeType switch
             {
-                case XmlNodeType.Element:
-                    return "<" + _r.LocalName + " xmlns='" + _r.NamespaceURI + "'>";
-                case XmlNodeType.EndElement:
-                    return ">";
-                case XmlNodeType.Text:
-                    return _r.Value;
-                case XmlNodeType.CDATA:
-                    return "CDATA";
-                case XmlNodeType.Comment:
-                    return "<--";
-                case XmlNodeType.ProcessingInstruction:
-                    return "<?";
-                default:
-                    return "(unknown)";
-            }
-        }
+                XmlNodeType.Element => "<" + _r.LocalName + " xmlns='" + _r.NamespaceURI + "'>",
+                XmlNodeType.EndElement => ">",
+                XmlNodeType.Text => _r.Value,
+                XmlNodeType.CDATA => "CDATA",
+                XmlNodeType.Comment => "<--",
+                XmlNodeType.ProcessingInstruction => "<?",
+                _ => "(unknown)",
+            };
 
         protected Exception CreateUnknownTypeException(XmlQualifiedName type)
         {
@@ -2455,8 +2446,8 @@ namespace System.Xml.Serialization
                     }
                 }
 #if DEBUG
-                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (choiceSource == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "Can not find " + member.ChoiceIdentifier.MemberName + " in the members mapping."));
+                // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                if (choiceSource == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "Can not find " + member.ChoiceIdentifier.MemberName + " in the members mapping."));
 #endif
 
             }
@@ -3070,8 +3061,8 @@ namespace System.Xml.Serialization
 
                 string methodName = ReferenceMapping(derived);
 #if DEBUG
-                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, derived.TypeDesc.Name));
+                // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, derived.TypeDesc.Name));
 #endif
 
                 Writer.Write("return ");
@@ -3107,8 +3098,8 @@ namespace System.Xml.Serialization
                         Writer.WriteLine("Reader.ReadStartElement();");
                         string methodName = ReferenceMapping(mapping);
 #if DEBUG
-                            // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                            if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, mapping.TypeDesc.Name));
+                        // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                        if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, mapping.TypeDesc.Name));
 #endif
                         Writer.Write("object e = ");
                         Writer.Write(methodName);
@@ -4578,7 +4569,7 @@ namespace System.Xml.Serialization
                 memberMapping.TypeDesc = arrayMapping.TypeDesc;
                 memberMapping.ReadOnly = readOnly;
                 Member member = new Member(this, source, arrayName, 0, memberMapping, false);
-                member.IsNullable = false;//Note, sowmys: IsNullable is set to false since null condition (xsi:nil) is already handled by 'ReadNull()'
+                member.IsNullable = false; // Note, sowmys: IsNullable is set to false since null condition (xsi:nil) is already handled by 'ReadNull()'
 
                 Member[] members = new Member[] { member };
                 WriteMemberBegin(members);
@@ -4787,8 +4778,8 @@ namespace System.Xml.Serialization
                 {
                     string methodName = ReferenceMapping(mapping);
 #if DEBUG
-                        // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                        if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, mapping.TypeDesc.Name));
+                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                    if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, mapping.TypeDesc.Name));
 #endif
 
                     if (checkForNull)
@@ -4871,8 +4862,8 @@ namespace System.Xml.Serialization
             if (choice != null)
             {
 #if DEBUG
-                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (choiceSource == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "need parent for the " + source));
+                // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                if (choiceSource == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "need parent for the " + source));
 #endif
 
                 string enumTypeName = choice.Mapping.TypeDesc.CSharpName;

@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using Xunit;
 
 namespace System.Linq.Tests

@@ -162,6 +162,9 @@
   <data name="Cryptography_HashAlgorithmNameNullOrEmpty" xml:space="preserve">
     <value>The hash algorithm name cannot be null or empty.</value>
   </data>
+  <data name="Cryptography_InvalidECCharacteristic2Curve" xml:space="preserve">
+    <value>The specified Characteristic2 curve parameters are not valid. Polynomial, A, B, G.X, G.Y, and Order are required. A, B, G.X, G.Y must be the same length, and the same length as Q.X, Q.Y and D if those are specified. Seed, Cofactor and Hash are optional. Other parameters are not allowed.</value>
+  </data>
   <data name="Cryptography_InvalidContextHandle" xml:space="preserve">
     <value>The chain context handle is invalid.</value>
   </data>
@@ -183,6 +186,12 @@
   <data name="Cryptography_InvalidStoreHandle" xml:space="preserve">
     <value>The store handle is invalid.</value>
   </data>
+  <data name="Cryptography_CustomTrustCertsInSystemMode" xml:space="preserve">
+    <value>Custom trust certificates were provided while in System trust mode.</value>
+  </data>
+  <data name="Cryptography_InvalidTrustCertificate" xml:space="preserve">
+    <value>A null or disposed certificate was present in CustomTrustStore.</value>
+  </data>
   <data name="Cryptography_KeyTooSmall" xml:space="preserve">
     <value>The key is too small for the requested operation.</value>
   </data>
@@ -191,6 +200,15 @@
   </data>
   <data name="Cryptography_OpenInvalidHandle" xml:space="preserve">
     <value>Cannot open an invalid handle.</value>
+  </data>
+  <data name="Cryptography_Pfx_BadKeyReference" xml:space="preserve">
+    <value>A certificate referenced a private key which was already referenced, or could not be loaded.</value>
+  </data>
+  <data name="Cryptography_Pfx_BadPassword" xml:space="preserve">
+    <value>The certificate data cannot be read with the provided password, the password may be incorrect.</value>
+  </data>
+  <data name="Cryptography_Pfx_NoCertificates" xml:space="preserve">
+    <value>The provided PFX data contains no certificates.</value>
   </data>
   <data name="Cryptography_PrivateKey_DoesNotMatch" xml:space="preserve">
     <value>The provided key does not match the public key for this certificate.</value>

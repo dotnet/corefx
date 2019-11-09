@@ -5,7 +5,6 @@
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Buffers;
@@ -205,14 +204,9 @@ namespace System.IO
         }
 
         #region Task based Async APIs
-        public virtual Task<string?> ReadLineAsync()
-        {
-            return Task<string?>.Factory.StartNew(state =>
-            {
-                return ((TextReader)state!).ReadLine();
-            },
-            this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
-        }
+        public virtual Task<string?> ReadLineAsync() =>
+            Task<string?>.Factory.StartNew(state => ((TextReader)state!).ReadLine(), this,
+                CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
 
         public virtual async Task<string> ReadToEndAsync()
         {
@@ -241,7 +235,7 @@ namespace System.IO
             }
             if (index < 0 || count < 0)
             {
-                throw new ArgumentOutOfRangeException((index < 0 ? nameof(index): nameof(count)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - index < count)
             {
@@ -279,7 +273,7 @@ namespace System.IO
             }
             if (index < 0 || count < 0)
             {
-                throw new ArgumentOutOfRangeException((index < 0 ? nameof(index): nameof(count)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
             if (buffer.Length - index < count)
             {
@@ -388,7 +382,7 @@ namespace System.IO
                 if (buffer == null)
                     throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
                 if (index < 0 || count < 0)
-                    throw new ArgumentOutOfRangeException((index < 0 ? nameof(index) : nameof(count)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
                 if (buffer.Length - index < count)
                     throw new ArgumentException(SR.Argument_InvalidOffLen);
 
@@ -401,7 +395,7 @@ namespace System.IO
                 if (buffer == null)
                     throw new ArgumentNullException(nameof(buffer), SR.ArgumentNull_Buffer);
                 if (index < 0 || count < 0)
-                    throw new ArgumentOutOfRangeException((index < 0 ? nameof(index) : nameof(count)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                    throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
                 if (buffer.Length - index < count)
                     throw new ArgumentException(SR.Argument_InvalidOffLen);
 

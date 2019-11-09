@@ -26,7 +26,7 @@ namespace System.Data.SqlClient
         private readonly TdsParserStateObject _stateObj;      // target to write to
         private readonly SmiMetaData _metaData;      // metadata describing value
         private readonly bool _isPlp;         // should this column be sent in PLP format?
-        private bool _plpUnknownSent;// did we send initial UNKNOWN_LENGTH marker?
+        private bool _plpUnknownSent; // did we send initial UNKNOWN_LENGTH marker?
         private Encoder _encoder;       // required for chunking character type data
         private SmiMetaData _variantType;   // required for sql_variant
 #if DEBUG
@@ -603,7 +603,7 @@ namespace System.Data.SqlClient
         internal void SetGuid(Guid value)
         {
             Debug.Assert(SmiXetterAccessMap.IsSetterAccessValid(_metaData, SmiXetterTypeCode.XetGuid));
-#if netcoreapp
+#if NETCOREAPP
             Span<byte> bytes = stackalloc byte[16];
             value.TryWriteBytes(bytes);
 #else
@@ -621,7 +621,7 @@ namespace System.Data.SqlClient
 
                 _stateObj.WriteByte((byte)_metaData.MaxLength);
             }
-#if netcoreapp
+#if NETCOREAPP
             _stateObj.WriteByteSpan(bytes);
 #else
             _stateObj.WriteByteArray(bytes, bytes.Length, 0);

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 using System.Globalization;
 
@@ -70,19 +71,13 @@ namespace System.Drawing
             // 3 -- RGB
             // 4 -- ARGB
             //
-            switch (values.Length)
+            return values.Length switch
             {
-                case 1:
-                    return PossibleKnownColor(Color.FromArgb(values[0]));
-
-                case 3:
-                    return PossibleKnownColor(Color.FromArgb(values[0], values[1], values[2]));
-
-                case 4:
-                    return PossibleKnownColor(Color.FromArgb(values[0], values[1], values[2], values[3]));
-            }
-
-            throw new ArgumentException(SR.Format(SR.InvalidColor, text));
+                1 => PossibleKnownColor(Color.FromArgb(values[0])),
+                3 => PossibleKnownColor(Color.FromArgb(values[0], values[1], values[2])),
+                4 => PossibleKnownColor(Color.FromArgb(values[0], values[1], values[2], values[3])),
+                _ => throw new ArgumentException(SR.Format(SR.InvalidColor, text)),
+            };
         }
 
         private static Color PossibleKnownColor(Color color)
@@ -121,7 +116,7 @@ namespace System.Drawing
                 else
                 {
                     Debug.Assert(culture != null);
-                    NumberFormatInfo formatInfo = (NumberFormatInfo)culture.GetFormat(typeof(NumberFormatInfo));
+                    var formatInfo = (NumberFormatInfo?)culture.GetFormat(typeof(NumberFormatInfo));
                     return IntFromString(text, formatInfo);
                 }
             }
@@ -136,7 +131,7 @@ namespace System.Drawing
             return Convert.ToInt32(value, radix);
         }
 
-        private static int IntFromString(string value, NumberFormatInfo formatInfo)
+        private static int IntFromString(string value, NumberFormatInfo? formatInfo)
         {
             return int.Parse(value, NumberStyles.Integer, formatInfo);
         }

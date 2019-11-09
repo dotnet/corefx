@@ -13,6 +13,8 @@ namespace System.Xml
     // XmlReaderSettings class specifies basic features of an XmlReader.
     public sealed class XmlReaderSettings
     {
+        internal static readonly XmlReaderSettings s_defaultReaderSettings = new XmlReaderSettings() { ReadOnly = true };
+
         //
         // Fields
         //
@@ -424,11 +426,7 @@ namespace System.Xml
             }
 
             // resolve and open the url
-            XmlResolver tmpResolver = this.GetXmlResolver();
-            if (tmpResolver == null)
-            {
-                tmpResolver = CreateDefaultResolver();
-            }
+            XmlResolver tmpResolver = this.GetXmlResolver() ?? new XmlUrlResolver();
 
             // create text XML reader
             XmlReader reader = new XmlTextReaderImpl(inputUri, this, inputContext, tmpResolver);
@@ -579,11 +577,6 @@ namespace System.Xml
             IsXmlResolverSet = false;
         }
 
-        private static XmlResolver CreateDefaultResolver()
-        {
-            return new XmlUrlResolver();
-        }
-
         internal XmlReader AddValidation(XmlReader reader)
         {
             XmlResolver resolver = null;
@@ -598,7 +591,7 @@ namespace System.Xml
                 }
             }
 
-            return  AddValidationAndConformanceInternal(reader, resolver, addConformanceWrapper: false);
+            return AddValidationAndConformanceInternal(reader, resolver, addConformanceWrapper: false);
         }
 
         private XmlReader AddValidationAndConformanceWrapper(XmlReader reader)
@@ -609,7 +602,7 @@ namespace System.Xml
                 resolver = GetXmlResolver_CheckConfig();
             }
 
-            return  AddValidationAndConformanceInternal(reader, resolver, addConformanceWrapper: true);
+            return AddValidationAndConformanceInternal(reader, resolver, addConformanceWrapper: true);
         }
 
         private XmlReader AddValidationAndConformanceInternal(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper)

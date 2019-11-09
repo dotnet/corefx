@@ -42,21 +42,9 @@ namespace System
             m_daylightName = local.DaylightName;
         }
 
-        public override string StandardName
-        {
-            get
-            {
-                return m_standardName;
-            }
-        }
+        public override string StandardName => m_standardName;
 
-        public override string DaylightName
-        {
-            get
-            {
-                return m_daylightName;
-            }
-        }
+        public override string DaylightName => m_daylightName;
 
         internal long GetUtcOffsetFromUniversalTime(DateTime time, ref bool isAmbiguousLocalDst)
         {
@@ -148,34 +136,25 @@ namespace System
 
         private static DaylightTime CreateDaylightChanges(int year)
         {
-            DaylightTime? currentDaylightChanges = null;
+            DateTime start = DateTime.MinValue;
+            DateTime end = DateTime.MinValue;
+            TimeSpan delta = TimeSpan.Zero;
 
             if (TimeZoneInfo.Local.SupportsDaylightSavingTime)
             {
-                DateTime start;
-                DateTime end;
-                TimeSpan delta;
-
-                foreach (var rule in TimeZoneInfo.Local.GetAdjustmentRules())
+                foreach (TimeZoneInfo.AdjustmentRule rule in TimeZoneInfo.Local.GetAdjustmentRules())
                 {
                     if (rule.DateStart.Year <= year && rule.DateEnd.Year >= year && rule.DaylightDelta != TimeSpan.Zero)
                     {
                         start = TimeZoneInfo.TransitionTimeToDateTime(year, rule.DaylightTransitionStart);
                         end = TimeZoneInfo.TransitionTimeToDateTime(year, rule.DaylightTransitionEnd);
                         delta = rule.DaylightDelta;
-
-                        currentDaylightChanges = new DaylightTime(start, end, delta);
                         break;
                     }
                 }
             }
 
-            if (currentDaylightChanges == null)
-            {
-                currentDaylightChanges = new DaylightTime(DateTime.MinValue, DateTime.MinValue, TimeSpan.Zero);
-            }
-
-            return currentDaylightChanges;
+            return new DaylightTime(start, end, delta);
         }
 
         public override TimeSpan GetUtcOffset(DateTime time)
@@ -212,6 +191,5 @@ namespace System
         // The per-year information is cached in this instance value. As a result it can
         // be cleaned up by CultureInfo.ClearCachedData, which will clear the instance of this object
         private readonly Hashtable m_CachedDaylightChanges = new Hashtable();
-
     } // class CurrentSystemTimeZone
 }

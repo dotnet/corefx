@@ -184,7 +184,6 @@ namespace System
             return Compare(strA, strB, StringComparison.CurrentCulture);
         }
 
-
         // Provides a culture-correct string comparison. strA is compared to strB
         // to determine whether it is lexicographically less, equal, or greater, and then a
         // negative integer, 0, or a positive integer is returned; respectively.
@@ -192,10 +191,9 @@ namespace System
         //
         public static int Compare(string? strA, string? strB, bool ignoreCase)
         {
-            var comparisonType = ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture;
+            StringComparison comparisonType = ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture;
             return Compare(strA, strB, comparisonType);
         }
-
 
         // Provides a more flexible function for string comparison. See StringComparison
         // for meaning of different comparisonType.
@@ -247,7 +245,6 @@ namespace System
             }
         }
 
-
         // Provides a culture-correct string comparison. strA is compared to strB
         // to determine whether it is lexicographically less, equal, or greater, and then a
         // negative integer, 0, or a positive integer is returned; respectively.
@@ -258,8 +255,6 @@ namespace System
             return compareCulture.CompareInfo.Compare(strA, strB, options);
         }
 
-
-
         // Provides a culture-correct string comparison. strA is compared to strB
         // to determine whether it is lexicographically less, equal, or greater, and then a
         // negative integer, 0, or a positive integer is returned; respectively.
@@ -268,7 +263,7 @@ namespace System
         //
         public static int Compare(string? strA, string? strB, bool ignoreCase, CultureInfo? culture)
         {
-            var options = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
+            CompareOptions options = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
             return Compare(strA, strB, culture, options);
         }
 
@@ -316,7 +311,7 @@ namespace System
                 lengthB = Math.Min(lengthB, strB.Length - indexB);
             }
 
-            var options = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
+            CompareOptions options = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
             return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, indexA, lengthA, strB, indexB, lengthB, options);
         }
 
@@ -327,10 +322,9 @@ namespace System
         //
         public static int Compare(string? strA, int indexA, string? strB, int indexB, int length, bool ignoreCase, CultureInfo? culture)
         {
-            var options = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
+            CompareOptions options = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
             return Compare(strA, indexA, strB, indexB, length, culture, options);
         }
-
 
         // Determines whether two string regions match.  The substring of strA beginning
         // at indexA of length length is compared with the substring of strB
@@ -361,7 +355,6 @@ namespace System
 
             if (strA == null || strB == null)
             {
-
                 if (object.ReferenceEquals(strA, strB))
                 {
                     // They're both null
@@ -645,11 +638,11 @@ namespace System
             {
                 case StringComparison.CurrentCulture:
                 case StringComparison.CurrentCultureIgnoreCase:
-                    return (CultureInfo.CurrentCulture.CompareInfo.Compare(this, value, GetCaseCompareOfComparisonCulture(comparisonType)) == 0);
+                    return CultureInfo.CurrentCulture.CompareInfo.Compare(this, value, GetCaseCompareOfComparisonCulture(comparisonType)) == 0;
 
                 case StringComparison.InvariantCulture:
                 case StringComparison.InvariantCultureIgnoreCase:
-                    return (CompareInfo.Invariant.Compare(this, value, GetCaseCompareOfComparisonCulture(comparisonType)) == 0);
+                    return CompareInfo.Invariant.Compare(this, value, GetCaseCompareOfComparisonCulture(comparisonType)) == 0;
 
                 case StringComparison.Ordinal:
                     if (this.Length != value.Length)
@@ -667,11 +660,10 @@ namespace System
             }
         }
 
-
         // Determines whether two Strings match.
         public static bool Equals(string? a, string? b)
         {
-            if (object.ReferenceEquals(a,b))
+            if (object.ReferenceEquals(a, b))
             {
                 return true;
             }
@@ -702,11 +694,11 @@ namespace System
             {
                 case StringComparison.CurrentCulture:
                 case StringComparison.CurrentCultureIgnoreCase:
-                    return (CultureInfo.CurrentCulture.CompareInfo.Compare(a, b, GetCaseCompareOfComparisonCulture(comparisonType)) == 0);
+                    return CultureInfo.CurrentCulture.CompareInfo.Compare(a, b, GetCaseCompareOfComparisonCulture(comparisonType)) == 0;
 
                 case StringComparison.InvariantCulture:
                 case StringComparison.InvariantCultureIgnoreCase:
-                    return (CompareInfo.Invariant.Compare(a, b, GetCaseCompareOfComparisonCulture(comparisonType)) == 0);
+                    return CompareInfo.Invariant.Compare(a, b, GetCaseCompareOfComparisonCulture(comparisonType)) == 0;
 
                 case StringComparison.Ordinal:
                     if (a.Length != b.Length)
@@ -724,15 +716,9 @@ namespace System
             }
         }
 
-        public static bool operator ==(string? a, string? b)
-        {
-            return string.Equals(a, b);
-        }
+        public static bool operator ==(string? a, string? b) => string.Equals(a, b);
 
-        public static bool operator !=(string? a, string? b)
-        {
-            return !string.Equals(a, b);
-        }
+        public static bool operator !=(string? a, string? b) => !string.Equals(a, b);
 
         // Gets a hash code for this string.  If strings A and B are such that A.Equals(B), then
         // they will return the same hash code.

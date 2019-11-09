@@ -108,7 +108,7 @@ namespace System.Text.Json
         {
             if (!TryGetBytesFromBase64(out byte[] value))
             {
-                throw ThrowHelper.GetFormatException(DateType.Base64String);
+                throw ThrowHelper.GetFormatException(DataType.Base64String);
             }
             return value;
         }
@@ -395,7 +395,7 @@ namespace System.Text.Json
         {
             if (!TryGetDateTime(out DateTime value))
             {
-                throw ThrowHelper.GetFormatException(DateType.DateTime);
+                throw ThrowHelper.GetFormatException(DataType.DateTime);
             }
 
             return value;
@@ -418,7 +418,7 @@ namespace System.Text.Json
         {
             if (!TryGetDateTimeOffset(out DateTimeOffset value))
             {
-                throw ThrowHelper.GetFormatException(DateType.DateTimeOffset);
+                throw ThrowHelper.GetFormatException(DataType.DateTimeOffset);
             }
 
             return value;
@@ -441,7 +441,7 @@ namespace System.Text.Json
         {
             if (!TryGetGuid(out Guid value))
             {
-                throw new FormatException(SR.FormatGuid);
+                throw ThrowHelper.GetFormatException(DataType.Guid);
             }
 
             return value;
@@ -823,7 +823,7 @@ namespace System.Text.Json
             {
                 long sequenceLength = ValueSequence.Length;
 
-                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(sequenceLength))
+                if (!JsonHelpers.IsValidDateTimeOffsetParseLength(sequenceLength))
                 {
                     value = default;
                     return false;
@@ -837,7 +837,7 @@ namespace System.Text.Json
             }
             else
             {
-                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(ValueSpan.Length))
+                if (!JsonHelpers.IsValidDateTimeOffsetParseLength(ValueSpan.Length))
                 {
                     value = default;
                     return false;
@@ -853,8 +853,7 @@ namespace System.Text.Json
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
-            if (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
-                && JsonHelpers.TryParseAsISO(span, out DateTime tmp))
+            if (JsonHelpers.TryParseAsISO(span, out DateTime tmp))
             {
                 value = tmp;
                 return true;
@@ -887,7 +886,7 @@ namespace System.Text.Json
             {
                 long sequenceLength = ValueSequence.Length;
 
-                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(sequenceLength))
+                if (!JsonHelpers.IsValidDateTimeOffsetParseLength(sequenceLength))
                 {
                     value = default;
                     return false;
@@ -901,7 +900,7 @@ namespace System.Text.Json
             }
             else
             {
-                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(ValueSpan.Length))
+                if (!JsonHelpers.IsValidDateTimeOffsetParseLength(ValueSpan.Length))
                 {
                     value = default;
                     return false;
@@ -917,8 +916,7 @@ namespace System.Text.Json
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
-            if (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
-                && JsonHelpers.TryParseAsISO(span, out DateTimeOffset tmp))
+            if (JsonHelpers.TryParseAsISO(span, out DateTimeOffset tmp))
             {
                 value = tmp;
                 return true;

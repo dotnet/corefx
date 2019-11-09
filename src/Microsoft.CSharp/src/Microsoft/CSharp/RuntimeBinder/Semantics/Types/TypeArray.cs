@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -101,7 +100,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public void AssertValid()
         {
             Debug.Assert(Count >= 0);
-            Debug.Assert(Items.All(item => item != null));
+            Debug.Assert(Array.TrueForAll(Items, item => item != null));
         }
 
         public void CopyItems(int i, int c, CType[] dest) => Array.Copy(Items, i, dest, 0, c);
@@ -157,7 +156,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             CType[] combined = new CType[prgtype1.Length + prgtype2.Length];
-            Array.Copy(prgtype1, 0, combined, 0, prgtype1.Length);
+            Array.Copy(prgtype1, combined, prgtype1.Length);
             Array.Copy(prgtype2, 0, combined, prgtype1.Length, prgtype2.Length);
             return Allocate(combined);
         }

@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
+#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -81,8 +83,8 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         internal EventLevel Level
         {
-            get { return this.level; }
-            set { this.level = value; }
+            get => this.level;
+            set => this.level = value;
         }
 
         /// <summary>
@@ -107,8 +109,8 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         internal EventOpcode Opcode
         {
-            get { return this.opcode; }
-            set { this.opcode = value; }
+            get => this.opcode;
+            set => this.opcode = value;
         }
 
         /// <summary>

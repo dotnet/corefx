@@ -4,6 +4,8 @@
 
 using System.Diagnostics;
 
+#pragma warning disable SA1001
+
 // This file contains the handling of Windows OS specific culture features.
 
 namespace System.Globalization
@@ -21,7 +23,7 @@ namespace System.Globalization
         ConsoleLocaleIndex = 8
     }
 
-    internal partial class LocaleData
+    internal static class LocaleData
     {
         // this is done rather than using a large readonly array of strings to avoid
         // generating a large amount of code in the static constructor.

@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace System.Collections
 {
     // An IDictionary is a possibly unordered set of key-value pairs.
@@ -22,7 +20,7 @@ namespace System.Collections
         }
 
         // Returns a collections of the keys in this dictionary.
-        ICollection Keys {get; }
+        ICollection Keys { get; }
 
         // Returns a collections of the values in this dictionary.
         ICollection Values { get; }

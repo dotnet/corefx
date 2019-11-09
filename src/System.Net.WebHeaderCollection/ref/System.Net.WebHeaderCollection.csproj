@@ -1,7 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{99180E9D-F72D-4EF5-8F0E-79C6B29C3FA2}</ProjectGuid>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
+    <Nullable>enable</Nullable>
+    <!-- Disable 8610 (Nullability of reference type doesn't match overridden member) warning so it doesn't turn into an error -->
+    <NoWarn>$(NoWarn);8610</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Net.WebHeaderCollection.cs" />

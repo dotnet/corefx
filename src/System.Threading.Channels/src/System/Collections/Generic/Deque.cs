@@ -53,7 +53,7 @@ namespace System.Collections.Generic
             Debug.Assert(!IsEmpty); // caller's responsibility to make sure there are elements remaining
 
             T item = _array[_head];
-            _array[_head] = default;
+            _array[_head] = default!;
 
             if (++_head == _array.Length)
             {
@@ -74,7 +74,7 @@ namespace System.Collections.Generic
             }
 
             T item = _array[_tail];
-            _array[_tail] = default;
+            _array[_tail] = default!;
 
             _size--;
             return item;
@@ -108,7 +108,7 @@ namespace System.Collections.Generic
 
             if (_head == 0)
             {
-                Array.Copy(_array, 0, newArray, 0, _size);
+                Array.Copy(_array, newArray, _size);
             }
             else
             {

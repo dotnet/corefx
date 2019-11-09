@@ -2,14 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
 using System.Diagnostics;
-using System.Numerics.Hashing;
 using System.Runtime.CompilerServices;
 
 namespace System.Drawing
 {
     [DebuggerDisplay("{NameAndARGBValue}")]
     [Serializable]
+    [TypeConverter("System.Drawing.ColorConverter, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     [TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public readonly struct Color : IEquatable<Color>
     {
@@ -326,7 +327,7 @@ namespace System.Drawing
 
         // User supplied name of color. Will not be filled in if
         // we map to a "knowncolor"
-        private readonly string name; // Do not rename (binary serialization)
+        private readonly string? name; // Do not rename (binary serialization)
 
         // Standard 32bit sRGB (ARGB)
         private readonly long value; // Do not rename (binary serialization)
@@ -345,7 +346,7 @@ namespace System.Drawing
             this.knownColor = unchecked((short)knownColor);
         }
 
-        private Color(long value, short state, string name, KnownColor knownColor)
+        private Color(long value, short state, string? name, KnownColor knownColor)
         {
             this.value = value;
             this.state = state;
@@ -384,6 +385,7 @@ namespace System.Drawing
             {
                 if ((state & StateNameValid) != 0)
                 {
+                    Debug.Assert(name != null);
                     return name;
                 }
 
@@ -564,7 +566,7 @@ namespace System.Drawing
 
         public static bool operator !=(Color left, Color right) => !(left == right);
 
-        public override bool Equals(object obj) => obj is Color other && Equals(other);
+        public override bool Equals(object? obj) => obj is Color other && Equals(other);
 
         public bool Equals(Color other) => this == other;
 
@@ -577,11 +579,10 @@ namespace System.Drawing
             // an unnamed color with the same ARGB value.
             // 3. Have an unknown name. Will differ from other unknown-named colors only by name, so we
             // can usefully use the names hash code alone.
-            if (name != null & !IsKnownColor)
+            if (name != null && !IsKnownColor)
                 return name.GetHashCode();
 
-            return HashHelpers.Combine(
-                HashHelpers.Combine(value.GetHashCode(), state.GetHashCode()), knownColor.GetHashCode());
+            return HashCode.Combine(value.GetHashCode(), state.GetHashCode(), knownColor.GetHashCode());
         }
     }
 }

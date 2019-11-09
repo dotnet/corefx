@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace System.Runtime
 {
@@ -11,8 +10,7 @@ namespace System.Runtime
     {
         private static ulong GetTopOfMemory()
         {
-            Interop.Kernel32.SYSTEM_INFO info = new Interop.Kernel32.SYSTEM_INFO();
-            Interop.Kernel32.GetSystemInfo(out info);
+            Interop.Kernel32.GetSystemInfo(out Interop.Kernel32.SYSTEM_INFO info);
             return (ulong)info.lpMaximumApplicationAddress;
         }
 
@@ -29,11 +27,10 @@ namespace System.Runtime
             return true;
         }
 
-        // Based on the shouldThrow parameter, this will throw an exception, or
-        // returns whether there is enough space.  In all cases, we update
-        // our last known free address space, hopefully avoiding needing to
-        // probe again.
-        private static unsafe bool CheckForFreeAddressSpace(ulong size, bool shouldThrow)
+        // Based on the shouldThrow parameter, this will throw an exception.
+        // In all cases, we update our last known free address space, hopefully
+        // avoiding needing to probe again.
+        private static unsafe void CheckForFreeAddressSpace(ulong size, bool shouldThrow)
         {
             // Start walking the address space at 0.  VirtualAlloc may wrap
             // around the address space.  We don't need to find the exact
@@ -52,7 +49,6 @@ namespace System.Runtime
 
             if (freeSpaceAfterGCHeap < size && shouldThrow)
                 throw new InsufficientMemoryException(SR.InsufficientMemory_MemFailPoint_VAFrag);
-            return freeSpaceAfterGCHeap >= size;
         }
 
         // Returns the amount of consecutive free memory available in a block

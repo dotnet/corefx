@@ -299,8 +299,8 @@ namespace System.ComponentModel
                 {
                     Type[] newTypes = new Type[_editorTypes.Length * 2];
                     object[] newEditors = new object[_editors.Length * 2];
-                    Array.Copy(_editorTypes, 0, newTypes, 0, _editorTypes.Length);
-                    Array.Copy(_editors, 0, newEditors, 0, _editors.Length);
+                    Array.Copy(_editorTypes, newTypes, _editorTypes.Length);
+                    Array.Copy(_editors, newEditors, _editors.Length);
                     _editorTypes = newTypes;
                     _editors = newEditors;
                 }
@@ -383,7 +383,7 @@ namespace System.ComponentModel
         {
             if (component != null)
             {
-                ((EventHandler) _valueChangedHandlers?[component])?.Invoke(component, e);
+                ((EventHandler)_valueChangedHandlers?[component])?.Invoke(component, e);
             }
         }
 

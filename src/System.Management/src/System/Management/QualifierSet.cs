@@ -83,24 +83,15 @@ namespace System.Management
         /// </summary>
         private IWbemQualifierSetFreeThreaded GetTypeQualifierSet(QualifierType qualifierSetType)
         {
-            IWbemQualifierSetFreeThreaded qualifierSet    = null;
-            int status                        = (int)ManagementStatus.NoError;
+            IWbemQualifierSetFreeThreaded qualifierSet = null;
 
-            switch (qualifierSetType)
+            int status = qualifierSetType switch
             {
-                case QualifierType.ObjectQualifier :
-                    status = parent.wbemObject.GetQualifierSet_(out qualifierSet);
-                    break;
-                case QualifierType.PropertyQualifier :
-                    status = parent.wbemObject.GetPropertyQualifierSet_(propertyOrMethodName, out qualifierSet);
-                    break;
-                case QualifierType.MethodQualifier :
-                    status = parent.wbemObject.GetMethodQualifierSet_(propertyOrMethodName, out qualifierSet);
-                    break;
-                default:
-                    throw new ManagementException(ManagementStatus.Unexpected, null, null);    // Is this the best fit error ??
-            }
-
+                QualifierType.ObjectQualifier => parent.wbemObject.GetQualifierSet_(out qualifierSet),
+                QualifierType.PropertyQualifier => parent.wbemObject.GetPropertyQualifierSet_(propertyOrMethodName, out qualifierSet),
+                QualifierType.MethodQualifier => parent.wbemObject.GetMethodQualifierSet_(propertyOrMethodName, out qualifierSet),
+                _ => throw new ManagementException(ManagementStatus.Unexpected, null, null),    // Is this the best fit error ??
+            };
             if (status < 0)
             {
                 if ((status & 0xfffff000) == 0x80041000)
@@ -124,7 +115,8 @@ namespace System.Management
         /// </value>
         public int Count
         {
-            get {
+            get
+            {
                 string[] qualifierNames = null;
                 IWbemQualifierSetFreeThreaded quals;
                 try
@@ -160,7 +152,9 @@ namespace System.Management
         /// <para><see langword='true'/> if the object is synchronized;
         ///    otherwise, <see langword='false'/>.</para>
         /// </value>
-        public bool IsSynchronized { get { return false; }
+        public bool IsSynchronized
+        {
+            get { return false; }
         }
 
         /// <summary>
@@ -169,7 +163,9 @@ namespace System.Management
         /// <value>
         ///    <para>The object to be used for synchronization.</para>
         /// </value>
-        public object SyncRoot { get { return this; }
+        public object SyncRoot
+        {
+            get { return this; }
         }
 
         /// <overload>
@@ -315,28 +311,21 @@ namespace System.Management
             internal QualifierDataEnumerator(ManagementBaseObject parent, string propertyOrMethodName,
                                                         QualifierType qualifierType)
             {
-                this.parent               = parent;
+                this.parent = parent;
                 this.propertyOrMethodName = propertyOrMethodName;
-                this.qualifierType        = qualifierType;
-                this.qualifierNames       = null;
+                this.qualifierType = qualifierType;
+                this.qualifierNames = null;
 
                 IWbemQualifierSetFreeThreaded qualifierSet = null;
                 int status = (int)ManagementStatus.NoError;
 
-                switch (qualifierType)
+                status = qualifierType switch
                 {
-                    case QualifierType.ObjectQualifier :
-                        status = parent.wbemObject.GetQualifierSet_(out qualifierSet);
-                        break;
-                    case QualifierType.PropertyQualifier :
-                        status = parent.wbemObject.GetPropertyQualifierSet_(propertyOrMethodName, out qualifierSet);
-                        break;
-                    case QualifierType.MethodQualifier :
-                        status = parent.wbemObject.GetMethodQualifierSet_(propertyOrMethodName, out qualifierSet);
-                        break;
-                    default:
-                        throw new ManagementException(ManagementStatus.Unexpected, null, null);    // Is this the best fit error ??
-                }
+                    QualifierType.ObjectQualifier => parent.wbemObject.GetQualifierSet_(out qualifierSet),
+                    QualifierType.PropertyQualifier => parent.wbemObject.GetPropertyQualifierSet_(propertyOrMethodName, out qualifierSet),
+                    QualifierType.MethodQualifier => parent.wbemObject.GetMethodQualifierSet_(propertyOrMethodName, out qualifierSet),
+                    _ => throw new ManagementException(ManagementStatus.Unexpected, null, null),    // Is this the best fit error ??
+                };
 
                 // If we got an error code back, assume there are NO qualifiers for this object/property/method
                 if (status < 0)
@@ -369,7 +358,8 @@ namespace System.Management
             /// </value>
             public QualifierData Current
             {
-                get {
+                get
+                {
                     if ((index == -1) || (index == qualifierNames.Length))
                         throw new InvalidOperationException();
                     else
@@ -419,7 +409,8 @@ namespace System.Management
         /// </value>
         public virtual QualifierData this[string qualifierName]
         {
-            get {
+            get
+            {
                 if (null == qualifierName)
                     throw new ArgumentNullException(nameof(qualifierName));
 

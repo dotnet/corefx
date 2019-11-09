@@ -149,8 +149,7 @@ namespace System.Runtime.InteropServices
             // occur implicitly as part of unmarshaling another P/Invoke).
             int lastError = Marshal.GetLastWin32Error();
 
-            if (!ReleaseHandle())
-                ReleaseHandleFailed();
+            ReleaseHandle();
 
             Marshal.SetLastWin32Error(lastError);
             GC.SuppressFinalize(this);
@@ -163,10 +162,7 @@ namespace System.Runtime.InteropServices
 
         // Returns whether the handle has been explicitly marked as closed
         // (Close/Dispose) or invalid (SetHandleAsInvalid).
-        public bool IsClosed
-        {
-            get { return _isClosed; }
-        }
+        public bool IsClosed => _isClosed;
 
         // Returns whether the handle looks like an invalid value (i.e. matches one
         // of the handle's designated illegal values). CriticalHandle itself doesn't

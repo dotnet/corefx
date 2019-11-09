@@ -308,7 +308,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (_values[index].Key == key)
                 {
-                    _values[index] = new KeyValuePair<object,object>(key, value);
+                    _values[index] = new KeyValuePair<object, object>(key, value);
                     return;
                 }
             }
@@ -319,7 +319,7 @@ namespace System.ComponentModel.Composition.Hosting
                 var newQueries = new KeyValuePair<object, object>[_valueCount == 0 ? 5 : _valueCount * 2];
                 if (_values != null)
                 {
-                    Array.Copy(_values, 0, newQueries, 0, _valueCount);
+                    Array.Copy(_values, newQueries, _valueCount);
                 }
                 _values = newQueries;
             }

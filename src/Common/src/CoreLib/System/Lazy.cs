@@ -143,7 +143,9 @@ namespace System
 
                 case LazyThreadSafetyMode.ExecutionAndPublication:
                     // we need to create an object for ExecutionAndPublication because we use Monitor-based locking
-                    var state = useDefaultConstructor ? LazyState.ExecutionAndPublicationViaConstructor : LazyState.ExecutionAndPublicationViaFactory;
+                    LazyState state = useDefaultConstructor ?
+                        LazyState.ExecutionAndPublicationViaConstructor :
+                        LazyState.ExecutionAndPublicationViaFactory;
                     return new LazyHelper(state);
 
                 default:
@@ -257,7 +259,7 @@ namespace System
         /// <param name="mode">The lazy thread-safety mode</param>
         /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="mode"/> mode contains an invalid valuee</exception>
         public Lazy(LazyThreadSafetyMode mode) :
-            this(null, mode, useDefaultConstructor:true)
+            this(null, mode, useDefaultConstructor: true)
         {
         }
 
@@ -289,7 +291,7 @@ namespace System
         /// a null reference (Nothing in Visual Basic).</exception>
         /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="mode"/> mode contains an invalid value.</exception>
         public Lazy(Func<T> valueFactory, LazyThreadSafetyMode mode)
-            : this(valueFactory, mode, useDefaultConstructor:false)
+            : this(valueFactory, mode, useDefaultConstructor: false)
         {
         }
 
@@ -417,11 +419,11 @@ namespace System
                         break;
 
                     case LazyState.ExecutionAndPublicationViaConstructor:
-                        ExecutionAndPublication(state, useDefaultConstructor:true);
+                        ExecutionAndPublication(state, useDefaultConstructor: true);
                         break;
 
                     case LazyState.ExecutionAndPublicationViaFactory:
-                        ExecutionAndPublication(state, useDefaultConstructor:false);
+                        ExecutionAndPublication(state, useDefaultConstructor: false);
                         break;
 
                     default:
@@ -509,7 +511,7 @@ namespace System
     /// to ensure that the Lazy&lt;T&gt; does not become initialized if it was not already.</summary>
     internal sealed class LazyDebugView<T>
     {
-        //The Lazy object being viewed.
+        // The Lazy object being viewed.
         private readonly Lazy<T> _lazy;
 
         /// <summary>Constructs a new debugger view object for the provided Lazy object.</summary>
@@ -520,27 +522,15 @@ namespace System
         }
 
         /// <summary>Returns whether the Lazy object is initialized or not.</summary>
-        public bool IsValueCreated
-        {
-            get { return _lazy.IsValueCreated; }
-        }
+        public bool IsValueCreated => _lazy.IsValueCreated;
 
         /// <summary>Returns the value of the Lazy object.</summary>
-        public T Value
-        {
-            get { return _lazy.ValueForDebugDisplay; }
-        }
+        public T Value => _lazy.ValueForDebugDisplay;
 
         /// <summary>Returns the execution mode of the Lazy object</summary>
-        public LazyThreadSafetyMode? Mode
-        {
-            get { return _lazy.Mode; }
-        }
+        public LazyThreadSafetyMode? Mode => _lazy.Mode;
 
         /// <summary>Returns the execution mode of the Lazy object</summary>
-        public bool IsValueFaulted
-        {
-            get { return _lazy.IsValueFaulted; }
-        }
+        public bool IsValueFaulted => _lazy.IsValueFaulted;
     }
 }

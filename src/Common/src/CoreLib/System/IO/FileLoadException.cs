@@ -41,17 +41,7 @@ namespace System.IO
             FileName = fileName;
         }
 
-        public override string Message
-        {
-            get
-            {
-                if (_message == null)
-                {
-                    _message = FormatFileLoadExceptionMessage(FileName, HResult);
-                }
-                return _message;
-            }
-        }
+        public override string Message => _message ??= FormatFileLoadExceptionMessage(FileName, HResult);
 
         public string? FileName { get; }
         public string? FusionLog { get; }
@@ -60,22 +50,19 @@ namespace System.IO
         {
             string s = GetType().ToString() + ": " + Message;
 
-            if (FileName != null && FileName.Length != 0)
-                s += Environment.NewLine + SR.Format(SR.IO_FileName_Name, FileName);
+            if (!string.IsNullOrEmpty(FileName))
+                s += Environment.NewLineConst + SR.Format(SR.IO_FileName_Name, FileName);
 
             if (InnerException != null)
-                s = s + Environment.NewLine + InnerExceptionPrefix + InnerException.ToString();
+                s += Environment.NewLineConst + InnerExceptionPrefix + InnerException.ToString();
 
             if (StackTrace != null)
-                s += Environment.NewLine + StackTrace;
+                s += Environment.NewLineConst + StackTrace;
 
             if (FusionLog != null)
             {
-                if (s == null)
-                    s = " ";
-                s += Environment.NewLine;
-                s += Environment.NewLine;
-                s += FusionLog;
+                s ??= " ";
+                s += Environment.NewLineConst + Environment.NewLineConst + FusionLog;
             }
 
             return s;

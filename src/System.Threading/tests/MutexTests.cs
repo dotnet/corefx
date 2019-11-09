@@ -161,12 +161,7 @@ namespace System.Threading.Tests
         {
             yield return string.Empty;
             yield return "Local\\";
-
-            // Creating global sync objects is not allowed in UWP apps
-            if (!PlatformDetection.IsUap)
-            {
-                yield return "Global\\";
-            }
+            yield return "Global\\";
         }
 
         public static IEnumerable<object[]> AbandonExisting_MemberData()
@@ -404,6 +399,7 @@ namespace System.Threading.Tests
             }
         }
 
+        [ActiveIssue(34666)]
         [Theory]
         [MemberData(nameof(CrossProcess_NamedMutex_ProtectedFileAccessAtomic_MemberData))]
         public void CrossProcess_NamedMutex_ProtectedFileAccessAtomic(string prefix)
@@ -413,7 +409,7 @@ namespace System.Threading.Tests
                 string mutexName = prefix + Guid.NewGuid().ToString("N");
                 string fileName = GetTestFilePath();
 
-                Func<string, string, int> otherProcess = (m, f) =>
+                Action<string, string> otherProcess = (m, f) =>
                 {
                     using (var mutex = Mutex.OpenExisting(m))
                     {
@@ -424,7 +420,6 @@ namespace System.Threading.Tests
 
                         IncrementValueInFileNTimes(mutex, f, 10);
                     }
-                    return RemoteExecutor.SuccessExitCode;
                 };
 
                 using (var mutex = new Mutex(false, mutexName))

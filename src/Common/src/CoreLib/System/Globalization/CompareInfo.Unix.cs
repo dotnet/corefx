@@ -32,7 +32,12 @@ namespace System.Globalization
             }
             else
             {
-                _isAsciiEqualityOrdinal = (_sortName == "en-US" || _sortName == "");
+                // Inline the following condition to avoid potential implementation cycles within globalization
+                //
+                // _isAsciiEqualityOrdinal = _sortName == "" || _sortName == "en" || _sortName.StartsWith("en-", StringComparison.Ordinal);
+                //
+                _isAsciiEqualityOrdinal = _sortName.Length == 0 ||
+                    (_sortName.Length >= 2 && _sortName[0] == 'e' && _sortName[1] == 'n' && (_sortName.Length == 2 || _sortName[2] == '-'));
 
                 _sortHandle = SortHandleCache.GetCachedSortHandle(_sortName);
             }
@@ -238,26 +243,25 @@ namespace System.Globalization
             Debug.Assert((options & CompareOptions.OrdinalIgnoreCase) == 0);
             Debug.Assert((options & CompareOptions.Ordinal) == 0);
 
-#if CORECLR
-            if (_isAsciiEqualityOrdinal && CanUseAsciiOrdinalForOptions(options) && source.IsFastSort() && target.IsFastSort())
+            int index;
+
+            if (_isAsciiEqualityOrdinal && CanUseAsciiOrdinalForOptions(options))
             {
-                int index = IndexOf(source, target, startIndex, count, GetOrdinalCompareOptions(options));
-                if (index != -1)
+                if ((options & CompareOptions.IgnoreCase) != 0)
+                    index = IndexOfOrdinalIgnoreCaseHelper(source.AsSpan(startIndex, count), target.AsSpan(), options, matchLengthPtr, fromBeginning: true);
+                else
+                    index = IndexOfOrdinalHelper(source.AsSpan(startIndex, count), target.AsSpan(), options, matchLengthPtr, fromBeginning: true);
+            }
+            else
+            {
+                fixed (char* pSource = source)
+                fixed (char* pTarget = target)
                 {
-                    if (matchLengthPtr != null)
-                        *matchLengthPtr = target.Length;
+                    index = Interop.Globalization.IndexOf(_sortHandle, pTarget, target.Length, pSource + startIndex, count, options, matchLengthPtr);
                 }
-                return index;
             }
-#endif
 
-            fixed (char* pSource = source)
-            fixed (char* pTarget = target)
-            {
-                int index = Interop.Globalization.IndexOf(_sortHandle, pTarget, target.Length, pSource + startIndex, count, options, matchLengthPtr);
-
-                return index != -1 ? index + startIndex : -1;
-            }
+            return index != -1 ? index + startIndex : -1;
         }
 
         // For now, this method is only called from Span APIs with either options == CompareOptions.None or CompareOptions.IgnoreCase
@@ -269,7 +273,7 @@ namespace System.Globalization
 
             if (_isAsciiEqualityOrdinal && CanUseAsciiOrdinalForOptions(options))
             {
-                if ((options & CompareOptions.IgnoreCase) == CompareOptions.IgnoreCase)
+                if ((options & CompareOptions.IgnoreCase) != 0)
                     return IndexOfOrdinalIgnoreCaseHelper(source, target, options, matchLengthPtr, fromBeginning);
                 else
                     return IndexOfOrdinalHelper(source, target, options, matchLengthPtr, fromBeginning);
@@ -296,7 +300,6 @@ namespace System.Globalization
         {
             Debug.Assert(!GlobalizationMode.Invariant);
 
-            Debug.Assert(!source.IsEmpty);
             Debug.Assert(!target.IsEmpty);
             Debug.Assert(_isAsciiEqualityOrdinal);
 
@@ -306,14 +309,22 @@ namespace System.Globalization
                 char* a = ap;
                 char* b = bp;
 
-                if (target.Length > source.Length)
-                    goto InteropCall;
-
                 for (int j = 0; j < target.Length; j++)
                 {
                     char targetChar = *(b + j);
-                    if (targetChar >= 0x80 || s_highCharTable[targetChar])
+                    if (targetChar >= 0x80 || HighCharTable[targetChar])
                         goto InteropCall;
+                }
+
+                if (target.Length > source.Length)
+                {
+                    for (int k = 0; k < source.Length; k++)
+                    {
+                        char targetChar = *(a + k);
+                        if (targetChar >= 0x80 || HighCharTable[targetChar])
+                            goto InteropCall;
+                    }
+                    return -1;
                 }
 
                 int startIndex, endIndex, jump;
@@ -344,7 +355,10 @@ namespace System.Globalization
                         char valueChar = *(a + sourceIndex);
                         char targetChar = *(b + targetIndex);
 
-                        if (valueChar == targetChar && valueChar < 0x80 && !s_highCharTable[valueChar])
+                        if (valueChar >= 0x80 || HighCharTable[valueChar])
+                            goto InteropCall;
+
+                        if (valueChar == targetChar)
                         {
                             continue;
                         }
@@ -355,22 +369,30 @@ namespace System.Globalization
                         if ((uint)(targetChar - 'a') <= ('z' - 'a'))
                             targetChar = (char)(targetChar - 0x20);
 
-                        if (valueChar >= 0x80 || s_highCharTable[valueChar])
+                        if (valueChar == targetChar)
+                        {
+                            continue;
+                        }
+
+                        // The match may be affected by special character. Verify that the following character is regular ASCII.
+                        if (sourceIndex < source.Length - 1 && *(a + sourceIndex + 1) >= 0x80)
                             goto InteropCall;
-                        else if (valueChar != targetChar)
-                            break;
+                        goto Next;
                     }
 
-                    if (targetIndex == target.Length)
-                    {
-                        if (matchLengthPtr != null)
-                            *matchLengthPtr = target.Length;
-                        return i;
-                    }
+                    // The match may be affected by special character. Verify that the following character is regular ASCII.
+                    if (sourceIndex < source.Length && *(a + sourceIndex) >= 0x80)
+                        goto InteropCall;
+                    if (matchLengthPtr != null)
+                        *matchLengthPtr = target.Length;
+                    return i;
+
+                Next: ;
                 }
 
                 return -1;
-                InteropCall:
+
+            InteropCall:
                 if (fromBeginning)
                     return Interop.Globalization.IndexOf(_sortHandle, b, target.Length, a, source.Length, options, matchLengthPtr);
                 else
@@ -382,7 +404,6 @@ namespace System.Globalization
         {
             Debug.Assert(!GlobalizationMode.Invariant);
 
-            Debug.Assert(!source.IsEmpty);
             Debug.Assert(!target.IsEmpty);
             Debug.Assert(_isAsciiEqualityOrdinal);
 
@@ -392,14 +413,22 @@ namespace System.Globalization
                 char* a = ap;
                 char* b = bp;
 
-                if (target.Length > source.Length)
-                    goto InteropCall;
-
                 for (int j = 0; j < target.Length; j++)
                 {
                     char targetChar = *(b + j);
-                    if (targetChar >= 0x80 || s_highCharTable[targetChar])
+                    if (targetChar >= 0x80 || HighCharTable[targetChar])
                         goto InteropCall;
+                }
+
+                if (target.Length > source.Length)
+                {
+                    for (int k = 0; k < source.Length; k++)
+                    {
+                        char targetChar = *(a + k);
+                        if (targetChar >= 0x80 || HighCharTable[targetChar])
+                            goto InteropCall;
+                    }
+                    return -1;
                 }
 
                 int startIndex, endIndex, jump;
@@ -430,21 +459,32 @@ namespace System.Globalization
                         char valueChar = *(a + sourceIndex);
                         char targetChar = *(b + targetIndex);
 
-                        if (valueChar >= 0x80 || s_highCharTable[valueChar])
+                        if (valueChar >= 0x80 || HighCharTable[valueChar])
                             goto InteropCall;
-                        else if (valueChar != targetChar)
-                            break;
+
+                        if (valueChar == targetChar)
+                        {
+                            continue;
+                        }
+
+                        // The match may be affected by special character. Verify that the following character is regular ASCII.
+                        if (sourceIndex < source.Length - 1 && *(a + sourceIndex + 1) >= 0x80)
+                            goto InteropCall;
+                        goto Next;
                     }
 
-                    if (targetIndex == target.Length)
-                    {
-                        if (matchLengthPtr != null)
-                            *matchLengthPtr = target.Length;
-                        return i;
-                    }
+                    // The match may be affected by special character. Verify that the following character is regular ASCII.
+                    if (sourceIndex < source.Length && *(a + sourceIndex) >= 0x80)
+                        goto InteropCall;
+                    if (matchLengthPtr != null)
+                        *matchLengthPtr = target.Length;
+                    return i;
+
+                Next: ;
                 }
 
                 return -1;
+
             InteropCall:
                 if (fromBeginning)
                     return Interop.Globalization.IndexOf(_sortHandle, b, target.Length, a, source.Length, options, matchLengthPtr);
@@ -471,42 +511,29 @@ namespace System.Globalization
                 return LastIndexOfOrdinalCore(source, target, startIndex, count, ignoreCase: false);
             }
 
-#if CORECLR
-            if (_isAsciiEqualityOrdinal && CanUseAsciiOrdinalForOptions(options) && source.IsFastSort() && target.IsFastSort())
-            {
-                return LastIndexOf(source, target, startIndex, count, GetOrdinalCompareOptions(options));
-            }
-#endif
-
             // startIndex is the index into source where we start search backwards from. leftStartIndex is the index into source
             // of the start of the string that is count characters away from startIndex.
             int leftStartIndex = (startIndex - count + 1);
 
-            fixed (char* pSource = source)
-            fixed (char* pTarget = target)
+            int lastIndex;
+
+            if (_isAsciiEqualityOrdinal && CanUseAsciiOrdinalForOptions(options))
             {
-                int lastIndex = Interop.Globalization.LastIndexOf(_sortHandle, pTarget, target.Length, pSource + (startIndex - count + 1), count, options);
-
-                return lastIndex != -1 ? lastIndex + leftStartIndex : -1;
+                if ((options & CompareOptions.IgnoreCase) != 0)
+                    lastIndex = IndexOfOrdinalIgnoreCaseHelper(source.AsSpan(leftStartIndex, count), target.AsSpan(), options, matchLengthPtr: null, fromBeginning: false);
+                else
+                    lastIndex = IndexOfOrdinalHelper(source.AsSpan(leftStartIndex, count), target.AsSpan(), options, matchLengthPtr: null, fromBeginning: false);
             }
-        }
-
-        private bool StartsWith(string source, string prefix, CompareOptions options)
-        {
-            Debug.Assert(!GlobalizationMode.Invariant);
-
-            Debug.Assert(!string.IsNullOrEmpty(source));
-            Debug.Assert(!string.IsNullOrEmpty(prefix));
-            Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
-
-#if CORECLR
-            if (_isAsciiEqualityOrdinal && CanUseAsciiOrdinalForOptions(options) && source.IsFastSort() && prefix.IsFastSort())
+            else
             {
-                return IsPrefix(source, prefix, GetOrdinalCompareOptions(options));
+                fixed (char* pSource = source)
+                fixed (char* pTarget = target)
+                {
+                    lastIndex = Interop.Globalization.LastIndexOf(_sortHandle, pTarget, target.Length, pSource + (startIndex - count + 1), count, options);
+                }
             }
-#endif
 
-            return Interop.Globalization.StartsWith(_sortHandle, prefix, prefix.Length, source, source.Length, options);
+            return lastIndex != -1 ? lastIndex + leftStartIndex : -1;
         }
 
         private unsafe bool StartsWith(ReadOnlySpan<char> source, ReadOnlySpan<char> prefix, CompareOptions options)
@@ -519,19 +546,10 @@ namespace System.Globalization
 
             if (_isAsciiEqualityOrdinal && CanUseAsciiOrdinalForOptions(options))
             {
-                if (source.Length < prefix.Length)
-                {
-                    return false;
-                }
-
-                if ((options & CompareOptions.IgnoreCase) == CompareOptions.IgnoreCase)
-                {
+                if ((options & CompareOptions.IgnoreCase) != 0)
                     return StartsWithOrdinalIgnoreCaseHelper(source, prefix, options);
-                }
                 else
-                {
                     return StartsWithOrdinalHelper(source, prefix, options);
-                }
             }
             else
             {
@@ -550,9 +568,8 @@ namespace System.Globalization
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!prefix.IsEmpty);
             Debug.Assert(_isAsciiEqualityOrdinal);
-            Debug.Assert(source.Length >= prefix.Length);
 
-            int length = prefix.Length;
+            int length = Math.Min(source.Length, prefix.Length);
 
             fixed (char* ap = &MemoryMarshal.GetReference(source))
             fixed (char* bp = &MemoryMarshal.GetReference(prefix))
@@ -560,10 +577,13 @@ namespace System.Globalization
                 char* a = ap;
                 char* b = bp;
 
-                while (length != 0 && (*a < 0x80) && (*b < 0x80) && (!s_highCharTable[*a]) && (!s_highCharTable[*b]))
+                while (length != 0)
                 {
                     int charA = *a;
                     int charB = *b;
+
+                    if (charA >= 0x80 || charB >= 0x80 || HighCharTable[charA] || HighCharTable[charB])
+                        goto InteropCall;
 
                     if (charA == charB)
                     {
@@ -576,16 +596,39 @@ namespace System.Globalization
                     if ((uint)(charA - 'a') <= (uint)('z' - 'a')) charA -= 0x20;
                     if ((uint)(charB - 'a') <= (uint)('z' - 'a')) charB -= 0x20;
 
-                    if (charA != charB)
-                        return false;
+                    if (charA == charB)
+                    {
+                        a++; b++;
+                        length--;
+                        continue;
+                    }
 
-                    // Next char
-                    a++; b++;
-                    length--;
+                    // The match may be affected by special character. Verify that the following character is regular ASCII.
+                    if (a < ap + source.Length - 1 && *(a + 1) >= 0x80)
+                        goto InteropCall;
+                    if (b < bp + prefix.Length - 1 && *(b + 1) >= 0x80)
+                        goto InteropCall;
+                    return false;
                 }
 
-                if (length == 0) return true;
-                return Interop.Globalization.StartsWith(_sortHandle, b, length, a, length, options);
+                // The match may be affected by special character. Verify that the following character is regular ASCII.
+
+                if (source.Length < prefix.Length)
+                {
+                    if (*b >= 0x80)
+                        goto InteropCall;
+                    return false;
+                }
+
+                if (source.Length > prefix.Length)
+                {
+                    if (*a >= 0x80)
+                        goto InteropCall;
+                }
+                return true;
+
+            InteropCall:
+                return Interop.Globalization.StartsWith(_sortHandle, bp, prefix.Length, ap, source.Length, options);
             }
         }
 
@@ -596,9 +639,8 @@ namespace System.Globalization
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!prefix.IsEmpty);
             Debug.Assert(_isAsciiEqualityOrdinal);
-            Debug.Assert(source.Length >= prefix.Length);
 
-            int length = prefix.Length;
+            int length = Math.Min(source.Length, prefix.Length);
 
             fixed (char* ap = &MemoryMarshal.GetReference(source))
             fixed (char* bp = &MemoryMarshal.GetReference(prefix))
@@ -606,40 +648,48 @@ namespace System.Globalization
                 char* a = ap;
                 char* b = bp;
 
-                while (length != 0 && (*a < 0x80) && (*b < 0x80) && (!s_highCharTable[*a]) && (!s_highCharTable[*b]))
+                while (length != 0)
                 {
                     int charA = *a;
                     int charB = *b;
 
-                    if (charA != charB)
-                        return false;
+                    if (charA >= 0x80 || charB >= 0x80 || HighCharTable[charA] || HighCharTable[charB])
+                        goto InteropCall;
 
-                    // Next char
-                    a++; b++;
-                    length--;
+                    if (charA == charB)
+                    {
+                        a++; b++;
+                        length--;
+                        continue;
+                    }
+
+                    // The match may be affected by special character. Verify that the following character is regular ASCII.
+                    if (a < ap + source.Length - 1 && *(a + 1) >= 0x80)
+                        goto InteropCall;
+                    if (b < bp + prefix.Length - 1 && *(b + 1) >= 0x80)
+                        goto InteropCall;
+                    return false;
                 }
 
-                if (length == 0) return true;
-                return Interop.Globalization.StartsWith(_sortHandle, b, length, a, length, options);
+                // The match may be affected by special character. Verify that the following character is regular ASCII.
+
+                if (source.Length < prefix.Length)
+                {
+                    if (*b >= 0x80)
+                        goto InteropCall;
+                    return false;
+                }
+
+                if (source.Length > prefix.Length)
+                {
+                    if (*a >= 0x80)
+                        goto InteropCall;
+                }
+                return true;
+
+            InteropCall:
+                return Interop.Globalization.StartsWith(_sortHandle, bp, prefix.Length, ap, source.Length, options);
             }
-        }
-
-        private bool EndsWith(string source, string suffix, CompareOptions options)
-        {
-            Debug.Assert(!GlobalizationMode.Invariant);
-
-            Debug.Assert(!string.IsNullOrEmpty(source));
-            Debug.Assert(!string.IsNullOrEmpty(suffix));
-            Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
-
-#if CORECLR
-            if (_isAsciiEqualityOrdinal && CanUseAsciiOrdinalForOptions(options) && source.IsFastSort() && suffix.IsFastSort())
-            {
-                return IsSuffix(source, suffix, GetOrdinalCompareOptions(options));
-            }
-#endif
-
-            return Interop.Globalization.EndsWith(_sortHandle, suffix, suffix.Length, source, source.Length, options);
         }
 
         private unsafe bool EndsWith(ReadOnlySpan<char> source, ReadOnlySpan<char> suffix, CompareOptions options)
@@ -652,19 +702,10 @@ namespace System.Globalization
 
             if (_isAsciiEqualityOrdinal && CanUseAsciiOrdinalForOptions(options))
             {
-                if (source.Length < suffix.Length)
-                {
-                    return false;
-                }
-
-                if ((options & CompareOptions.IgnoreCase) == CompareOptions.IgnoreCase)
-                {
+                if ((options & CompareOptions.IgnoreCase) != 0)
                     return EndsWithOrdinalIgnoreCaseHelper(source, suffix, options);
-                }
                 else
-                {
                     return EndsWithOrdinalHelper(source, suffix, options);
-                }
             }
             else
             {
@@ -683,9 +724,8 @@ namespace System.Globalization
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!suffix.IsEmpty);
             Debug.Assert(_isAsciiEqualityOrdinal);
-            Debug.Assert(source.Length >= suffix.Length);
 
-            int length = suffix.Length;
+            int length = Math.Min(source.Length, suffix.Length);
 
             fixed (char* ap = &MemoryMarshal.GetReference(source))
             fixed (char* bp = &MemoryMarshal.GetReference(suffix))
@@ -693,10 +733,13 @@ namespace System.Globalization
                 char* a = ap + source.Length - 1;
                 char* b = bp + suffix.Length - 1;
 
-                while (length != 0 && (*a < 0x80) && (*b < 0x80) && (!s_highCharTable[*a]) && (!s_highCharTable[*b]))
+                while (length != 0)
                 {
                     int charA = *a;
                     int charB = *b;
+
+                    if (charA >= 0x80 || charB >= 0x80 || HighCharTable[charA] || HighCharTable[charB])
+                        goto InteropCall;
 
                     if (charA == charB)
                     {
@@ -709,16 +752,20 @@ namespace System.Globalization
                     if ((uint)(charA - 'a') <= (uint)('z' - 'a')) charA -= 0x20;
                     if ((uint)(charB - 'a') <= (uint)('z' - 'a')) charB -= 0x20;
 
-                    if (charA != charB)
-                        return false;
+                    if (charA == charB)
+                    {
+                        a--; b--;
+                        length--;
+                        continue;
+                    }
 
-                    // Next char
-                    a--; b--;
-                    length--;
+                    return false;
                 }
 
-                if (length == 0) return true;
-                return Interop.Globalization.EndsWith(_sortHandle, b - length + 1, length, a - length + 1, length, options);
+                return (source.Length >= suffix.Length);
+
+            InteropCall:
+                return Interop.Globalization.EndsWith(_sortHandle, bp, suffix.Length, ap, source.Length, options);
             }
         }
 
@@ -729,9 +776,8 @@ namespace System.Globalization
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!suffix.IsEmpty);
             Debug.Assert(_isAsciiEqualityOrdinal);
-            Debug.Assert(source.Length >= suffix.Length);
 
-            int length = suffix.Length;
+            int length = Math.Min(source.Length, suffix.Length);
 
             fixed (char* ap = &MemoryMarshal.GetReference(source))
             fixed (char* bp = &MemoryMarshal.GetReference(suffix))
@@ -739,21 +785,28 @@ namespace System.Globalization
                 char* a = ap + source.Length - 1;
                 char* b = bp + suffix.Length - 1;
 
-                while (length != 0 && (*a < 0x80) && (*b < 0x80) && (!s_highCharTable[*a]) && (!s_highCharTable[*b]))
+                while (length != 0)
                 {
                     int charA = *a;
                     int charB = *b;
 
-                    if (charA != charB)
-                        return false;
+                    if (charA >= 0x80 || charB >= 0x80 || HighCharTable[charA] || HighCharTable[charB])
+                        goto InteropCall;
 
-                    // Next char
-                    a--; b--;
-                    length--;
+                    if (charA == charB)
+                    {
+                        a--; b--;
+                        length--;
+                        continue;
+                    }
+
+                    return false;
                 }
 
-                if (length == 0) return true;
-                return Interop.Globalization.EndsWith(_sortHandle, b - length + 1, length, a - length + 1, length, options);
+                return (source.Length >= suffix.Length);
+
+            InteropCall:
+                return Interop.Globalization.EndsWith(_sortHandle, bp, suffix.Length, ap, source.Length, options);
             }
         }
 
@@ -896,7 +949,7 @@ namespace System.Globalization
 
         private static CompareOptions GetOrdinalCompareOptions(CompareOptions options)
         {
-            if ((options & CompareOptions.IgnoreCase) == CompareOptions.IgnoreCase)
+            if ((options & CompareOptions.IgnoreCase) != 0)
             {
                 return CompareOptions.OrdinalIgnoreCase;
             }
@@ -960,8 +1013,7 @@ namespace System.Globalization
             }
         }
 
-        // See https://github.com/dotnet/coreclr/blob/master/src/utilcode/util_nodependencies.cpp#L970
-        private static readonly bool[] s_highCharTable = new bool[0x80]
+        private static ReadOnlySpan<bool> HighCharTable => new bool[0x80]
         {
             true, /* 0x0, 0x0 */
             true, /* 0x1, .*/

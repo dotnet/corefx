@@ -3894,7 +3894,7 @@ namespace System.Data.SqlClient
                 else
                 {
                     MultiPartTableName[] newTables = new MultiPartTableName[tables.Length + 1];
-                    Array.Copy(tables, 0, newTables, 0, tables.Length);
+                    Array.Copy(tables, newTables, tables.Length);
                     newTables[tables.Length] = mpt;
                     tables = newTables;
                 }
@@ -7548,7 +7548,7 @@ namespace System.Data.SqlClient
                     {
                         WriteUnsignedLong(TdsEnums.SQL_PLP_NULL, stateObj); // PLP Null.
                     }
-                    return null;//continue; // End of UDT - continue to next parameter.
+                    return null; //continue; // End of UDT - continue to next parameter.
                 }
                 else if (mt.IsPlp)
                 {
@@ -9364,17 +9364,13 @@ namespace System.Data.SqlClient
             {
                 return null;
             }
-            switch (task.Status)
+            return task.Status switch
             {
-                case TaskStatus.RanToCompletion:
-                    return null;
-                case TaskStatus.Faulted:
-                    throw task.Exception.InnerException;
-                case TaskStatus.Canceled:
-                    throw SQL.OperationCancelled();
-                default:
-                    return task;
-            }
+                TaskStatus.RanToCompletion => null,
+                TaskStatus.Faulted => throw task.Exception.InnerException,
+                TaskStatus.Canceled => throw SQL.OperationCancelled(),
+                _ => task,
+            };
         }
 
         private Task WriteValue(object value, MetaType type, byte scale, int actualLength, int encodingByteSize, int offset, TdsParserStateObject stateObj, int paramSize, bool isDataFeed)

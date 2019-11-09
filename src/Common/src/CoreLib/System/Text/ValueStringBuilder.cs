@@ -85,7 +85,7 @@ namespace System.Text
 
         public override string ToString()
         {
-            var s = _chars.Slice(0, _pos).ToString();
+            string s = _chars.Slice(0, _pos).ToString();
             Dispose();
             return s;
         }
@@ -140,8 +140,13 @@ namespace System.Text
             _pos += count;
         }
 
-        public void Insert(int index, string s)
+        public void Insert(int index, string? s)
         {
+            if (s == null)
+            {
+                return;
+            }
+
             int count = s.Length;
 
             if (_pos > (_chars.Length - count))
@@ -171,8 +176,13 @@ namespace System.Text
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append(string s)
+        public void Append(string? s)
         {
+            if (s == null)
+            {
+                return;
+            }
+
             int pos = _pos;
             if (s.Length == 1 && (uint)pos < (uint)_chars.Length) // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
             {
@@ -276,7 +286,7 @@ namespace System.Text
 
             char[] poolArray = ArrayPool<char>.Shared.Rent(Math.Max(_pos + additionalCapacityBeyondPos, _chars.Length * 2));
 
-            _chars.CopyTo(poolArray);
+            _chars.Slice(0, _pos).CopyTo(poolArray);
 
             char[]? toReturn = _arrayToReturnToPool;
             _chars = _arrayToReturnToPool = poolArray;

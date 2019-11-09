@@ -15,7 +15,7 @@ namespace System.Globalization
                 // Never been set before.  Use the system value from registry.
                 _hijriAdvance = GetAdvanceHijriDate();
             }
-            return (_hijriAdvance);
+            return _hijriAdvance;
         }
 
         private const string InternationalRegKey = "Control Panel\\International";
@@ -63,7 +63,7 @@ namespace System.Globalization
                     {
                         try
                         {
-                            int advance = int.Parse(str.AsSpan(HijriAdvanceRegKeyEntry.Length), provider:CultureInfo.InvariantCulture);
+                            int advance = int.Parse(str.AsSpan(HijriAdvanceRegKeyEntry.Length), provider: CultureInfo.InvariantCulture);
                             if ((advance >= MinAdvancedHijri) && (advance <= MaxAdvancedHijri))
                             {
                                 hijriAdvance = advance;

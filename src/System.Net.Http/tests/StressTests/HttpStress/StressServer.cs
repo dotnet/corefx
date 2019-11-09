@@ -3,11 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
 using System.Collections.Specialized;
 using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -24,6 +26,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace HttpStress
 {
@@ -32,14 +35,15 @@ namespace HttpStress
         // Header indicating expected response content length to be returned by the server
         public const string ExpectedResponseContentLength = "Expected-Response-Content-Length";
 
-        private EventListener _eventListener;
+        private EventListener? _eventListener;
         private readonly IWebHost _webHost;
 
-        public Uri ServerUri { get; }
+        public string ServerUri { get; }
 
         public StressServer(Configuration configuration)
         {
             ServerUri = configuration.ServerUri;
+            (string scheme, string hostname, int port) = ParseServerUri(configuration.ServerUri);
             IWebHostBuilder host = WebHost.CreateDefaultBuilder();
 
             if (configuration.UseHttpSys)
@@ -52,7 +56,7 @@ namespace HttpStress
                 // 3. Register the cert, e.g. netsh http add sslcert ipport=[::1]:5001 certhash=THUMBPRINTFROMABOVE appid="{some-guid}"
                 host = host.UseHttpSys(hso =>
                 {
-                    hso.UrlPrefixes.Add(ServerUri.ToString());
+                    hso.UrlPrefixes.Add(ServerUri);
                     hso.Authentication.Schemes = Microsoft.AspNetCore.Server.HttpSys.AuthenticationSchemes.None;
                     hso.Authentication.AllowAnonymous = true;
                     hso.MaxConnections = null;
@@ -66,26 +70,54 @@ namespace HttpStress
                 {
                     // conservative estimation based on https://github.com/aspnet/AspNetCore/blob/caa910ceeba5f2b2c02c47a23ead0ca31caea6f0/src/Servers/Kestrel/Core/src/Internal/Http2/Http2Stream.cs#L204
                     ko.Limits.MaxRequestLineSize = Math.Max(ko.Limits.MaxRequestLineSize, configuration.MaxRequestUriSize + 100);
+                    ko.Limits.MaxRequestHeaderCount = Math.Max(ko.Limits.MaxRequestHeaderCount, configuration.MaxRequestHeaderCount);
+                    ko.Limits.MaxRequestHeadersTotalSize = Math.Max(ko.Limits.MaxRequestHeadersTotalSize, configuration.MaxRequestHeaderTotalSize);
 
-                    IPAddress iPAddress = Dns.GetHostAddresses(configuration.ServerUri.Host).First();
+                    ko.Limits.Http2.MaxStreamsPerConnection = configuration.ServerMaxConcurrentStreams ?? ko.Limits.Http2.MaxStreamsPerConnection;
+                    ko.Limits.Http2.MaxFrameSize = configuration.ServerMaxFrameSize ?? ko.Limits.Http2.MaxFrameSize;
+                    ko.Limits.Http2.InitialConnectionWindowSize = configuration.ServerInitialConnectionWindowSize ?? ko.Limits.Http2.InitialConnectionWindowSize;
+                    ko.Limits.Http2.MaxRequestHeaderFieldSize = configuration.ServerMaxRequestHeaderFieldSize ?? ko.Limits.Http2.MaxRequestHeaderFieldSize;
 
-                    ko.Listen(iPAddress, configuration.ServerUri.Port, listenOptions =>
+                    switch (hostname)
                     {
-                        // Create self-signed cert for server.
-                        using (RSA rsa = RSA.Create())
+                        case "+":
+                        case "*":
+                            ko.ListenAnyIP(port, ConfigureListenOptions);
+                            break;
+                        default:
+                            IPAddress iPAddress = Dns.GetHostAddresses(hostname).First();
+                            ko.Listen(iPAddress, port, ConfigureListenOptions);
+                            break;
+
+                    }
+
+                    void ConfigureListenOptions(ListenOptions listenOptions)
+                    {
+                        if (scheme == "https")
                         {
-                            var certReq = new CertificateRequest($"CN={ServerUri.Host}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-                            certReq.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
-                            certReq.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new OidCollection { new Oid("1.3.6.1.5.5.7.3.1") }, false));
-                            certReq.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, false));
-                            X509Certificate2 cert = certReq.CreateSelfSigned(DateTimeOffset.UtcNow.AddMonths(-1), DateTimeOffset.UtcNow.AddMonths(1));
-                            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                            // Create self-signed cert for server.
+                            using (RSA rsa = RSA.Create())
                             {
-                                cert = new X509Certificate2(cert.Export(X509ContentType.Pfx));
+                                var certReq = new CertificateRequest("CN=contoso.com", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                                certReq.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
+                                certReq.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new OidCollection { new Oid("1.3.6.1.5.5.7.3.1") }, false));
+                                certReq.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, false));
+                                X509Certificate2 cert = certReq.CreateSelfSigned(DateTimeOffset.UtcNow.AddMonths(-1), DateTimeOffset.UtcNow.AddMonths(1));
+                                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                                {
+                                    cert = new X509Certificate2(cert.Export(X509ContentType.Pfx));
+                                }
+                                listenOptions.UseHttps(cert);
                             }
-                            listenOptions.UseHttps(cert);
                         }
-                    });
+                        else
+                        {
+                            listenOptions.Protocols = 
+                                configuration.HttpVersion == new Version(2,0) ?
+                                HttpProtocols.Http2 :
+                                HttpProtocols.Http1 ;
+                        }
+                    }
                 });
             };
 
@@ -95,7 +127,6 @@ namespace HttpStress
                 // Set up how each request should be handled by the server.
                 .Configure(app =>
                 {
-                    var head = new[] { "HEAD" };
                     app.UseRouting();
                     app.UseEndpoints(MapRoutes);
                 });
@@ -117,6 +148,10 @@ namespace HttpStress
 
             endpoints.MapGet("/", async context =>
             {
+                await context.Response.WriteAsync("ok");
+            });
+            endpoints.MapGet("/get", async context =>
+            {
                 // Get requests just send back the requested content.
                 string content = CreateResponseContent(context);
                 await context.Response.WriteAsync(content);
@@ -136,8 +171,7 @@ namespace HttpStress
             {
                 (string name, StringValues values)[] headersToEcho =
                         context.Request.Headers
-                        // filter the pseudo-headers surfaced by Kestrel
-                        .Where(h => !h.Key.StartsWith(':'))
+                        .Where(h => h.Key.StartsWith("header-"))
                         // kestrel does not seem to be splitting comma separated header values, handle here
                         .Select(h => (h.Key, new StringValues(h.Value.SelectMany(v => v.Split(',')).Select(x => x.Trim()).ToArray())))
                         .ToArray();
@@ -147,6 +181,10 @@ namespace HttpStress
                     context.Response.Headers.Add(name, values);
                 }
 
+                // send back a checksum of all the echoed headers
+                ulong checksum = CRC.CalculateHeaderCrc(headersToEcho);
+                AppendChecksumHeader(context.Response.Headers, checksum);
+
                 await context.Response.WriteAsync("ok");
 
                 if (context.Response.SupportsTrailers())
@@ -154,7 +192,7 @@ namespace HttpStress
                     // just add variations of already echoed headers as trailers
                     foreach ((string name, StringValues values) in headersToEcho)
                     {
-                        context.Response.AppendTrailer(name + "-Trailer", values);
+                        context.Response.AppendTrailer(name + "-trailer", values);
                     }
                 }
 
@@ -184,21 +222,58 @@ namespace HttpStress
                 // Post echos back the requested content, first buffering it all server-side, then sending it all back.
                 var s = new MemoryStream();
                 await context.Request.Body.CopyToAsync(s);
+                
+                ulong checksum = CRC.CalculateCRC(s.ToArray());
+                AppendChecksumHeader(context.Response.Headers, checksum);
+
                 s.Position = 0;
                 await s.CopyToAsync(context.Response.Body);
             });
             endpoints.MapPost("/duplex", async context =>
             {
                 // Echos back the requested content in a full duplex manner.
-                await context.Request.Body.CopyToAsync(context.Response.Body);
+                ArrayPool<byte> bufferPool = ArrayPool<byte>.Shared;
+
+                byte[] buffer = bufferPool.Rent(512);
+                ulong hashAcc = CRC.InitialCrc;
+                int read;
+
+                try
+                {
+                    while ((read = await context.Request.Body.ReadAsync(buffer)) != 0)
+                    {
+                        hashAcc = CRC.update_crc(hashAcc, buffer, read);
+                        await context.Response.Body.WriteAsync(buffer, 0, read);
+                    }
+                }
+                finally
+                {
+                    bufferPool.Return(buffer);
+                }
+
+                hashAcc = CRC.InitialCrc ^ hashAcc;
+
+                if (context.Response.SupportsTrailers())
+                {
+                    context.Response.AppendTrailer("crc32", hashAcc.ToString());
+                }
             });
             endpoints.MapPost("/duplexSlow", async context =>
             {
                 // Echos back the requested content in a full duplex manner, but one byte at a time.
                 var buffer = new byte[1];
+                ulong hashAcc = CRC.InitialCrc;
                 while ((await context.Request.Body.ReadAsync(buffer)) != 0)
                 {
+                    hashAcc = CRC.update_crc(hashAcc, buffer, buffer.Length);
                     await context.Response.Body.WriteAsync(buffer);
+                }
+
+                hashAcc = CRC.InitialCrc ^ hashAcc;
+
+                if (context.Response.SupportsTrailers())
+                {
+                    context.Response.AppendTrailer("crc32", hashAcc.ToString());
                 }
             });
             endpoints.MapMethods("/", head, context =>
@@ -215,6 +290,11 @@ namespace HttpStress
             });
         }
 
+        private static void AppendChecksumHeader(IHeaderDictionary headers, ulong checksum)
+        {
+            headers.Add("crc32", checksum.ToString());
+        }
+
         public void Dispose()
         {
             _webHost.Dispose(); _eventListener?.Dispose();
@@ -222,7 +302,7 @@ namespace HttpStress
 
         private void SetUpJustInTimeLogging()
         {
-            if (_eventListener == null)
+            if (_eventListener == null && !Console.IsInputRedirected)
             {
                 // If no command-line requested logging, enable the user to press 'L' to enable logging to the console
                 // during execution, so that it can be done just-in-time when something goes awry.
@@ -242,12 +322,34 @@ namespace HttpStress
             }
         }
 
+        private static (string scheme, string hostname, int port) ParseServerUri(string serverUri)
+        {
+            try
+            {
+                var uri = new Uri(serverUri);
+                return (uri.Scheme, uri.Host, uri.Port);
+            } 
+            catch (UriFormatException)
+            {
+                // Simple uri parser: used to parse values valid in Kestrel
+                // but not representable by the System.Uri class, e.g. https://+:5050
+                Match m = Regex.Match(serverUri, "^(?<scheme>https?)://(?<host>[^:/]+)(:(?<port>[0-9]+))?");
+
+                if (!m.Success) throw;
+
+                string scheme = m.Groups["scheme"].Value;
+                string hostname = m.Groups["host"].Value;
+                int port = m.Groups["port"].Success ? int.Parse(m.Groups["port"].Value) : (scheme == "https" ? 443 : 80);
+                return (scheme, hostname, port);
+            }
+        }
+
         /// <summary>EventListener that dumps HTTP events out to either the console or a stream writer.</summary>
         private sealed class HttpEventListener : EventListener
         {
-            private readonly StreamWriter _writer;
+            private readonly StreamWriter? _writer;
 
-            public HttpEventListener(StreamWriter writer = null) => _writer = writer;
+            public HttpEventListener(StreamWriter? writer = null) => _writer = writer;
 
             protected override void OnEventSourceCreated(EventSource eventSource)
             {
@@ -262,11 +364,11 @@ namespace HttpStress
                     if (_writer != null)
                     {
                         var sb = new StringBuilder().Append($"[{eventData.EventName}] ");
-                        for (int i = 0; i < eventData.Payload.Count; i++)
+                        for (int i = 0; i < eventData.Payload?.Count; i++)
                         {
                             if (i > 0)
                                 sb.Append(", ");
-                            sb.Append(eventData.PayloadNames[i]).Append(": ").Append(eventData.Payload[i]);
+                            sb.Append(eventData.PayloadNames?[i]).Append(": ").Append(eventData.Payload[i]);
                         }
                         _writer.WriteLine(sb);
                     }
@@ -275,12 +377,12 @@ namespace HttpStress
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.Write($"[{eventData.EventName}] ");
                         Console.ResetColor();
-                        for (int i = 0; i < eventData.Payload.Count; i++)
+                        for (int i = 0; i < eventData.Payload?.Count; i++)
                         {
                             if (i > 0)
                                 Console.Write(", ");
                             Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(eventData.PayloadNames[i] + ": ");
+                            Console.Write(eventData.PayloadNames?[i] + ": ");
                             Console.ResetColor();
                             Console.Write(eventData.Payload[i]);
                         }
@@ -329,6 +431,5 @@ namespace HttpStress
 
             return true;
         }
-
     }
 }

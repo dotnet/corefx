@@ -2,16 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using Xunit;
 
 namespace System.IO.Tests
 {
-    public partial class BinaryReaderTests
+    public class BinaryReaderTests
     {
         protected virtual Stream CreateStream()
         {
@@ -126,7 +123,7 @@ namespace System.IO.Tests
 
                 using (var reader = new BinaryReader(str, new NegEncoding()))
                 {
-                    AssertExtensions.Throws<ArgumentOutOfRangeException>("charsRemaining", () => reader.Read(new char[10], 0, 10));
+                    Assert.ThrowsAny<ArgumentException>(() => reader.Read(new char[10], 0, 10));
                 }
             }
         }
@@ -185,6 +182,135 @@ namespace System.IO.Tests
 
                     Assert.Equal(expected, destination);
                 }
+            }
+        }
+
+        // ChunkingStream returns less than requested
+        private sealed class ChunkingStream : MemoryStream
+        {
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                return base.Read(buffer, offset, count > 10 ? count - 3 : count);
+            }
+
+            public override int Read(Span<byte> destination)
+            {
+                return base.Read(destination.Length > 10 ? destination.Slice(0, destination.Length - 3) : destination);
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReadChars_OverReads(bool unicodeEncoding)
+        {
+            Encoding encoding = unicodeEncoding ? Encoding.Unicode : Encoding.UTF8;
+
+            char[] data1 = "hello world \ud83d\ude03!".ToCharArray(); // 14 code points, 15 chars in UTF-16, 17 bytes in UTF-8
+            uint data2 = 0xABCDEF01;
+
+            using (Stream stream = new ChunkingStream())
+            {
+                using (BinaryWriter writer = new BinaryWriter(stream, encoding, leaveOpen: true))
+                {
+                    writer.Write(data1);
+                    writer.Write(data2);
+                }
+
+                stream.Seek(0, SeekOrigin.Begin);
+                using (BinaryReader reader = new BinaryReader(stream, encoding, leaveOpen: true))
+                {
+                    Assert.Equal(data1, reader.ReadChars(data1.Length));
+                    Assert.Equal(data2, reader.ReadUInt32());
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(100, 100, 100)]
+        [InlineData(100, 50, 50)]
+        [InlineData(50, 100, 50)]
+        [InlineData(10, 0, 0)]
+        [InlineData(0, 10, 0)]
+        public void Read_ByteSpan(int sourceSize, int destinationSize, int expectedReadLength)
+        {
+            using (var stream = CreateStream())
+            {
+                var source = new byte[sourceSize];
+                new Random(345).NextBytes(source);
+                stream.Write(source, 0, source.Length);
+                stream.Position = 0;
+
+                using (var reader = new BinaryReader(stream))
+                {
+                    var destination = new byte[destinationSize];
+
+                    int readCount = reader.Read(new Span<byte>(destination));
+
+                    Assert.Equal(expectedReadLength, readCount);
+                    Assert.Equal(source.Take(expectedReadLength), destination.Take(expectedReadLength));
+
+                    // Make sure we didn't write past the end
+                    Assert.True(destination.Skip(expectedReadLength).All(b => b == default(byte)));
+                }
+            }
+        }
+
+        [Fact]
+        public void Read_ByteSpan_ThrowIfDisposed()
+        {
+            using (var memStream = CreateStream())
+            {
+                var binaryReader = new BinaryReader(memStream);
+                binaryReader.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => binaryReader.Read(new Span<byte>()));
+            }
+        }
+
+        [Theory]
+        [InlineData(100, 100, 100)]
+        [InlineData(100, 50, 50)]
+        [InlineData(50, 100, 50)]
+        [InlineData(10, 0, 0)]
+        [InlineData(0, 10, 0)]
+        public void Read_CharSpan(int sourceSize, int destinationSize, int expectedReadLength)
+        {
+            using (var stream = CreateStream())
+            {
+                var source = new char[sourceSize];
+                var random = new Random(345);
+
+                for (int i = 0; i < sourceSize; i++)
+                {
+                    source[i] = (char)random.Next(0, 127);
+                }
+
+                stream.Write(Encoding.ASCII.GetBytes(source), 0, source.Length);
+                stream.Position = 0;
+
+                using (var reader = new BinaryReader(stream, Encoding.ASCII))
+                {
+                    var destination = new char[destinationSize];
+
+                    int readCount = reader.Read(new Span<char>(destination));
+
+                    Assert.Equal(expectedReadLength, readCount);
+                    Assert.Equal(source.Take(expectedReadLength), destination.Take(expectedReadLength));
+
+                    // Make sure we didn't write past the end
+                    Assert.True(destination.Skip(expectedReadLength).All(b => b == default(char)));
+                }
+            }
+        }
+
+        [Fact]
+        public void Read_CharSpan_ThrowIfDisposed()
+        {
+            using (var memStream = CreateStream())
+            {
+                var binaryReader = new BinaryReader(memStream);
+                binaryReader.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => binaryReader.Read(new Span<char>()));
             }
         }
     }

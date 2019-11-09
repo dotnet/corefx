@@ -670,7 +670,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (;;)
+                while (true)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -762,7 +762,7 @@ namespace System.Xml
                                 pSrc += 2;
                             }
                             /* Invalid XML character */
-                            else  if (ch <= 0x7F || ch >= 0xFFFE)
+                            else if (ch <= 0x7F || ch >= 0xFFFE)
                             {
                                 pDst = InvalidXmlChar(ch, pDst, true);
                                 pSrc++;
@@ -874,7 +874,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (;;)
+                while (true)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -966,7 +966,7 @@ namespace System.Xml
                                 pSrc += 2;
                             }
                             /* Invalid XML character */
-                            else  if (ch <= 0x7F || ch >= 0xFFFE)
+                            else if (ch <= 0x7F || ch >= 0xFFFE)
                             {
                                 pDst = InvalidXmlChar(ch, pDst, true);
                                 pSrc++;
@@ -1114,7 +1114,7 @@ namespace System.Xml
                 char* pSrc = pSrcBegin;
 
                 int ch = 0;
-                for (;;)
+                while (true)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1150,7 +1150,7 @@ namespace System.Xml
                         pSrc += 2;
                     }
                     /* Invalid XML character */
-                    else  if (ch <= 0x7F || ch >= 0xFFFE)
+                    else if (ch <= 0x7F || ch >= 0xFFFE)
                     {
                         pDst = InvalidXmlChar(ch, pDst, false);
                         pSrc++;
@@ -1289,7 +1289,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (;;)
+                while (true)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1369,7 +1369,7 @@ namespace System.Xml
                                 pSrc += 2;
                             }
                             /* Invalid XML character */
-                            else  if (ch <= 0x7F || ch >= 0xFFFE)
+                            else if (ch <= 0x7F || ch >= 0xFFFE)
                             {
                                 pDst = InvalidXmlChar(ch, pDst, false);
                                 pSrc++;
@@ -1491,7 +1491,7 @@ namespace System.Xml
                     char* pDst = pDstBegin + bufPos;
 
                     int ch = 0;
-                    for (;;)
+                    while (true)
                     {
                         char* pDstEnd = pDst + (pSrcEnd - pSrc);
                         if (pDstEnd > pDstBegin + bufLen)
@@ -1600,7 +1600,7 @@ namespace System.Xml
                                     pSrc += 2;
                                 }
                                 /* Invalid XML character */
-                                else  if (ch <= 0x7F || ch >= 0xFFFE)
+                                else if (ch <= 0x7F || ch >= 0xFFFE)
                                 {
                                     pDst = InvalidXmlChar(ch, pDst, false);
                                     pSrc++;
@@ -1681,7 +1681,7 @@ namespace System.Xml
                     char* pDst = pDstBegin + bufPos;
 
                     int ch = 0;
-                    for (;;)
+                    while (true)
                     {
                         char* pDstEnd = pDst + (pSrcEnd - pSrc);
                         if (pDstEnd > pDstBegin + bufLen)
@@ -1784,7 +1784,7 @@ namespace System.Xml
                                     pSrc += 2;
                                 }
                                 /* Invalid XML character */
-                                else  if (ch <= 0x7F || ch >= 0xFFFE)
+                                else if (ch <= 0x7F || ch >= 0xFFFE)
                                 {
                                     pDst = InvalidXmlChar(ch, pDst, false);
                                     pSrc++;

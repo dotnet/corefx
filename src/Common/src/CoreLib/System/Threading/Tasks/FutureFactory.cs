@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 namespace System.Threading.Tasks
 {
@@ -203,7 +202,7 @@ namespace System.Threading.Tasks
         /// tasks created by this factory unless another CancellationToken value is explicitly specified
         /// during the call to the factory methods.
         /// </remarks>
-        public CancellationToken CancellationToken { get { return m_defaultCancellationToken; } }
+        public CancellationToken CancellationToken => m_defaultCancellationToken;
 
         /// <summary>
         /// Gets the <see cref="System.Threading.Tasks.TaskScheduler">TaskScheduler</see> of this
@@ -215,7 +214,7 @@ namespace System.Threading.Tasks
         /// If null, <see cref="System.Threading.Tasks.TaskScheduler.Current">TaskScheduler.Current</see>
         /// will be used.
         /// </remarks>
-        public TaskScheduler? Scheduler { get { return m_defaultScheduler; } }
+        public TaskScheduler? Scheduler => m_defaultScheduler;
 
         /// <summary>
         /// Gets the <see cref="System.Threading.Tasks.TaskCreationOptions">TaskCreationOptions
@@ -225,7 +224,7 @@ namespace System.Threading.Tasks
         /// This property returns the default creation options for this factory.  They will be used to create all
         /// tasks unless other options are explicitly specified during calls to this factory's methods.
         /// </remarks>
-        public TaskCreationOptions CreationOptions { get { return m_defaultCreationOptions; } }
+        public TaskCreationOptions CreationOptions => m_defaultCreationOptions;
 
         /// <summary>
         /// Gets the <see cref="System.Threading.Tasks.TaskCreationOptions">TaskContinuationOptions
@@ -235,7 +234,7 @@ namespace System.Threading.Tasks
         /// This property returns the default continuation options for this factory.  They will be used to create
         /// all continuation tasks unless other options are explicitly specified during calls to this factory's methods.
         /// </remarks>
-        public TaskContinuationOptions ContinuationOptions { get { return m_defaultContinuationOptions; } }
+        public TaskContinuationOptions ContinuationOptions => m_defaultContinuationOptions;
 
 
         /* StartNew */
@@ -773,8 +772,8 @@ namespace System.Threading.Tasks
 
             try
             {
-                //if we don't require synchronization, a faster set result path is taken
-                var asyncResult = beginMethod(iar =>
+                // if we don't require synchronization, a faster set result path is taken
+                IAsyncResult asyncResult = beginMethod(iar =>
                 {
                     if (!iar.CompletedSynchronously)
                         FromAsyncCoreLogic(iar, endFunction, endAction, promise, requiresSynchronization: true);
@@ -890,8 +889,8 @@ namespace System.Threading.Tasks
 
             try
             {
-                //if we don't require synchronization, a faster set result path is taken
-                var asyncResult = beginMethod(arg1, iar =>
+                // if we don't require synchronization, a faster set result path is taken
+                IAsyncResult asyncResult = beginMethod(arg1, iar =>
                 {
                     if (!iar.CompletedSynchronously)
                         FromAsyncCoreLogic(iar, endFunction, endAction, promise, requiresSynchronization: true);
@@ -1015,8 +1014,8 @@ namespace System.Threading.Tasks
 
             try
             {
-                //if we don't require synchronization, a faster set result path is taken
-                var asyncResult = beginMethod(arg1, arg2, iar =>
+                // if we don't require synchronization, a faster set result path is taken
+                IAsyncResult asyncResult = beginMethod(arg1, arg2, iar =>
                 {
                     if (!iar.CompletedSynchronously)
                         FromAsyncCoreLogic(iar, endFunction, endAction, promise, requiresSynchronization: true);
@@ -1148,8 +1147,8 @@ namespace System.Threading.Tasks
 
             try
             {
-                //if we don't require synchronization, a faster set result path is taken
-                var asyncResult = beginMethod(arg1, arg2, arg3, iar =>
+                // if we don't require synchronization, a faster set result path is taken
+                IAsyncResult asyncResult = beginMethod(arg1, arg2, arg3, iar =>
                 {
                     if (!iar.CompletedSynchronously)
                         FromAsyncCoreLogic(iar, endFunction, endAction, promise, requiresSynchronization: true);
@@ -1204,7 +1203,7 @@ namespace System.Threading.Tasks
             // the task doesn't have AttachedToParent set on it, there's no need to complete it in
             // case of an exception occurring... we can just let it go unresolved.
             var promise = new FromAsyncTrimPromise<TInstance>(thisRef, endMethod);
-            var asyncResult = beginMethod(thisRef, args, FromAsyncTrimPromise<TInstance>.s_completeFromAsyncResult, promise);
+            IAsyncResult asyncResult = beginMethod(thisRef, args, FromAsyncTrimPromise<TInstance>.s_completeFromAsyncResult, promise);
 
             // If the IAsyncResult completed asynchronously, completing the promise will be handled by the callback.
             // If it completed synchronously, we'll handle that here.
@@ -1229,14 +1228,14 @@ namespace System.Threading.Tasks
             internal static readonly AsyncCallback s_completeFromAsyncResult = CompleteFromAsyncResult;
 
             /// <summary>A reference to the object on which the begin/end methods are invoked.</summary>
-            [AllowNull, MaybeNull] private TInstance m_thisRef;
+            private TInstance? m_thisRef;
             /// <summary>The end method.</summary>
             private Func<TInstance, IAsyncResult, TResult>? m_endMethod;
 
             /// <summary>Initializes the promise.</summary>
             /// <param name="thisRef">A reference to the object on which the begin/end methods are invoked.</param>
             /// <param name="endMethod">The end method.</param>
-            internal FromAsyncTrimPromise(TInstance thisRef, Func<TInstance, IAsyncResult, TResult> endMethod) : base()
+            internal FromAsyncTrimPromise(TInstance thisRef, Func<TInstance, IAsyncResult, TResult> endMethod)
             {
                 Debug.Assert(thisRef != null, "Expected a non-null thisRef");
                 Debug.Assert(endMethod != null, "Expected a non-null endMethod");
@@ -1258,8 +1257,8 @@ namespace System.Threading.Tasks
                 if (promise == null) ThrowHelper.ThrowArgumentException(ExceptionResource.InvalidOperation_WrongAsyncResultOrEndCalledMultiple, ExceptionArgument.asyncResult);
 
                 // Grab the relevant state and then null it out so that the task doesn't hold onto the state unnecessarily
-                var thisRef = promise.m_thisRef;
-                var endMethod = promise.m_endMethod;
+                TInstance? thisRef = promise.m_thisRef;
+                Func<TInstance, IAsyncResult, TResult>? endMethod = promise.m_endMethod;
                 promise.m_thisRef = default;
                 promise.m_endMethod = null;
                 if (endMethod == null) ThrowHelper.ThrowArgumentException(ExceptionResource.InvalidOperation_WrongAsyncResultOrEndCalledMultiple, ExceptionArgument.asyncResult);
@@ -1291,7 +1290,7 @@ namespace System.Threading.Tasks
                 bool successfullySet;
                 try
                 {
-                    var result = endMethod(thisRef, asyncResult);
+                    TResult result = endMethod(thisRef, asyncResult);
                     if (requiresSynchronization)
                     {
                         successfullySet = TrySetResult(result);
@@ -1607,7 +1606,7 @@ namespace System.Threading.Tasks
             // check arguments
             TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
             if (tasks == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.tasks);
-            //ArgumentNullException of continuationFunction or continuationAction is checked by the caller
+            // ArgumentNullException of continuationFunction or continuationAction is checked by the caller
             Debug.Assert((continuationFunction != null) != (continuationAction != null), "Expected exactly one of endFunction/endAction to be non-null");
             if (scheduler == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.scheduler);
 
@@ -1623,13 +1622,12 @@ namespace System.Threading.Tasks
             }
 
             // Call common ContinueWhenAll() setup logic, extract starter task.
-            var starter = TaskFactory.CommonCWAllLogic(tasksCopy);
+            Task<Task<TAntecedentResult>[]> starter = TaskFactory.CommonCWAllLogic(tasksCopy);
 
             // returned continuation task, off of starter
             if (continuationFunction != null)
             {
                 return starter.ContinueWith<TResult>(
-                   // use a cached delegate
                    GenericDelegateCache<TAntecedentResult, TResult>.CWAllFuncDelegate,
                    continuationFunction, scheduler, cancellationToken, continuationOptions);
             }
@@ -1638,7 +1636,6 @@ namespace System.Threading.Tasks
                 Debug.Assert(continuationAction != null);
 
                 return starter.ContinueWith<TResult>(
-                   // use a cached delegate
                    GenericDelegateCache<TAntecedentResult, TResult>.CWAllActionDelegate,
                    continuationAction, scheduler, cancellationToken, continuationOptions);
             }
@@ -1653,7 +1650,7 @@ namespace System.Threading.Tasks
             // check arguments
             TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
             if (tasks == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.tasks);
-            //ArgumentNullException of continuationFunction or continuationAction is checked by the caller
+            // ArgumentNullException of continuationFunction or continuationAction is checked by the caller
             Debug.Assert((continuationFunction != null) != (continuationAction != null), "Expected exactly one of endFunction/endAction to be non-null");
             if (scheduler == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.scheduler);
 
@@ -1669,15 +1666,12 @@ namespace System.Threading.Tasks
             }
 
             // Perform common ContinueWhenAll() setup logic, extract starter task
-            var starter = TaskFactory.CommonCWAllLogic(tasksCopy);
+            Task<Task[]> starter = TaskFactory.CommonCWAllLogic(tasksCopy);
 
             // returned continuation task, off of starter
             if (continuationFunction != null)
             {
                 return starter.ContinueWith(
-                    //the following delegate avoids closure capture as much as possible
-                    //completedTasks.Result == tasksCopy;
-                    //state == continuationFunction
                     (completedTasks, state) =>
                     {
                         completedTasks.NotifyDebuggerOfWaitCompletionIfNecessary();
@@ -1690,13 +1684,10 @@ namespace System.Threading.Tasks
             {
                 Debug.Assert(continuationAction != null);
                 return starter.ContinueWith<TResult>(
-                   //the following delegate avoids closure capture as much as possible
-                   //completedTasks.Result == tasksCopy;
-                   //state == continuationAction
                    (completedTasks, state) =>
                    {
                        completedTasks.NotifyDebuggerOfWaitCompletionIfNecessary();
-                        Debug.Assert(state is Action<Task[]>);
+                       Debug.Assert(state is Action<Task[]>);
                        ((Action<Task[]>)state)(completedTasks.Result); return default!;
                    },
                    continuationAction, scheduler, cancellationToken, continuationOptions);
@@ -1984,7 +1975,7 @@ namespace System.Threading.Tasks
             if (tasks == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.tasks);
             if (tasks.Length == 0) ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_EmptyTaskList, ExceptionArgument.tasks);
 
-            //ArgumentNullException of continuationFunction or continuationAction is checked by the caller
+            // ArgumentNullException of continuationFunction or continuationAction is checked by the caller
             Debug.Assert((continuationFunction != null) != (continuationAction != null), "Expected exactly one of endFunction/endAction to be non-null");
             if (scheduler == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.scheduler);
 
@@ -2003,8 +1994,6 @@ namespace System.Threading.Tasks
             if (continuationFunction != null)
             {
                 return starter.ContinueWith(
-                     //the following delegate avoids closure capture as much as possible
-                     //completedTask.Result is the winning task; state == continuationAction
                      (completedTask, state) =>
                      {
                          Debug.Assert(state is Func<Task, TResult>);
@@ -2016,8 +2005,6 @@ namespace System.Threading.Tasks
             {
                 Debug.Assert(continuationAction != null);
                 return starter.ContinueWith<TResult>(
-                    //the following delegate avoids closure capture as much as possible
-                    //completedTask.Result is the winning task; state == continuationAction
                     (completedTask, state) =>
                     {
                         Debug.Assert(state is Action<Task>);
@@ -2039,12 +2026,12 @@ namespace System.Threading.Tasks
             TaskFactory.CheckMultiTaskContinuationOptions(continuationOptions);
             if (tasks == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.tasks);
             if (tasks.Length == 0) ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_EmptyTaskList, ExceptionArgument.tasks);
-            //ArgumentNullException of continuationFunction or continuationAction is checked by the caller
+            // ArgumentNullException of continuationFunction or continuationAction is checked by the caller
             Debug.Assert((continuationFunction != null) != (continuationAction != null), "Expected exactly one of endFunction/endAction to be non-null");
             if (scheduler == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.scheduler);
 
             // Call common ContinueWhenAny setup logic, extract starter
-            var starter = TaskFactory.CommonCWAnyLogic(tasks);
+            Task<Task> starter = TaskFactory.CommonCWAnyLogic(tasks);
 
             // Bail early if cancellation has been requested.
             if (cancellationToken.IsCancellationRequested
@@ -2058,7 +2045,6 @@ namespace System.Threading.Tasks
             if (continuationFunction != null)
             {
                 return starter.ContinueWith<TResult>(
-                    // Use a cached delegate
                     GenericDelegateCache<TAntecedentResult, TResult>.CWAnyFuncDelegate,
                     continuationFunction, scheduler, cancellationToken, continuationOptions);
             }
@@ -2066,7 +2052,6 @@ namespace System.Threading.Tasks
             {
                 Debug.Assert(continuationAction != null);
                 return starter.ContinueWith<TResult>(
-                    // Use a cached delegate
                     GenericDelegateCache<TAntecedentResult, TResult>.CWAnyActionDelegate,
                     continuationAction, scheduler, cancellationToken, continuationOptions);
             }

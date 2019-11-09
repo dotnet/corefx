@@ -184,7 +184,7 @@ namespace System.Net.Http
             SetRequestAuthenticationHeaderValue(request, new AuthenticationHeaderValue(BasicScheme, base64AuthString), isProxyAuth);
         }
 
-        private static async Task<bool> TrySetDigestAuthToken(HttpRequestMessage request, NetworkCredential credential, DigestResponse digestResponse, bool isProxyAuth)
+        private static async ValueTask<bool> TrySetDigestAuthToken(HttpRequestMessage request, NetworkCredential credential, DigestResponse digestResponse, bool isProxyAuth)
         {
             string parameter = await GetDigestTokenForCredential(credential, request, digestResponse).ConfigureAwait(false);
 
@@ -327,12 +327,12 @@ namespace System.Net.Http
 
         public static Task<HttpResponseMessage> SendWithProxyAuthAsync(HttpRequestMessage request, Uri proxyUri, ICredentials proxyCredentials, bool doRequestAuth, HttpConnectionPool pool, CancellationToken cancellationToken)
         {
-            return SendWithAuthAsync(request, proxyUri, proxyCredentials, preAuthenticate:false, isProxyAuth:true, doRequestAuth, pool, cancellationToken);
+            return SendWithAuthAsync(request, proxyUri, proxyCredentials, preAuthenticate: false, isProxyAuth: true, doRequestAuth, pool, cancellationToken);
         }
 
         public static Task<HttpResponseMessage> SendWithRequestAuthAsync(HttpRequestMessage request, ICredentials credentials, bool preAuthenticate, HttpConnectionPool pool, CancellationToken cancellationToken)
         {
-            return SendWithAuthAsync(request, request.RequestUri, credentials, preAuthenticate, isProxyAuth:false, doRequestAuth:true, pool, cancellationToken);
+            return SendWithAuthAsync(request, request.RequestUri, credentials, preAuthenticate, isProxyAuth: false, doRequestAuth: true, pool, cancellationToken);
         }
     }
 }

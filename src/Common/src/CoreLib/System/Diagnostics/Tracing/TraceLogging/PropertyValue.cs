@@ -2,16 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
+using System.Diagnostics;
+#endif
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
-
-#if !ES_BUILD_AGAINST_DOTNET_V35
-using Contract = System.Diagnostics.Contracts.Contract;
-#else
-using Contract = Microsoft.Diagnostics.Contracts.Internal.Contract;
-#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -189,12 +185,12 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         private static Func<PropertyValue, PropertyValue> GetBoxedValueTypePropertyGetter(PropertyInfo property)
         {
-            var type = property.PropertyType;
+            Type type = property.PropertyType;
 
             if (type.GetTypeInfo().IsEnum)
                 type = Enum.GetUnderlyingType(type);
 
-            var factory = GetFactory(type);
+            Func<object?, PropertyValue> factory = GetFactory(type);
 
             return container => factory(property.GetValue(container.ReferenceValue));
         }
@@ -236,7 +232,7 @@ namespace System.Diagnostics.Tracing
         {
             public override Func<PropertyValue, PropertyValue> GetPropertyGetter(PropertyInfo property)
             {
-                var type = property.PropertyType;
+                Type type = property.PropertyType;
 
                 if (!Statics.IsValueType(type))
                 {

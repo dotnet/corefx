@@ -4,7 +4,6 @@
 
 #nullable enable
 using System.Diagnostics;
-using System.Text;
 
 namespace System.IO
 {
@@ -71,7 +70,7 @@ namespace System.IO
             // because some Win32 API don't work without it.
             if (name.Length == 2 && name[1] == ':')
             {
-                name = name + "\\";
+                name += "\\";
             }
 
             // Now verify that the drive letter could be a real drive name.

@@ -7,7 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Net;
 using HttpStress;
@@ -18,28 +20,33 @@ using HttpStress;
 public static class Program
 {
 
-    public static async Task Main(string[] args)
+    public enum ExitCode { Success = 0, StressError = 1, CliError = 2 };
+
+    public static async Task<int> Main(string[] args)
     {
-        if (!TryParseCli(args, out Configuration config))
+        if (!TryParseCli(args, out Configuration? config))
         {
-            return;
+            return (int) ExitCode.CliError;
         }
 
-        await Run(config);
+        return (int) await Run(config);
     }
 
-    private static bool TryParseCli(string[] args, out Configuration config)
+    private static bool TryParseCli(string[] args, [NotNullWhen(true)] out Configuration? config)
     {
         var cmd = new RootCommand();
         cmd.AddOption(new Option("-n", "Max number of requests to make concurrently.") { Argument = new Argument<int>("numWorkers", Environment.ProcessorCount) });
-        cmd.AddOption(new Option("-serverUri", "Stress suite server uri.") { Argument = new Argument<Uri>("serverUri", new Uri("https://localhost:5001")) });
+        cmd.AddOption(new Option("-serverUri", "Stress suite server uri.") { Argument = new Argument<string>("serverUri", "https://localhost:5001") });
         cmd.AddOption(new Option("-runMode", "Stress suite execution mode. Defaults to Both.") { Argument = new Argument<RunMode>("runMode", RunMode.both) });
+        cmd.AddOption(new Option("-maxExecutionTime", "Maximum stress execution time, in minutes. Defaults to infinity.") { Argument = new Argument<double?>("minutes", null) });
         cmd.AddOption(new Option("-maxContentLength", "Max content length for request and response bodies.") { Argument = new Argument<int>("numBytes", 1000) });
-        cmd.AddOption(new Option("-maxRequestUriSize", "Max query string length support by the server.") { Argument = new Argument<int>("numChars", 8000) });
+        cmd.AddOption(new Option("-maxRequestUriSize", "Max query string length support by the server.") { Argument = new Argument<int>("numChars", 5000) });
+        cmd.AddOption(new Option("-maxRequestHeaderCount", "Maximum number of headers to place in request") { Argument = new Argument<int>("numHeaders", 90) });
+        cmd.AddOption(new Option("-maxRequestHeaderTotalSize", "Max request header total size.") { Argument = new Argument<int>("numBytes", 1000) });
         cmd.AddOption(new Option("-http", "HTTP version (1.1 or 2.0)") { Argument = new Argument<Version>("version", HttpVersion.Version20) });
         cmd.AddOption(new Option("-connectionLifetime", "Max connection lifetime length (milliseconds).") { Argument = new Argument<int?>("connectionLifetime", null) });
-        cmd.AddOption(new Option("-ops", "Indices of the operations to use") { Argument = new Argument<int[]>("space-delimited indices", null) });
-        cmd.AddOption(new Option("-xops", "Indices of the operations to exclude") { Argument = new Argument<int[]>("space-delimited indices", null) });
+        cmd.AddOption(new Option("-ops", "Indices of the operations to use") { Argument = new Argument<int[]?>("space-delimited indices", null) });
+        cmd.AddOption(new Option("-xops", "Indices of the operations to exclude") { Argument = new Argument<int[]?>("space-delimited indices", null) });
         cmd.AddOption(new Option("-trace", "Enable Microsoft-System-Net-Http tracing.") { Argument = new Argument<string>("\"console\" or path") });
         cmd.AddOption(new Option("-aspnetlog", "Enable ASP.NET warning and error logging.") { Argument = new Argument<bool>("enable", false) });
         cmd.AddOption(new Option("-listOps", "List available options.") { Argument = new Argument<bool>("enable", false) });
@@ -47,8 +54,13 @@ public static class Program
         cmd.AddOption(new Option("-numParameters", "Max number of query parameters or form fields for a request.") { Argument = new Argument<int>("queryParameters", 1) });
         cmd.AddOption(new Option("-cancelRate", "Number between 0 and 1 indicating rate of client-side request cancellation attempts. Defaults to 0.1.") { Argument = new Argument<double>("probability", 0.1) });
         cmd.AddOption(new Option("-httpSys", "Use http.sys instead of Kestrel.") { Argument = new Argument<bool>("enable", false) });
+        cmd.AddOption(new Option("-winHttp", "Use WinHttpHandler for the stress client.") { Argument = new Argument<bool>("enable", false) });
         cmd.AddOption(new Option("-displayInterval", "Client stats display interval in seconds. Defaults to 5 seconds.") { Argument = new Argument<int>("seconds", 5) });
         cmd.AddOption(new Option("-clientTimeout", "Default HttpClient timeout in seconds. Defaults to 10 seconds.") { Argument = new Argument<int>("seconds", 10) });
+        cmd.AddOption(new Option("-serverMaxConcurrentStreams", "Overrides kestrel max concurrent streams per connection.") { Argument = new Argument<int?>("streams", null) });
+        cmd.AddOption(new Option("-serverMaxFrameSize", "Overrides kestrel max frame size setting.") { Argument = new Argument<int?>("bytes", null) });
+        cmd.AddOption(new Option("-serverInitialConnectionWindowSize", "Overrides kestrel initial connection window size setting.") { Argument = new Argument<int?>("bytes", null) });
+        cmd.AddOption(new Option("-serverMaxRequestHeaderFieldSize", "Overrides kestrel max request header field size.") { Argument = new Argument<int?>("bytes", null) });
 
         ParseResult cmdline = cmd.Parse(args);
         if (cmdline.Errors.Count > 0)
@@ -66,14 +78,17 @@ public static class Program
         config = new Configuration()
         {
             RunMode = cmdline.ValueForOption<RunMode>("-runMode"),
-            ServerUri = cmdline.ValueForOption<Uri>("-serverUri"),
+            ServerUri = cmdline.ValueForOption<string>("-serverUri"),
             ListOperations = cmdline.ValueForOption<bool>("-listOps"),
 
             HttpVersion = cmdline.ValueForOption<Version>("-http"),
+            UseWinHttpHandler = cmdline.ValueForOption<bool>("-winHttp"),
             ConcurrentRequests = cmdline.ValueForOption<int>("-n"),
             RandomSeed = cmdline.ValueForOption<int?>("-seed") ?? new Random().Next(),
             MaxContentLength = cmdline.ValueForOption<int>("-maxContentLength"),
             MaxRequestUriSize = cmdline.ValueForOption<int>("-maxRequestUriSize"),
+            MaxRequestHeaderCount = cmdline.ValueForOption<int>("-maxRequestHeaderCount"),
+            MaxRequestHeaderTotalSize = cmdline.ValueForOption<int>("-maxRequestHeaderTotalSize"),
             OpIndices = cmdline.ValueForOption<int[]>("-ops"),
             ExcludedOpIndices = cmdline.ValueForOption<int[]>("-xops"),
             MaxParameters = cmdline.ValueForOption<int>("-numParameters"),
@@ -81,16 +96,21 @@ public static class Program
             DefaultTimeout = TimeSpan.FromSeconds(cmdline.ValueForOption<int>("-clientTimeout")),
             ConnectionLifetime = cmdline.ValueForOption<double?>("-connectionLifetime").Select(TimeSpan.FromMilliseconds),
             CancellationProbability = Math.Max(0, Math.Min(1, cmdline.ValueForOption<double>("-cancelRate"))),
+            MaximumExecutionTime = cmdline.ValueForOption<double?>("-maxExecutionTime").Select(TimeSpan.FromMinutes),
 
             UseHttpSys = cmdline.ValueForOption<bool>("-httpSys"),
             LogAspNet = cmdline.ValueForOption<bool>("-aspnetlog"),
-            LogPath = cmdline.HasOption("-trace") ? cmdline.ValueForOption<string>("-trace") : null
+            LogPath = cmdline.HasOption("-trace") ? cmdline.ValueForOption<string>("-trace") : null,
+            ServerMaxConcurrentStreams = cmdline.ValueForOption<int?>("-serverMaxConcurrentStreams"),
+            ServerMaxFrameSize = cmdline.ValueForOption<int?>("-serverMaxFrameSize"),
+            ServerInitialConnectionWindowSize = cmdline.ValueForOption<int?>("-serverInitialConnectionWindowSize"),
+            ServerMaxRequestHeaderFieldSize = cmdline.ValueForOption<int?>("-serverMaxRequestHeaderFieldSize"),
         };
 
         return true;
     }
 
-    private static async Task Run(Configuration config)
+    private static async Task<ExitCode> Run(Configuration config)
     {
         (string name, Func<RequestContext, Task> op)[] clientOperations =
             ClientOperations.Operations
@@ -101,13 +121,13 @@ public static class Program
         if ((config.RunMode & RunMode.both) == 0)
         {
             Console.Error.WriteLine("Must specify a valid run mode");
-            return;
+            return ExitCode.CliError;
         }
 
-        if (config.ServerUri.Scheme != "https")
+        if (!config.ServerUri.StartsWith("http"))
         {
-            Console.Error.WriteLine("Server uri must be https.");
-            return;
+            Console.Error.WriteLine("Invalid server uri");
+            return ExitCode.CliError;
         }
 
         if (config.ListOperations)
@@ -116,7 +136,7 @@ public static class Program
             {
                 Console.WriteLine(clientOperations[i].name);
             }
-            return;
+            return ExitCode.Success;
         }
 
         // derive client operations based on arguments
@@ -132,9 +152,11 @@ public static class Program
                 .ToArray(),
         };
 
-        Console.WriteLine("       .NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(object).Assembly.Location)));
-        Console.WriteLine("    ASP.NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(WebHost).Assembly.Location)));
-        Console.WriteLine(" System.Net.Http: " + GetSysNetHttpAssemblyInfo());
+        string GetAssemblyInfo(Assembly assembly) => $"{assembly.Location}, modified {new FileInfo(assembly.Location).LastWriteTime}";
+
+        Console.WriteLine("       .NET Core: " + GetAssemblyInfo(typeof(object).Assembly));
+        Console.WriteLine("    ASP.NET Core: " + GetAssemblyInfo(typeof(WebHost).Assembly));
+        Console.WriteLine(" System.Net.Http: " + GetAssemblyInfo(typeof(System.Net.Http.HttpClient).Assembly));
         Console.WriteLine("          Server: " + (config.UseHttpSys ? "http.sys" : "Kestrel"));
         Console.WriteLine("      Server URL: " + config.ServerUri);
         Console.WriteLine("         Tracing: " + (config.LogPath == null ? (object)false : config.LogPath.Length == 0 ? (object)true : config.LogPath));
@@ -151,7 +173,7 @@ public static class Program
         Console.WriteLine();
 
 
-        StressServer server = null;
+        StressServer? server = null;
         if (config.RunMode.HasFlag(RunMode.server))
         {
             // Start the Kestrel web server in-proc.
@@ -160,7 +182,7 @@ public static class Program
             Console.WriteLine($"Server started at {server.ServerUri}");
         }
 
-        StressClient client = null;
+        StressClient? client = null;
         if (config.RunMode.HasFlag(RunMode.client))
         {
             // Start the client.
@@ -170,27 +192,31 @@ public static class Program
             client.Start();
         }
 
-        await AwaitCancelKeyPress();
+        await WaitUntilMaxExecutionTimeElapsedOrKeyboardInterrupt(config.MaximumExecutionTime);
 
         client?.Stop();
         client?.PrintFinalReport();
+
+        // return nonzero status code if there are stress errors
+        return client?.TotalErrorCount == 0 ? ExitCode.Success : ExitCode.StressError;
     }
 
-    private static async Task AwaitCancelKeyPress()
+    private static async Task WaitUntilMaxExecutionTimeElapsedOrKeyboardInterrupt(TimeSpan? maxExecutionTime = null)
     {
         var tcs = new TaskCompletionSource<bool>();
         Console.CancelKeyPress += (sender,args) => { Console.Error.WriteLine("Keyboard interrupt"); args.Cancel = true; tcs.TrySetResult(false); };
+        if (maxExecutionTime.HasValue)
+        {
+            Console.WriteLine($"Running for a total of {maxExecutionTime.Value.TotalMinutes:0.##} minutes");
+            var cts = new System.Threading.CancellationTokenSource(delay: maxExecutionTime.Value);
+            cts.Token.Register(() => { Console.WriteLine("Max execution time elapsed"); tcs.TrySetResult(false); });
+        }
+
         await tcs.Task;
     }
 
     private static S? Select<T, S>(this T? value, Func<T, S> mapper) where T : struct where S : struct
     {
-        return value != null ? new S?(mapper(value.Value)) : null;
-    }
-
-    private static string GetSysNetHttpAssemblyInfo()
-    {
-        string location = typeof(System.Net.Http.HttpClient).Assembly.Location;
-        return $"{location}, last modified {new FileInfo(location).LastWriteTime}";
+        return value is null ? null : new S?(mapper(value.Value));
     }
 }

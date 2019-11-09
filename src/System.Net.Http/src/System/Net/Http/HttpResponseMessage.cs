@@ -122,7 +122,7 @@ namespace System.Net.Http
             {
                 if (_trailingHeaders == null)
                 {
-                    _trailingHeaders = new HttpResponseHeaders();
+                    _trailingHeaders = new HttpResponseHeaders(containsTrailingHeaders: true);
                 }
 
                 return _trailingHeaders;
@@ -195,12 +195,12 @@ namespace System.Net.Http
             sb.Append(", Content: ");
             sb.Append(_content == null ? "<null>" : _content.GetType().ToString());
 
-            sb.Append(", Headers:\r\n");
+            sb.AppendLine(", Headers:");
             HeaderUtilities.DumpHeaders(sb, _headers, _content?.Headers);
 
             if (_trailingHeaders != null)
             {
-                sb.Append(", Trailing Headers:\r\n");
+                sb.AppendLine(", Trailing Headers:");
                 HeaderUtilities.DumpHeaders(sb, _trailingHeaders);
             }
 

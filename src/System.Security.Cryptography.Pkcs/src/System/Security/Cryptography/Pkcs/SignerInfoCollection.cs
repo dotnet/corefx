@@ -59,7 +59,7 @@ namespace System.Security.Cryptography.Pkcs
             if (array.Rank != 1)
                 throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
             if (index < 0 || index >= array.Length)
-                throw new ArgumentOutOfRangeException(nameof(index),SR.ArgumentOutOfRange_Index);
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
             if (index + Count > array.Length)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
 
@@ -76,65 +76,28 @@ namespace System.Security.Cryptography.Pkcs
         public bool IsSynchronized => false;
         public object SyncRoot => this;
 
-        internal int FindIndexForSigner(SignerInfo signer)
+        private static int FindIndexForSigner(SignerInfo[] signerInfos, SignerInfo signer)
         {
             Debug.Assert(signer != null);
             SubjectIdentifier id = signer.SignerIdentifier;
-            X509IssuerSerial issuerSerial = default;
 
-            if (id.Type == SubjectIdentifierType.IssuerAndSerialNumber)
+            for (int i = 0; i < signerInfos.Length; i++)
             {
-                issuerSerial = (X509IssuerSerial)id.Value;
-            }
-
-            for (int i = 0; i < _signerInfos.Length; i++)
-            {
-                SignerInfo current = _signerInfos[i];
+                SignerInfo current = signerInfos[i];
                 SubjectIdentifier currentId = current.SignerIdentifier;
 
-                if (currentId.Type != id.Type)
-                {
-                    continue;
-                }
-
-                bool equal = false;
-
-                switch (id.Type)
-                {
-                    case SubjectIdentifierType.IssuerAndSerialNumber:
-                    {
-                        X509IssuerSerial currentIssuerSerial = (X509IssuerSerial)currentId.Value;
-
-                        if (currentIssuerSerial.IssuerName == issuerSerial.IssuerName &&
-                            currentIssuerSerial.SerialNumber == issuerSerial.SerialNumber)
-                        {
-                            equal = true;
-                        }
-
-                        break;
-                    }
-                    case SubjectIdentifierType.SubjectKeyIdentifier:
-                        if ((string)id.Value == (string)currentId.Value)
-                        {
-                            equal = true;
-                        }
-
-                        break;
-                    case SubjectIdentifierType.NoSignature:
-                        equal = true;
-                        break;
-                    default:
-                        Debug.Fail($"No match logic for SubjectIdentifierType {id.Type}");
-                        throw new CryptographicException();
-                }
-
-                if (equal)
+                if (id.IsEquivalentTo(currentId))
                 {
                     return i;
                 }
             }
 
             return -1;
+        }
+
+        internal int FindIndexForSigner(SignerInfo signer)
+        {
+            return FindIndexForSigner(_signerInfos, signer);
         }
     }
 }

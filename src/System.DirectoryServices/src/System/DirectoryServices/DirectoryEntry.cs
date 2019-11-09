@@ -682,7 +682,7 @@ namespace System.DirectoryServices
         public DirectoryEntry CopyTo(DirectoryEntry newParent, string newName)
         {
             if (!newParent.IsContainer)
-                throw new InvalidOperationException(SR.Format(SR.DSNotAContainer , newParent.Path));
+                throw new InvalidOperationException(SR.Format(SR.DSNotAContainer, newParent.Path));
 
             object copy = null;
             try
@@ -902,7 +902,7 @@ namespace System.DirectoryServices
         {
             object newEntry = null;
             if (!(newParent.AdsObject is UnsafeNativeMethods.IAdsContainer))
-                throw new InvalidOperationException(SR.Format(SR.DSNotAContainer , newParent.Path));
+                throw new InvalidOperationException(SR.Format(SR.DSNotAContainer, newParent.Path));
             try
             {
                 if (AdsObject.ADsPath.StartsWith("WinNT:", StringComparison.Ordinal))
@@ -1001,7 +1001,7 @@ namespace System.DirectoryServices
             // this is a half-lie, but oh well. Without it, this method is pointless.
             _cacheFilled = true;
             // we need to partially refresh that properties table.
-            if (_propertyCollection != null && propertyNames != null)
+            if (_propertyCollection != null)
             {
                 for (int i = 0; i < propertyNames.Length; i++)
                 {

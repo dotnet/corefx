@@ -9,7 +9,6 @@ As part of our Pull Requests we have some validation builds where we build the p
 | Windows x86_Release | netcoreapp | X | X |
 | Windows x64_Debug | netcoreapp | X | X |
 | Windows NETFX_x86_Release | netfx | X | X |
-| Windows UWP_CoreCLR_x64_Debug | uap | X | X |
 | Linux x64_Release | netcoreapp | X | X |
 | Linux arm64_Release | netcoreapp | X | X |
 | Linux arm_Release | netcoreapp | X |   |
@@ -78,11 +77,8 @@ Once you click under the `Artifacts` section, a popup will show, with multiple d
 
   1. Multiline comments are not supported, so if you want to trigger multiple builds, you have to do it on separate comments. Also, everything after `/azp run` is considered the build name, so a comment trigger can't have anything after it. [See a real example](https://github.com/dotnet/corefx/pull/35322#issuecomment-4638363830).
   2. Feature request: trigger multiple builds with one `/azp` call. I.e `/azp run corefx-ci, corefx-outerloop-osx`.
-  3. Duplicated jobs are shown on PR badges when a build is `rerun`.
-  4. Feature request: `/azp help` doesn't list available builds for the repo.
-  5. Too much clicks to get to the build UI.
-  6. Mobile experience is really bad.
-  7. Only an entire pipeline can be triggered through comments, triggering a single leg is not supported yet. `/azp run corefx-ci (macOS x64_Debug)` wouldn't work.
-  8. Rerunning a single leg while others are still running is not yet supported, you have to wait for all legs to finish before retrying an individual leg.
+  3. Feature request: `/azp help` doesn't list available builds for the repo.
+  4. Only an entire pipeline can be triggered through comments, triggering a single leg is not supported yet. `/azp run corefx-ci (macOS x64_Debug)` wouldn't work.
+  5. Rerunning a single leg while others are still running is not yet supported, you have to wait for all legs to finish before retrying an individual leg.
 
 All of this issues have been raised to Azure DevOps teams, expect @safern, to update the docs through PR to widely communicate new features coming.

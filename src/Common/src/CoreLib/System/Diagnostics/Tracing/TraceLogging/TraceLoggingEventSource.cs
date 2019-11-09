@@ -15,26 +15,15 @@
 #endif
 
 #if ES_BUILD_STANDALONE
+using System;
+using System.Diagnostics;
 using Environment = Microsoft.Diagnostics.Tracing.Internal.Environment;
 using EventDescriptor = Microsoft.Diagnostics.Tracing.EventDescriptor;
 #endif
-
-using System;
-using System.Diagnostics;
-using System.Resources;
-using System.Runtime.InteropServices;
-using System.Security;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-
-#if !ES_BUILD_AGAINST_DOTNET_V35
-using Contract = System.Diagnostics.Contracts.Contract;
-using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
-#else
-using Contract = Microsoft.Diagnostics.Contracts.Internal.Contract;
-using System.Collections.Generic;
-using System.Text;
-#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -418,7 +407,7 @@ namespace System.Diagnostics.Tracing
                 ? options.keywords
                 : eventTypes.keywords;
 
-            var nameInfo = eventTypes.GetNameInfo(eventName ?? eventTypes.Name, tags);
+            NameInfo nameInfo = eventTypes.GetNameInfo(eventName ?? eventTypes.Name, tags);
             if (nameInfo == null)
             {
                 return;
@@ -433,13 +422,13 @@ namespace System.Diagnostics.Tracing
             IntPtr eventHandle = IntPtr.Zero;
 #endif
 
-            var pinCount = eventTypes.pinCount;
-            var scratch = stackalloc byte[eventTypes.scratchSize];
-            var descriptors = stackalloc EventData[eventTypes.dataCount + 3];
+            int pinCount = eventTypes.pinCount;
+            byte* scratch = stackalloc byte[eventTypes.scratchSize];
+            EventData* descriptors = stackalloc EventData[eventTypes.dataCount + 3];
             for (int i = 0; i < eventTypes.dataCount + 3; i++)
                 descriptors[i] = default;
 
-            var pins = stackalloc GCHandle[pinCount];
+            GCHandle* pins = stackalloc GCHandle[pinCount];
             for (int i = 0; i < pinCount; i++)
                 pins[i] = default;
 
@@ -467,7 +456,7 @@ namespace System.Diagnostics.Tracing
 
                     for (int i = 0; i < eventTypes.typeInfos.Length; i++)
                     {
-                        var info = eventTypes.typeInfos[i];
+                        TraceLoggingTypeInfo info = eventTypes.typeInfos[i];
                         info.WriteData(TraceLoggingDataCollector.Instance, info.PropertyValueFactory(values[i]));
                     }
 
@@ -482,7 +471,7 @@ namespace System.Diagnostics.Tracing
                 }
                 finally
                 {
-                    this.WriteCleanup(pins, pinCount);
+                    WriteCleanup(pins, pinCount);
                 }
             }
 #endif // FEATURE_MANAGED_ETW
@@ -535,23 +524,23 @@ namespace System.Diagnostics.Tracing
             fixed (EventSourceOptions* pOptions = &options)
             {
                 EventDescriptor descriptor;
-                var nameInfo = this.UpdateDescriptor(eventName, eventTypes, ref options, out descriptor);
+                NameInfo? nameInfo = this.UpdateDescriptor(eventName, eventTypes, ref options, out descriptor);
                 if (nameInfo == null)
                 {
                     return;
                 }
 
 #if FEATURE_PERFTRACING
-                    IntPtr eventHandle = nameInfo.GetOrCreateEventHandle(m_eventPipeProvider, m_eventHandleTable, descriptor, eventTypes);
-                    Debug.Assert(eventHandle != IntPtr.Zero);
+                IntPtr eventHandle = nameInfo.GetOrCreateEventHandle(m_eventPipeProvider, m_eventHandleTable, descriptor, eventTypes);
+                Debug.Assert(eventHandle != IntPtr.Zero);
 #else
-                    IntPtr eventHandle = IntPtr.Zero;
+                IntPtr eventHandle = IntPtr.Zero;
 #endif
 
                 // We make a descriptor for each EventData, and because we morph strings to counted strings
                 // we may have 2 for each arg, so we allocate enough for this.
-                var descriptorsLength = eventTypes.dataCount + eventTypes.typeInfos.Length * 2 + 3;
-                var descriptors = stackalloc EventData[descriptorsLength];
+                int descriptorsLength = eventTypes.dataCount + eventTypes.typeInfos.Length * 2 + 3;
+                EventData* descriptors = stackalloc EventData[descriptorsLength];
                 for (int i = 0; i < descriptorsLength; i++)
                     descriptors[i] = default;
 
@@ -604,7 +593,7 @@ namespace System.Diagnostics.Tracing
                 {
                     EventDescriptor descriptor;
                     options.Opcode = options.IsOpcodeSet ? options.Opcode : GetOpcodeWithDefault(options.Opcode, eventName);
-                    var nameInfo = this.UpdateDescriptor(eventName, eventTypes, ref options, out descriptor);
+                    NameInfo? nameInfo = this.UpdateDescriptor(eventName, eventTypes, ref options, out descriptor);
                     if (nameInfo == null)
                     {
                         return;
@@ -618,13 +607,13 @@ namespace System.Diagnostics.Tracing
 #endif
 
 #if FEATURE_MANAGED_ETW
-                    var pinCount = eventTypes.pinCount;
-                    var scratch = stackalloc byte[eventTypes.scratchSize];
-                    var descriptors = stackalloc EventData[eventTypes.dataCount + 3];
+                    int pinCount = eventTypes.pinCount;
+                    byte* scratch = stackalloc byte[eventTypes.scratchSize];
+                    EventData* descriptors = stackalloc EventData[eventTypes.dataCount + 3];
                     for (int i = 0; i < eventTypes.dataCount + 3; i++)
                         descriptors[i] = default;
 
-                    var pins = stackalloc GCHandle[pinCount];
+                    GCHandle* pins = stackalloc GCHandle[pinCount];
                     for (int i = 0; i < pinCount; i++)
                         pins[i] = default;
 
@@ -639,7 +628,7 @@ namespace System.Diagnostics.Tracing
 #endif // FEATURE_MANAGED_ETW
 
 #if (!ES_BUILD_PCL && !ES_BUILD_PN)
-                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions();
+                        System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions();
 #endif
                         EventOpcode opcode = (EventOpcode)descriptor.Opcode;
 
@@ -675,7 +664,7 @@ namespace System.Diagnostics.Tracing
                                 pins,
                                 pinCount);
 
-                            var info = eventTypes.typeInfos[0];
+                            TraceLoggingTypeInfo info = eventTypes.typeInfos[0];
                             info.WriteData(TraceLoggingDataCollector.Instance, info.PropertyValueFactory(data));
 
                             this.WriteEventRaw(
@@ -694,7 +683,6 @@ namespace System.Diagnostics.Tracing
                                 var eventData = (EventPayload?)(eventTypes.typeInfos[0].GetData(data));
                                 WriteToAllListeners(eventName, ref descriptor, nameInfo.tags, pActivityId, pRelatedActivityId, eventData);
                             }
-
                         }
                         catch (Exception ex)
                         {
@@ -706,7 +694,7 @@ namespace System.Diagnostics.Tracing
 #if FEATURE_MANAGED_ETW
                         finally
                         {
-                            this.WriteCleanup(pins, pinCount);
+                            WriteCleanup(pins, pinCount);
                         }
                     }
 #endif // FEATURE_MANAGED_ETW
@@ -725,9 +713,9 @@ namespace System.Diagnostics.Tracing
         {
             EventWrittenEventArgs eventCallbackArgs = new EventWrittenEventArgs(this);
             eventCallbackArgs.EventName = eventName;
-            eventCallbackArgs.m_level = (EventLevel) eventDescriptor.Level;
-            eventCallbackArgs.m_keywords = (EventKeywords) eventDescriptor.Keywords;
-            eventCallbackArgs.m_opcode = (EventOpcode) eventDescriptor.Opcode;
+            eventCallbackArgs.m_level = (EventLevel)eventDescriptor.Level;
+            eventCallbackArgs.m_keywords = (EventKeywords)eventDescriptor.Keywords;
+            eventCallbackArgs.m_opcode = (EventOpcode)eventDescriptor.Opcode;
             eventCallbackArgs.m_tags = tags;
 
             // Self described events do not have an id attached. We mark it internally with -1.
@@ -752,7 +740,7 @@ namespace System.Diagnostics.Tracing
             System.Runtime.ConstrainedExecution.Cer.Success)]
 #endif
         [NonEvent]
-        private unsafe void WriteCleanup(GCHandle* pPins, int cPins)
+        private static unsafe void WriteCleanup(GCHandle* pPins, int cPins)
         {
             DataCollector.ThreadInstance.Disable();
 
@@ -793,14 +781,14 @@ namespace System.Diagnostics.Tracing
                         traitMetaData.Add(0);                                           // Emit size (to be filled in later)
                         traitMetaData.Add(0);
                         traitMetaData.Add(traitNum);                                    // Emit Trait number
-                        var valueLen = AddValueToMetaData(traitMetaData, value) + 3;    // Emit the value bytes +3 accounts for 3 bytes we emited above.
+                        int valueLen = AddValueToMetaData(traitMetaData, value) + 3;    // Emit the value bytes +3 accounts for 3 bytes we emited above.
                         traitMetaData[lenPos] = unchecked((byte)valueLen);              // Fill in size
                         traitMetaData[lenPos + 1] = unchecked((byte)(valueLen >> 8));
                     }
                 }
                 providerMetadata = Statics.MetadataForString(this.Name, 0, traitMetaData.Count, 0);
                 int startPos = providerMetadata.Length - traitMetaData.Count;
-                foreach (var b in traitMetaData)
+                foreach (byte b in traitMetaData)
                     providerMetadata[startPos++] = b;
             }
             else
@@ -854,7 +842,7 @@ namespace System.Diagnostics.Tracing
         {
             if ('0' <= c && c <= '9')
             {
-                return (c - '0');
+                return c - '0';
             }
             if ('a' <= c)
             {
@@ -862,7 +850,7 @@ namespace System.Diagnostics.Tracing
             }
             if ('A' <= c && c <= 'F')
             {
-                return (c - 'A' + 10);
+                return c - 'A' + 10;
             }
 
             throw new ArgumentException(SR.Format(SR.EventSource_BadHexDigit, c), "traits");

@@ -80,22 +80,13 @@ namespace System.Diagnostics
                 else
                     shellExecuteInfo.fMask |= Interop.Shell32.SEE_MASK_FLAG_NO_UI;
 
-                switch (startInfo.WindowStyle)
+                shellExecuteInfo.nShow = startInfo.WindowStyle switch
                 {
-                    case ProcessWindowStyle.Hidden:
-                        shellExecuteInfo.nShow = Interop.Shell32.SW_HIDE;
-                        break;
-                    case ProcessWindowStyle.Minimized:
-                        shellExecuteInfo.nShow = Interop.Shell32.SW_SHOWMINIMIZED;
-                        break;
-                    case ProcessWindowStyle.Maximized:
-                        shellExecuteInfo.nShow = Interop.Shell32.SW_SHOWMAXIMIZED;
-                        break;
-                    default:
-                        shellExecuteInfo.nShow = Interop.Shell32.SW_SHOWNORMAL;
-                        break;
-                }
-
+                    ProcessWindowStyle.Hidden => Interop.Shell32.SW_HIDE,
+                    ProcessWindowStyle.Minimized => Interop.Shell32.SW_SHOWMINIMIZED,
+                    ProcessWindowStyle.Maximized => Interop.Shell32.SW_SHOWMAXIMIZED,
+                    _ => Interop.Shell32.SW_SHOWNORMAL,
+                };
                 ShellExecuteHelper executeHelper = new ShellExecuteHelper(&shellExecuteInfo);
                 if (!executeHelper.ShellExecuteOnSTAThread())
                 {
@@ -186,7 +177,7 @@ namespace System.Diagnostics
                 if (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
                 {
                     ThreadStart threadStart = new ThreadStart(ShellExecuteFunction);
-                    Thread executionThread = new Thread(threadStart);
+                    Thread executionThread = new Thread(threadStart) { IsBackground = true };
                     executionThread.SetApartmentState(ApartmentState.STA);
                     executionThread.Start();
                     executionThread.Join();

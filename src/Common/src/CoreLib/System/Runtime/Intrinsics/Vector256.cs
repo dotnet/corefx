@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 using Internal.Runtime.CompilerServices;
@@ -171,6 +173,35 @@ namespace System.Runtime.Intrinsics
             return vector.As<T, ulong>();
         }
 
+        /// <summary>Reinterprets a <see cref="Vector{T}" /> as a new <see cref="Vector256{T}" />.</summary>
+        /// <typeparam name="T">The type of the vectors.</typeparam>
+        /// <param name="value">The vector to reinterpret.</param>
+        /// <returns><paramref name="value" /> reinterpreted as a new <see cref="Vector256{T}" />.</returns>
+        /// <exception cref="NotSupportedException">The type of <paramref name="value" /> (<typeparamref name="T" />) is not supported.</exception>
+        public static Vector256<T> AsVector256<T>(this Vector<T> value)
+            where T : struct
+        {
+            Debug.Assert(Vector256<T>.Count >= Vector<T>.Count);
+            ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
+
+            Vector256<T> result = default;
+            Unsafe.WriteUnaligned(ref Unsafe.As<Vector256<T>, byte>(ref result), value);
+            return result;
+        }
+
+        /// <summary>Reinterprets a <see cref="Vector256{T}" /> as a new <see cref="Vector{T}" />.</summary>
+        /// <typeparam name="T">The type of the vectors.</typeparam>
+        /// <param name="value">The vector to reinterpret.</param>
+        /// <returns><paramref name="value" /> reinterpreted as a new <see cref="Vector{T}" />.</returns>
+        /// <exception cref="NotSupportedException">The type of <paramref name="value" /> (<typeparamref name="T" />) is not supported.</exception>
+        public static Vector<T> AsVector<T>(this Vector256<T> value)
+            where T : struct
+        {
+            Debug.Assert(Vector256<T>.Count >= Vector<T>.Count);
+            ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
+            return Unsafe.As<Vector256<T>, Vector<T>>(ref value);
+        }
+
         /// <summary>Creates a new <see cref="Vector256{Byte}" /> instance with all elements initialized to the specified value.</summary>
         /// <param name="value">The value that all elements will be initialized to.</param>
         /// <returns>A new <see cref="Vector256{Byte}" /> with all elements initialized to <paramref name="value" />.</returns>
@@ -193,7 +224,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<byte> SoftwareFallback(byte value)
             {
-                var pResult = stackalloc byte[32]
+                byte* pResult = stackalloc byte[32]
                 {
                     value,
                     value,
@@ -255,7 +286,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<double> SoftwareFallback(double value)
             {
-                var pResult = stackalloc double[4]
+                double* pResult = stackalloc double[4]
                 {
                     value,
                     value,
@@ -289,7 +320,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<short> SoftwareFallback(short value)
             {
-                var pResult = stackalloc short[16]
+                short* pResult = stackalloc short[16]
                 {
                     value,
                     value,
@@ -335,7 +366,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<int> SoftwareFallback(int value)
             {
-                var pResult = stackalloc int[8]
+                int* pResult = stackalloc int[8]
                 {
                     value,
                     value,
@@ -375,7 +406,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<long> SoftwareFallback(long value)
             {
-                var pResult = stackalloc long[4]
+                long* pResult = stackalloc long[4]
                 {
                     value,
                     value,
@@ -410,7 +441,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<sbyte> SoftwareFallback(sbyte value)
             {
-                var pResult = stackalloc sbyte[32]
+                sbyte* pResult = stackalloc sbyte[32]
                 {
                     value,
                     value,
@@ -472,7 +503,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<float> SoftwareFallback(float value)
             {
-                var pResult = stackalloc float[8]
+                float* pResult = stackalloc float[8]
                 {
                     value,
                     value,
@@ -511,7 +542,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<ushort> SoftwareFallback(ushort value)
             {
-                var pResult = stackalloc ushort[16]
+                ushort* pResult = stackalloc ushort[16]
                 {
                     value,
                     value,
@@ -558,7 +589,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<uint> SoftwareFallback(uint value)
             {
-                var pResult = stackalloc uint[8]
+                uint* pResult = stackalloc uint[8]
                 {
                     value,
                     value,
@@ -599,7 +630,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<ulong> SoftwareFallback(ulong value)
             {
-                var pResult = stackalloc ulong[4]
+                ulong* pResult = stackalloc ulong[4]
             {
                     value,
                     value,
@@ -659,7 +690,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<byte> SoftwareFallback(byte e0, byte e1, byte e2, byte e3, byte e4, byte e5, byte e6, byte e7, byte e8, byte e9, byte e10, byte e11, byte e12, byte e13, byte e14, byte e15, byte e16, byte e17, byte e18, byte e19, byte e20, byte e21, byte e22, byte e23, byte e24, byte e25, byte e26, byte e27, byte e28, byte e29, byte e30, byte e31)
             {
-                var pResult = stackalloc byte[32]
+                byte* pResult = stackalloc byte[32]
                 {
                     e0,
                     e1,
@@ -719,7 +750,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<double> SoftwareFallback(double e0, double e1, double e2, double e3)
             {
-                var pResult = stackalloc double[4]
+                double* pResult = stackalloc double[4]
                 {
                     e0,
                     e1,
@@ -763,7 +794,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<short> SoftwareFallback(short e0, short e1, short e2, short e3, short e4, short e5, short e6, short e7, short e8, short e9, short e10, short e11, short e12, short e13, short e14, short e15)
             {
-                var pResult = stackalloc short[16]
+                short* pResult = stackalloc short[16]
                 {
                     e0,
                     e1,
@@ -811,7 +842,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<int> SoftwareFallback(int e0, int e1, int e2, int e3, int e4, int e5, int e6, int e7)
             {
-                var pResult = stackalloc int[8]
+                int* pResult = stackalloc int[8]
                 {
                     e0,
                     e1,
@@ -847,7 +878,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<long> SoftwareFallback(long e0, long e1, long e2, long e3)
             {
-                var pResult = stackalloc long[4]
+                long* pResult = stackalloc long[4]
                 {
                     e0,
                     e1,
@@ -908,7 +939,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<sbyte> SoftwareFallback(sbyte e0, sbyte e1, sbyte e2, sbyte e3, sbyte e4, sbyte e5, sbyte e6, sbyte e7, sbyte e8, sbyte e9, sbyte e10, sbyte e11, sbyte e12, sbyte e13, sbyte e14, sbyte e15, sbyte e16, sbyte e17, sbyte e18, sbyte e19, sbyte e20, sbyte e21, sbyte e22, sbyte e23, sbyte e24, sbyte e25, sbyte e26, sbyte e27, sbyte e28, sbyte e29, sbyte e30, sbyte e31)
             {
-                var pResult = stackalloc sbyte[32]
+                sbyte* pResult = stackalloc sbyte[32]
                 {
                     e0,
                     e1,
@@ -972,7 +1003,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<float> SoftwareFallback(float e0, float e1, float e2, float e3, float e4, float e5, float e6, float e7)
             {
-                var pResult = stackalloc float[8]
+                float* pResult = stackalloc float[8]
                 {
                     e0,
                     e1,
@@ -1021,7 +1052,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<ushort> SoftwareFallback(ushort e0, ushort e1, ushort e2, ushort e3, ushort e4, ushort e5, ushort e6, ushort e7, ushort e8, ushort e9, ushort e10, ushort e11, ushort e12, ushort e13, ushort e14, ushort e15)
             {
-                var pResult = stackalloc ushort[16]
+                ushort* pResult = stackalloc ushort[16]
                 {
                     e0,
                     e1,
@@ -1070,7 +1101,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<uint> SoftwareFallback(uint e0, uint e1, uint e2, uint e3, uint e4, uint e5, uint e6, uint e7)
             {
-                var pResult = stackalloc uint[8]
+                uint* pResult = stackalloc uint[8]
                 {
                     e0,
                     e1,
@@ -1107,7 +1138,7 @@ namespace System.Runtime.Intrinsics
 
             static Vector256<ulong> SoftwareFallback(ulong e0, ulong e1, ulong e2, ulong e3)
             {
-                var pResult = stackalloc ulong[4]
+                ulong* pResult = stackalloc ulong[4]
                 {
                     e0,
                     e1,
@@ -1616,7 +1647,7 @@ namespace System.Runtime.Intrinsics
             // This relies on us stripping the "init" flag from the ".locals"
             // declaration to let the upper bits be uninitialized.
 
-            var pResult = stackalloc byte[32];
+            byte* pResult = stackalloc byte[32];
             pResult[0] = value;
             return Unsafe.AsRef<Vector256<byte>>(pResult);
         }
@@ -1630,7 +1661,7 @@ namespace System.Runtime.Intrinsics
             // This relies on us stripping the "init" flag from the ".locals"
             // declaration to let the upper bits be uninitialized.
 
-            var pResult = stackalloc double[4];
+            double* pResult = stackalloc double[4];
             pResult[0] = value;
             return Unsafe.AsRef<Vector256<double>>(pResult);
         }
@@ -1644,7 +1675,7 @@ namespace System.Runtime.Intrinsics
             // This relies on us stripping the "init" flag from the ".locals"
             // declaration to let the upper bits be uninitialized.
 
-            var pResult = stackalloc short[16];
+            short* pResult = stackalloc short[16];
             pResult[0] = value;
             return Unsafe.AsRef<Vector256<short>>(pResult);
         }
@@ -1658,7 +1689,7 @@ namespace System.Runtime.Intrinsics
             // This relies on us stripping the "init" flag from the ".locals"
             // declaration to let the upper bits be uninitialized.
 
-            var pResult = stackalloc int[8];
+            int* pResult = stackalloc int[8];
             pResult[0] = value;
             return Unsafe.AsRef<Vector256<int>>(pResult);
         }
@@ -1672,7 +1703,7 @@ namespace System.Runtime.Intrinsics
             // This relies on us stripping the "init" flag from the ".locals"
             // declaration to let the upper bits be uninitialized.
 
-            var pResult = stackalloc long[4];
+            long* pResult = stackalloc long[4];
             pResult[0] = value;
             return Unsafe.AsRef<Vector256<long>>(pResult);
         }
@@ -1687,7 +1718,7 @@ namespace System.Runtime.Intrinsics
             // This relies on us stripping the "init" flag from the ".locals"
             // declaration to let the upper bits be uninitialized.
 
-            var pResult = stackalloc sbyte[32];
+            sbyte* pResult = stackalloc sbyte[32];
             pResult[0] = value;
             return Unsafe.AsRef<Vector256<sbyte>>(pResult);
         }
@@ -1701,7 +1732,7 @@ namespace System.Runtime.Intrinsics
             // This relies on us stripping the "init" flag from the ".locals"
             // declaration to let the upper bits be uninitialized.
 
-            var pResult = stackalloc float[8];
+            float* pResult = stackalloc float[8];
             pResult[0] = value;
             return Unsafe.AsRef<Vector256<float>>(pResult);
         }
@@ -1716,7 +1747,7 @@ namespace System.Runtime.Intrinsics
             // This relies on us stripping the "init" flag from the ".locals"
             // declaration to let the upper bits be uninitialized.
 
-            var pResult = stackalloc ushort[16];
+            ushort* pResult = stackalloc ushort[16];
             pResult[0] = value;
             return Unsafe.AsRef<Vector256<ushort>>(pResult);
         }
@@ -1731,7 +1762,7 @@ namespace System.Runtime.Intrinsics
             // This relies on us stripping the "init" flag from the ".locals"
             // declaration to let the upper bits be uninitialized.
 
-            var pResult = stackalloc uint[8];
+            uint* pResult = stackalloc uint[8];
             pResult[0] = value;
             return Unsafe.AsRef<Vector256<uint>>(pResult);
         }
@@ -1746,7 +1777,7 @@ namespace System.Runtime.Intrinsics
             // This relies on us stripping the "init" flag from the ".locals"
             // declaration to let the upper bits be uninitialized.
 
-            var pResult = stackalloc ulong[4];
+            ulong* pResult = stackalloc ulong[4];
             pResult[0] = value;
             return Unsafe.AsRef<Vector256<ulong>>(pResult);
         }

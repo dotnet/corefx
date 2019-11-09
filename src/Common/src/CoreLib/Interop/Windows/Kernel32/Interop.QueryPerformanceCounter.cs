@@ -4,9 +4,9 @@
 
 using System.Runtime.InteropServices;
 
-internal partial class Interop
+internal static partial class Interop
 {
-    internal partial class Kernel32
+    internal static partial class Kernel32
     {
         // The actual native signature is:
         //      BOOL WINAPI QueryPerformanceCounter(
@@ -17,6 +17,7 @@ internal partial class Interop
         // We don't set last error since we don't need the extended error info.
 
         [DllImport(Libraries.Kernel32, ExactSpelling = true)]
+        [SuppressGCTransition]
         internal static extern unsafe BOOL QueryPerformanceCounter(long* lpPerformanceCount);
     }
 }

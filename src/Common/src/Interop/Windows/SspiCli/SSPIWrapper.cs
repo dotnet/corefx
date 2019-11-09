@@ -374,7 +374,7 @@ namespace System.Net
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, contextAttribute);
 
             Span<T> span =
-#if netstandard
+#if NETSTANDARD2_0
                 stackalloc T[1] { attribute };
 #else
                 MemoryMarshal.CreateSpan(ref attribute, 1);
@@ -384,7 +384,7 @@ namespace System.Net
                 MemoryMarshal.AsBytes(span),
                 null,
                 out SafeHandle sspiHandle);
-#if netstandard
+#if NETSTANDARD2_0
             attribute = span[0];
 #endif
 
@@ -406,7 +406,7 @@ namespace System.Net
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, contextAttribute);
 
             Span<T> span =
-#if netstandard
+#if NETSTANDARD2_0
                 stackalloc T[1] { attribute };
 #else
                 MemoryMarshal.CreateSpan(ref attribute, 1);
@@ -416,7 +416,7 @@ namespace System.Net
                 MemoryMarshal.AsBytes(span),
                 safeHandleType,
                 out sspiHandle);
-#if netstandard
+#if NETSTANDARD2_0
             attribute = span[0];
 #endif
 
@@ -488,7 +488,7 @@ namespace System.Net
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
 
             Span<Interop.SspiCli.SecPkgContext_IssuerListInfoEx> buffer =
-#if netstandard
+#if NETSTANDARD2_0
                 stackalloc Interop.SspiCli.SecPkgContext_IssuerListInfoEx[1] { ctx };
 #else
                 MemoryMarshal.CreateSpan(ref ctx, 1);
@@ -499,7 +499,7 @@ namespace System.Net
                 MemoryMarshal.AsBytes(buffer),
                 typeof(SafeFreeContextBuffer),
                 out sspiHandle);
-#if netstandard
+#if NETSTANDARD2_0
             ctx = buffer[0];
 #endif
 
@@ -520,31 +520,20 @@ namespace System.Net
                 return "An exception when invoking Win32 API";
             }
 
-            switch ((Interop.SECURITY_STATUS)errorCode)
+            return (Interop.SECURITY_STATUS)errorCode switch
             {
-                case Interop.SECURITY_STATUS.InvalidHandle:
-                    return "Invalid handle";
-                case Interop.SECURITY_STATUS.InvalidToken:
-                    return "Invalid token";
-                case Interop.SECURITY_STATUS.ContinueNeeded:
-                    return "Continue needed";
-                case Interop.SECURITY_STATUS.IncompleteMessage:
-                    return "Message incomplete";
-                case Interop.SECURITY_STATUS.WrongPrincipal:
-                    return "Wrong principal";
-                case Interop.SECURITY_STATUS.TargetUnknown:
-                    return "Target unknown";
-                case Interop.SECURITY_STATUS.PackageNotFound:
-                    return "Package not found";
-                case Interop.SECURITY_STATUS.BufferNotEnough:
-                    return "Buffer not enough";
-                case Interop.SECURITY_STATUS.MessageAltered:
-                    return "Message altered";
-                case Interop.SECURITY_STATUS.UntrustedRoot:
-                    return "Untrusted root";
-                default:
-                    return "0x" + errorCode.ToString("x", NumberFormatInfo.InvariantInfo);
-            }
+                Interop.SECURITY_STATUS.InvalidHandle => "Invalid handle",
+                Interop.SECURITY_STATUS.InvalidToken => "Invalid token",
+                Interop.SECURITY_STATUS.ContinueNeeded => "Continue needed",
+                Interop.SECURITY_STATUS.IncompleteMessage => "Message incomplete",
+                Interop.SECURITY_STATUS.WrongPrincipal => "Wrong principal",
+                Interop.SECURITY_STATUS.TargetUnknown => "Target unknown",
+                Interop.SECURITY_STATUS.PackageNotFound => "Package not found",
+                Interop.SECURITY_STATUS.BufferNotEnough => "Buffer not enough",
+                Interop.SECURITY_STATUS.MessageAltered => "Message altered",
+                Interop.SECURITY_STATUS.UntrustedRoot => "Untrusted root",
+                _ => "0x" + errorCode.ToString("x", NumberFormatInfo.InvariantInfo),
+            };
         }
     } // class SSPIWrapper
 }

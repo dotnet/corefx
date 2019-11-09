@@ -31,37 +31,37 @@ namespace System.Configuration
         protected const string ConfigSectionsTag = "configSections";
 
         protected const string SectionTag = "section";
-        protected const string  SectionNameAttribute = "name";
-        protected const string  SectionTypeAttribute = "type";
-        protected const string  SectionAllowLocationAttribute = "allowLocation";
-        protected const string  SectionAllowDefinitionAttribute = "allowDefinition";
-        protected const string   AllowDefinitionEverywhere = "Everywhere";
-        protected const string   AllowDefinitionMachineOnly = "MachineOnly";
-        protected const string   AllowDefinitionMachineToApplication = "MachineToApplication";
-        protected const string   AllowDefinitionMachineToWebRoot = "MachineToWebRoot";
-        protected const string  SectionAllowExeDefinitionAttribute = "allowExeDefinition";
-        protected const string   AllowExeDefinitionMachineToRoaming = "MachineToRoamingUser";
-        protected const string   AllowExeDefinitionMachineToLocal = "MachineToLocalUser";
-        protected const string  SectionRestartonExternalChangesAttribute = "restartOnExternalChanges";
-        protected const string  SectionRequirePermissionAttribute = "requirePermission";
-        internal const string   SectionOverrideModeDefaultAttribute = "overrideModeDefault";
+        protected const string SectionNameAttribute = "name";
+        protected const string SectionTypeAttribute = "type";
+        protected const string SectionAllowLocationAttribute = "allowLocation";
+        protected const string SectionAllowDefinitionAttribute = "allowDefinition";
+        protected const string AllowDefinitionEverywhere = "Everywhere";
+        protected const string AllowDefinitionMachineOnly = "MachineOnly";
+        protected const string AllowDefinitionMachineToApplication = "MachineToApplication";
+        protected const string AllowDefinitionMachineToWebRoot = "MachineToWebRoot";
+        protected const string SectionAllowExeDefinitionAttribute = "allowExeDefinition";
+        protected const string AllowExeDefinitionMachineToRoaming = "MachineToRoamingUser";
+        protected const string AllowExeDefinitionMachineToLocal = "MachineToLocalUser";
+        protected const string SectionRestartonExternalChangesAttribute = "restartOnExternalChanges";
+        protected const string SectionRequirePermissionAttribute = "requirePermission";
+        internal const string SectionOverrideModeDefaultAttribute = "overrideModeDefault";
 
         internal const string OverrideModeInherit = "Inherit";
         internal const string OverrideModeAllow = "Allow";
         internal const string OverrideModeDeny = "Deny";
 
         protected const string SectionGroupTag = "sectionGroup";
-        protected const string  SectionGroupNameAttribute = "name";
-        protected const string  SectionGroupTypeAttribute = "type";
+        protected const string SectionGroupNameAttribute = "name";
+        protected const string SectionGroupTypeAttribute = "type";
 
         protected const string RemoveTag = "remove";
         protected const string ClearTag = "clear";
 
         protected const string LocationTag = "location";
-        protected const string  LocationPathAttribute = "path";
-        internal const string   LocationAllowOverrideAttribute = "allowOverride";
-        internal const string   LocationOverrideModeAttribute = "overrideMode";
-        protected const string  LocationInheritInChildApplicationsAttribute = "inheritInChildApplications";
+        protected const string LocationPathAttribute = "path";
+        internal const string LocationAllowOverrideAttribute = "allowOverride";
+        internal const string LocationOverrideModeAttribute = "overrideMode";
+        protected const string LocationInheritInChildApplicationsAttribute = "inheritInChildApplications";
 
         protected const string ConfigSourceAttribute = "configSource";
         internal const string ProtectionProviderAttibute = "configProtectionProvider";
@@ -2112,45 +2112,29 @@ namespace System.Configuration
         /// </summary>
         /// <param name="allowExeDefinition">string representation of value</param>
         /// <param name="xmlUtil">[optional] - can provide better error</param>
-        internal static ConfigurationAllowExeDefinition
-            AllowExeDefinitionToEnum(string allowExeDefinition, XmlUtil xmlUtil)
-        {
-            switch (allowExeDefinition)
+        internal static ConfigurationAllowExeDefinition AllowExeDefinitionToEnum(string allowExeDefinition, XmlUtil xmlUtil) =>
+            allowExeDefinition switch
             {
-                case AllowDefinitionMachineOnly:
-                    return ConfigurationAllowExeDefinition.MachineOnly;
-                case AllowDefinitionMachineToApplication:
-                    return ConfigurationAllowExeDefinition.MachineToApplication;
-                case AllowExeDefinitionMachineToRoaming:
-                    return ConfigurationAllowExeDefinition.MachineToRoamingUser;
-                case AllowExeDefinitionMachineToLocal:
-                    return ConfigurationAllowExeDefinition.MachineToLocalUser;
-                default:
-                    throw new ConfigurationErrorsException(
+                AllowDefinitionMachineOnly => ConfigurationAllowExeDefinition.MachineOnly,
+                AllowDefinitionMachineToApplication => ConfigurationAllowExeDefinition.MachineToApplication,
+                AllowExeDefinitionMachineToRoaming => ConfigurationAllowExeDefinition.MachineToRoamingUser,
+                AllowExeDefinitionMachineToLocal => ConfigurationAllowExeDefinition.MachineToLocalUser,
+                _ => throw new ConfigurationErrorsException(
                         SR.Config_section_allow_exe_definition_attribute_invalid,
-                        xmlUtil);
-            }
-        }
+                        xmlUtil),
+            };
 
-        internal static ConfigurationAllowDefinition
-            AllowDefinitionToEnum(string allowDefinition, XmlUtil xmlUtil)
-        {
-            switch (xmlUtil.Reader.Value)
+        internal static ConfigurationAllowDefinition AllowDefinitionToEnum(string allowDefinition, XmlUtil xmlUtil) =>
+            xmlUtil.Reader.Value switch
             {
-                case AllowDefinitionEverywhere:
-                    return ConfigurationAllowDefinition.Everywhere;
-                case AllowDefinitionMachineOnly:
-                    return ConfigurationAllowDefinition.MachineOnly;
-                case AllowDefinitionMachineToApplication:
-                    return ConfigurationAllowDefinition.MachineToApplication;
-                case AllowDefinitionMachineToWebRoot:
-                    return ConfigurationAllowDefinition.MachineToWebRoot;
-                default:
-                    throw new ConfigurationErrorsException(
+                AllowDefinitionEverywhere => ConfigurationAllowDefinition.Everywhere,
+                AllowDefinitionMachineOnly => ConfigurationAllowDefinition.MachineOnly,
+                AllowDefinitionMachineToApplication => ConfigurationAllowDefinition.MachineToApplication,
+                AllowDefinitionMachineToWebRoot => ConfigurationAllowDefinition.MachineToWebRoot,
+                _ => throw new ConfigurationErrorsException(
                         SR.Config_section_allow_definition_attribute_invalid,
-                        xmlUtil);
-            }
-        }
+                        xmlUtil),
+            };
 
         internal static string CombineConfigKey(string parentConfigKey, string tagName)
         {
@@ -3598,7 +3582,7 @@ namespace System.Configuration
                 throw new ConfigurationErrorsException(SR.EncryptedNode_not_found, filename, lineNumber);
 
             // Find the <EncryptedData> node
-            for (;;)
+            while (true)
             {
                 clone.Read(); // Keep reading till we find a relavant node
 

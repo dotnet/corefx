@@ -26,7 +26,7 @@ namespace System
     // specified. Note, however, that the Parse methods do not accept
     // NaNs or Infinities.
 
-    internal partial class Number
+    internal static partial class Number
     {
         private const int Int32Precision = 10;
         private const int UInt32Precision = Int32Precision;
@@ -268,8 +268,8 @@ namespace System
 
             Debug.Assert(number.DigitsCount == 0);
             Debug.Assert(number.Scale == 0);
-            Debug.Assert(number.IsNegative == false);
-            Debug.Assert(number.HasNonZeroTail == false);
+            Debug.Assert(!number.IsNegative);
+            Debug.Assert(!number.HasNonZeroTail);
 
             number.CheckConsistency();
 
@@ -374,12 +374,12 @@ namespace System
                         number.Scale--;
                     }
                 }
-                else if (((styles & NumberStyles.AllowDecimalPoint) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, strEnd, decSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, strEnd, info.NumberDecimalSeparator)) != null))
+                else if (((styles & NumberStyles.AllowDecimalPoint) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, strEnd, decSep)) != null || (parsingCurrency && (state & StateCurrency) == 0) && (next = MatchChars(p, strEnd, info.NumberDecimalSeparator)) != null))
                 {
                     state |= StateDecimal;
                     p = next - 1;
                 }
-                else if (((styles & NumberStyles.AllowThousands) != 0) && ((state & StateDigits) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, strEnd, groupSep)) != null || ((parsingCurrency) && (state & StateCurrency) == 0) && (next = MatchChars(p, strEnd, info.NumberGroupSeparator)) != null))
+                else if (((styles & NumberStyles.AllowThousands) != 0) && ((state & StateDigits) != 0) && ((state & StateDecimal) == 0) && ((next = MatchChars(p, strEnd, groupSep)) != null || (parsingCurrency && (state & StateCurrency) == 0) && (next = MatchChars(p, strEnd, info.NumberGroupSeparator)) != null))
                 {
                     p = next - 1;
                 }
@@ -440,7 +440,7 @@ namespace System
                 {
                     if (!IsWhite(ch) || (styles & NumberStyles.AllowTrailingWhite) == 0)
                     {
-                        if (((styles & NumberStyles.AllowTrailingSign) != 0 && ((state & StateSign) == 0)) && ((next = MatchChars(p, strEnd, info.PositiveSign)) != null || (((next = MatchChars(p, strEnd, info.NegativeSign)) != null) && (number.IsNegative = true))))
+                        if ((styles & NumberStyles.AllowTrailingSign) != 0 && ((state & StateSign) == 0) && ((next = MatchChars(p, strEnd, info.PositiveSign)) != null || (((next = MatchChars(p, strEnd, info.NegativeSign)) != null) && (number.IsNegative = true))))
                         {
                             state |= StateSign;
                             p = next - 1;
@@ -1115,7 +1115,6 @@ namespace System
 
             int index = 0;
             int num = value[0];
-            uint numValue;
 
             // Skip past any whitespace at the beginning.
             if ((styles & NumberStyles.AllowLeadingWhite) != 0 && IsWhite(num))
@@ -1158,6 +1157,8 @@ namespace System
                     if ((uint)index >= (uint)value.Length)
                         goto DoneAtEnd;
                     num = value[index];
+
+                    uint numValue;
                     if ((uint)num >= (uint)charToHexLookup.Length || (numValue = charToHexLookup[num]) == 0xFF)
                         goto HasTrailingChars;
                     index++;
@@ -1168,7 +1169,7 @@ namespace System
                 if ((uint)index >= (uint)value.Length)
                     goto DoneAtEnd;
                 num = value[index];
-                if ((uint)num >= (uint)charToHexLookup.Length || (numValue = charToHexLookup[num]) == 0xFF)
+                if ((uint)num >= (uint)charToHexLookup.Length || charToHexLookup[num] == 0xFF)
                     goto HasTrailingChars;
 
                 // At this point, we're either overflowing or hitting a formatting error.
@@ -1443,7 +1444,6 @@ namespace System
 
             int index = 0;
             int num = value[0];
-            uint numValue;
 
             // Skip past any whitespace at the beginning.
             if ((styles & NumberStyles.AllowLeadingWhite) != 0 && IsWhite(num))
@@ -1486,6 +1486,8 @@ namespace System
                     if ((uint)index >= (uint)value.Length)
                         goto DoneAtEnd;
                     num = value[index];
+
+                    uint numValue;
                     if ((uint)num >= (uint)charToHexLookup.Length || (numValue = charToHexLookup[num]) == 0xFF)
                         goto HasTrailingChars;
                     index++;
@@ -1496,7 +1498,7 @@ namespace System
                 if ((uint)index >= (uint)value.Length)
                     goto DoneAtEnd;
                 num = value[index];
-                if ((uint)num >= (uint)charToHexLookup.Length || (numValue = charToHexLookup[num]) == 0xFF)
+                if ((uint)num >= (uint)charToHexLookup.Length || charToHexLookup[num] == 0xFF)
                     goto HasTrailingChars;
 
                 // At this point, we're either overflowing or hitting a formatting error.

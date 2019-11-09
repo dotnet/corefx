@@ -924,7 +924,8 @@ namespace System.Data.SqlClient
                     {
                         AsyncHelper.ContinueTaskWithState(execNQ, completion,
                             state: Tuple.Create(this, completion),
-                            onSuccess: state => {
+                            onSuccess: state =>
+                            {
                                 var parameters = (Tuple<SqlCommand, TaskCompletionSource<object>>)state;
                                 parameters.Item1.BeginExecuteNonQueryInternalReadStage(parameters.Item2);
                             }
@@ -1284,7 +1285,8 @@ namespace System.Data.SqlClient
                 {
                     AsyncHelper.ContinueTaskWithState(writeTask, completion,
                         state: Tuple.Create(this, completion),
-                        onSuccess: state => {
+                        onSuccess: state =>
+                        {
                             var parameters = (Tuple<SqlCommand, TaskCompletionSource<object>>)state;
                             parameters.Item1.BeginExecuteXmlReaderInternalReadStage(parameters.Item2);
                         }
@@ -1573,7 +1575,8 @@ namespace System.Data.SqlClient
                 {
                     AsyncHelper.ContinueTaskWithState(writeTask, completion,
                         state: Tuple.Create(this, completion),
-                        onSuccess: state => {
+                        onSuccess: state =>
+                        {
                             var parameters = (Tuple<SqlCommand, TaskCompletionSource<object>>)state;
                             parameters.Item1.BeginExecuteReaderInternalReadStage(parameters.Item2);
                         }
@@ -2296,18 +2299,13 @@ namespace System.Data.SqlClient
         {
             Debug.Assert(oledbDirection >= 1 && oledbDirection <= 4, "invalid parameter direction from params_rowset!");
 
-            switch (oledbDirection)
+            return oledbDirection switch
             {
-                case 2:
-                    return ParameterDirection.InputOutput;
-                case 3:
-                    return ParameterDirection.Output;
-                case 4:
-                    return ParameterDirection.ReturnValue;
-                default:
-                    return ParameterDirection.Input;
-            }
-
+                2 => ParameterDirection.InputOutput,
+                3 => ParameterDirection.Output,
+                4 => ParameterDirection.ReturnValue,
+                _ => ParameterDirection.Input,
+            };
         }
 
         // get cached metadata
@@ -2589,7 +2587,7 @@ namespace System.Data.SqlClient
                     Debug.Assert(!IsPrepared, "Batch RPC should not be prepared!");
                     Debug.Assert(!IsDirty, "Batch RPC should not be marked as dirty!");
                     Debug.Assert(_SqlRPCBatchArray != null, "RunExecuteReader rpc array not provided");
-                    writeTask = _stateObj.Parser.TdsExecuteRPC( _SqlRPCBatchArray, timeout, inSchema, this.Notification, _stateObj, CommandType.StoredProcedure == CommandType, sync: !asyncWrite);
+                    writeTask = _stateObj.Parser.TdsExecuteRPC(_SqlRPCBatchArray, timeout, inSchema, this.Notification, _stateObj, CommandType.StoredProcedure == CommandType, sync: !asyncWrite);
                 }
                 else if ((System.Data.CommandType.Text == this.CommandType) && (0 == GetParameterCount(_parameters)))
                 {
@@ -3333,7 +3331,7 @@ namespace System.Data.SqlClient
                         if (parameter.IsDerivedParameterTypeName)
                         {
                             string[] parts = MultipartIdentifier.ParseMultipartIdentifier(parameter.TypeName, "[\"", "]\"", SR.SQL_TDSParserTableName, false);
-                            if (parts != null && parts.Length==4) // will always return int[4] right justified
+                            if (parts != null && parts.Length == 4) // will always return int[4] right justified
                             {
                                 if (
                                     parts[3] != null && // name must not be null
@@ -3341,7 +3339,7 @@ namespace System.Data.SqlClient
                                     parts[1] != null // server should not be null or we don't need to remove it
                                 )
                                 {
-                                    parameter.TypeName = QuoteIdentifier(parts.AsSpan(2,2));
+                                    parameter.TypeName = QuoteIdentifier(parts.AsSpan(2, 2));
                                 }
                             }
                         }

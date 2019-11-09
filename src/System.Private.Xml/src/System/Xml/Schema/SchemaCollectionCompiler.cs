@@ -2,19 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text;
+
 namespace System.Xml.Schema
 {
-    using System;
-    using System.Collections;
-    using System.Globalization;
-    using System.Text;
-    using System.Diagnostics;
-
     internal sealed class SchemaCollectionCompiler : BaseProcessor
     {
         private bool _compileContentModel;
         private readonly XmlSchemaObjectTable _examplars = new XmlSchemaObjectTable();
-        private readonly Stack _complexTypeStack = new Stack();
+        private readonly Stack<XmlSchemaComplexType> _complexTypeStack = new Stack<XmlSchemaComplexType>();
         private XmlSchema _schema;
 
         public SchemaCollectionCompiler(XmlNameTable nameTable, ValidationEventHandler eventHandler)
@@ -237,7 +238,7 @@ namespace System.Xml.Schema
             }
             while (_complexTypeStack.Count > 0)
             {
-                XmlSchemaComplexType type = (XmlSchemaComplexType)_complexTypeStack.Pop();
+                XmlSchemaComplexType type = _complexTypeStack.Pop();
                 CompileCompexTypeElements(type);
             }
             foreach (XmlSchemaType type in _schema.SchemaTypes.Values)
@@ -1034,19 +1035,6 @@ namespace System.Xml.Schema
             {
                 if (!IsValidRestriction(complexType.ContentTypeParticle, baseType.ContentTypeParticle))
                 {
-#if DEBUG
-                    if (complexType.ContentTypeParticle != null && baseType.ContentTypeParticle != null)
-                    {
-                        string position = string.Empty;
-                        if (complexType.SourceUri != null)
-                        {
-                            position = " in " + complexType.SourceUri + "(" + complexType.LineNumber + ", " + complexType.LinePosition + ")";
-                        }
-                        Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceError, "Invalid complexType content restriction" + position);
-                        Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceError, "     Base    " + DumpContentModel(baseType.ContentTypeParticle));
-                        Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceError, "     Derived " + DumpContentModel(complexType.ContentTypeParticle));
-                    }
-#endif
                     SendValidationEvent(SR.Sch_InvalidParticleRestriction, complexType);
                 }
             }
@@ -1893,16 +1881,6 @@ namespace System.Xml.Schema
                         {
                             if (attributeBase.Use == XmlSchemaUse.Prohibited && attribute.Use != XmlSchemaUse.Prohibited)
                             {
-#if DEBUG
-                                string position = string.Empty;
-                                if (derivedType.SourceUri != null)
-                                {
-                                    position = " in " + derivedType.SourceUri + "(" + derivedType.LineNumber + ", " + derivedType.LinePosition + ")";
-                                }
-                                Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceError, "Invalid complexType attributes restriction" + position);
-                                Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceError, "     Base    " + DumpAttributes(baseType.AttributeUses, baseType.AttributeWildcard));
-                                Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceError, "     Derived " + DumpAttributes(derivedType.AttributeUses, derivedType.AttributeWildcard));
-#endif
                                 SendValidationEvent(SR.Sch_AttributeRestrictionProhibited, attribute);
                             }
                             else if (attribute.Use == XmlSchemaUse.Prohibited)
@@ -1926,16 +1904,6 @@ namespace System.Xml.Schema
                         }
                         if (baseAttributeWildcard == null || !baseAttributeWildcard.Allows(attribute.QualifiedName))
                         {
-#if DEBUG
-                            string position = string.Empty;
-                            if (derivedType.SourceUri != null)
-                            {
-                                position = " in " + derivedType.SourceUri + "(" + derivedType.LineNumber + ", " + derivedType.LinePosition + ")";
-                            }
-                            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceError, "Invalid complexType attributes restriction" + position);
-                            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceError, "     Base    " + DumpAttributes(baseType.AttributeUses, baseType.AttributeWildcard));
-                            Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceError, "     Derived " + DumpAttributes(derivedType.AttributeUses, derivedType.AttributeWildcard));
-#endif
                             SendValidationEvent(SR.Sch_AttributeRestrictionInvalidFromWildcard, attribute);
                         }
                     }
@@ -1946,64 +1914,6 @@ namespace System.Xml.Schema
                 derivedType.SetAttributeWildcard(anyAttribute);
             }
         }
-
-
-#if DEBUG
-        private string DumpAttributes(XmlSchemaObjectTable attributeUses, XmlSchemaAnyAttribute attributeWildcard)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("[");
-            bool first = true;
-            foreach (XmlSchemaAttribute attribute in attributeUses.Values)
-            {
-                if (attribute.Use != XmlSchemaUse.Prohibited)
-                {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                    {
-                        sb.Append(" ");
-                    }
-                    sb.Append(attribute.QualifiedName.Name);
-                    if (attribute.Use == XmlSchemaUse.Optional)
-                    {
-                        sb.Append("?");
-                    }
-                }
-            }
-            if (attributeWildcard != null)
-            {
-                if (attributeUses.Count != 0)
-                {
-                    sb.Append(" ");
-                }
-                sb.Append("<");
-                sb.Append(attributeWildcard.NamespaceList.ToString());
-                sb.Append(">");
-            }
-            sb.Append("] - [");
-            first = true;
-            foreach (XmlSchemaAttribute attribute in attributeUses.Values)
-            {
-                if (attribute.Use == XmlSchemaUse.Prohibited)
-                {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                    {
-                        sb.Append(" ");
-                    }
-                    sb.Append(attribute.QualifiedName.Name);
-                }
-            }
-            sb.Append("]");
-            return sb.ToString();
-        }
-#endif
 
         private XmlSchemaAnyAttribute CompileAnyAttributeUnion(XmlSchemaAnyAttribute a, XmlSchemaAnyAttribute b)
         {
@@ -2464,13 +2374,6 @@ namespace System.Xml.Schema
             else
             {
                 ParticleContentValidator contentValidator = new ParticleContentValidator(complexType.ContentType);
-#if DEBUG
-                if (DiagnosticsSwitches.XmlSchema.TraceVerbose)
-                {
-                    string name = complexType.Name != null ? complexType.Name : string.Empty;
-                    Debug.WriteLine("CompileComplexContent: " + name + DumpContentModel(particle));
-                }
-#endif
                 try
                 {
                     contentValidator.Start();

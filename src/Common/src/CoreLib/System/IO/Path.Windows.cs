@@ -86,7 +86,7 @@ namespace System.IO
             int length = path.Length;
             string? combinedPath = null;
 
-            if ((length >= 1 && PathInternal.IsDirectorySeparator(path[0])))
+            if (length >= 1 && PathInternal.IsDirectorySeparator(path[0]))
             {
                 // Path is current drive rooted i.e. starts with \:
                 // "\Foo" and "C:\Bar" => "C:\Foo"
@@ -136,8 +136,7 @@ namespace System.IO
 
         public static string GetTempPath()
         {
-            Span<char> initialBuffer = stackalloc char[PathInternal.MaxShortPath];
-            var builder = new ValueStringBuilder(initialBuffer);
+            var builder = new ValueStringBuilder(stackalloc char[PathInternal.MaxShortPath]);
 
             GetTempPath(ref builder);
 
@@ -148,7 +147,7 @@ namespace System.IO
 
         private static void GetTempPath(ref ValueStringBuilder builder)
         {
-            uint result = 0;
+            uint result;
             while ((result = Interop.Kernel32.GetTempPathW(builder.Capacity, ref builder.GetPinnableReference())) > builder.Capacity)
             {
                 // Reported size is greater than the buffer size. Increase the capacity.
@@ -165,13 +164,11 @@ namespace System.IO
         // name on disk.
         public static string GetTempFileName()
         {
-            Span<char> initialTempPathBuffer = stackalloc char[PathInternal.MaxShortPath];
-            ValueStringBuilder tempPathBuilder = new ValueStringBuilder(initialTempPathBuffer);
+            var tempPathBuilder = new ValueStringBuilder(stackalloc char[PathInternal.MaxShortPath]);
 
             GetTempPath(ref tempPathBuilder);
 
-            Span<char> initialBuffer = stackalloc char[PathInternal.MaxShortPath];
-            var builder = new ValueStringBuilder(initialBuffer);
+            var builder = new ValueStringBuilder(stackalloc char[PathInternal.MaxShortPath]);
 
             uint result = Interop.Kernel32.GetTempFileNameW(
                 ref tempPathBuilder.GetPinnableReference(), "tmp", 0, ref builder.GetPinnableReference());
@@ -236,7 +233,7 @@ namespace System.IO
         }
 
         /// <summary>Gets whether the system is case-sensitive.</summary>
-        internal static bool IsCaseSensitive { get { return false; } }
+        internal static bool IsCaseSensitive => false;
 
         /// <summary>
         /// Returns the volume name for dos, UNC and device paths.
@@ -276,7 +273,7 @@ namespace System.IO
         {
             bool isDevice = PathInternal.IsDevice(path);
 
-            if (!isDevice && path.Slice(0, 2).EqualsOrdinal(@"\\".AsSpan()) )
+            if (!isDevice && path.Slice(0, 2).EqualsOrdinal(@"\\".AsSpan()))
                 return 2;
             else if (isDevice && path.Length >= 8
                 && (path.Slice(0, 8).EqualsOrdinal(PathInternal.UncExtendedPathPrefix.AsSpan())

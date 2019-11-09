@@ -24,7 +24,7 @@ namespace System
 
         public bool Contains(string value, StringComparison comparisonType)
         {
-            return (IndexOf(value, comparisonType) >= 0);
+            return IndexOf(value, comparisonType) >= 0;
         }
 
         public bool Contains(char value) => SpanHelpers.Contains(ref _firstChar, value, Length);
@@ -107,7 +107,7 @@ namespace System
             if (anyOf.Length > 0 && anyOf.Length <= 5)
             {
                 // The ReadOnlySpan.IndexOfAny extension is vectorized for values of 1 - 5 in length
-                var result = new ReadOnlySpan<char>(ref Unsafe.Add(ref _firstChar, startIndex), count).IndexOfAny(anyOf);
+                int result = new ReadOnlySpan<char>(ref Unsafe.Add(ref _firstChar, startIndex), count).IndexOfAny(anyOf);
                 return result == -1 ? result : result + startIndex;
             }
             else if (anyOf.Length > 5)
@@ -268,7 +268,7 @@ namespace System
 
             if (comparisonType == StringComparison.Ordinal)
             {
-                var result = SpanHelpers.IndexOf(
+                int result = SpanHelpers.IndexOf(
                     ref Unsafe.Add(ref this._firstChar, startIndex),
                     count,
                     ref value._firstChar,
@@ -288,7 +288,7 @@ namespace System
                     return CompareInfo.Invariant.IndexOf(this, value, startIndex, count, GetCaseCompareOfComparisonCulture(comparisonType));
 
                 case StringComparison.OrdinalIgnoreCase:
-                    return CompareInfo.Invariant.IndexOfOrdinal(this, value, startIndex, count, GetCaseCompareOfComparisonCulture(comparisonType) != CompareOptions.None);
+                    return CompareInfo.IndexOfOrdinal(this, value, startIndex, count, GetCaseCompareOfComparisonCulture(comparisonType) != CompareOptions.None);
 
                 default:
                     throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));
@@ -478,7 +478,7 @@ namespace System
 
                 case StringComparison.Ordinal:
                 case StringComparison.OrdinalIgnoreCase:
-                    return CompareInfo.Invariant.LastIndexOfOrdinal(this, value, startIndex, count, GetCaseCompareOfComparisonCulture(comparisonType) != CompareOptions.None);
+                    return CompareInfo.LastIndexOfOrdinal(this, value, startIndex, count, GetCaseCompareOfComparisonCulture(comparisonType) != CompareOptions.None);
 
                 default:
                     throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));

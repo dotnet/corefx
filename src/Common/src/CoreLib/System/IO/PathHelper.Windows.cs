@@ -12,7 +12,7 @@ namespace System.IO
     /// <summary>
     /// Wrapper to help with path normalization.
     /// </summary>
-    internal class PathHelper
+    internal static class PathHelper
     {
         /// <summary>
         /// Normalize the given path.
@@ -26,8 +26,7 @@ namespace System.IO
         /// <returns>Normalized path</returns>
         internal static string Normalize(string path)
         {
-            Span<char> initialBuffer = stackalloc char[PathInternal.MaxShortPath];
-            var builder = new ValueStringBuilder(initialBuffer);
+            var builder = new ValueStringBuilder(stackalloc char[PathInternal.MaxShortPath]);
 
             // Get the full path
             GetFullPathName(path.AsSpan(), ref builder);
@@ -51,8 +50,7 @@ namespace System.IO
         /// </remarks>
         internal static string Normalize(ref ValueStringBuilder path)
         {
-            Span<char> initialBuffer = stackalloc char[PathInternal.MaxShortPath];
-            var builder = new ValueStringBuilder(initialBuffer);
+            var builder = new ValueStringBuilder(stackalloc char[PathInternal.MaxShortPath]);
 
             // Get the full path
             GetFullPathName(path.AsSpan(terminate: true), ref builder);
@@ -77,7 +75,7 @@ namespace System.IO
             // it doesn't root extended paths correctly. We don't currently resolve extended paths, so we'll just assert here.
             Debug.Assert(PathInternal.IsPartiallyQualified(path) || !PathInternal.IsExtended(path));
 
-            uint result = 0;
+            uint result;
             while ((result = Interop.Kernel32.GetFullPathNameW(ref MemoryMarshal.GetReference(path), (uint)builder.Capacity, ref builder.GetPinnableReference(), IntPtr.Zero)) > builder.Capacity)
             {
                 // Reported size is greater than the buffer size. Increase the capacity.
@@ -215,7 +213,6 @@ namespace System.IO
                 {
                     // Not enough space. The result count for this API does not include the null terminator.
                     outputBuilder.EnsureCapacity(checked((int)result));
-                    result = Interop.Kernel32.GetLongPathNameW(ref inputBuilder.GetPinnableReference(), ref outputBuilder.GetPinnableReference(), (uint)outputBuilder.Capacity);
                 }
                 else
                 {

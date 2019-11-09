@@ -6,7 +6,6 @@
 // Don't override IsAlwaysNormalized because it is just a Unicode Transformation and could be confused.
 //
 
-using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -16,8 +15,8 @@ namespace System.Text
     {
         private const string base64Chars =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        //   0123456789111111111122222222223333333333444444444455555555556666
-        //             012345678901234567890123456789012345678901234567890123
+        // 0123456789111111111122222222223333333333444444444455555555556666
+        //              012345678901234567890123456789012345678901234567890123
 
         // These are the characters that can be directly encoded in UTF7.
         private const string directChars =
@@ -46,14 +45,13 @@ namespace System.Text
 
         private const int UTF7_CODEPAGE = 65000;
 
-
         public UTF7Encoding()
             : this(false)
         {
         }
 
         public UTF7Encoding(bool allowOptionals)
-            : base(UTF7_CODEPAGE) //Set the data item.
+            : base(UTF7_CODEPAGE) // Set the data item.
         {
             // Allowing optionals?
             _allowOptionals = allowOptionals;
@@ -135,7 +133,7 @@ namespace System.Text
                 throw new ArgumentNullException(nameof(chars), SR.ArgumentNull_Array);
 
             if (index < 0 || count < 0)
-                throw new ArgumentOutOfRangeException((index < 0 ? nameof(index) : nameof(count)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             if (chars.Length - index < count)
                 throw new ArgumentOutOfRangeException(nameof(chars), SR.ArgumentOutOfRange_IndexCountBuffer);
@@ -191,10 +189,10 @@ namespace System.Text
                                               byte[] bytes, int byteIndex)
         {
             if (s == null || bytes == null)
-                throw new ArgumentNullException((s == null ? nameof(s) : nameof(bytes)), SR.ArgumentNull_Array);
+                throw new ArgumentNullException(s == null ? nameof(s) : nameof(bytes), SR.ArgumentNull_Array);
 
             if (charIndex < 0 || charCount < 0)
-                throw new ArgumentOutOfRangeException((charIndex < 0 ? nameof(charIndex) : nameof(charCount)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(charIndex < 0 ? nameof(charIndex) : nameof(charCount), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             if (s.Length - charIndex < charCount)
                 throw new ArgumentOutOfRangeException(nameof(s), SR.ArgumentOutOfRange_IndexCount);
@@ -227,10 +225,10 @@ namespace System.Text
         {
             // Validate parameters
             if (chars == null || bytes == null)
-                throw new ArgumentNullException((chars == null ? nameof(chars) : nameof(bytes)), SR.ArgumentNull_Array);
+                throw new ArgumentNullException(chars == null ? nameof(chars) : nameof(bytes), SR.ArgumentNull_Array);
 
             if (charIndex < 0 || charCount < 0)
-                throw new ArgumentOutOfRangeException((charIndex < 0 ? nameof(charIndex) : nameof(charCount)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(charIndex < 0 ? nameof(charIndex) : nameof(charCount), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             if (chars.Length - charIndex < charCount)
                 throw new ArgumentOutOfRangeException(nameof(chars), SR.ArgumentOutOfRange_IndexCountBuffer);
@@ -262,7 +260,7 @@ namespace System.Text
                 throw new ArgumentNullException(bytes == null ? nameof(bytes) : nameof(chars), SR.ArgumentNull_Array);
 
             if (charCount < 0 || byteCount < 0)
-                throw new ArgumentOutOfRangeException((charCount < 0 ? nameof(charCount) : nameof(byteCount)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(charCount < 0 ? nameof(charCount) : nameof(byteCount), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             return GetBytes(chars, charCount, bytes, byteCount, null);
         }
@@ -282,7 +280,7 @@ namespace System.Text
                 throw new ArgumentNullException(nameof(bytes), SR.ArgumentNull_Array);
 
             if (index < 0 || count < 0)
-                throw new ArgumentOutOfRangeException((index < 0 ? nameof(index) : nameof(count)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             if (bytes.Length - index < count)
                 throw new ArgumentOutOfRangeException(nameof(bytes), SR.ArgumentOutOfRange_IndexCountBuffer);
@@ -326,9 +324,9 @@ namespace System.Text
                 throw new ArgumentNullException(bytes == null ? nameof(bytes) : nameof(chars), SR.ArgumentNull_Array);
 
             if (byteIndex < 0 || byteCount < 0)
-                throw new ArgumentOutOfRangeException((byteIndex < 0 ? nameof(byteIndex) : nameof(byteCount)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(byteIndex < 0 ? nameof(byteIndex) : nameof(byteCount), SR.ArgumentOutOfRange_NeedNonNegNum);
 
-            if ( bytes.Length - byteIndex < byteCount)
+            if (bytes.Length - byteIndex < byteCount)
                 throw new ArgumentOutOfRangeException(nameof(bytes), SR.ArgumentOutOfRange_IndexCountBuffer);
 
             if (charIndex < 0 || charIndex > chars.Length)
@@ -358,7 +356,7 @@ namespace System.Text
                 throw new ArgumentNullException(bytes == null ? nameof(bytes) : nameof(chars), SR.ArgumentNull_Array);
 
             if (charCount < 0 || byteCount < 0)
-                throw new ArgumentOutOfRangeException((charCount < 0 ? nameof(charCount) : nameof(byteCount)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(charCount < 0 ? nameof(charCount) : nameof(byteCount), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             return GetChars(bytes, byteCount, chars, charCount, null);
         }
@@ -378,7 +376,7 @@ namespace System.Text
                 throw new ArgumentNullException(nameof(bytes), SR.ArgumentNull_Array);
 
             if (index < 0 || count < 0)
-                throw new ArgumentOutOfRangeException((index < 0 ? nameof(index) : nameof(count)), SR.ArgumentOutOfRange_NeedNonNegNum);
+                throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
 
             if (bytes.Length - index < count)
                 throw new ArgumentOutOfRangeException(nameof(bytes), SR.ArgumentOutOfRange_IndexCountBuffer);
@@ -492,8 +490,8 @@ namespace System.Text
                         if (!buffer.AddByte(_base64Bytes[(bits >> bitCount) & 0x3F]))
                         {
                             bitCount += 6;                              // We didn't use these bits
-                            currentChar = buffer.GetNextChar();              // We're processing this char still, but AddByte
-                                                                             // --'d it when we ran out of space
+                            buffer.GetNextChar();                       // We're processing this char still, but AddByte
+                                                                        // --'d it when we ran out of space
                             break;                                      // Stop here, not enough room for bytes
                         }
                     }
@@ -576,7 +574,7 @@ namespace System.Text
                 bitCount = decoder.bitCount;
                 firstByte = decoder.firstByte;
 
-                Debug.Assert(firstByte == false || decoder.bitCount <= 0,
+                Debug.Assert(!firstByte || decoder.bitCount <= 0,
                     "[UTF7Encoding.GetChars]If remembered bits, then first byte flag shouldn't be set");
             }
 
@@ -719,18 +717,15 @@ namespace System.Text
             return buffer.Count;
         }
 
-
         public override System.Text.Decoder GetDecoder()
         {
             return new UTF7Encoding.Decoder(this);
         }
 
-
         public override System.Text.Encoder GetEncoder()
         {
             return new UTF7Encoding.Encoder(this);
         }
-
 
         public override int GetMaxByteCount(int charCount)
         {
@@ -762,7 +757,6 @@ namespace System.Text
 
             return (int)byteCount;
         }
-
 
         public override int GetMaxCharCount(int byteCount)
         {
@@ -804,15 +798,10 @@ namespace System.Text
             }
 
             // Anything left in our encoder?
-            internal override bool HasState
-            {
-                get
-                {
-                    // NOTE: This forces the last -, which some encoder might not encode.  If we
-                    // don't see it we don't think we're done reading.
-                    return (this.bitCount != -1);
-                }
-            }
+            internal override bool HasState =>
+                // NOTE: This forces the last -, which some encoder might not encode.  If we
+                // don't see it we don't think we're done reading.
+                this.bitCount != -1;
         }
 
         // Of all the amazing things... This MUST be Encoder so that our com name
@@ -838,52 +827,24 @@ namespace System.Text
             }
 
             // Anything left in our encoder?
-            internal override bool HasState
-            {
-                get
-                {
-                    return this.bits != 0 || this.bitCount != -1;
-                }
-            }
+            internal override bool HasState => this.bits != 0 || this.bitCount != -1;
         }
 
         // Preexisting UTF7 behavior for bad bytes was just to spit out the byte as the next char
         // and turn off base64 mode if it was in that mode.  We still exit the mode, but now we fallback.
         private sealed class DecoderUTF7Fallback : DecoderFallback
         {
-            // Construction.  Default replacement fallback uses no best fit and ? replacement string
-            public DecoderUTF7Fallback()
-            {
-            }
+            // Default replacement fallback uses no best fit and ? replacement string
 
-            public override DecoderFallbackBuffer CreateFallbackBuffer()
-            {
-                return new DecoderUTF7FallbackBuffer(this);
-            }
+            public override DecoderFallbackBuffer CreateFallbackBuffer() =>
+                new DecoderUTF7FallbackBuffer();
 
             // Maximum number of characters that this instance of this fallback could return
-            public override int MaxCharCount
-            {
-                get
-                {
-                    // returns 1 char per bad byte
-                    return 1;
-                }
-            }
+            public override int MaxCharCount => 1; // returns 1 char per bad byte
 
-            public override bool Equals(object? value)
-            {
-                if (value is DecoderUTF7Fallback)
-                {
-                    return true;
-                }
-                return false;
-            }
+            public override bool Equals(object? value) => value is DecoderUTF7Fallback;
 
-            public override int GetHashCode()
-            {
-                return 984;
-            }
+            public override int GetHashCode() => 984;
         }
 
         private sealed class DecoderUTF7FallbackBuffer : DecoderFallbackBuffer
@@ -892,11 +853,6 @@ namespace System.Text
             private char cFallback = (char)0;
             private int iCount = -1;
             private int iSize;
-
-            // Construction
-            public DecoderUTF7FallbackBuffer(DecoderUTF7Fallback fallback)
-            {
-            }
 
             // Fallback Methods
             public override bool Fallback(byte[] bytesUnknown, int index)
@@ -940,13 +896,7 @@ namespace System.Text
             }
 
             // Return # of chars left in this fallback
-            public override int Remaining
-            {
-                get
-                {
-                    return (iCount > 0) ? iCount : 0;
-                }
-            }
+            public override int Remaining => (iCount > 0) ? iCount : 0;
 
             // Clear the buffer
             public override unsafe void Reset()

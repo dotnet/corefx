@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
+
 #pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
 using nuint = System.UInt64;
@@ -65,14 +67,8 @@ namespace System.Runtime.InteropServices
             return obj.m_array == m_array && obj.m_offset == m_offset && obj.m_count == m_count;
         }
 
-        public static bool operator ==(ArrayWithOffset a, ArrayWithOffset b)
-        {
-            return a.Equals(b);
-        }
+        public static bool operator ==(ArrayWithOffset a, ArrayWithOffset b) => a.Equals(b);
 
-        public static bool operator !=(ArrayWithOffset a, ArrayWithOffset b)
-        {
-            return !(a == b);
-        }
+        public static bool operator !=(ArrayWithOffset a, ArrayWithOffset b) => !(a == b);
     }
 }

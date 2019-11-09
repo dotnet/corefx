@@ -2,16 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Serialization;
-using System.Security;
 using System.Text;
-using System.Threading;
 
 namespace System
 {
@@ -228,7 +225,7 @@ namespace System
 
             for (int i = 0; i < exceptionsCopy.Length; i++)
             {
-                var edi = innerExceptionInfos[i];
+                ExceptionDispatchInfo edi = innerExceptionInfos[i];
                 if (edi != null) exceptionsCopy[i] = edi.SourceException;
 
                 if (exceptionsCopy[i] == null)
@@ -306,10 +303,7 @@ namespace System
         /// Gets a read-only collection of the <see cref="System.Exception"/> instances that caused the
         /// current exception.
         /// </summary>
-        public ReadOnlyCollection<Exception> InnerExceptions
-        {
-            get { return m_innerExceptions; }
-        }
+        public ReadOnlyCollection<Exception> InnerExceptions => m_innerExceptions;
 
 
         /// <summary>
@@ -345,11 +339,7 @@ namespace System
                 // exceptions (to be rethrown later) and add it.
                 if (!predicate(m_innerExceptions[i]))
                 {
-                    if (unhandledExceptions == null)
-                    {
-                        unhandledExceptions = new List<Exception>();
-                    }
-
+                    unhandledExceptions ??= new List<Exception>();
                     unhandledExceptions.Add(m_innerExceptions[i]);
                 }
             }
@@ -380,8 +370,7 @@ namespace System
             List<Exception> flattenedExceptions = new List<Exception>();
 
             // Create a list to remember all aggregates to be flattened, this will be accessed like a FIFO queue
-            List<AggregateException> exceptionsToFlatten = new List<AggregateException>();
-            exceptionsToFlatten.Add(this);
+            var exceptionsToFlatten = new List<AggregateException> { this };
             int nDequeueIndex = 0;
 
             // Continue removing and recursively flattening exceptions, until there are no more.
@@ -435,7 +424,7 @@ namespace System
                     sb.Append(m_innerExceptions[i].Message);
                     sb.Append(") ");
                 }
-                sb.Length -= 1;
+                sb.Length--;
                 return StringBuilderCache.GetStringAndRelease(sb);
             }
         }
@@ -454,7 +443,7 @@ namespace System
                 if (m_innerExceptions[i] == InnerException)
                     continue; // Already logged in base.ToString()
 
-                text.Append(Environment.NewLine).Append(InnerExceptionPrefix);
+                text.Append(Environment.NewLineConst + InnerExceptionPrefix);
                 text.AppendFormat(CultureInfo.InvariantCulture, SR.AggregateException_InnerException, i);
                 text.Append(m_innerExceptions[i].ToString());
                 text.Append("<---");
@@ -473,12 +462,6 @@ namespace System
         ///
         /// See https://docs.microsoft.com/en-us/visualstudio/debugger/using-the-debuggerdisplay-attribute
         /// </summary>
-        private int InnerExceptionCount
-        {
-            get
-            {
-                return InnerExceptions.Count;
-            }
-        }
+        private int InnerExceptionCount => InnerExceptions.Count;
     }
 }

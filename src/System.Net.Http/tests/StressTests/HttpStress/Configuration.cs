@@ -22,26 +22,34 @@ namespace HttpStress
 
     public class Configuration
     {
-        public Uri ServerUri { get; set; }
+        public string ServerUri { get; set; } = "";
         public RunMode RunMode { get; set; }
         public bool ListOperations { get; set; }
 
-        public Version HttpVersion { get; set; }
+        public Version HttpVersion { get; set; } = new Version();
+        public bool UseWinHttpHandler { get; set; }
         public int ConcurrentRequests { get; set; }
         public int RandomSeed { get; set; }
         public int MaxContentLength { get; set; }
         public int MaxRequestUriSize { get; set; }
+        public int MaxRequestHeaderCount { get; set; }
+        public int MaxRequestHeaderTotalSize { get; set; }
         public int MaxParameters { get; set; }
-        public int[] OpIndices { get; set; }
-        public int[] ExcludedOpIndices { get; set; }
+        public int[]? OpIndices { get; set; }
+        public int[]? ExcludedOpIndices { get; set; }
         public TimeSpan DisplayInterval { get; set; }
         public TimeSpan DefaultTimeout { get; set; }
         public TimeSpan? ConnectionLifetime { get; set; }
+        public TimeSpan? MaximumExecutionTime { get; set; }
         public double CancellationProbability { get; set; }
 
         public bool UseHttpSys { get; set; }
-        public string LogPath { get; set; }
+        public string? LogPath { get; set; }
         public bool LogAspNet { get; set; }
+        public int? ServerMaxConcurrentStreams { get; set; }
+        public int? ServerMaxFrameSize { get; set; }
+        public int? ServerInitialConnectionWindowSize { get; set; }
+        public int? ServerMaxRequestHeaderFieldSize { get; set; }
     }
 
 }

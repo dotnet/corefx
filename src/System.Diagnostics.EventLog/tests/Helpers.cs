@@ -18,31 +18,30 @@ namespace System.Diagnostics.Tests
         public static bool IsElevatedAndSupportsEventLogs { get => AdminHelpers.IsProcessElevated() && SupportsEventLogs; }
         public static bool SupportsEventLogs { get => PlatformDetection.IsNotWindowsNanoServer && PlatformDetection.IsNotWindowsIoTCore; }
 
-        public static void RetryOnWin7(Action func)
+        // Retry that eats exceptions: for "best effort cleanup"
+        public static void RetrySilently(Action func)
         {
-            RetryOnWin7<object>(() => { func(); return null; });
-        }
-
-        public static T RetryOnWin7<T>(Func<T> func)
-        {
-            if (!PlatformDetection.IsWindows7)
+            try
             {
-                return func();
+                Retry(func);
             }
-
-            return RetryOnAllPlatforms(func);
-            // We are retrying on windows 7 because it throws win32exception while some operations like Writing,retrieving and Deleting log.
-            // So We just try to do the operation again in case of this exception
+            catch
+            {}
         }
 
-        public static T RetryOnAllPlatforms<T>(Func<T> func)
+        public static void Retry(Action func)
+        {
+            Retry<object>(() => { func(); return null; });
+        }
+
+        public static T Retry<T>(Func<T> func)
         {
             // Harden the tests increasing the retry count and the timeout.
             T result = default;
             RetryHelper.Execute(() =>
             {
                 result = func();
-            }, maxAttempts: 10, (iteration) => iteration * 300);
+            }, maxAttempts: 20, (iteration) => iteration * 300);
 
             return result;
         }
@@ -51,7 +50,7 @@ namespace System.Diagnostics.Tests
         {
             int tries = 1;
             Stopwatch stopwatch = Stopwatch.StartNew();
-            while (RetryOnAllPlatforms((() => eventLog.Entries.Count)) < entriesExpected && tries <= 50)
+            while (Retry((() => eventLog.Entries.Count)) < entriesExpected && tries <= 50)
             {
                 if (tries == 50)
                 {
@@ -67,7 +66,7 @@ namespace System.Diagnostics.Tests
             if (stopwatch.ElapsedMilliseconds / 1000 >= 5)
                 Console.WriteLine($"{stopwatch.ElapsedMilliseconds / 1000 } seconds");
 
-            Assert.Equal(entriesExpected, RetryOnWin7((() => eventLog.Entries.Count)));
+            Assert.Equal(entriesExpected, Retry((() => eventLog.Entries.Count)));
         }
 
         internal static EventBookmark GetBookmark(string log, PathType pathType)

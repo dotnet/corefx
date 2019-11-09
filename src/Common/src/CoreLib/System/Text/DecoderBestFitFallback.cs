@@ -24,33 +24,17 @@ namespace System.Text
             _encoding = encoding;
         }
 
-        public override DecoderFallbackBuffer CreateFallbackBuffer()
-        {
-            return new InternalDecoderBestFitFallbackBuffer(this);
-        }
+        public override DecoderFallbackBuffer CreateFallbackBuffer() =>
+            new InternalDecoderBestFitFallbackBuffer(this);
 
         // Maximum number of characters that this instance of this fallback could return
-        public override int MaxCharCount
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public override int MaxCharCount => 1;
 
-        public override bool Equals(object? value)
-        {
-            if (value is InternalDecoderBestFitFallback that)
-            {
-                return _encoding.CodePage == that._encoding.CodePage;
-            }
-            return false;
-        }
+        public override bool Equals(object? value) =>
+            value is InternalDecoderBestFitFallback that &&
+            _encoding.CodePage == that._encoding.CodePage;
 
-        public override int GetHashCode()
-        {
-            return _encoding.CodePage;
-        }
+        public override int GetHashCode() => _encoding.CodePage;
     }
 
     internal sealed class InternalDecoderBestFitFallbackBuffer : DecoderFallbackBuffer
@@ -87,8 +71,7 @@ namespace System.Text
                 lock (InternalSyncObject)
                 {
                     // Double check before we do it again.
-                    if (_oFallback._arrayBestFit == null)
-                        _oFallback._arrayBestFit = fallback._encoding.GetBestFitBytesToUnicodeData();
+                    _oFallback._arrayBestFit ??= fallback._encoding.GetBestFitBytesToUnicodeData();
                 }
             }
         }
@@ -138,17 +121,11 @@ namespace System.Text
                 _iCount++;
 
             // Return true if we could do it.
-            return (_iCount >= 0 && _iCount <= _iSize);
+            return _iCount >= 0 && _iCount <= _iSize;
         }
 
         // How many characters left to output?
-        public override int Remaining
-        {
-            get
-            {
-                return (_iCount > 0) ? _iCount : 0;
-            }
-        }
+        public override int Remaining => (_iCount > 0) ? _iCount : 0;
 
         // Clear the buffer
         public override unsafe void Reset()

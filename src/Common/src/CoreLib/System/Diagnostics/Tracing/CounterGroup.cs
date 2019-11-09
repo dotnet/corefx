@@ -2,14 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
 using System.Diagnostics;
-using System.Collections;
+#endif
 using System.Collections.Generic;
 using System.Threading;
-#if ES_BUILD_PCL
-    using System.Threading.Tasks;
-#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -21,7 +19,7 @@ namespace System.Diagnostics.Tracing
     {
         private readonly EventSource _eventSource;
         private readonly List<DiagnosticCounter> _counters;
-        private static readonly object s_counterGroupLock  = new object();
+        private static readonly object s_counterGroupLock = new object();
 
         internal CounterGroup(EventSource eventSource)
         {
@@ -42,7 +40,7 @@ namespace System.Diagnostics.Tracing
                 _counters.Remove(eventCounter);
         }
 
-        #region EventSource Command Processing
+#region EventSource Command Processing
 
         private void RegisterCommandCallback()
         {
@@ -72,9 +70,9 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        #endregion // EventSource Command Processing
+#endregion // EventSource Command Processing
 
-        #region Global CounterGroup Array management
+#region Global CounterGroup Array management
 
         // We need eventCounters to 'attach' themselves to a particular EventSource.
         // this table provides the mapping from EventSource -> CounterGroup
@@ -91,7 +89,7 @@ namespace System.Diagnostics.Tracing
             else if (eventSourceIndex >= CounterGroup.s_counterGroups.Length)
             {
                 WeakReference<CounterGroup>[] newCounterGroups = new WeakReference<CounterGroup>[eventSourceIndex + 1];
-                Array.Copy(CounterGroup.s_counterGroups, 0, newCounterGroups, 0, CounterGroup.s_counterGroups.Length);
+                Array.Copy(CounterGroup.s_counterGroups, newCounterGroups, CounterGroup.s_counterGroups.Length);
                 CounterGroup.s_counterGroups = newCounterGroups;
             }
         }
@@ -114,9 +112,9 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        #endregion // Global CounterGroup Array management
+#endregion // Global CounterGroup Array management
 
-        #region Timer Processing
+#region Timer Processing
 
         private DateTime _timeStampSinceCollectionStarted;
         private int _pollingIntervalInMilliseconds;
@@ -184,7 +182,7 @@ namespace System.Diagnostics.Tracing
         {
             lock (s_counterGroupLock) // Lock the CounterGroup
             {
-                foreach (var counter in _counters)
+                foreach (DiagnosticCounter counter in _counters)
                 {
                     if (counter is IncrementingEventCounter ieCounter)
                     {
@@ -210,7 +208,7 @@ namespace System.Diagnostics.Tracing
                 DateTime now = DateTime.UtcNow;
                 TimeSpan elapsed = now - _timeStampSinceCollectionStarted;
 
-                foreach (var counter in _counters)
+                foreach (DiagnosticCounter counter in _counters)
                 {
                     counter.WritePayload((float)elapsed.TotalSeconds, _pollingIntervalInMilliseconds);
                 }
@@ -222,8 +220,6 @@ namespace System.Diagnostics.Tracing
                 } while (_nextPollingTimeStamp <= now);
             }
         }
-
-
 
         private static Thread? s_pollingThread;
         // Used for sleeping for a certain amount of time while allowing the thread to be woken up
@@ -261,8 +257,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-
-        #endregion // Timer Processing
+#endregion // Timer Processing
 
     }
 }

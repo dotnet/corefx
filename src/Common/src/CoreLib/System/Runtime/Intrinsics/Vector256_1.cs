@@ -79,19 +79,16 @@ namespace System.Runtime.Intrinsics
         internal static bool IsSupported
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return (typeof(T) == typeof(byte)) ||
-                       (typeof(T) == typeof(sbyte)) ||
-                       (typeof(T) == typeof(short)) ||
-                       (typeof(T) == typeof(ushort)) ||
-                       (typeof(T) == typeof(int)) ||
-                       (typeof(T) == typeof(uint)) ||
-                       (typeof(T) == typeof(long)) ||
-                       (typeof(T) == typeof(ulong)) ||
-                       (typeof(T) == typeof(float)) ||
-                       (typeof(T) == typeof(double));
-            }
+            get => (typeof(T) == typeof(byte)) ||
+                   (typeof(T) == typeof(sbyte)) ||
+                   (typeof(T) == typeof(short)) ||
+                   (typeof(T) == typeof(ushort)) ||
+                   (typeof(T) == typeof(int)) ||
+                   (typeof(T) == typeof(uint)) ||
+                   (typeof(T) == typeof(long)) ||
+                   (typeof(T) == typeof(ulong)) ||
+                   (typeof(T) == typeof(float)) ||
+                   (typeof(T) == typeof(double));
         }
 
         /// <summary>Determines whether the specified <see cref="Vector256{T}" /> is equal to the current instance.</summary>
@@ -177,20 +174,20 @@ namespace System.Runtime.Intrinsics
             ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
 
             int lastElement = Count - 1;
-            StringBuilder sb = StringBuilderCache.Acquire();
+            var sb = new ValueStringBuilder(stackalloc char[64]);
             CultureInfo invariant = CultureInfo.InvariantCulture;
 
             sb.Append('<');
             for (int i = 0; i < lastElement; i++)
             {
-                sb.Append(((IFormattable)this.GetElement(i)).ToString("G", invariant))
-                 .Append(',')
-                 .Append(' ');
+                sb.Append(((IFormattable)this.GetElement(i)).ToString("G", invariant));
+                sb.Append(',');
+                sb.Append(' ');
             }
-            sb.Append(((IFormattable)this.GetElement(lastElement)).ToString("G", invariant))
-             .Append('>');
+            sb.Append(((IFormattable)this.GetElement(lastElement)).ToString("G", invariant));
+            sb.Append('>');
 
-            return StringBuilderCache.GetStringAndRelease(sb);
+            return sb.ToString();
         }
     }
 }

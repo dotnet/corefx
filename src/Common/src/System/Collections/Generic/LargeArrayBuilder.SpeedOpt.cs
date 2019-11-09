@@ -158,7 +158,7 @@ namespace System.Collections.Generic
         {
             Debug.Assert(arrayIndex >= 0);
             Debug.Assert(count >= 0 && count <= Count);
-            Debug.Assert(array?.Length - arrayIndex >= count);
+            Debug.Assert(array.Length - arrayIndex >= count);
 
             for (int i = 0; count > 0; i++)
             {
@@ -308,7 +308,7 @@ namespace System.Collections.Generic
                 int nextCapacity = Math.Min(_count == 0 ? StartingCapacity : _count * 2, _maxCapacity);
 
                 _current = new T[nextCapacity];
-                Array.Copy(_first, 0, _current, 0, _count);
+                Array.Copy(_first, _current, _count);
                 _first = _current;
             }
             else

@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using Internal.Runtime.CompilerServices;
 
@@ -109,22 +106,10 @@ namespace System.Globalization
         }
 
         // Get native two digit year max
-        internal static int GetTwoDigitYearMax(CalendarId calendarId)
-        {
-            if (GlobalizationMode.Invariant)
-            {
-                return Invariant.iTwoDigitYearMax;
-            }
-
-            int twoDigitYearMax = -1;
-
-            if (!CallGetCalendarInfoEx(null, calendarId, (uint)CAL_ITWODIGITYEARMAX, out twoDigitYearMax))
-            {
-                twoDigitYearMax = -1;
-            }
-
-            return twoDigitYearMax;
-        }
+        internal static int GetTwoDigitYearMax(CalendarId calendarId) =>
+            GlobalizationMode.Invariant ? Invariant.iTwoDigitYearMax :
+            CallGetCalendarInfoEx(null, calendarId, CAL_ITWODIGITYEARMAX, out int twoDigitYearMax) ? twoDigitYearMax :
+            -1;
 
         // Call native side to figure out which calendars are allowed
         internal static int GetCalendars(string localeName, bool useUserOverride, CalendarId[] calendars)
@@ -166,9 +151,8 @@ namespace System.Globalization
         {
             Debug.Assert(!GlobalizationMode.Invariant);
 
-            string data;
             // Taiwanese calendar get listed as one of the optional zh-TW calendars only when having zh-TW UI
-            return CallGetCalendarInfoEx("zh-TW", CalendarId.TAIWAN, CAL_SCALNAME, out data);
+            return CallGetCalendarInfoEx("zh-TW", CalendarId.TAIWAN, CAL_SCALNAME, out string _);
         }
 
         // PAL Layer ends here
@@ -215,20 +199,18 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////
         private static void CheckSpecialCalendar(ref CalendarId calendar, ref string localeName)
         {
-            string data;
-
             // Gregorian-US isn't always available in the OS, however it is the same for all locales
             switch (calendar)
             {
                 case CalendarId.GREGORIAN_US:
                     // See if this works
-                    if (!CallGetCalendarInfoEx(localeName, calendar, CAL_SCALNAME, out data))
+                    if (!CallGetCalendarInfoEx(localeName, calendar, CAL_SCALNAME, out string _))
                     {
                         // Failed, set it to a locale (fa-IR) that's alway has Gregorian US available in the OS
                         localeName = "fa-IR";
                     }
                     // See if that works
-                    if (!CallGetCalendarInfoEx(localeName, calendar, CAL_SCALNAME, out data))
+                    if (!CallGetCalendarInfoEx(localeName, calendar, CAL_SCALNAME, out string _))
                     {
                         // Failed again, just use en-US with the gregorian calendar
                         localeName = "en-US";
@@ -249,7 +231,7 @@ namespace System.Globalization
 
         private static bool CallGetCalendarInfoEx(string? localeName, CalendarId calendar, uint calType, out int data)
         {
-            return (Interop.Kernel32.GetCalendarInfoEx(localeName, (uint)calendar, IntPtr.Zero, calType | CAL_RETURN_NUMBER, IntPtr.Zero, 0, out data) != 0);
+            return Interop.Kernel32.GetCalendarInfoEx(localeName, (uint)calendar, IntPtr.Zero, calType | CAL_RETURN_NUMBER, IntPtr.Zero, 0, out data) != 0;
         }
 
         private static unsafe bool CallGetCalendarInfoEx(string localeName, CalendarId calendar, uint calType, out string data)
@@ -310,7 +292,7 @@ namespace System.Globalization
             context.userOverride = null;
             context.strings = new List<string>();
             // First call GetLocaleInfo if necessary
-            if (((lcType != 0) && ((lcType & CAL_NOUSEROVERRIDE) == 0)) &&
+            if ((lcType != 0) && ((lcType & CAL_NOUSEROVERRIDE) == 0) &&
                 // Get user locale, see if it matches localeName.
                 // Note that they should match exactly, including letter case
                 GetUserDefaultLocaleName() == localeName)
@@ -336,11 +318,8 @@ namespace System.Globalization
                 }
             }
 
-            unsafe
-            {
-                // Now call the enumeration API. Work is done by our callback function
-                Interop.Kernel32.EnumCalendarInfoExEx(EnumCalendarInfoCallback, localeName, (uint)calendar, null, calType, Unsafe.AsPointer(ref context));
-            }
+            // Now call the enumeration API. Work is done by our callback function
+            Interop.Kernel32.EnumCalendarInfoExEx(EnumCalendarInfoCallback, localeName, (uint)calendar, null, calType, Unsafe.AsPointer(ref context));
 
             // Now we have a list of data, fail if we didn't find anything.
             Debug.Assert(context.strings != null);

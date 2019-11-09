@@ -8,12 +8,11 @@ using Microsoft.Win32.SafeHandles;
 #else
 using Internal.Win32.SafeHandles;
 #endif
-using System;
 using System.Runtime.InteropServices;
 
-internal partial class Interop
+internal static partial class Interop
 {
-    internal partial class Advapi32
+    internal static partial class Advapi32
     {
         [DllImport(Libraries.Advapi32, CharSet = CharSet.Unicode, BestFitMapping = false, EntryPoint = "RegDeleteValueW")]
         internal static extern int RegDeleteValue(SafeRegistryHandle hKey, string? lpValueName);

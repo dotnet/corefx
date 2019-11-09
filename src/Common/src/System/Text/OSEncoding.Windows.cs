@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace System.Text
     internal sealed class OSEncoding : Encoding
     {
         private readonly int _codePage;
-        private string _encodingName;
+        private string? _encodingName;
 
         internal OSEncoding(int codePage) : base(codePage)
         {
@@ -34,7 +35,7 @@ namespace System.Text
 
             fixed (char* pChar = chars)
             {
-                return WideCharToMultiByte(_codePage, pChar+index, count, null, 0);
+                return WideCharToMultiByte(_codePage, pChar + index, count, null, 0);
             }
         }
 
@@ -76,9 +77,9 @@ namespace System.Text
             }
 
             fixed (char* pChars = s)
-            fixed (byte *pBytes = &bytes[0])
+            fixed (byte* pBytes = &bytes[0])
             {
-                return WideCharToMultiByte(_codePage, pChars+charIndex, charCount, pBytes+byteIndex, bytes.Length - byteIndex);
+                return WideCharToMultiByte(_codePage, pChars + charIndex, charCount, pBytes + byteIndex, bytes.Length - byteIndex);
             }
         }
 
@@ -105,9 +106,9 @@ namespace System.Text
             }
 
             fixed (char* pChars = chars)
-            fixed (byte *pBytes = &bytes[0])
+            fixed (byte* pBytes = &bytes[0])
             {
-                return WideCharToMultiByte(_codePage, pChars+charIndex, charCount, pBytes+byteIndex, bytes.Length - byteIndex);
+                return WideCharToMultiByte(_codePage, pChars + charIndex, charCount, pBytes + byteIndex, bytes.Length - byteIndex);
             }
         }
 
@@ -127,7 +128,7 @@ namespace System.Text
 
             fixed (byte* pBytes = bytes)
             {
-                return MultiByteToWideChar(_codePage, pBytes+index, count, null, 0);
+                return MultiByteToWideChar(_codePage, pBytes + index, count, null, 0);
             }
         }
 
@@ -154,7 +155,7 @@ namespace System.Text
             fixed (byte* pBytes = bytes)
             fixed (char* pChars = &chars[0])
             {
-                return MultiByteToWideChar(_codePage, pBytes+byteIndex, byteCount, pChars+charIndex, chars.Length - charIndex);
+                return MultiByteToWideChar(_codePage, pBytes + byteIndex, byteCount, pChars + charIndex, chars.Length - charIndex);
             }
         }
 

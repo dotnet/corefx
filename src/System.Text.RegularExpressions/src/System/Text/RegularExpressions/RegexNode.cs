@@ -100,13 +100,13 @@ namespace System.Text.RegularExpressions
         public const int Testgroup = 34;                              //          (?(...) | )- alternation, expression
 
         public int NType;
-        public List<RegexNode> Children;
-        public string Str;
+        public List<RegexNode>? Children;
+        public string? Str;
         public char Ch;
         public int M;
         public int N;
         public readonly RegexOptions Options;
-        public RegexNode Next;
+        public RegexNode? Next;
 
         public RegexNode(int type, RegexOptions options)
         {
@@ -212,18 +212,13 @@ namespace System.Text.RegularExpressions
         /// one child strip out the intermediate node. If it has zero children,
         /// turn it into an empty.
         /// </summary>
-        private RegexNode StripEnation(int emptyType)
-        {
-            switch (ChildCount())
+        private RegexNode StripEnation(int emptyType) =>
+            ChildCount() switch
             {
-                case 0:
-                    return new RegexNode(emptyType, Options);
-                case 1:
-                    return Child(0);
-                default:
-                    return this;
-            }
-        }
+                0 => new RegexNode(emptyType, Options),
+                1 => Child(0),
+                _ => this,
+            };
 
         /// <summary>
         /// Simple optimization. Once parsed into a tree, non-capturing groups
@@ -251,7 +246,7 @@ namespace System.Text.RegularExpressions
             int min = M;
             int max = N;
 
-            for (; ;)
+            while (true)
             {
                 if (u.ChildCount() == 0)
                     break;
@@ -290,6 +285,8 @@ namespace System.Text.RegularExpressions
         private RegexNode ReduceSet()
         {
             // Extract empty-set, one and not-one case as special
+
+            Debug.Assert(Str != null);
 
             if (RegexCharClass.IsEmpty(Str))
             {
@@ -342,11 +339,11 @@ namespace System.Text.RegularExpressions
                 if (j < i)
                     Children[j] = at;
 
-                for (; ;)
+                while (true)
                 {
                     if (at.NType == Alternate)
                     {
-                        for (int k = 0; k < at.Children.Count; k++)
+                        for (int k = 0; k < at.Children!.Count; k++)
                             at.Children[k].Next = this;
 
                         Children.InsertRange(i + 1, at.Children);
@@ -360,10 +357,10 @@ namespace System.Text.RegularExpressions
 
                         if (at.NType == Set)
                         {
-                            if (!wasLastSet || optionsLast != optionsAt || lastNodeCannotMerge || !RegexCharClass.IsMergeable(at.Str))
+                            if (!wasLastSet || optionsLast != optionsAt || lastNodeCannotMerge || !RegexCharClass.IsMergeable(at.Str!))
                             {
                                 wasLastSet = true;
-                                lastNodeCannotMerge = !RegexCharClass.IsMergeable(at.Str);
+                                lastNodeCannotMerge = !RegexCharClass.IsMergeable(at.Str!);
                                 optionsLast = optionsAt;
                                 break;
                             }
@@ -390,7 +387,7 @@ namespace System.Text.RegularExpressions
                         }
                         else
                         {
-                            prevCharClass = RegexCharClass.Parse(prev.Str);
+                            prevCharClass = RegexCharClass.Parse(prev.Str!);
                         }
 
                         if (at.NType == One)
@@ -399,7 +396,7 @@ namespace System.Text.RegularExpressions
                         }
                         else
                         {
-                            RegexCharClass atCharClass = RegexCharClass.Parse(at.Str);
+                            RegexCharClass atCharClass = RegexCharClass.Parse(at.Str!);
                             prevCharClass.AddCharClass(atCharClass);
                         }
 
@@ -455,7 +452,7 @@ namespace System.Text.RegularExpressions
                 if (at.NType == Concatenate &&
                     ((at.Options & RegexOptions.RightToLeft) == (Options & RegexOptions.RightToLeft)))
                 {
-                    for (int k = 0; k < at.Children.Count; k++)
+                    for (int k = 0; k < at.Children!.Count; k++)
                         at.Children[k].Next = this;
 
                     Children.InsertRange(i + 1, at.Children);
@@ -548,7 +545,7 @@ namespace System.Text.RegularExpressions
 
         public RegexNode Child(int i)
         {
-            return Children[i];
+            return Children![i];
         }
 
         public int ChildCount()
@@ -622,7 +619,7 @@ namespace System.Text.RegularExpressions
                 case Set:
                 case Setloop:
                 case Setlazy:
-                    ArgSb.Append("(Set = " + RegexCharClass.SetDescription(Str) + ")");
+                    ArgSb.Append("(Set = " + RegexCharClass.SetDescription(Str!) + ")");
                     break;
             }
 
@@ -646,7 +643,7 @@ namespace System.Text.RegularExpressions
         public void Dump()
         {
             List<int> Stack = new List<int>();
-            RegexNode CurNode;
+            RegexNode? CurNode;
             int CurChild;
 
             CurNode = this;
@@ -654,9 +651,9 @@ namespace System.Text.RegularExpressions
 
             Debug.WriteLine(CurNode.Description());
 
-            for (; ;)
+            while (true)
             {
-                if (CurNode.Children != null && CurChild < CurNode.Children.Count)
+                if (CurNode!.Children != null && CurChild < CurNode.Children.Count)
                 {
                     Stack.Add(CurChild + 1);
                     CurNode = CurNode.Children[CurChild];

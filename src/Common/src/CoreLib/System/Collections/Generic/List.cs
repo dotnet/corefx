@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace System.Collections.Generic
 {
@@ -24,8 +23,8 @@ namespace System.Collections.Generic
     {
         private const int DefaultCapacity = 4;
 
-        private T[] _items; // Do not rename (binary serialization)
-        private int _size; // Do not rename (binary serialization)
+        internal T[] _items; // Do not rename (binary serialization)
+        internal int _size; // Do not rename (binary serialization)
         private int _version; // Do not rename (binary serialization)
 
 #pragma warning disable CA1825 // avoid the extra generic instantiation for Array.Empty<T>()
@@ -99,10 +98,7 @@ namespace System.Collections.Generic
         //
         public int Capacity
         {
-            get
-            {
-                return _items.Length;
-            }
+            get => _items.Length;
             set
             {
                 if (value < _size)
@@ -117,7 +113,7 @@ namespace System.Collections.Generic
                         T[] newItems = new T[value];
                         if (_size > 0)
                         {
-                            Array.Copy(_items, 0, newItems, 0, _size);
+                            Array.Copy(_items, newItems, _size);
                         }
                         _items = newItems;
                     }
@@ -173,15 +169,12 @@ namespace System.Collections.Generic
         {
             // Non-null values are fine.  Only accept nulls if T is a class or Nullable<U>.
             // Note that default(T) is not equal to null for value types except when T is Nullable<U>.
-            return ((value is T) || (value == null && default(T)! == null)); // default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
+            return (value is T) || (value == null && default(T)! == null); // default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
         }
 
         object? IList.this[int index]
         {
-            get
-            {
-                return this[index];
-            }
+            get => this[index];
             set
             {
                 ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(value, ExceptionArgument.value);
@@ -431,7 +424,7 @@ namespace System.Collections.Generic
 
             for (int i = 0; i < _size; i++)
             {
-                if (match!(_items[i]))
+                if (match(_items[i]))
                 {
                     return _items[i];
                 }
@@ -483,7 +476,7 @@ namespace System.Collections.Generic
             int endIndex = startIndex + count;
             for (int i = startIndex; i < endIndex; i++)
             {
-                if (match!(_items[i])) return i;
+                if (match(_items[i])) return i;
             }
             return -1;
         }
@@ -498,7 +491,7 @@ namespace System.Collections.Generic
 
             for (int i = _size - 1; i >= 0; i--)
             {
-                if (match!(_items[i]))
+                if (match(_items[i]))
                 {
                     return _items[i];
                 }
@@ -568,7 +561,7 @@ namespace System.Collections.Generic
                 {
                     break;
                 }
-                action!(_items[i]);
+                action(_items[i]);
             }
 
             if (version != _version)
@@ -611,7 +604,6 @@ namespace System.Collections.Generic
             list._size = count;
             return list;
         }
-
 
         // Returns the index of the first occurrence of a given value in a range of
         // this list. The list is searched forwards from beginning to end.
@@ -876,7 +868,7 @@ namespace System.Collections.Generic
             while (current < _size)
             {
                 // Find the first item which needs to be kept.
-                while (current < _size && match!(_items[current])) current++;
+                while (current < _size && match(_items[current])) current++;
 
                 if (current < _size)
                 {
@@ -1028,7 +1020,7 @@ namespace System.Collections.Generic
 
             if (_size > 1)
             {
-                ArraySortHelper<T>.Sort(_items, 0, _size, comparison);
+                ArraySortHelper<T>.Sort(new Span<T>(_items, 0, _size), comparison);
             }
             _version++;
         }
@@ -1043,7 +1035,7 @@ namespace System.Collections.Generic
             }
 
             T[] array = new T[_size];
-            Array.Copy(_items, 0, array, 0, _size);
+            Array.Copy(_items, array, _size);
             return array;
         }
 
@@ -1074,7 +1066,7 @@ namespace System.Collections.Generic
 
             for (int i = 0; i < _size; i++)
             {
-                if (!match!(_items[i]))
+                if (!match(_items[i]))
                 {
                     return false;
                 }

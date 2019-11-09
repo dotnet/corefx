@@ -5,7 +5,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
@@ -19,17 +18,23 @@ namespace HttpStress
 {
     public class StressClient : IDisposable
     {
+        private const string UNENCRYPTED_HTTP2_ENV_VAR = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT";
+
         private readonly (string name, Func<RequestContext, Task> operation)[] _clientOperations;
+        private readonly Uri _baseAddress;
         private readonly Configuration _config;
         private readonly StressResultAggregator _aggregator;
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
-        private Task _clientTask;
+        private Task? _clientTask;
+
+        public long TotalErrorCount => _aggregator.TotalErrorCount;
 
         public StressClient((string name, Func<RequestContext, Task> operation)[] clientOperations, Configuration configuration)
         {
             _clientOperations = clientOperations;
             _config = configuration;
+            _baseAddress = new Uri(configuration.ServerUri);
             _aggregator = new StressResultAggregator(clientOperations);
         }
 
@@ -77,16 +82,61 @@ namespace HttpStress
 
         private async Task StartCore()
         {
-            var handler = new SocketsHttpHandler()
+            if (_baseAddress.Scheme == "http")
             {
-                PooledConnectionLifetime = _config.ConnectionLifetime.GetValueOrDefault(Timeout.InfiniteTimeSpan),
-                SslOptions = new SslClientAuthenticationOptions
-                {
-                    RemoteCertificateValidationCallback = delegate { return true; }
-                }
-            };
+                Environment.SetEnvironmentVariable(UNENCRYPTED_HTTP2_ENV_VAR, "1");
+            }
 
-            using var client = new HttpClient(handler) { BaseAddress = _config.ServerUri, Timeout = _config.DefaultTimeout };
+            HttpMessageHandler CreateHttpHandler()
+            {
+                if (_config.UseWinHttpHandler)
+                {
+                    return new System.Net.Http.WinHttpHandler()
+                    {
+                        ServerCertificateValidationCallback = delegate { return true; }
+                    };
+                }
+                else
+                {
+                    return new SocketsHttpHandler()
+                    {
+                        PooledConnectionLifetime = _config.ConnectionLifetime.GetValueOrDefault(Timeout.InfiniteTimeSpan),
+                        SslOptions = new SslClientAuthenticationOptions
+                        {
+                            RemoteCertificateValidationCallback = delegate { return true; }
+                        }
+                    };
+                }
+            }
+
+            HttpClient CreateHttpClient() => 
+                new HttpClient(CreateHttpHandler()) 
+                { 
+                    BaseAddress = _baseAddress,
+                    Timeout = _config.DefaultTimeout,
+                    DefaultRequestVersion = _config.HttpVersion,
+                };
+
+            using HttpClient client = CreateHttpClient();
+
+            // Before starting the full-blown test, make sure can communicate with the server
+            // Needed for scenaria where we're deploying server & client in separate containers, simultaneously.
+            await SendTestRequestToServer(maxRetries: 10);
+
+            // Spin up a thread dedicated to outputting stats for each defined interval
+            new Thread(() =>
+            {
+                while (!_cts.IsCancellationRequested)
+                {
+                    Thread.Sleep(_config.DisplayInterval);
+                    lock (Console.Out) { _aggregator.PrintCurrentResults(_stopwatch.Elapsed); }
+                }
+            })
+            { IsBackground = true }.Start();
+
+            // Start N workers, each of which sits in a loop making requests.
+            Task[] tasks = Enumerable.Range(0, _config.ConcurrentRequests).Select(RunWorker).ToArray();
+            await Task.WhenAll(tasks);
 
             async Task RunWorker(int taskNum)
             {
@@ -126,21 +176,24 @@ namespace HttpStress
                     return ((int)rol5 + h1) ^ h2;
                 }
             }
-
-            // Spin up a thread dedicated to outputting stats for each defined interval
-            new Thread(() =>
+            
+            async Task SendTestRequestToServer(int maxRetries)
             {
-                while (!_cts.IsCancellationRequested)
+                using HttpClient client = CreateHttpClient();
+                for (int remainingRetries = maxRetries; ; remainingRetries--)
                 {
-                    Thread.Sleep(_config.DisplayInterval);
-                    lock (Console.Out) { _aggregator.PrintCurrentResults(_stopwatch.Elapsed); }
+                    try
+                    {
+                        await client.GetAsync("/");
+                        break;
+                    }
+                    catch (HttpRequestException) when (remainingRetries > 0)
+                    {
+                        Console.WriteLine($"Stress client could not connect to host {_baseAddress}, {remainingRetries} attempts remaining");
+                        await Task.Delay(millisecondsDelay: 1000);
+                    }
                 }
-            })
-            { IsBackground = true }.Start();
-
-            // Start N workers, each of which sits in a loop making requests.
-            Task[] tasks = Enumerable.Range(0, _config.ConcurrentRequests).Select(RunWorker).ToArray();
-            await Task.WhenAll(tasks);
+            }
         }
 
         /// <summary>Aggregate view of a particular stress failure type</summary>
@@ -148,15 +201,16 @@ namespace HttpStress
         {
             // Representative error text of stress failure
             public string ErrorText { get; }
-            public ImmutableDictionary<int, int> Failures { get; }
+            // Operation id => failure timestamps
+            public Dictionary<int, List<DateTime>> Failures { get; }
 
-            public StressFailureType(string errorText, ImmutableDictionary<int, int> failures)
+            public StressFailureType(string errorText)
             {
                 ErrorText = errorText;
-                Failures = failures;
+                Failures = new Dictionary<int, List<DateTime>>();
             }
 
-            public int FailureCount => Failures.Values.Sum();
+            public int FailureCount => Failures.Values.Select(x => x.Count).Sum();
         }
 
         private sealed class StressResultAggregator
@@ -170,6 +224,8 @@ namespace HttpStress
 
             private readonly ConcurrentDictionary<(Type exception, string message, string callSite)[], StressFailureType> _failureTypes;
             private readonly ConcurrentBag<double> _latencies = new ConcurrentBag<double>();
+
+            public long TotalErrorCount => _failures.Sum();
 
             public StressResultAggregator((string name, Func<RequestContext, Task>)[] operations)
             {
@@ -198,6 +254,8 @@ namespace HttpStress
 
             public void RecordFailure(Exception exn, int operationIndex, TimeSpan elapsed, int taskNum, long iteration)
             {
+                DateTime timestamp = DateTime.Now;
+                
                 Interlocked.Increment(ref _totalRequests);
                 Interlocked.Increment(ref _failures[operationIndex]);
 
@@ -211,27 +269,27 @@ namespace HttpStress
                 {
                     (Type, string, string)[] key = ClassifyFailure(exn);
 
-                    _failureTypes.AddOrUpdate(key, Add, Update);
+                    StressFailureType failureType = _failureTypes.GetOrAdd(key, _ => new StressFailureType(exn.ToString()));
 
-                    StressFailureType Add<T>(T key)
+                    lock (failureType)
                     {
-                        return new StressFailureType(exn.ToString(), ImmutableDictionary<int, int>.Empty.SetItem(operationIndex, 1));
-                    }
+                        if(!failureType.Failures.TryGetValue(operationIndex, out List<DateTime>? timestamps))
+                        {
+                            timestamps = new List<DateTime>();
+                            failureType.Failures.Add(operationIndex, timestamps);
+                        }
 
-                    StressFailureType Update<T>(T key, StressFailureType current)
-                    {
-                        current.Failures.TryGetValue(operationIndex, out int failureCount);
-                        return new StressFailureType(current.ErrorText, current.Failures.SetItem(operationIndex, failureCount + 1));
+                        timestamps.Add(timestamp);
                     }
 
                     (Type exception, string message, string callSite)[] ClassifyFailure(Exception exn)
                     {
                         var acc = new List<(Type exception, string message, string callSite)>();
 
-                        while (exn != null)
+                        for (Exception? e = exn; e != null; )
                         {
-                            acc.Add((exn.GetType(), exn.Message ?? "", new StackTrace(exn, true).GetFrame(0)?.ToString() ?? ""));
-                            exn = exn.InnerException;
+                            acc.Add((e.GetType(), e.Message ?? "", new StackTrace(e, true).GetFrame(0)?.ToString() ?? ""));
+                            e = e.InnerException;
                         }
 
                         return acc.ToArray();
@@ -361,15 +419,16 @@ namespace HttpStress
                     Console.WriteLine(failure.ErrorText);
                     Console.WriteLine();
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    foreach (KeyValuePair<int, int> operation in failure.Failures)
+                    foreach (KeyValuePair<int, List<DateTime>> operation in failure.Failures)
                     {
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.Write($"\t{_operationNames[operation.Key].PadRight(30)}");
                         Console.ResetColor();
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write($"Fail: ");
+                        Console.Write("Fail: ");
                         Console.ResetColor();
-                        Console.WriteLine(operation.Value);
+                        Console.Write(operation.Value.Count);
+                        Console.WriteLine($"\tTimestamps: {string.Join(", ", operation.Value.Select(x => x.ToString("HH:mm:ss")))}");
                     }
 
                     Console.ForegroundColor = ConsoleColor.Cyan;

@@ -31,15 +31,16 @@ namespace System
             {
                 return 1;
             }
-            if (value is long)
+
+            // Need to use compare because subtraction will wrap
+            // to positive for very large neg numbers, etc.
+            if (value is long i)
             {
-                // Need to use compare because subtraction will wrap
-                // to positive for very large neg numbers, etc.
-                long i = (long)value;
                 if (m_value < i) return -1;
                 if (m_value > i) return 1;
                 return 0;
             }
+
             throw new ArgumentException(SR.Arg_MustBeInt64);
         }
 
@@ -70,7 +71,7 @@ namespace System
         // The value of the lower 32 bits XORed with the uppper 32 bits.
         public override int GetHashCode()
         {
-            return (unchecked((int)((long)m_value)) ^ (int)(m_value >> 32));
+            return unchecked((int)((long)m_value)) ^ (int)(m_value >> 32);
         }
 
         public override string ToString()
@@ -116,7 +117,6 @@ namespace System
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Number.ParseInt64(s, NumberStyles.Integer, NumberFormatInfo.GetInstance(provider));
         }
-
 
         // Parses a long from a String in the given style.  If
         // a NumberFormatInfo isn't specified, the current culture's

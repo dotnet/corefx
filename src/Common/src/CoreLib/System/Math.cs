@@ -15,8 +15,6 @@
 **
 ===========================================================*/
 
-//This class contains only static members and doesn't require serialization.
-
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -117,7 +115,7 @@ namespace System
 
         public static double BitDecrement(double x)
         {
-            var bits = BitConverter.DoubleToInt64Bits(x);
+            long bits = BitConverter.DoubleToInt64Bits(x);
 
             if (((bits >> 32) & 0x7FF00000) >= 0x7FF00000)
             {
@@ -142,7 +140,7 @@ namespace System
 
         public static double BitIncrement(double x)
         {
-            var bits = BitConverter.DoubleToInt64Bits(x);
+            long bits = BitConverter.DoubleToInt64Bits(x);
 
             if (((bits >> 32) & 0x7FF00000) >= 0x7FF00000)
             {
@@ -170,8 +168,8 @@ namespace System
             // This method is required to work for all inputs,
             // including NaN, so we operate on the raw bits.
 
-            var xbits = BitConverter.DoubleToInt64Bits(x);
-            var ybits = BitConverter.DoubleToInt64Bits(y);
+            long xbits = BitConverter.DoubleToInt64Bits(x);
+            long ybits = BitConverter.DoubleToInt64Bits(y);
 
             // If the sign bits of x and y are not the same,
             // flip the sign bit of x and return the new value;
@@ -465,7 +463,7 @@ namespace System
                 return y; // IEEE 754-2008: NaN payload must be preserved
             }
 
-            var regularMod = x % y;
+            double regularMod = x % y;
 
             if (double.IsNaN(regularMod))
             {
@@ -477,12 +475,12 @@ namespace System
                 return double.NegativeZero;
             }
 
-            var alternativeResult = (regularMod - (Abs(y) * Sign(x)));
+            double alternativeResult = (regularMod - (Abs(y) * Sign(x)));
 
             if (Abs(alternativeResult) == Abs(regularMod))
             {
-                var divisionResult = x / y;
-                var roundedResult = Round(divisionResult);
+                double divisionResult = x / y;
+                double roundedResult = Round(divisionResult);
 
                 if (Abs(roundedResult) > Abs(divisionResult))
                 {
@@ -526,7 +524,7 @@ namespace System
                 return double.NaN;
             }
 
-            return (Log(a) / Log(newBase));
+            return Log(a) / Log(newBase);
         }
 
         [NonVersionable]
@@ -896,7 +894,7 @@ namespace System
 
             if (Abs(value) < doubleRoundLimit)
             {
-                var power10 = roundPower10Double[digits];
+                double power10 = roundPower10Double[digits];
 
                 value *= power10;
 

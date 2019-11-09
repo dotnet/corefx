@@ -27,19 +27,12 @@ namespace Internal.Cryptography
         {
             _encrypting = encrypting;
             _cngKey = cngKeyFactory();
-
-            CngProperty chainingModeProperty;
-            switch (cipherMode)
+            CngProperty chainingModeProperty = cipherMode switch
             {
-                case CipherMode.ECB:
-                    chainingModeProperty = s_ECBMode;
-                    break;
-                case CipherMode.CBC:
-                    chainingModeProperty = s_CBCMode;
-                    break;
-                default:
-                    throw new CryptographicException(SR.Cryptography_InvalidCipherMode);
-            }
+                CipherMode.ECB => s_ECBMode,
+                CipherMode.CBC => s_CBCMode,
+                _ => throw new CryptographicException(SR.Cryptography_InvalidCipherMode),
+            };
             _cngKey.SetProperty(chainingModeProperty);
 
             Reset();
@@ -127,16 +120,12 @@ namespace Internal.Cryptography
             }
         }
 
-        private static CngProperty CreateCngPropertyForCipherMode(string cipherMode)
-        {
-            byte[] cipherModeBytes = Encoding.Unicode.GetBytes((cipherMode + "\0").ToCharArray());
-            return new CngProperty(Interop.NCrypt.NCRYPT_CHAINING_MODE_PROPERTY, cipherModeBytes, CngPropertyOptions.None);
-        }
-
         private CngKey _cngKey;
         private readonly bool _encrypting;
 
-        private static readonly CngProperty s_ECBMode = CreateCngPropertyForCipherMode(Interop.BCrypt.BCRYPT_CHAIN_MODE_ECB);
-        private static readonly CngProperty s_CBCMode = CreateCngPropertyForCipherMode(Interop.BCrypt.BCRYPT_CHAIN_MODE_CBC);
+        private static readonly CngProperty s_ECBMode =
+            new CngProperty(Interop.NCrypt.NCRYPT_CHAINING_MODE_PROPERTY, Encoding.UTF8.GetBytes(Interop.BCrypt.BCRYPT_CHAIN_MODE_ECB + "\0"), CngPropertyOptions.None);
+        private static readonly CngProperty s_CBCMode =
+            new CngProperty(Interop.NCrypt.NCRYPT_CHAINING_MODE_PROPERTY, Encoding.UTF8.GetBytes(Interop.BCrypt.BCRYPT_CHAIN_MODE_CBC + "\0"), CngPropertyOptions.None);
     }
 }

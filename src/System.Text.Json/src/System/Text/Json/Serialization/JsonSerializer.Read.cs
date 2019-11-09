@@ -68,13 +68,13 @@ namespace System.Text.Json
                                 break;
                             }
                         }
-                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructible)
+                        else if (readStack.Current.IsProcessingDictionary())
                         {
-                            HandleStartDictionary(options, ref reader, ref readStack);
+                            HandleStartDictionary(options, ref readStack);
                         }
                         else
                         {
-                            HandleStartObject(options, ref reader, ref readStack);
+                            HandleStartObject(options, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.EndObject)
@@ -82,21 +82,25 @@ namespace System.Text.Json
                         if (readStack.Current.Drain)
                         {
                             readStack.Pop();
+
+                            // Clear the current property in case it is a dictionary, since dictionaries must have EndProperty() called when completed.
+                            // A non-dictionary property can also have EndProperty() called when completed, although it is redundant.
+                            readStack.Current.EndProperty();
                         }
-                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructible)
+                        else if (readStack.Current.IsProcessingDictionary())
                         {
-                            HandleEndDictionary(options, ref reader, ref readStack);
+                            HandleEndDictionary(options, ref readStack);
                         }
                         else
                         {
-                            HandleEndObject(options, ref reader, ref readStack);
+                            HandleEndObject(ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.StartArray)
                     {
                         if (!readStack.Current.IsProcessingValue())
                         {
-                            HandleStartArray(options, ref reader, ref readStack);
+                            HandleStartArray(options, ref readStack);
                         }
                         else if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState, initialBytesConsumed))
                         {
@@ -106,11 +110,11 @@ namespace System.Text.Json
                     }
                     else if (tokenType == JsonTokenType.EndArray)
                     {
-                        HandleEndArray(options, ref reader, ref readStack);
+                        HandleEndArray(options, ref readStack);
                     }
                     else if (tokenType == JsonTokenType.Null)
                     {
-                        HandleNull(ref reader, ref readStack);
+                        HandleNull(options, ref reader, ref readStack);
                     }
                 }
             }
@@ -134,7 +138,6 @@ namespace System.Text.Json
             }
 
             readStack.BytesConsumed += reader.BytesConsumed;
-            return;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

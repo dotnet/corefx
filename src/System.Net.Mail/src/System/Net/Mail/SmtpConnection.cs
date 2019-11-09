@@ -36,7 +36,6 @@ namespace System.Net.Mail
         private SmtpReplyReaderFactory _responseReader;
 
         private readonly ICredentialsByHost _credentials;
-        private int _timeout = 100000;
         private string[] _extensions;
         private readonly ChannelBinding _channelBindingToken = null;
         private bool _enableSsl;
@@ -71,19 +70,6 @@ namespace System.Net.Mail
                 _enableSsl = value;
             }
         }
-
-        internal int Timeout
-        {
-            get
-            {
-                return _timeout;
-            }
-            set
-            {
-                _timeout = value;
-            }
-        }
-
 
         internal X509CertificateCollection ClientCertificates
         {
@@ -820,7 +806,7 @@ namespace System.Net.Mail
 
             private bool AuthenticateContinue()
             {
-                for (;;)
+                while (true)
                 {
                     // We don't need credential on the continued auth assuming they were captured on the first call.
                     // That should always work, otherwise what if a new credential has been returned?

@@ -46,12 +46,15 @@ namespace System.Diagnostics
             return true;
         }
 
-        private bool EnumWindowsCallback(IntPtr handle, IntPtr extraParameter) {
+        private bool EnumWindowsCallback(IntPtr handle, IntPtr extraParameter)
+        {
             int processId;
             Interop.User32.GetWindowThreadProcessId(handle, out processId);
 
-            if (processId == _processId) {
-                if (IsMainWindow(handle)) {
+            if (processId == _processId)
+            {
+                if (IsMainWindow(handle))
+                {
                     _bestHandle = handle;
                     return false;
                 }
@@ -79,7 +82,7 @@ namespace System.Diagnostics
                 IntPtr[] moduleHandles = new IntPtr[64];
                 GCHandle moduleHandlesArrayHandle = new GCHandle();
                 int moduleCount = 0;
-                for (;;)
+                while (true)
                 {
                     bool enumResult = false;
                     try

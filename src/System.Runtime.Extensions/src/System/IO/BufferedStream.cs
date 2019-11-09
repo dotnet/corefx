@@ -331,7 +331,7 @@ namespace System.IO
             Debug.Assert(_stream != null);
 
             SemaphoreSlim sem = LazyEnsureAsyncActiveSemaphoreInitialized();
-            await sem.WaitAsync().ConfigureAwait(false);
+            await sem.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 if (_writePos > 0)
@@ -431,7 +431,7 @@ namespace System.IO
             _stream.Flush();
         }
 
-        private async Task FlushWriteAsync(CancellationToken cancellationToken)
+        private async ValueTask FlushWriteAsync(CancellationToken cancellationToken)
         {
             Debug.Assert(_stream != null);
             Debug.Assert(_readPos == 0 && _readLen == 0,
@@ -633,7 +633,7 @@ namespace System.IO
             // Async IO Task accesses the buffer concurrently. If we fail to acquire the lock without waiting, make this
             // an Async operation.
             SemaphoreSlim sem = LazyEnsureAsyncActiveSemaphoreInitialized();
-            Task semaphoreLockTask = sem.WaitAsync();
+            Task semaphoreLockTask = sem.WaitAsync(cancellationToken);
             if (semaphoreLockTask.IsCompletedSuccessfully)
             {
                 bool completeSynchronously = true;
@@ -684,7 +684,7 @@ namespace System.IO
 
             int bytesFromBuffer = 0;
             SemaphoreSlim sem = LazyEnsureAsyncActiveSemaphoreInitialized();
-            Task semaphoreLockTask = sem.WaitAsync();
+            Task semaphoreLockTask = sem.WaitAsync(cancellationToken);
             if (semaphoreLockTask.IsCompletedSuccessfully)
             {
                 bool completeSynchronously = true;
@@ -1087,7 +1087,7 @@ namespace System.IO
 
             // Try to satisfy the request from the buffer synchronously.
             SemaphoreSlim sem = LazyEnsureAsyncActiveSemaphoreInitialized();
-            Task semaphoreLockTask = sem.WaitAsync();
+            Task semaphoreLockTask = sem.WaitAsync(cancellationToken);
             if (semaphoreLockTask.IsCompletedSuccessfully)
             {
                 bool completeSynchronously = true;
@@ -1117,7 +1117,7 @@ namespace System.IO
             }
 
             // Delegate to the async implementation.
-            return new ValueTask(WriteToUnderlyingStreamAsync(buffer, cancellationToken, semaphoreLockTask));
+            return WriteToUnderlyingStreamAsync(buffer, cancellationToken, semaphoreLockTask);
         }
 
         /// <summary>BufferedStream should be as thin a wrapper as possible. We want WriteAsync to delegate to
@@ -1125,7 +1125,7 @@ namespace System.IO
         /// in terms of the other. This allows BufferedStream to affect the semantics of the stream it wraps as
         /// little as possible.
         /// </summary>
-        private async Task WriteToUnderlyingStreamAsync(
+        private async ValueTask WriteToUnderlyingStreamAsync(
             ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken, Task semaphoreLockTask)
         {
             Debug.Assert(_stream != null);
@@ -1338,7 +1338,7 @@ namespace System.IO
             Debug.Assert(_stream != null);
 
             // Synchronize async operations as does Read/WriteAsync.
-            await LazyEnsureAsyncActiveSemaphoreInitialized().WaitAsync().ConfigureAwait(false);
+            await LazyEnsureAsyncActiveSemaphoreInitialized().WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 int readBytes = _readLen - _readPos;

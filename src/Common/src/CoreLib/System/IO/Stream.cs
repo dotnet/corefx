@@ -56,13 +56,7 @@ namespace System.IO
             get;
         }
 
-        public virtual bool CanTimeout
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool CanTimeout => false;
 
         public abstract bool CanWrite
         {
@@ -82,26 +76,14 @@ namespace System.IO
 
         public virtual int ReadTimeout
         {
-            get
-            {
-                throw new InvalidOperationException(SR.InvalidOperation_TimeoutsNotSupported);
-            }
-            set
-            {
-                throw new InvalidOperationException(SR.InvalidOperation_TimeoutsNotSupported);
-            }
+            get => throw new InvalidOperationException(SR.InvalidOperation_TimeoutsNotSupported);
+            set => throw new InvalidOperationException(SR.InvalidOperation_TimeoutsNotSupported);
         }
 
         public virtual int WriteTimeout
         {
-            get
-            {
-                throw new InvalidOperationException(SR.InvalidOperation_TimeoutsNotSupported);
-            }
-            set
-            {
-                throw new InvalidOperationException(SR.InvalidOperation_TimeoutsNotSupported);
-            }
+            get => throw new InvalidOperationException(SR.InvalidOperation_TimeoutsNotSupported);
+            set => throw new InvalidOperationException(SR.InvalidOperation_TimeoutsNotSupported);
         }
 
         public Task CopyToAsync(Stream destination)
@@ -281,7 +263,7 @@ namespace System.IO
             // don't natively support async IO operations when there are multiple
             // async requests outstanding, we will block the application's main
             // thread if it does a second IO request until the first one completes.
-            var semaphore = EnsureAsyncActiveSemaphoreInitialized();
+            SemaphoreSlim semaphore = EnsureAsyncActiveSemaphoreInitialized();
             Task? semaphoreTask = null;
             if (serializeAsynchronously)
             {
@@ -337,7 +319,7 @@ namespace System.IO
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
 
-            var readTask = _activeReadWriteTask;
+            ReadWriteTask? readTask = _activeReadWriteTask;
 
             if (readTask == null)
             {
@@ -444,7 +426,7 @@ namespace System.IO
             // don't natively support async IO operations when there are multiple
             // async requests outstanding, we will block the application's main
             // thread if it does a second IO request until the first one completes.
-            var semaphore = EnsureAsyncActiveSemaphoreInitialized();
+            SemaphoreSlim semaphore = EnsureAsyncActiveSemaphoreInitialized();
             Task? semaphoreTask = null;
             if (serializeAsynchronously)
             {
@@ -544,7 +526,7 @@ namespace System.IO
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
 
-            var writeTask = _activeReadWriteTask;
+            ReadWriteTask? writeTask = _activeReadWriteTask;
             if (writeTask == null)
             {
                 throw new ArgumentException(SR.InvalidOperation_WrongAsyncResultOrEndWriteCalledMultiple);
@@ -638,7 +620,7 @@ namespace System.IO
             {
                 Debug.Assert(completedTask is ReadWriteTask);
                 var rwc = (ReadWriteTask)completedTask;
-                var callback = rwc._callback;
+                AsyncCallback? callback = rwc._callback;
                 Debug.Assert(callback != null);
                 rwc._callback = null;
                 callback(rwc);
@@ -651,10 +633,10 @@ namespace System.IO
                 // Get the ExecutionContext.  If there is none, just run the callback
                 // directly, passing in the completed task as the IAsyncResult.
                 // If there is one, process it with ExecutionContext.Run.
-                var context = _context;
+                ExecutionContext? context = _context;
                 if (context == null)
                 {
-                    var callback = _callback;
+                    AsyncCallback? callback = _callback;
                     Debug.Assert(callback != null);
                     _callback = null;
                     callback(completingTask);
@@ -663,14 +645,13 @@ namespace System.IO
                 {
                     _context = null;
 
-                    var invokeAsyncCallback = s_invokeAsyncCallback;
-                    if (invokeAsyncCallback == null) s_invokeAsyncCallback = invokeAsyncCallback = InvokeAsyncCallback; // benign race condition
+                    ContextCallback? invokeAsyncCallback = s_invokeAsyncCallback ??= InvokeAsyncCallback;
 
                     ExecutionContext.RunInternal(context, invokeAsyncCallback, this);
                 }
             }
 
-            bool ITaskCompletionAction.InvokeMayRunArbitraryCode { get { return true; } }
+            bool ITaskCompletionAction.InvokeMayRunArbitraryCode => true;
         }
 
         public Task WriteAsync(byte[] buffer, int offset, int count)
@@ -884,7 +865,7 @@ namespace System.IO
 
             public override long Position
             {
-                get { return 0; }
+                get => 0;
                 set { }
             }
 
@@ -1029,7 +1010,6 @@ namespace System.IO
             {
                 _bytesRead = bytesRead;
                 _stateObject = asyncStateObject;
-                //_isWrite = false;
             }
 
             internal SynchronousAsyncResult(object? asyncStateObject)
@@ -1045,29 +1025,14 @@ namespace System.IO
                 _isWrite = isWrite;
             }
 
-            public bool IsCompleted
-            {
-                // We never hand out objects of this type to the user before the synchronous IO completed:
-                get { return true; }
-            }
+            public bool IsCompleted => true;
 
-            public WaitHandle AsyncWaitHandle
-            {
-                get
-                {
-                    return LazyInitializer.EnsureInitialized(ref _waitHandle, () => new ManualResetEvent(true));
-                }
-            }
+            public WaitHandle AsyncWaitHandle =>
+                LazyInitializer.EnsureInitialized(ref _waitHandle, () => new ManualResetEvent(true));
 
-            public object? AsyncState
-            {
-                get { return _stateObject; }
-            }
+            public object? AsyncState => _stateObject;
 
-            public bool CompletedSynchronously
-            {
-                get { return true; }
-            }
+            public bool CompletedSynchronously => true;
 
             internal void ThrowIfError()
             {
@@ -1156,26 +1121,14 @@ namespace System.IO
 
             public override int ReadTimeout
             {
-                get
-                {
-                    return _stream.ReadTimeout;
-                }
-                set
-                {
-                    _stream.ReadTimeout = value;
-                }
+                get => _stream.ReadTimeout;
+                set => _stream.ReadTimeout = value;
             }
 
             public override int WriteTimeout
             {
-                get
-                {
-                    return _stream.WriteTimeout;
-                }
-                set
-                {
-                    _stream.WriteTimeout = value;
-                }
+                get => _stream.WriteTimeout;
+                set => _stream.WriteTimeout = value;
             }
 
             // In the off chance that some wrapped stream has different

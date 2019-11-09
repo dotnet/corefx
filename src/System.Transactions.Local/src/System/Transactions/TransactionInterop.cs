@@ -118,13 +118,8 @@ namespace System.Transactions
 
             // Extract the transaction guid from the propagation token to see if we already have a
             // transaction object for the transaction.
-            byte[] guidByteArray = new byte[16];
-            for (int i = 0; i < guidByteArray.Length; i++)
-            {
-                // In a cookie, the transaction guid is preceeded by a signature guid.
-                guidByteArray[i] = cookie[i + 16];
-            }
-            Guid txId = new Guid(guidByteArray);
+            // In a cookie, the transaction guid is preceeded by a signature guid.
+            var txId = new Guid(cookie.AsSpan(16, 16));
 
             // First check to see if there is a promoted LTM transaction with the same ID.  If there
             // is, just return that.
@@ -195,14 +190,8 @@ namespace System.Transactions
 
             // Extract the transaction guid from the propagation token to see if we already have a
             // transaction object for the transaction.
-            byte[] guidByteArray = new byte[16];
-            for (int i = 0; i < guidByteArray.Length; i++)
-            {
-                // In a propagation token, the transaction guid is preceeded by two version DWORDs.
-                guidByteArray[i] = propagationToken[i + 8];
-            }
-
-            var txId = new Guid(guidByteArray);
+            // In a propagation token, the transaction guid is preceeded by two version DWORDs.
+            var txId = new Guid(propagationToken.AsSpan(8, 16));
 
             // First check to see if there is a promoted LTM transaction with the same ID.  If there is, just return that.
             Transaction tx = TransactionManager.FindPromotedTransaction(txId);
@@ -305,7 +294,7 @@ namespace System.Transactions
             }
 
             byte[] propagationTokenCopy = new byte[propagationToken.Length];
-            Array.Copy(propagationToken, 0, propagationTokenCopy, 0, propagationToken.Length);
+            Array.Copy(propagationToken, propagationTokenCopy, propagationToken.Length);
 
             return DistributedTransactionManager.GetDistributedTransactionFromTransmitterPropagationToken(propagationTokenCopy);
         }

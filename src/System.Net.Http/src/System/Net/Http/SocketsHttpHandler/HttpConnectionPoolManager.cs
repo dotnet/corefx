@@ -5,6 +5,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -265,14 +266,14 @@ namespace System.Net.Http
 
         public Task<HttpResponseMessage> SendProxyConnectAsync(HttpRequestMessage request, Uri proxyUri, CancellationToken cancellationToken)
         {
-            return SendAsyncCore(request, proxyUri, doRequestAuth:false, isProxyConnect:true, cancellationToken);
+            return SendAsyncCore(request, proxyUri, doRequestAuth: false, isProxyConnect: true, cancellationToken);
         }
 
         public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
         {
             if (_proxy == null)
             {
-                return SendAsyncCore(request, null, doRequestAuth, isProxyConnect:false, cancellationToken);
+                return SendAsyncCore(request, null, doRequestAuth, isProxyConnect: false, cancellationToken);
             }
 
             // Do proxy lookup.
@@ -281,14 +282,26 @@ namespace System.Net.Http
             {
                 if (!_proxy.IsBypassed(request.RequestUri))
                 {
-                    proxyUri = _proxy.GetProxy(request.RequestUri);
+                    if (_proxy is IMultiWebProxy multiWebProxy)
+                    {
+                        MultiProxy multiProxy = multiWebProxy.GetMultiProxy(request.RequestUri);
+
+                        if (multiProxy.ReadNext(out proxyUri, out bool isFinalProxy) && !isFinalProxy)
+                        {
+                            return SendAsyncMultiProxy(request, doRequestAuth, multiProxy, proxyUri, cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        proxyUri = _proxy.GetProxy(request.RequestUri);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 // Eat any exception from the IWebProxy and just treat it as no proxy.
                 // This matches the behavior of other handlers.
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"Exception from IWebProxy.GetProxy({request.RequestUri}): {ex}");
+                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"Exception from {_proxy.GetType().Name}.GetProxy({request.RequestUri}): {ex}");
             }
 
             if (proxyUri != null && proxyUri.Scheme != UriScheme.Http)
@@ -296,7 +309,33 @@ namespace System.Net.Http
                 throw new NotSupportedException(SR.net_http_invalid_proxy_scheme);
             }
 
-            return SendAsyncCore(request, proxyUri, doRequestAuth, isProxyConnect:false, cancellationToken);
+            return SendAsyncCore(request, proxyUri, doRequestAuth, isProxyConnect: false, cancellationToken);
+        }
+
+        /// <summary>
+        /// Iterates a request over a set of proxies until one works, or all proxies have failed.
+        /// </summary>
+        /// <param name="multiProxy">The set of proxies to use.</param>
+        /// <param name="firstProxy">The first proxy try.</param>
+        private async Task<HttpResponseMessage> SendAsyncMultiProxy(HttpRequestMessage request, bool doRequestAuth, MultiProxy multiProxy, Uri firstProxy, CancellationToken cancellationToken)
+        {
+            HttpRequestException rethrowException = null;
+
+            do
+            {
+                try
+                {
+                    return await SendAsyncCore(request, firstProxy, doRequestAuth, isProxyConnect: false, cancellationToken).ConfigureAwait(false);
+                }
+                catch (HttpRequestException ex) when (ex.AllowRetry != RequestRetryType.NoRetry)
+                {
+                    rethrowException = ex;
+                }
+            }
+            while (multiProxy.ReadNext(out firstProxy, out _));
+
+            ExceptionDispatchInfo.Throw(rethrowException);
+            return null; // should never be reached: VS doesn't realize Throw() never returns.
         }
 
         /// <summary>Disposes of the pools, disposing of each individual pool.</summary>

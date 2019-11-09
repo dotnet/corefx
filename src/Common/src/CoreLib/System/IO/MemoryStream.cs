@@ -192,7 +192,6 @@ namespace System.IO
             }
         }
 
-
         public virtual byte[] GetBuffer()
         {
             if (!_exposable)
@@ -208,7 +207,7 @@ namespace System.IO
                 return false;
             }
 
-            buffer = new ArraySegment<byte>(_buffer, offset: _origin, count: (_length - _origin));
+            buffer = new ArraySegment<byte>(_buffer, offset: _origin, count: _length - _origin);
             return true;
         }
 
@@ -413,7 +412,7 @@ namespace System.IO
             try
             {
                 int n = Read(buffer, offset, count);
-                var t = _lastReadTask;
+                Task<int>? t = _lastReadTask;
                 Debug.Assert(t == null || t.Status == TaskStatus.RanToCompletion,
                     "Expected that a stored last task completed successfully");
                 return (t != null && t.Result == n) ? t : (_lastReadTask = Task.FromResult<int>(n));
@@ -547,7 +546,6 @@ namespace System.IO
                 return Task.FromException(ex);
             }
         }
-
 
         public override long Seek(long offset, SeekOrigin loc)
         {

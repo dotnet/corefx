@@ -20,7 +20,7 @@ namespace System.Text.RegularExpressions
     {
         public readonly int[] Positive;
         public readonly int[] NegativeASCII;
-        public readonly int[][] NegativeUnicode;
+        public readonly int[][]? NegativeUnicode;
         public readonly string Pattern;
         public readonly int LowASCII;
         public readonly int HighASCII;
@@ -79,11 +79,11 @@ namespace System.Text.RegularExpressions
             int scan;
             int match;
 
-            for (; ;)
+            while (true)
             {
                 // find an internal char (examine) that matches the tail
 
-                for (; ;)
+                while (true)
                 {
                     if (examine == beforefirst)
                         goto OuterloopBreak;
@@ -97,7 +97,7 @@ namespace System.Text.RegularExpressions
 
                 // find the length of the match
 
-                for (; ;)
+                while (true)
                 {
                     if (scan == beforefirst || pattern[match] != pattern[scan])
                     {
@@ -192,7 +192,7 @@ namespace System.Text.RegularExpressions
 
                         if (i == 0)
                         {
-                            Array.Copy(NegativeASCII, 0, newarray, 0, 128);
+                            Array.Copy(NegativeASCII, newarray, 128);
                             NegativeASCII = newarray;
                         }
 
@@ -283,7 +283,7 @@ namespace System.Text.RegularExpressions
             int advance;
             int[] unicodeLookup;
 
-            for (; ;)
+            while (true)
             {
                 if (test >= endlimit || test < beglimit)
                     return -1;
@@ -309,7 +309,7 @@ namespace System.Text.RegularExpressions
                     test2 = test;
                     match = startmatch;
 
-                    for (; ;)
+                    while (true)
                     {
                         if (match == endmatch)
                             return (RightToLeft ? test2 + 1 : test2);

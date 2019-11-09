@@ -12,7 +12,6 @@
 **
 ===========================================================*/
 
-using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -73,7 +72,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsFinite(double d)
         {
-            var bits = BitConverter.DoubleToInt64Bits(d);
+            long bits = BitConverter.DoubleToInt64Bits(d);
             return (bits & 0x7FFFFFFFFFFFFFFF) < 0x7FF0000000000000;
         }
 
@@ -82,7 +81,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsInfinity(double d)
         {
-            var bits = BitConverter.DoubleToInt64Bits(d);
+            long bits = BitConverter.DoubleToInt64Bits(d);
             return (bits & 0x7FFFFFFFFFFFFFFF) == 0x7FF0000000000000;
         }
 
@@ -91,8 +90,12 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsNaN(double d)
         {
-            var bits = BitConverter.DoubleToInt64Bits(d);
-            return (bits & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000;
+            // A NaN will never equal itself so this is an
+            // easy and efficient way to check for NaN.
+
+            #pragma warning disable CS1718
+            return d != d;
+            #pragma warning restore CS1718
         }
 
         /// <summary>Determines whether the specified value is negative.</summary>
@@ -108,7 +111,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNegativeInfinity(double d)
         {
-            return (d == double.NegativeInfinity);
+            return d == double.NegativeInfinity;
         }
 
         /// <summary>Determines whether the specified value is normal.</summary>
@@ -116,7 +119,7 @@ namespace System
         // This is probably not worth inlining, it has branches and should be rarely called
         public static unsafe bool IsNormal(double d)
         {
-            var bits = BitConverter.DoubleToInt64Bits(d);
+            long bits = BitConverter.DoubleToInt64Bits(d);
             bits &= 0x7FFFFFFFFFFFFFFF;
             return (bits < 0x7FF0000000000000) && (bits != 0) && ((bits & 0x7FF0000000000000) != 0);
         }
@@ -126,7 +129,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPositiveInfinity(double d)
         {
-            return (d == double.PositiveInfinity);
+            return d == double.PositiveInfinity;
         }
 
         /// <summary>Determines whether the specified value is subnormal.</summary>
@@ -134,7 +137,7 @@ namespace System
         // This is probably not worth inlining, it has branches and should be rarely called
         public static unsafe bool IsSubnormal(double d)
         {
-            var bits = BitConverter.DoubleToInt64Bits(d);
+            long bits = BitConverter.DoubleToInt64Bits(d);
             bits &= 0x7FFFFFFFFFFFFFFF;
             return (bits < 0x7FF0000000000000) && (bits != 0) && ((bits & 0x7FF0000000000000) == 0);
         }
@@ -162,19 +165,20 @@ namespace System
             {
                 return 1;
             }
-            if (value is double)
+
+            if (value is double d)
             {
-                double d = (double)value;
                 if (m_value < d) return -1;
                 if (m_value > d) return 1;
                 if (m_value == d) return 0;
 
                 // At least one of the values is NaN.
                 if (IsNaN(m_value))
-                    return (IsNaN(d) ? 0 : -1);
+                    return IsNaN(d) ? 0 : -1;
                 else
                     return 1;
             }
+
             throw new ArgumentException(SR.Arg_MustBeDouble);
         }
 
@@ -186,7 +190,7 @@ namespace System
 
             // At least one of the values is NaN.
             if (IsNaN(m_value))
-                return (IsNaN(value) ? 0 : -1);
+                return IsNaN(value) ? 0 : -1;
             else
                 return 1;
         }
@@ -209,40 +213,22 @@ namespace System
         }
 
         [NonVersionable]
-        public static bool operator ==(double left, double right)
-        {
-            return left == right;
-        }
+        public static bool operator ==(double left, double right) => left == right;
 
         [NonVersionable]
-        public static bool operator !=(double left, double right)
-        {
-            return left != right;
-        }
+        public static bool operator !=(double left, double right) => left != right;
 
         [NonVersionable]
-        public static bool operator <(double left, double right)
-        {
-            return left < right;
-        }
+        public static bool operator <(double left, double right) => left < right;
 
         [NonVersionable]
-        public static bool operator >(double left, double right)
-        {
-            return left > right;
-        }
+        public static bool operator >(double left, double right) => left > right;
 
         [NonVersionable]
-        public static bool operator <=(double left, double right)
-        {
-            return left <= right;
-        }
+        public static bool operator <=(double left, double right) => left <= right;
 
         [NonVersionable]
-        public static bool operator >=(double left, double right)
-        {
-            return left >= right;
-        }
+        public static bool operator >=(double left, double right) => left >= right;
 
         public bool Equals(double obj)
         {
@@ -253,13 +239,12 @@ namespace System
             return IsNaN(obj) && IsNaN(m_value);
         }
 
-        //The hashcode for a double is the absolute value of the integer representation
-        //of that double.
-        //
+        // The hashcode for a double is the absolute value of the integer representation
+        // of that double.
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // 64-bit constants make the IL unusually large that makes the inliner to reject the method
         public override int GetHashCode()
         {
-            var bits = Unsafe.As<double, long>(ref Unsafe.AsRef(in m_value));
+            long bits = Unsafe.As<double, long>(ref Unsafe.AsRef(in m_value));
 
             // Optimized check for IsNan() || IsZero()
             if (((bits - 1) & 0x7FFFFFFFFFFFFFFF) >= 0x7FF0000000000000)
@@ -335,8 +320,6 @@ namespace System
             NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
             return Number.ParseDouble(s, style, NumberFormatInfo.GetInstance(provider));
         }
-
-
 
         public static bool TryParse(string? s, out double result)
         {

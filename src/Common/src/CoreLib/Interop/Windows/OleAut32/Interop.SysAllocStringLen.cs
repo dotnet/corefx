@@ -6,13 +6,10 @@ using System;
 using System.Runtime.InteropServices;
 using System.Security;
 
-internal partial class Interop
+internal static partial class Interop
 {
-    internal partial class OleAut32
+    internal static partial class OleAut32
     {
-        [DllImport(Libraries.OleAut32, CharSet = CharSet.Unicode)]
-        internal static extern SafeBSTRHandle SysAllocStringLen(IntPtr src, uint len);
-
         [DllImport(Libraries.OleAut32, CharSet = CharSet.Unicode)]
         internal static extern IntPtr SysAllocStringLen(string? src, int len);
     }

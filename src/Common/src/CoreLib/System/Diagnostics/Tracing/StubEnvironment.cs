@@ -3,30 +3,31 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+#if ES_BUILD_PCL || ES_BUILD_PN
 using System.Collections.Generic;
-
+#endif
+using System.Reflection;
 #if ES_BUILD_STANDALONE
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
+#endif
+#if ES_BUILD_AGAINST_DOTNET_V35
+using Microsoft.Internal;
+#endif
+using Microsoft.Reflection;
 
+#if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing.Internal
 #else
 namespace System.Diagnostics.Tracing.Internal
 #endif
 {
-#if ES_BUILD_AGAINST_DOTNET_V35
-    using Microsoft.Internal;
-#endif
-    using Microsoft.Reflection;
-    using System.Reflection;
-
     internal static class Environment
     {
         public static readonly string NewLine = System.Environment.NewLine;
 
-        public static int TickCount
-        { get { return System.Environment.TickCount; } }
+        public static int TickCount => System.Environment.TickCount;
 
         public static string GetResourceString(string key, params object?[] args)
         {
@@ -174,8 +175,6 @@ namespace Microsoft.Internal
 
 namespace Microsoft.Reflection
 {
-    using System.Reflection;
-
 #if ES_BUILD_PCL
     [Flags]
     public enum BindingFlags
@@ -226,7 +225,7 @@ namespace Microsoft.Reflection
 
         public static bool ReflectionOnly(this Assembly assm) { return assm.ReflectionOnly; }
 
-#else // ES_BUILD_PCL
+#else
 
         //
         // Type extension methods

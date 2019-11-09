@@ -17,7 +17,6 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "SslProtocols not supported on UAP")]
     public abstract partial class HttpClientHandler_SslProtocols_Test : HttpClientHandlerTestBase
     {
         public HttpClientHandler_SslProtocols_Test(ITestOutputHelper output) : base(output) { }
@@ -57,11 +56,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task SetProtocols_AfterRequest_ThrowsException()
         {
-            if (!BackendSupportsSslConfiguration)
-            {
-                return;
-            }
-
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (HttpClient client = CreateHttpClient(handler))
             {
@@ -111,11 +105,6 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(GetAsync_AllowedSSLVersion_Succeeds_MemberData))]
         public async Task GetAsync_AllowedSSLVersion_Succeeds(SslProtocols acceptedProtocol, bool requestOnlyThisProtocol)
         {
-            if (!BackendSupportsSslConfiguration)
-            {
-                return;
-            }
-
 #pragma warning disable 0618
             if (IsCurlHandler && PlatformDetection.IsRedHatFamily6 && acceptedProtocol == SslProtocols.Ssl3)
             {
@@ -234,11 +223,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_NoSpecifiedProtocol_DefaultsToTls12()
         {
-            if (!BackendSupportsSslConfiguration)
-            {
-                return;
-            }
-
             using (HttpClientHandler handler = CreateHttpClientHandler())
             using (HttpClient client = CreateHttpClient(handler))
             {
@@ -270,11 +254,6 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_AllowedClientSslVersionDiffersFromServer_ThrowsException(
             SslProtocols allowedClientProtocols, SslProtocols acceptedServerProtocols)
         {
-            if (!BackendSupportsSslConfiguration)
-            {
-                return;
-            }
-
             if (IsWinHttpHandler &&
                 allowedClientProtocols == (SslProtocols.Tls11 | SslProtocols.Tls12) &&
                 acceptedServerProtocols == SslProtocols.Tls)

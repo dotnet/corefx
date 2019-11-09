@@ -137,7 +137,7 @@ namespace System.Text
                         else
                         {
                             // Low surrogate
-                            if (bHighSurrogate == false)
+                            if (!bHighSurrogate)
                                 throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex);
                             bHighSurrogate = false;
                         }
@@ -192,7 +192,7 @@ namespace System.Text
                         else
                         {
                             // Low surrogate
-                            if (bHighSurrogate == false)
+                            if (!bHighSurrogate)
                                 throw new ArgumentException(SR.Argument_InvalidCharSequenceNoIndex);
                             bHighSurrogate = false;
                         }
@@ -300,7 +300,7 @@ namespace System.Text
         [DoesNotReturn]
         internal void ThrowLastBytesRecursive(byte[] bytesUnknown)
         {
-            bytesUnknown = bytesUnknown ?? Array.Empty<byte>();
+            bytesUnknown ??= Array.Empty<byte>();
 
             // Create a string representation of our bytes.
             StringBuilder strBytes = new StringBuilder(bytesUnknown.Length * 3);

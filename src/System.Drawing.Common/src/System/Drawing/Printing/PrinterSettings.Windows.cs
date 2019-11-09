@@ -235,7 +235,7 @@ namespace System.Drawing.Printing
         {
             get
             {
-                return GetDeviceCaps(SafeNativeMethods.TECHNOLOGY, SafeNativeMethods.DT_RASPRINTER) == SafeNativeMethods.DT_PLOTTER;
+                return GetDeviceCaps(Interop.Gdi32.DeviceCapability.TECHNOLOGY, Interop.Gdi32.DeviceTechnology.DT_RASPRINTER) == Interop.Gdi32.DeviceTechnology.DT_PLOTTER;
             }
         }
 
@@ -523,7 +523,7 @@ namespace System.Drawing.Printing
         {
             get
             {
-                return GetDeviceCaps(SafeNativeMethods.BITSPIXEL, 1) > 1;
+                return GetDeviceCaps(Interop.Gdi32.DeviceCapability.BITSPIXEL, 1) > 1;
             }
         }
 
@@ -566,16 +566,16 @@ namespace System.Drawing.Printing
             }
             finally
             {
-                SafeNativeMethods.GlobalFree(new HandleRef(null, modeHandle));
+                Interop.Kernel32.GlobalFree(modeHandle);
             }
             return dc;
         }
 
         internal DeviceContext CreateDeviceContext(IntPtr hdevmode)
         {
-            IntPtr modePointer = SafeNativeMethods.GlobalLock(new HandleRef(null, hdevmode));
-            DeviceContext dc = DeviceContext.CreateDC(DriverName, PrinterNameInternal, (string)null, new HandleRef(null, modePointer));
-            SafeNativeMethods.GlobalUnlock(new HandleRef(null, hdevmode));
+            IntPtr modePointer = Interop.Kernel32.GlobalLock(hdevmode);
+            DeviceContext dc = DeviceContext.CreateDC(DriverName, PrinterNameInternal, (string)null, modePointer);
+            Interop.Kernel32.GlobalUnlock(hdevmode);
             return dc;
         }
 
@@ -594,7 +594,7 @@ namespace System.Drawing.Printing
             }
             finally
             {
-                SafeNativeMethods.GlobalFree(new HandleRef(null, modeHandle));
+                Interop.Kernel32.GlobalFree(modeHandle);
             }
             return dc;
         }
@@ -602,9 +602,9 @@ namespace System.Drawing.Printing
         // A read-only DC, which is faster than CreateHdc
         internal DeviceContext CreateInformationContext(IntPtr hdevmode)
         {
-            IntPtr modePointer = SafeNativeMethods.GlobalLock(new HandleRef(null, hdevmode));
-            DeviceContext dc = DeviceContext.CreateIC(DriverName, PrinterNameInternal, (string)null, new HandleRef(null, modePointer));
-            SafeNativeMethods.GlobalUnlock(new HandleRef(null, hdevmode));
+            IntPtr modePointer = Interop.Kernel32.GlobalLock(hdevmode);
+            DeviceContext dc = DeviceContext.CreateIC(DriverName, PrinterNameInternal, (string)null, modePointer);
+            Interop.Kernel32.GlobalUnlock(hdevmode);
             return dc;
         }
 
@@ -735,17 +735,17 @@ namespace System.Drawing.Printing
                     return SR.NoDefaultPrinter;
 
                 IntPtr handle = data.hDevNames;
-                IntPtr names = SafeNativeMethods.GlobalLock(new HandleRef(data, handle));
+                IntPtr names = Interop.Kernel32.GlobalLock(new HandleRef(data, handle));
                 if (names == IntPtr.Zero)
                     throw new Win32Exception();
 
                 string name = ReadOneDEVNAME(names, 1);
-                SafeNativeMethods.GlobalUnlock(new HandleRef(data, handle));
+                Interop.Kernel32.GlobalUnlock(new HandleRef(data, handle));
                 names = IntPtr.Zero;
 
                 // Windows allocates them, but we have to free them
-                SafeNativeMethods.GlobalFree(new HandleRef(data, data.hDevNames));
-                SafeNativeMethods.GlobalFree(new HandleRef(data, data.hDevMode));
+                Interop.Kernel32.GlobalFree(new HandleRef(data, data.hDevNames));
+                Interop.Kernel32.GlobalFree(new HandleRef(data, data.hDevMode));
 
                 return name;
             }
@@ -759,17 +759,17 @@ namespace System.Drawing.Printing
                     return SR.NoDefaultPrinter;
 
                 IntPtr handle = data.hDevNames;
-                IntPtr names = SafeNativeMethods.GlobalLock(new HandleRef(data, handle));
+                IntPtr names = Interop.Kernel32.GlobalLock(new HandleRef(data, handle));
                 if (names == IntPtr.Zero)
                     throw new Win32Exception();
 
                 string name = ReadOneDEVNAME(names, 1);
-                SafeNativeMethods.GlobalUnlock(new HandleRef(data, handle));
+                Interop.Kernel32.GlobalUnlock(new HandleRef(data, handle));
                 names = IntPtr.Zero;
 
                 // Windows allocates them, but we have to free them
-                SafeNativeMethods.GlobalFree(new HandleRef(data, data.hDevNames));
-                SafeNativeMethods.GlobalFree(new HandleRef(data, data.hDevMode));
+                Interop.Kernel32.GlobalFree(new HandleRef(data, data.hDevNames));
+                Interop.Kernel32.GlobalFree(new HandleRef(data, data.hDevMode));
 
                 return name;
             }
@@ -788,18 +788,18 @@ namespace System.Drawing.Printing
                     return SR.NoDefaultPrinter;
 
                 IntPtr handle = data.hDevNames;
-                IntPtr names = SafeNativeMethods.GlobalLock(new HandleRef(data, handle));
+                IntPtr names = Interop.Kernel32.GlobalLock(new HandleRef(data, handle));
                 if (names == IntPtr.Zero)
                     throw new Win32Exception();
 
                 string name = ReadOneDEVNAME(names, 2);
 
-                SafeNativeMethods.GlobalUnlock(new HandleRef(data, handle));
+                Interop.Kernel32.GlobalUnlock(new HandleRef(data, handle));
                 names = IntPtr.Zero;
 
                 // Windows allocates them, but we have to free them
-                SafeNativeMethods.GlobalFree(new HandleRef(data, data.hDevNames));
-                SafeNativeMethods.GlobalFree(new HandleRef(data, data.hDevMode));
+                Interop.Kernel32.GlobalFree(new HandleRef(data, data.hDevNames));
+                Interop.Kernel32.GlobalFree(new HandleRef(data, data.hDevMode));
 
                 return name;
             }
@@ -813,53 +813,39 @@ namespace System.Drawing.Printing
                     return SR.NoDefaultPrinter;
 
                 IntPtr handle = data.hDevNames;
-                IntPtr names = SafeNativeMethods.GlobalLock(new HandleRef(data, handle));
+                IntPtr names = Interop.Kernel32.GlobalLock(new HandleRef(data, handle));
                 if (names == IntPtr.Zero)
                     throw new Win32Exception();
 
                 string name = ReadOneDEVNAME(names, 2);
 
-                SafeNativeMethods.GlobalUnlock(new HandleRef(data, handle));
+                Interop.Kernel32.GlobalUnlock(new HandleRef(data, handle));
                 names = IntPtr.Zero;
 
                 // Windows allocates them, but we have to free them
-                SafeNativeMethods.GlobalFree(new HandleRef(data, data.hDevNames));
-                SafeNativeMethods.GlobalFree(new HandleRef(data, data.hDevMode));
+                Interop.Kernel32.GlobalFree(new HandleRef(data, data.hDevNames));
+                Interop.Kernel32.GlobalFree(new HandleRef(data, data.hDevMode));
 
                 return name;
             }
         }
 
-        private int GetDeviceCaps(int capability, int defaultValue)
+        private int GetDeviceCaps(Interop.Gdi32.DeviceCapability capability, int defaultValue)
         {
-            DeviceContext dc = CreateInformationContext(DefaultPageSettings);
-            int result = defaultValue;
-
-            try
+            using (DeviceContext dc = CreateInformationContext(DefaultPageSettings))
             {
-                result = UnsafeNativeMethods.GetDeviceCaps(new HandleRef(dc, dc.Hdc), capability);
+                return Interop.Gdi32.GetDeviceCaps(new HandleRef(dc, dc.Hdc), capability);
             }
-            catch (InvalidPrinterException)
-            {
-                // do nothing, will return defaultValue.
-            }
-            finally
-            {
-                dc.Dispose();
-            }
-
-            return result;
         }
 
         /// <summary>
         /// Creates a handle to a DEVMODE structure which correspond too the printer settings.When you are done with the
         /// handle, you must deallocate it yourself:
-        ///   Windows.GlobalFree(handle);
+        ///   Interop.Kernel32.GlobalFree(handle);
         ///   Where "handle" is the return value from this method.
         /// </summary>
         public IntPtr GetHdevmode()
         {
-            // Don't assert unmanaged code -- anyone using handles should have unmanaged code permission
             IntPtr modeHandle = GetHdevmodeInternal();
             _defaultPageSettings.CopyToHdevmode(modeHandle);
             return modeHandle;
@@ -881,7 +867,7 @@ namespace System.Drawing.Printing
                 throw new InvalidPrinterException(this);
             }
             IntPtr handle = SafeNativeMethods.GlobalAlloc(SafeNativeMethods.GMEM_MOVEABLE, (uint)modeSize); // cannot be <0 anyway
-            IntPtr pointer = SafeNativeMethods.GlobalLock(new HandleRef(null, handle));
+            IntPtr pointer = Interop.Kernel32.GlobalLock(handle);
 
             //Get the DevMode only if its not cached....
             if (_cachedDevmode != null)
@@ -933,20 +919,20 @@ namespace System.Drawing.Printing
             int retCode = SafeNativeMethods.DocumentProperties(NativeMethods.NullHandleRef, NativeMethods.NullHandleRef, printer, pointer, pointer, SafeNativeMethods.DM_IN_BUFFER | SafeNativeMethods.DM_OUT_BUFFER);
             if (retCode < 0)
             {
-                SafeNativeMethods.GlobalFree(new HandleRef(null, handle));
-                SafeNativeMethods.GlobalUnlock(new HandleRef(null, handle));
+                Interop.Kernel32.GlobalFree(handle);
+                Interop.Kernel32.GlobalUnlock(handle);
                 return IntPtr.Zero;
             }
 
 
-            SafeNativeMethods.GlobalUnlock(new HandleRef(null, handle));
+            Interop.Kernel32.GlobalUnlock(handle);
             return handle;
         }
 
         /// <summary>
         /// Creates a handle to a DEVMODE structure which correspond to the printer and page settings.
         /// When you are done with the handle, you must deallocate it yourself:
-        ///   Windows.GlobalFree(handle);
+        ///   Interop.Kernel32.GlobalFree(handle);
         ///   Where "handle" is the return value from this method.
         /// </summary>
         public IntPtr GetHdevmode(PageSettings pageSettings)
@@ -960,7 +946,7 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Creates a handle to a DEVNAMES structure which correspond to the printer settings.
         /// When you are done with the handle, you must deallocate it yourself:
-        ///   Windows.GlobalFree(handle);
+        ///   Interop.Kernel32.GlobalFree(handle);
         ///   Where "handle" is the return value from this method.
         /// </summary>
         public IntPtr GetHdevnames()
@@ -977,7 +963,7 @@ namespace System.Drawing.Printing
             short offset = (short)(8 / Marshal.SystemDefaultCharSize); // Offsets are in characters, not bytes
             uint namesSize = (uint)checked(Marshal.SystemDefaultCharSize * (offset + namesCharacters)); // always >0
             IntPtr handle = SafeNativeMethods.GlobalAlloc(SafeNativeMethods.GMEM_MOVEABLE | SafeNativeMethods.GMEM_ZEROINIT, namesSize);
-            IntPtr namesPointer = SafeNativeMethods.GlobalLock(new HandleRef(null, handle));
+            IntPtr namesPointer = Interop.Kernel32.GlobalLock(handle);
 
             Marshal.WriteInt16(namesPointer, offset); // wDriverOffset
             offset += WriteOneDEVNAME(driver, namesPointer, offset);
@@ -987,7 +973,7 @@ namespace System.Drawing.Printing
             offset += WriteOneDEVNAME(outPort, namesPointer, offset);
             Marshal.WriteInt16((IntPtr)(checked((long)namesPointer + 6)), offset); // wDefault
 
-            SafeNativeMethods.GlobalUnlock(new HandleRef(null, handle));
+            Interop.Kernel32.GlobalUnlock(handle);
             return handle;
         }
 
@@ -1016,7 +1002,7 @@ namespace System.Drawing.Printing
                     }
                 }
 
-                IntPtr modePointer = SafeNativeMethods.GlobalLock(new HandleRef(this, modeHandle));
+                IntPtr modePointer = Interop.Kernel32.GlobalLock(new HandleRef(this, modeHandle));
                 SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)Marshal.PtrToStructure(modePointer, typeof(SafeNativeMethods.DEVMODE));
                 switch (field)
                 {
@@ -1061,13 +1047,13 @@ namespace System.Drawing.Printing
                         result = defaultValue;
                         break;
                 }
-                SafeNativeMethods.GlobalUnlock(new HandleRef(this, modeHandle));
+                Interop.Kernel32.GlobalUnlock(new HandleRef(this, modeHandle));
             }
             finally
             {
                 if (ownHandle)
                 {
-                    SafeNativeMethods.GlobalFree(new HandleRef(this, modeHandle));
+                    Interop.Kernel32.GlobalFree(new HandleRef(this, modeHandle));
                 }
             }
             return result;
@@ -1209,7 +1195,7 @@ namespace System.Drawing.Printing
             if (hdevmode == IntPtr.Zero)
                 throw new ArgumentException(SR.Format(SR.InvalidPrinterHandle, hdevmode));
 
-            IntPtr pointer = SafeNativeMethods.GlobalLock(new HandleRef(null, hdevmode));
+            IntPtr pointer = Interop.Kernel32.GlobalLock(hdevmode);
             SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)Marshal.PtrToStructure(pointer, typeof(SafeNativeMethods.DEVMODE));
 
             //Copy entire public devmode as a byte array...
@@ -1243,7 +1229,7 @@ namespace System.Drawing.Printing
                 _collate = (mode.dmCollate == SafeNativeMethods.DMCOLLATE_TRUE);
             }
 
-            SafeNativeMethods.GlobalUnlock(new HandleRef(null, hdevmode));
+            Interop.Kernel32.GlobalUnlock(hdevmode);
         }
 
         /// <summary>
@@ -1252,9 +1238,11 @@ namespace System.Drawing.Printing
         public void SetHdevnames(IntPtr hdevnames)
         {
             if (hdevnames == IntPtr.Zero)
+            {
                 throw new ArgumentException(SR.Format(SR.InvalidPrinterHandle, hdevnames));
+            }
 
-            IntPtr namesPointer = SafeNativeMethods.GlobalLock(new HandleRef(null, hdevnames));
+            IntPtr namesPointer = Interop.Kernel32.GlobalLock(hdevnames);
 
             _driverName = ReadOneDEVNAME(namesPointer, 0);
             _printerName = ReadOneDEVNAME(namesPointer, 1);
@@ -1262,7 +1250,7 @@ namespace System.Drawing.Printing
 
             PrintDialogDisplayed = true;
 
-            SafeNativeMethods.GlobalUnlock(new HandleRef(null, hdevnames));
+            Interop.Kernel32.GlobalUnlock(hdevnames);
         }
 
         /// <summary>
@@ -1337,7 +1325,7 @@ namespace System.Drawing.Printing
 
             public IEnumerator GetEnumerator()
             {
-                return new ArrayEnumerator(_array, 0, Count);
+                return new ArrayEnumerator(_array, Count);
             }
 
             int ICollection.Count
@@ -1429,7 +1417,7 @@ namespace System.Drawing.Printing
 
             public IEnumerator GetEnumerator()
             {
-                return new ArrayEnumerator(_array, 0, Count);
+                return new ArrayEnumerator(_array, Count);
             }
 
             int ICollection.Count
@@ -1519,7 +1507,7 @@ namespace System.Drawing.Printing
 
             public IEnumerator GetEnumerator()
             {
-                return new ArrayEnumerator(_array, 0, Count);
+                return new ArrayEnumerator(_array, Count);
             }
 
             int ICollection.Count
@@ -1608,7 +1596,7 @@ namespace System.Drawing.Printing
 
             public IEnumerator GetEnumerator()
             {
-                return new ArrayEnumerator(_array, 0, Count);
+                return new ArrayEnumerator(_array, Count);
             }
 
             int ICollection.Count
@@ -1667,28 +1655,17 @@ namespace System.Drawing.Printing
         private class ArrayEnumerator : IEnumerator
         {
             private readonly object[] _array;
-            private object _item;
-            private int _index;
-            private readonly int _startIndex;
             private readonly int _endIndex;
+            private int _index;
+            private object _item;
 
-            public ArrayEnumerator(object[] array, int startIndex, int count)
+            public ArrayEnumerator(object[] array, int count)
             {
                 _array = array;
-                _startIndex = startIndex;
-                _endIndex = _index + count;
-
-                _index = _startIndex;
+                _endIndex = count;
             }
 
-            public object Current
-            {
-                get
-                {
-                    return _item;
-                }
-            }
-
+            public object Current => _item;
 
             public bool MoveNext()
             {
@@ -1701,8 +1678,7 @@ namespace System.Drawing.Printing
             public void Reset()
             {
                 // Position enumerator before first item
-
-                _index = _startIndex;
+                _index = 0;
                 _item = null;
             }
         }

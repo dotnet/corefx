@@ -2,14 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
 using System.Diagnostics;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-#if ES_BUILD_PCL
-    using System.Threading.Tasks;
 #endif
+using System.Threading;
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -41,6 +38,7 @@ namespace System.Diagnostics.Tracing
             _max = double.NegativeInfinity;
 
             InitializeBuffer();
+            Publish();
         }
 
         /// <summary>
@@ -58,7 +56,13 @@ namespace System.Diagnostics.Tracing
             Enqueue(value);
         }
 
-        public override string ToString() => $"EventCounter '{Name}' Count {_count} Mean {(_sum / _count).ToString("n3")}";
+        public override string ToString()
+        {
+            int count = Volatile.Read(ref _count);
+            return count == 0 ?
+                $"EventCounter '{Name}' Count 0" :
+                $"EventCounter '{Name}' Count {count} Mean {(_sum / count).ToString("n3")}";
+        }
 
         #region Statistics Calculation
 
@@ -174,7 +178,7 @@ namespace System.Diagnostics.Tracing
             Debug.Assert(Monitor.IsEntered(this));
             for (int i = 0; i < _bufferedValues.Length; i++)
             {
-                var value = Interlocked.Exchange(ref _bufferedValues[i], UnusedBufferSlotValue);
+                double value = Interlocked.Exchange(ref _bufferedValues[i], UnusedBufferSlotValue);
                 if (value != UnusedBufferSlotValue)
                 {
                     OnMetricWritten(value);
@@ -195,5 +199,4 @@ namespace System.Diagnostics.Tracing
         public CounterPayloadType(CounterPayload payload) { Payload = payload; }
         public CounterPayload Payload { get; set; }
     }
-
 }

@@ -306,9 +306,9 @@ namespace System.Threading.Tasks
             Task continuationTask = m_task;
             if (isRightKind)
             {
-                //If the task was cancel before running (e.g a ContinueWhenAll with a cancelled caancelation token)
-                //we will still flow it to ScheduleAndStart() were it will check the status before running
-                //We check here to avoid faulty logs that contain a join event to an operation that was already set as completed.
+                // If the task was cancel before running (e.g a ContinueWhenAll with a cancelled caancelation token)
+                // we will still flow it to ScheduleAndStart() were it will check the status before running
+                // We check here to avoid faulty logs that contain a join event to an operation that was already set as completed.
                 if (!continuationTask.IsCanceled && AsyncCausalityTracer.LoggingOn)
                 {
                     // Log now that we are sure that this continuation is being ran
@@ -347,7 +347,6 @@ namespace System.Threading.Tasks
 
             return new Delegate[] { m_task.m_action };
         }
-
     }
 
     /// <summary>Task continuation for awaiting with a current synchronization context.</summary>
@@ -437,12 +436,7 @@ namespace System.Threading.Tasks
         /// to be passed as state.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static ContextCallback GetPostActionCallback()
-        {
-            ContextCallback? callback = s_postActionCallback;
-            if (callback == null) { s_postActionCallback = callback = PostAction; } // lazily initialize SecurityCritical delegate
-            return callback;
-        }
+        private static ContextCallback GetPostActionCallback() => s_postActionCallback ??= PostAction;
     }
 
     /// <summary>Task continuation for awaiting with a task scheduler.</summary>
@@ -486,7 +480,7 @@ namespace System.Threading.Tasks
 
                 // Create the continuation task task. If we're allowed to inline, try to do so.
                 // The target scheduler may still deny us from executing on this thread, in which case this'll be queued.
-                var task = CreateTask(state =>
+                Task task = CreateTask(state =>
                 {
                     try
                     {
@@ -603,19 +597,19 @@ namespace System.Threading.Tasks
             {
                 // If there's a SynchronizationContext, we'll be conservative and say
                 // this is a bad location to inline.
-                var ctx = SynchronizationContext.Current;
+                SynchronizationContext? ctx = SynchronizationContext.Current;
                 if (ctx != null && ctx.GetType() != typeof(SynchronizationContext)) return false;
 
                 // Similarly, if there's a non-default TaskScheduler, we'll be conservative
                 // and say this is a bad location to inline.
-                var sched = TaskScheduler.InternalCurrent;
+                TaskScheduler? sched = TaskScheduler.InternalCurrent;
                 return sched == null || sched == TaskScheduler.Default;
             }
         }
 
         void IThreadPoolWorkItem.Execute()
         {
-            var log = TplEventSource.Log;
+            TplEventSource log = TplEventSource.Log;
             ExecutionContext? context = m_capturedContext;
 
             if (!log.IsEnabled() && context == null)
@@ -681,7 +675,7 @@ namespace System.Threading.Tasks
 
             // Pretend there's no current task, so that no task is seen as a parent
             // and TaskScheduler.Current does not reflect false information
-            var prevCurrentTask = currentTask;
+            Task? prevCurrentTask = currentTask;
             try
             {
                 if (prevCurrentTask != null) currentTask = null;
@@ -807,7 +801,7 @@ namespace System.Threading.Tasks
         {
             AwaitTaskContinuation atc = new AwaitTaskContinuation(action, flowExecutionContext: false);
 
-            var log = TplEventSource.Log;
+            TplEventSource log = TplEventSource.Log;
             if (log.IsEnabled() && task != null)
             {
                 atc.m_continuationId = Task.NewId();

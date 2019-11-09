@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
-using Interlocked = System.Threading.Interlocked;
+#endif
+using System.Threading;
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -31,12 +33,12 @@ namespace System.Diagnostics.Tracing
         public ItemType? TryGet(KeyType key)
         {
             ItemType? item;
-            var oldItems = this.items;
+            ItemType[]? oldItems = this.items;
 
             if (oldItems != null)
             {
-                var lo = 0;
-                var hi = oldItems.Length;
+                int lo = 0;
+                int hi = oldItems.Length;
                 do
                 {
                     int i = (lo + hi) / 2;
@@ -69,7 +71,7 @@ namespace System.Diagnostics.Tracing
         public ItemType GetOrAdd(ItemType newItem)
         {
             ItemType item;
-            var oldItems = this.items;
+            ItemType[]? oldItems = this.items;
             ItemType[] newItems;
 
         Retry:
@@ -80,8 +82,8 @@ namespace System.Diagnostics.Tracing
             }
             else
             {
-                var lo = 0;
-                var hi = oldItems.Length;
+                int lo = 0;
+                int hi = oldItems.Length;
                 do
                 {
                     int i = (lo + hi) / 2;
@@ -105,7 +107,7 @@ namespace System.Diagnostics.Tracing
 
                 int oldLength = oldItems.Length;
                 newItems = new ItemType[oldLength + 1];
-                Array.Copy(oldItems, 0, newItems, 0, lo);
+                Array.Copy(oldItems, newItems, lo);
                 newItems[lo] = newItem;
                 Array.Copy(oldItems, lo, newItems, lo + 1, oldLength - lo);
             }

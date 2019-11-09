@@ -21,24 +21,25 @@ namespace System.Collections.Generic
         /// </summary>
         internal static string PairToString(object? key, object? value)
         {
-            StringBuilder s = StringBuilderCache.Acquire();
+            var s = new ValueStringBuilder(stackalloc char[64]);
+
             s.Append('[');
 
             if (key != null)
             {
-                s.Append(key);
+                s.Append(key.ToString());
             }
 
             s.Append(", ");
 
             if (value != null)
             {
-                s.Append(value);
+                s.Append(value.ToString());
             }
 
             s.Append(']');
 
-            return StringBuilderCache.GetStringAndRelease(s);
+            return s.ToString();
         }
     }
 
@@ -58,15 +59,9 @@ namespace System.Collections.Generic
             this.value = value;
         }
 
-        public TKey Key
-        {
-            get { return key; }
-        }
+        public TKey Key => key;
 
-        public TValue Value
-        {
-            get { return value; }
-        }
+        public TValue Value => value;
 
         public override string ToString()
         {

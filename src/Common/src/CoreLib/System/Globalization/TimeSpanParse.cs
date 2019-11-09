@@ -67,9 +67,9 @@ namespace System.Globalization
         {
             // Standard Format Styles
             None = 0x00000000,
-            Invariant = 0x00000001, //Allow Invariant Culture
-            Localized = 0x00000002, //Allow Localized Culture
-            RequireFull = 0x00000004, //Require the input to be in DHMSF format
+            Invariant = 0x00000001, // Allow Invariant Culture
+            Localized = 0x00000002, // Allow Localized Culture
+            RequireFull = 0x00000004, // Require the input to be in DHMSF format
             Any = Invariant | Localized,
         }
 
@@ -115,7 +115,7 @@ namespace System.Globalization
                 if (_zeroes == 0 && _num > MaxFraction)
                     return false;
 
-                int totalDigitsCount = ((int) Math.Floor(Math.Log10(_num))) + 1 + _zeroes;
+                int totalDigitsCount = ((int)Math.Floor(Math.Log10(_num))) + 1 + _zeroes;
 
                 if (totalDigitsCount == MaxFractionDigits)
                 {
@@ -133,7 +133,7 @@ namespace System.Globalization
                     // .000001  normalize to 10 ticks
                     // .1       normalize to 1,000,000 ticks
 
-                    _num *= (int) Pow10(MaxFractionDigits - totalDigitsCount);
+                    _num *= (int)Pow10(MaxFractionDigits - totalDigitsCount);
                     return true;
                 }
 
@@ -144,7 +144,7 @@ namespace System.Globalization
                 // .099999999   normalize to 1,000,000 ticks
 
                 Debug.Assert(_zeroes > 0); // Already validated that in the condition _zeroes == 0 && _num > MaxFraction
-                _num = (int) Math.Round((double)_num / Pow10(totalDigitsCount - MaxFractionDigits), MidpointRounding.AwayFromZero);
+                _num = (int)Math.Round((double)_num / Pow10(totalDigitsCount - MaxFractionDigits), MidpointRounding.AwayFromZero);
                 Debug.Assert(_num < MaxFraction);
 
                 return true;
@@ -262,9 +262,6 @@ namespace System.Globalization
         /// <summary>Stores intermediary parsing state for the standard formats.</summary>
         private ref struct TimeSpanRawInfo
         {
-            internal TimeSpanFormat.FormatLiterals PositiveInvariant => TimeSpanFormat.PositiveInvariantFormatLiterals;
-            internal TimeSpanFormat.FormatLiterals NegativeInvariant => TimeSpanFormat.NegativeInvariantFormatLiterals;
-
             internal TimeSpanFormat.FormatLiterals PositiveLocalized
             {
                 get
@@ -767,12 +764,12 @@ namespace System.Globalization
 
             if (inv)
             {
-                if (raw.FullMatch(raw.PositiveInvariant))
+                if (raw.FullMatch(TimeSpanFormat.PositiveInvariantFormatLiterals))
                 {
                     match = true;
                     positive = true;
                 }
-                if (!match && raw.FullMatch(raw.NegativeInvariant))
+                if (!match && raw.FullMatch(TimeSpanFormat.NegativeInvariantFormatLiterals))
                 {
                     match = true;
                     positive = false;
@@ -840,42 +837,42 @@ namespace System.Globalization
 
             if (inv)
             {
-                if (raw.FullHMSFMatch(raw.PositiveInvariant))
+                if (raw.FullHMSFMatch(TimeSpanFormat.PositiveInvariantFormatLiterals))
                 {
                     positive = true;
                     match = TryTimeToTicks(positive, zero, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, out ticks);
                     overflow = overflow || !match;
                 }
 
-                if (!match && raw.FullDHMSMatch(raw.PositiveInvariant))
+                if (!match && raw.FullDHMSMatch(TimeSpanFormat.PositiveInvariantFormatLiterals))
                 {
                     positive = true;
                     match = TryTimeToTicks(positive, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, zero, out ticks);
                     overflow = overflow || !match;
                 }
 
-                if (!match && raw.FullAppCompatMatch(raw.PositiveInvariant))
+                if (!match && raw.FullAppCompatMatch(TimeSpanFormat.PositiveInvariantFormatLiterals))
                 {
                     positive = true;
                     match = TryTimeToTicks(positive, raw._numbers0, raw._numbers1, raw._numbers2, zero, raw._numbers3, out ticks);
                     overflow = overflow || !match;
                 }
 
-                if (!match && raw.FullHMSFMatch(raw.NegativeInvariant))
+                if (!match && raw.FullHMSFMatch(TimeSpanFormat.NegativeInvariantFormatLiterals))
                 {
                     positive = false;
                     match = TryTimeToTicks(positive, zero, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, out ticks);
                     overflow = overflow || !match;
                 }
 
-                if (!match && raw.FullDHMSMatch(raw.NegativeInvariant))
+                if (!match && raw.FullDHMSMatch(TimeSpanFormat.NegativeInvariantFormatLiterals))
                 {
                     positive = false;
                     match = TryTimeToTicks(positive, raw._numbers0, raw._numbers1, raw._numbers2, raw._numbers3, zero, out ticks);
                     overflow = overflow || !match;
                 }
 
-                if (!match && raw.FullAppCompatMatch(raw.NegativeInvariant))
+                if (!match && raw.FullAppCompatMatch(TimeSpanFormat.NegativeInvariantFormatLiterals))
                 {
                     positive = false;
                     match = TryTimeToTicks(positive, raw._numbers0, raw._numbers1, raw._numbers2, zero, raw._numbers3, out ticks);
@@ -966,42 +963,42 @@ namespace System.Globalization
 
             if (inv)
             {
-                if (raw.FullHMSMatch(raw.PositiveInvariant))
+                if (raw.FullHMSMatch(TimeSpanFormat.PositiveInvariantFormatLiterals))
                 {
                     positive = true;
                     match = TryTimeToTicks(positive, zero, raw._numbers0, raw._numbers1, raw._numbers2, zero, out ticks);
                     overflow = overflow || !match;
                 }
 
-                if (!match && raw.FullDHMMatch(raw.PositiveInvariant))
+                if (!match && raw.FullDHMMatch(TimeSpanFormat.PositiveInvariantFormatLiterals))
                 {
                     positive = true;
                     match = TryTimeToTicks(positive, raw._numbers0, raw._numbers1, raw._numbers2, zero, zero, out ticks);
                     overflow = overflow || !match;
                 }
 
-                if (!match && raw.PartialAppCompatMatch(raw.PositiveInvariant))
+                if (!match && raw.PartialAppCompatMatch(TimeSpanFormat.PositiveInvariantFormatLiterals))
                 {
                     positive = true;
                     match = TryTimeToTicks(positive, zero, raw._numbers0, raw._numbers1, zero, raw._numbers2, out ticks);
                     overflow = overflow || !match;
                 }
 
-                if (!match && raw.FullHMSMatch(raw.NegativeInvariant))
+                if (!match && raw.FullHMSMatch(TimeSpanFormat.NegativeInvariantFormatLiterals))
                 {
                     positive = false;
                     match = TryTimeToTicks(positive, zero, raw._numbers0, raw._numbers1, raw._numbers2, zero, out ticks);
                     overflow = overflow || !match;
                 }
 
-                if (!match && raw.FullDHMMatch(raw.NegativeInvariant))
+                if (!match && raw.FullDHMMatch(TimeSpanFormat.NegativeInvariantFormatLiterals))
                 {
                     positive = false;
                     match = TryTimeToTicks(positive, raw._numbers0, raw._numbers1, raw._numbers2, zero, zero, out ticks);
                     overflow = overflow || !match;
                 }
 
-                if (!match && raw.PartialAppCompatMatch(raw.NegativeInvariant))
+                if (!match && raw.PartialAppCompatMatch(TimeSpanFormat.NegativeInvariantFormatLiterals))
                 {
                     positive = false;
                     match = TryTimeToTicks(positive, zero, raw._numbers0, raw._numbers1, zero, raw._numbers2, out ticks);
@@ -1090,13 +1087,13 @@ namespace System.Globalization
 
             if (inv)
             {
-                if (raw.FullHMMatch(raw.PositiveInvariant))
+                if (raw.FullHMMatch(TimeSpanFormat.PositiveInvariantFormatLiterals))
                 {
                     match = true;
                     positive = true;
                 }
 
-                if (!match && raw.FullHMMatch(raw.NegativeInvariant))
+                if (!match && raw.FullHMMatch(TimeSpanFormat.NegativeInvariantFormatLiterals))
                 {
                     match = true;
                     positive = false;
@@ -1160,13 +1157,13 @@ namespace System.Globalization
 
             if (inv)
             {
-                if (raw.FullDMatch(raw.PositiveInvariant))
+                if (raw.FullDMatch(TimeSpanFormat.PositiveInvariantFormatLiterals))
                 {
                     match = true;
                     positive = true;
                 }
 
-                if (!match && raw.FullDMatch(raw.NegativeInvariant))
+                if (!match && raw.FullDMatch(TimeSpanFormat.NegativeInvariantFormatLiterals))
                 {
                     match = true;
                     positive = false;
@@ -1519,7 +1516,7 @@ namespace System.Globalization
                     if (!ParseTime(out time, ref result))
                     {
                         return false;
-                    };
+                    }
                 }
                 else
                 {
@@ -1538,7 +1535,7 @@ namespace System.Globalization
                         if (!ParseTime(out remainingTime, ref result))
                         {
                             return false;
-                        };
+                        }
                         time += remainingTime;
                     }
                 }

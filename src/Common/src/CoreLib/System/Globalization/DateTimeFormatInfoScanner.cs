@@ -24,11 +24,8 @@ using System.Text;
 
 namespace System.Globalization
 {
-    //
     // from LocaleEx.txt header
-    //
-    //; IFORMATFLAGS
-    //;       Parsing/formatting flags.
+    // IFORMATFLAGS
     internal enum FORMATFLAGS
     {
         None = 0x00000000,
@@ -117,39 +114,32 @@ namespace System.Globalization
         // Hashtable for the known words.
         private static volatile Dictionary<string, string>? s_knownWords;
 
-        private static Dictionary<string, string> KnownWords
-        {
-            get
+        private static Dictionary<string, string> KnownWords =>
+            s_knownWords ??=
+            new Dictionary<string, string>(16)
             {
-                if (s_knownWords == null)
-                {
-                    Dictionary<string, string> temp = new Dictionary<string, string>();
-                    // Add known words into the hash table.
+                // Add known words into the hash table.
 
-                    // Skip these special symbols.
-                    temp.Add("/", string.Empty);
-                    temp.Add("-", string.Empty);
-                    temp.Add(".", string.Empty);
-                    // Skip known CJK suffixes.
-                    temp.Add(CJKYearSuff, string.Empty);
-                    temp.Add(CJKMonthSuff, string.Empty);
-                    temp.Add(CJKDaySuff, string.Empty);
-                    temp.Add(KoreanYearSuff, string.Empty);
-                    temp.Add(KoreanMonthSuff, string.Empty);
-                    temp.Add(KoreanDaySuff, string.Empty);
-                    temp.Add(KoreanHourSuff, string.Empty);
-                    temp.Add(KoreanMinuteSuff, string.Empty);
-                    temp.Add(KoreanSecondSuff, string.Empty);
-                    temp.Add(CJKHourSuff, string.Empty);
-                    temp.Add(ChineseHourSuff, string.Empty);
-                    temp.Add(CJKMinuteSuff, string.Empty);
-                    temp.Add(CJKSecondSuff, string.Empty);
+                // Skip these special symbols.
+                { "/", string.Empty },
+                { "-", string.Empty },
+                { ".", string.Empty },
 
-                    s_knownWords = temp;
-                }
-                return s_knownWords;
-            }
-        }
+                // Skip known CJK suffixes.
+                { CJKYearSuff, string.Empty },
+                { CJKMonthSuff, string.Empty },
+                { CJKDaySuff, string.Empty },
+                { KoreanYearSuff, string.Empty },
+                { KoreanMonthSuff, string.Empty },
+                { KoreanDaySuff, string.Empty },
+                { KoreanHourSuff, string.Empty },
+                { KoreanMinuteSuff, string.Empty },
+                { KoreanSecondSuff, string.Empty },
+                { CJKHourSuff, string.Empty },
+                { ChineseHourSuff, string.Empty },
+                { CJKMinuteSuff, string.Empty },
+                { CJKSecondSuff, string.Empty }
+            };
 
         ////////////////////////////////////////////////////////////////////////////
         //
@@ -196,7 +186,7 @@ namespace System.Globalization
                 // Skip the current char since it is not a letter.
                 currentIndex++;
             }
-            return (currentIndex);
+            return currentIndex;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -222,12 +212,10 @@ namespace System.Globalization
                     return;
                 }
 
-                if (KnownWords.TryGetValue(str, out _) == false)
+                if (!KnownWords.TryGetValue(str, out _))
                 {
-                    if (m_dateWords == null)
-                    {
-                        m_dateWords = new List<string>();
-                    }
+                    m_dateWords ??= new List<string>();
+
                     if (formatPostfix == "MMMM")
                     {
                         // Add the word into the ArrayList as "\xfffe" + real month postfix.
@@ -243,10 +231,10 @@ namespace System.Globalization
                         {
                             m_dateWords.Add(str);
                         }
-                        if (str[str.Length - 1] == '.')
+                        if (str[^1] == '.')
                         {
                             // Old version ignore the trailing dot in the date words. Support this as well.
-                            string strWithoutDot = str.Substring(0, str.Length - 1);
+                            string strWithoutDot = str[0..^1];
                             if (!m_dateWords.Contains(strWithoutDot))
                             {
                                 m_dateWords.Add(strWithoutDot);
@@ -333,7 +321,7 @@ namespace System.Globalization
                     index++;
                 }
             }
-            return (index);
+            return index;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -349,15 +337,15 @@ namespace System.Globalization
                 count++;
             }
             // Return the updated position.
-            return (index);
+            return index;
         }
 
         ////////////////////////////////////////////////////////////////////////////
         //
-        // Add the text that is a date separator but is treated like ignroable symbol.
+        // Add the text that is a date separator but is treated like ignorable symbol.
         // E.g.
         // hu-HU has:
-        //      shrot date pattern: yyyy. MM. dd.;yyyy-MM-dd;yy-MM-dd
+        //      short date pattern: yyyy. MM. dd.;yyyy-MM-dd;yy-MM-dd
         //      long date pattern: yyyy. MMMM d.
         // Here, "." is the date separator (derived from short date pattern). However,
         // "." also appear at the end of long date pattern.  In this case, we just
@@ -382,7 +370,6 @@ namespace System.Globalization
             }
         }
 
-
         //
         // Flag used to trace the date patterns (yy/yyyyy/M/MM/MMM/MMM/d/dd) that we have seen.
         //
@@ -397,7 +384,6 @@ namespace System.Globalization
 
         // Check if we have found all of the year/month/day pattern.
         private FoundDatePattern _ymdFlags = FoundDatePattern.None;
-
 
         ////////////////////////////////////////////////////////////////////////////
         //
@@ -551,7 +537,6 @@ namespace System.Globalization
             return result;
         }
 
-
         ////////////////////////////////////////////////////////////////////////////
         //
         // Scan the month names to see if genitive month names are used, and return
@@ -561,8 +546,8 @@ namespace System.Globalization
         internal static FORMATFLAGS GetFormatFlagGenitiveMonth(string[] monthNames, string[] genitveMonthNames, string[] abbrevMonthNames, string[] genetiveAbbrevMonthNames)
         {
             // If we have different names in regular and genitive month names, use genitive month flag.
-            return ((!EqualStringArrays(monthNames, genitveMonthNames) || !EqualStringArrays(abbrevMonthNames, genetiveAbbrevMonthNames))
-                ? FORMATFLAGS.UseGenitiveMonth : 0);
+            return (!EqualStringArrays(monthNames, genitveMonthNames) || !EqualStringArrays(abbrevMonthNames, genetiveAbbrevMonthNames))
+                ? FORMATFLAGS.UseGenitiveMonth : 0;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -584,7 +569,7 @@ namespace System.Globalization
                     ArrayElementsHaveSpace(abbrevMonthNames) ||
                     ArrayElementsHaveSpace(genetiveAbbrevMonthNames)
                     ? FORMATFLAGS.UseSpacesInMonthNames : 0);
-            return (formatFlags);
+            return formatFlags;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -594,9 +579,9 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////////
         internal static FORMATFLAGS GetFormatFlagUseSpaceInDayNames(string[] dayNames, string[] abbrevDayNames)
         {
-            return ((ArrayElementsHaveSpace(dayNames) ||
+            return (ArrayElementsHaveSpace(dayNames) ||
                     ArrayElementsHaveSpace(abbrevDayNames))
-                    ? FORMATFLAGS.UseSpacesInDayNames : 0);
+                    ? FORMATFLAGS.UseSpacesInDayNames : 0;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -606,15 +591,14 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////////
         internal static FORMATFLAGS GetFormatFlagUseHebrewCalendar(int calID)
         {
-            return (calID == (int)CalendarId.HEBREW ?
-                FORMATFLAGS.UseHebrewParsing | FORMATFLAGS.UseLeapYearMonth : 0);
+            return calID == (int)CalendarId.HEBREW ?
+                FORMATFLAGS.UseHebrewParsing | FORMATFLAGS.UseLeapYearMonth : 0;
         }
-
 
         //-----------------------------------------------------------------------------
         // EqualStringArrays
         //      compares two string arrays and return true if all elements of the first
-        //      array equals to all elmentsof the second array.
+        //      array equals to all elements of the second array.
         //      otherwise it returns false.
         //-----------------------------------------------------------------------------
 
@@ -669,7 +653,6 @@ namespace System.Globalization
             return false;
         }
 
-
         ////////////////////////////////////////////////////////////////////////////
         //
         // Check if any element of the array start with a digit.
@@ -692,7 +675,7 @@ namespace System.Globalization
                     }
                     if (index == array[i].Length)
                     {
-                        return (false);
+                        return false;
                     }
 
                     if (index == array[i].Length - 1)
@@ -704,7 +687,7 @@ namespace System.Globalization
                         {
                             case '\x6708': // CJKMonthSuff
                             case '\xc6d4': // KoreanMonthSuff
-                                return (false);
+                                return false;
                         }
                     }
 
@@ -716,10 +699,10 @@ namespace System.Globalization
                         if (array[i][index] == '\'' && array[i][index + 1] == ' ' &&
                            array[i][index + 2] == '\x6708' && array[i][index + 3] == '\'')
                         {
-                            return (false);
+                            return false;
                         }
                     }
-                    return (true);
+                    return true;
                 }
             }
 

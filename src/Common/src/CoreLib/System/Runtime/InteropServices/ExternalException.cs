@@ -52,13 +52,7 @@ namespace System.Runtime.InteropServices
         {
         }
 
-        public virtual int ErrorCode
-        {
-            get
-            {
-                return HResult;
-            }
-        }
+        public virtual int ErrorCode => HResult;
 
         public override string ToString()
         {
@@ -69,17 +63,17 @@ namespace System.Runtime.InteropServices
 
             if (!string.IsNullOrEmpty(message))
             {
-                s = s + ": " + message;
+                s += ": " + message;
             }
 
             Exception? innerException = InnerException;
             if (innerException != null)
             {
-                s = s + Environment.NewLine + InnerExceptionPrefix + innerException.ToString();
+                s += Environment.NewLineConst + InnerExceptionPrefix + innerException.ToString();
             }
 
             if (StackTrace != null)
-                s += Environment.NewLine + StackTrace;
+                s += Environment.NewLineConst + StackTrace;
 
             return s;
         }

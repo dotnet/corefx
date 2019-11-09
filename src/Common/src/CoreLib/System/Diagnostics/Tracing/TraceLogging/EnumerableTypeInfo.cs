@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
+using System.Diagnostics;
+#endif
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -35,13 +37,13 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
         {
-            var bookmark = collector.BeginBufferedArray();
+            int bookmark = collector.BeginBufferedArray();
 
-            var count = 0;
+            int count = 0;
             IEnumerable? enumerable = (IEnumerable?)value.ReferenceValue;
             if (enumerable != null)
             {
-                foreach (var element in enumerable)
+                foreach (object? element in enumerable)
                 {
                     this.elementInfo.WriteData(collector, elementInfo.PropertyValueFactory(element));
                     count++;
@@ -56,7 +58,7 @@ namespace System.Diagnostics.Tracing
             Debug.Assert(value != null, "null accepted only for some overrides");
             var iterType = (IEnumerable)value;
             List<object?> serializedEnumerable = new List<object?>();
-            foreach (var element in iterType)
+            foreach (object? element in iterType)
             {
                 serializedEnumerable.Add(elementInfo.GetData(element));
             }

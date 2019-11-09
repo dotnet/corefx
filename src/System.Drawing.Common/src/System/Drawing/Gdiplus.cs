@@ -18,16 +18,12 @@ namespace System.Drawing
         // We make this a nested class so that we don't have to initialize GDI+ to access SafeNativeMethods (mostly gdi/user32).
         internal static partial class Gdip
         {
-            private static readonly TraceSwitch s_gdiPlusInitialization = new TraceSwitch("GdiPlusInitialization", "Tracks GDI+ initialization and teardown");
-
             private static readonly IntPtr s_initToken;
             private const string ThreadDataSlotName = "system.drawing.threaddata";
 
             static Gdip()
             {
                 Debug.Assert(s_initToken == IntPtr.Zero, "GdiplusInitialization: Initialize should not be called more than once in the same domain!");
-                Debug.WriteLineIf(s_gdiPlusInitialization.TraceVerbose, "Initialize GDI+ [" + AppDomain.CurrentDomain.FriendlyName + "]");
-                Debug.Indent();
 
                 PlatformInitialize();
 
@@ -37,12 +33,6 @@ namespace System.Drawing
                 // domains are ok, just make sure to pair each w/GdiplusShutdown
                 int status = GdiplusStartup(out s_initToken, ref input, out StartupOutput output);
                 CheckStatus(status);
-
-                Debug.Unindent();
-
-                // Sync to event for handling shutdown
-                AppDomain currentDomain = AppDomain.CurrentDomain;
-                currentDomain.ProcessExit += new EventHandler(OnProcessExit);
             }
 
             /// <summary>
@@ -69,73 +59,6 @@ namespace System.Drawing
 
                     return threadData;
                 }
-            }
-
-            // Clean up thread data
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            private static void ClearThreadData()
-            {
-                Debug.WriteLineIf(s_gdiPlusInitialization.TraceVerbose, "Releasing TLS data");
-                LocalDataStoreSlot slot = Thread.GetNamedDataSlot(ThreadDataSlotName);
-                Thread.SetData(slot, null);
-            }
-
-            /// <summary>
-            /// Shutsdown GDI+
-            /// </summary>
-            private static void Shutdown()
-            {
-                Debug.WriteLineIf(s_gdiPlusInitialization.TraceVerbose, "Shutdown GDI+ [" + AppDomain.CurrentDomain.FriendlyName + "]");
-                Debug.Indent();
-
-                if (Initialized)
-                {
-                    Debug.WriteLineIf(s_gdiPlusInitialization.TraceVerbose, "Not already shutdown");
-
-                    ClearThreadData();
-
-                    // Due to conditions at shutdown, we can't be sure all objects will be finalized here: e.g. a Global variable
-                    // in the application/domain may still be holding a GDI+ object. If so, calling GdiplusShutdown will free the GDI+ heap,
-                    // causing AppVerifier exceptions due to active crit sections.
-                    // For now, we will simply not call shutdown, the resultant heap leak should occur most often during shutdown anyway.
-                    // If GDI+ moves their allocations to the standard heap we can revisit.
-
-#if GDIP_SHUTDOWN
-                    // Let any thread data collect and finalize before
-                    // we tear down GDI+
-                    //
-                    Debug.WriteLineIf(GdiPlusInitialization.TraceVerbose, "Running garbage collector");
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
-
-                    // Shutdown GDI+
-                    //
-                    Debug.WriteLineIf(GdiPlusInitialization.TraceVerbose, "Instruct GDI+ to shutdown");
-
-                    GdiplusShutdown(ref initToken);
-                    initToken = IntPtr.Zero;
-#endif
-
-                    // unhook our shutdown handlers as we do not need to shut down more than once
-                    AppDomain currentDomain = AppDomain.CurrentDomain;
-                    currentDomain.ProcessExit -= new EventHandler(OnProcessExit);
-                    if (!currentDomain.IsDefaultAppDomain())
-                    {
-                        currentDomain.DomainUnload -= new EventHandler(OnProcessExit);
-                    }
-                }
-                Debug.Unindent();
-            }
-
-
-            // When we get notification that the process/domain is terminating, we will
-            // try to shutdown GDI+ if we haven't already.
-            [PrePrepareMethod]
-            private static void OnProcessExit(object sender, EventArgs e)
-            {
-                Debug.WriteLineIf(s_gdiPlusInitialization.TraceVerbose, "Process exited");
-                Shutdown();
             }
 
             // Used to ensure static constructor has run.
@@ -246,9 +169,6 @@ namespace System.Drawing
         GMEM_ZEROINIT = 0x0040,
         DM_IN_BUFFER = 8,
         DM_OUT_BUFFER = 2,
-        DT_PLOTTER = 0,
-        DT_RASPRINTER = 2,
-        TECHNOLOGY = 2,
         DC_PAPERS = 2,
         DC_PAPERSIZE = 3,
         DC_BINS = 6,
@@ -274,16 +194,6 @@ namespace System.Drawing
         IDI_WARNING = 32515,
         IDI_ERROR = 32513,
         IDI_INFORMATION = 32516,
-        PLANES = 14,
-        BITSPIXEL = 12,
-        LOGPIXELSX = 88,
-        LOGPIXELSY = 90,
-        PHYSICALWIDTH = 110,
-        PHYSICALHEIGHT = 111,
-        PHYSICALOFFSETX = 112,
-        PHYSICALOFFSETY = 113,
-        VERTRES = 10,
-        HORZRES = 8,
         DM_ORIENTATION = 0x00000001,
         DM_PAPERSIZE = 0x00000002,
         DM_PAPERLENGTH = 0x00000004,
@@ -465,9 +375,6 @@ namespace System.Drawing
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
         public static extern IntPtr CreateDIBSection(HandleRef hdc, ref NativeMethods.BITMAPINFO_FLAT bmi, int iUsage, ref IntPtr ppvBits, IntPtr hSection, int dwOffset);
 
-        [DllImport(ExternDll.Kernel32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern IntPtr GlobalFree(HandleRef handle);
-
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int StartDoc(HandleRef hDC, DOCINFO lpDocInfo);
 
@@ -502,23 +409,8 @@ namespace System.Drawing
         public static extern int EnumPrinters(int flags, string name, int level, IntPtr pPrinterEnum/*buffer*/,
                                               int cbBuf, out int pcbNeeded, out int pcReturned);
 
-        [DllImport(ExternDll.Kernel32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern IntPtr GlobalLock(HandleRef handle);
-
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr /*HDC*/ ResetDC(HandleRef hDC, HandleRef /*DEVMODE*/ lpDevMode);
-
-        [DllImport(ExternDll.Kernel32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern bool GlobalUnlock(HandleRef handle);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
-        public static extern IntPtr CreateRectRgn(int x1, int y1, int x2, int y2);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern int GetClipRgn(HandleRef hDC, HandleRef hRgn);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern int SelectClipRgn(HandleRef hDC, HandleRef hRgn);
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int AddFontResourceEx(string lpszFilename, int fl, IntPtr pdv);
@@ -526,45 +418,6 @@ namespace System.Drawing
         public static int AddFontFile(string fileName)
         {
             return AddFontResourceEx(fileName, /*FR_PRIVATE*/ 0x10, IntPtr.Zero);
-        }
-
-        internal static IntPtr SaveClipRgn(IntPtr hDC)
-        {
-            IntPtr hTempRgn = CreateRectRgn(0, 0, 0, 0);
-            IntPtr hSaveRgn = IntPtr.Zero;
-            try
-            {
-                int result = GetClipRgn(new HandleRef(null, hDC), new HandleRef(null, hTempRgn));
-                if (result > 0)
-                {
-                    hSaveRgn = hTempRgn;
-                    hTempRgn = IntPtr.Zero;
-                }
-            }
-            finally
-            {
-                if (hTempRgn != IntPtr.Zero)
-                {
-                    DeleteObject(new HandleRef(null, hTempRgn));
-                }
-            }
-
-            return hSaveRgn;
-        }
-
-        internal static void RestoreClipRgn(IntPtr hDC, IntPtr hRgn)
-        {
-            try
-            {
-                SelectClipRgn(new HandleRef(null, hDC), new HandleRef(null, hRgn));
-            }
-            finally
-            {
-                if (hRgn != IntPtr.Zero)
-                {
-                    DeleteObject(new HandleRef(null, hRgn));
-                }
-            }
         }
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
@@ -725,50 +578,6 @@ namespace System.Drawing
             public int biClrImportant;
         }
 
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public unsafe struct LOGFONT
-        {
-            private const int LF_FACESIZE = 32;
-
-            public int lfHeight;
-            public int lfWidth;
-            public int lfEscapement;
-            public int lfOrientation;
-            public int lfWeight;
-            public byte lfItalic;
-            public byte lfUnderline;
-            public byte lfStrikeOut;
-            public byte lfCharSet;
-            public byte lfOutPrecision;
-            public byte lfClipPrecision;
-            public byte lfQuality;
-            public byte lfPitchAndFamily;
-            private fixed char _lfFaceName[LF_FACESIZE];
-            public Span<char> lfFaceName
-            {
-                get { fixed (char* c = _lfFaceName) { return new Span<char>(c, LF_FACESIZE); } }
-            }
-
-            public override string ToString()
-            {
-                return
-                    "lfHeight=" + lfHeight + ", " +
-                    "lfWidth=" + lfWidth + ", " +
-                    "lfEscapement=" + lfEscapement + ", " +
-                    "lfOrientation=" + lfOrientation + ", " +
-                    "lfWeight=" + lfWeight + ", " +
-                    "lfItalic=" + lfItalic + ", " +
-                    "lfUnderline=" + lfUnderline + ", " +
-                    "lfStrikeOut=" + lfStrikeOut + ", " +
-                    "lfCharSet=" + lfCharSet + ", " +
-                    "lfOutPrecision=" + lfOutPrecision + ", " +
-                    "lfClipPrecision=" + lfClipPrecision + ", " +
-                    "lfQuality=" + lfQuality + ", " +
-                    "lfPitchAndFamily=" + lfPitchAndFamily + ", " +
-                    "lfFaceName=" + lfFaceName.ToString();
-            }
-        }
-
         // https://devblogs.microsoft.com/oldnewthing/20101018-00/?p=12513
         // https://devblogs.microsoft.com/oldnewthing/20120720-00/?p=7083
 
@@ -882,14 +691,6 @@ namespace System.Drawing
             }
         }
 
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "DeleteObject", CharSet = CharSet.Auto)]
-        internal static extern int IntDeleteObject(HandleRef hObject);
-
-        public static int DeleteObject(HandleRef hObject)
-        {
-            return IntDeleteObject(hObject);
-        }
-
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern IntPtr SelectObject(HandleRef hdc, HandleRef obj);
 
@@ -920,10 +721,10 @@ namespace System.Drawing
         public static extern int GetObject(HandleRef hObject, int nSize, ref BITMAP bm);
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern int GetObject(HandleRef hObject, int nSize, ref LOGFONT lf);
+        public static extern int GetObject(HandleRef hObject, int nSize, ref Interop.User32.LOGFONT lf);
 
-        public static unsafe int GetObject(HandleRef hObject, ref LOGFONT lp)
-            => GetObject(hObject, sizeof(LOGFONT), ref lp);
+        public static unsafe int GetObject(HandleRef hObject, ref Interop.User32.LOGFONT lp)
+            => GetObject(hObject, sizeof(Interop.User32.LOGFONT), ref lp);
 
         [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true)]
         public static extern bool GetIconInfo(HandleRef hIcon, ref ICONINFO info);

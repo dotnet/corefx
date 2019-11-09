@@ -697,7 +697,7 @@ namespace System.Threading
                         catch (Exception ex) when (!throwOnFirstException)
                         {
                             // Store the exception and continue
-                            (exceptionList ?? (exceptionList = new List<Exception>())).Add(ex);
+                            (exceptionList ??= new List<Exception>()).Add(ex);
                         }
 
                         // Drop the node. While we could add it to the free list, doing so has cost (we'd need to take the lock again)
@@ -726,7 +726,7 @@ namespace System.Threading
         /// <returns>A power of 2 representing the number of partitions to use.</returns>
         private static int GetPartitionCount()
         {
-            int procs = PlatformHelper.ProcessorCount;
+            int procs = Environment.ProcessorCount;
             int count =
                 procs > 8 ? 16 : // capped at 16 to limit memory usage on larger machines
                 procs > 4 ? 8 :

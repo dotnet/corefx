@@ -3,12 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-internal partial class Interop
+internal static partial class Interop
 {
-    internal partial class BCrypt
+    internal static partial class BCrypt
     {
         internal const int BCRYPT_USE_SYSTEM_PREFERRED_RNG = 0x00000002;
 

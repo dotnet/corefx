@@ -185,7 +185,7 @@ namespace System.IO.Compression
                 return false;
 
             // this pattern needed because nested using blocks trigger CA2202
-            MemoryStream ms = null;
+            MemoryStream? ms = null;
             try
             {
                 ms = new MemoryStream(extraField.Data);
@@ -289,6 +289,8 @@ namespace System.IO.Compression
     internal struct Zip64EndOfCentralDirectoryLocator
     {
         public const uint SignatureConstant = 0x07064B50;
+        public const int SignatureSize = sizeof(uint);
+
         public const int SizeOfBlockWithoutSignature = 16;
 
         public uint NumberOfDiskWithZip64EOCD;
@@ -517,7 +519,7 @@ namespace System.IO.Compression
                     compressedSize = reader.ReadInt32();
                     uncompressedSize = reader.ReadInt32();
                 }
-                reader.BaseStream.Seek( -seekSize - entry.CompressedLength - 4,  SeekOrigin.Current); // Seek back to the beginning of compressed stream
+                reader.BaseStream.Seek(-seekSize - entry.CompressedLength - 4, SeekOrigin.Current); // Seek back to the beginning of compressed stream
             }
 
             if (entry.CompressedLength != compressedSize)
@@ -555,8 +557,8 @@ namespace System.IO.Compression
         public long RelativeOffsetOfLocalHeader;
 
         public byte[] Filename;
-        public byte[] FileComment;
-        public List<ZipGenericExtraField> ExtraFields;
+        public byte[]? FileComment;
+        public List<ZipGenericExtraField>? ExtraFields;
 
         // if saveExtraFieldsAndComments is false, FileComment and ExtraFields will be null
         // in either case, the zip64 extra field info will be incorporated into other fields
@@ -643,7 +645,16 @@ namespace System.IO.Compression
     internal struct ZipEndOfCentralDirectoryBlock
     {
         public const uint SignatureConstant = 0x06054B50;
+        public const int SignatureSize = sizeof(uint);
+
+        // This is the minimum possible size, assuming the zip file comments variable section is empty
         public const int SizeOfBlockWithoutSignature = 18;
+
+        // The end of central directory can have a variable size zip file comment at the end, but its max length can be 64K
+        // The Zip File Format Specification does not explicitly mention a max size for this field, but we are assuming this
+        // max size because that is the maximum value an ushort can hold.
+        public const int ZipFileCommentMaxLength = ushort.MaxValue;
+
         public uint Signature;
         public ushort NumberOfThisDisk;
         public ushort NumberOfTheDiskWithTheStartOfTheCentralDirectory;
@@ -653,7 +664,7 @@ namespace System.IO.Compression
         public uint OffsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber;
         public byte[] ArchiveComment;
 
-        public static void WriteBlock(Stream stream, long numberOfEntries, long startOfCentralDirectory, long sizeOfCentralDirectory, byte[] archiveComment)
+        public static void WriteBlock(Stream stream, long numberOfEntries, long startOfCentralDirectory, long sizeOfCentralDirectory, byte[]? archiveComment)
         {
             BinaryWriter writer = new BinaryWriter(stream);
 
@@ -673,7 +684,7 @@ namespace System.IO.Compression
             writer.Write(startOfCentralDirectoryTruncated);
 
             // Should be valid because of how we read archiveComment in TryReadBlock:
-            Debug.Assert((archiveComment == null) || (archiveComment.Length < ushort.MaxValue));
+            Debug.Assert((archiveComment == null) || (archiveComment.Length <= ZipFileCommentMaxLength));
 
             writer.Write(archiveComment != null ? (ushort)archiveComment.Length : (ushort)0); // zip file comment length
             if (archiveComment != null)

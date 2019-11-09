@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Tests;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -54,16 +55,12 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrentRegion()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("en-US"))
             {
-                CultureInfo.CurrentCulture = new CultureInfo("en-US");
-
                 RegionInfo ri = new RegionInfo(new RegionInfo(CultureInfo.CurrentCulture.Name).TwoLetterISORegionName);
                 Assert.True(RegionInfo.CurrentRegion.Equals(ri) || RegionInfo.CurrentRegion.Equals(new RegionInfo(CultureInfo.CurrentCulture.Name)));
                 Assert.Same(RegionInfo.CurrentRegion, RegionInfo.CurrentRegion);
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Theory]
@@ -71,13 +68,10 @@ namespace System.Globalization.Tests
         [OuterLoop("May fail on machines with multiple language packs installed")] // https://github.com/dotnet/corefx/issues/39177
         public void DisplayName(string name, string expected)
         {
-            RemoteExecutor.Invoke((string _name, string _expected) =>
+            using (new ThreadCultureChange(null, new CultureInfo(name)))
             {
-                CultureInfo.CurrentUICulture = new CultureInfo(_name);
-                Assert.Equal(_expected, new RegionInfo(_name).DisplayName);
-
-                return RemoteExecutor.SuccessExitCode;
-            }, name, expected).Dispose();
+                Assert.Equal(expected, new RegionInfo(name).DisplayName);
+            }
         }
 
         [Theory]
@@ -124,7 +118,7 @@ namespace System.Globalization.Tests
         public void CurrencySymbol(string name, string[] expected)
         {
             string result = new RegionInfo(name).CurrencySymbol;
-            Assert.True(expected.Contains(result));
+            Assert.Contains(result, expected);
         }
 
         [Theory]

@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq
 {
@@ -52,7 +53,7 @@ namespace System.Linq
         /// <param name="comparer">
         /// The comparer. If this is <c>null</c>, it defaults to <see cref="EqualityComparer{TElement}.Default"/>.
         /// </param>
-        public Set(IEqualityComparer<TElement> comparer)
+        public Set(IEqualityComparer<TElement>? comparer)
         {
             _comparer = comparer ?? EqualityComparer<TElement>.Default;
             _buckets = new int[7];
@@ -124,7 +125,7 @@ namespace System.Linq
                     }
 
                     _slots[i]._hashCode = -1;
-                    _slots[i]._value = default(TElement);
+                    _slots[i]._value = default;
                     _slots[i]._next = -1;
                     return true;
                 }
@@ -141,7 +142,7 @@ namespace System.Linq
             int newSize = checked((_count * 2) + 1);
             int[] newBuckets = new int[newSize];
             Slot[] newSlots = new Slot[newSize];
-            Array.Copy(_slots, 0, newSlots, 0, _count);
+            Array.Copy(_slots, newSlots, _count);
             for (int i = 0; i < _count; i++)
             {
                 int bucket = newSlots[i]._hashCode % newSize;
@@ -234,6 +235,7 @@ namespace System.Linq
             /// <summary>
             /// The item held by this slot.
             /// </summary>
+            [MaybeNull, AllowNull]
             internal TElement _value;
         }
     }

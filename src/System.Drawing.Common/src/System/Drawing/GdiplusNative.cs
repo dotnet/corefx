@@ -527,7 +527,7 @@ namespace System.Drawing
             internal static extern int GdipGetFontUnit(HandleRef font, out GraphicsUnit unit);
 
             [DllImport(LibraryName, ExactSpelling = true)]
-            internal static extern int GdipGetLogFontW(HandleRef font, HandleRef graphics, ref LOGFONT lf);
+            internal static extern int GdipGetLogFontW(HandleRef font, HandleRef graphics, ref Interop.User32.LOGFONT lf);
 
             [DllImport(LibraryName, ExactSpelling = true)]
             internal static extern int GdipCreatePen1(int argb, float width, int unit, out IntPtr pen);
@@ -1391,8 +1391,8 @@ namespace System.Drawing
             // dealing with function *'s and what not - so we make explicit calls
             // to gdi+ after the fact, via the GdiplusNotificationHook and
             // GdiplusNotificationUnhook methods.
-            public IntPtr hook;//not used
-            public IntPtr unhook;//not used.
+            public IntPtr hook; //not used
+            public IntPtr unhook; //not used.
         }
     }
 }

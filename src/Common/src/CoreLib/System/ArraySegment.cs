@@ -95,22 +95,8 @@ namespace System
             return new Enumerator(this);
         }
 
-        public override int GetHashCode()
-        {
-            if (_array == null)
-            {
-                return 0;
-            }
-
-            int hash = 5381;
-            hash = System.Numerics.Hashing.HashHelpers.Combine(hash, _offset);
-            hash = System.Numerics.Hashing.HashHelpers.Combine(hash, _count);
-
-            // The array hash is expected to be an evenly-distributed mixture of bits,
-            // so rather than adding the cost of another rotation we just xor it.
-            hash ^= _array.GetHashCode();
-            return hash;
-        }
+        public override int GetHashCode() =>
+            _array is null ? 0 : HashCode.Combine(_offset, _count, _array.GetHashCode());
 
         public void CopyTo(T[] destination) => CopyTo(destination, 0);
 
@@ -133,18 +119,11 @@ namespace System
             System.Array.Copy(_array!, _offset, destination._array!, destination._offset, _count);
         }
 
-        public override bool Equals(object? obj)
-        {
-            if (obj is ArraySegment<T>)
-                return Equals((ArraySegment<T>)obj);
-            else
-                return false;
-        }
+        public override bool Equals(object? obj) =>
+            obj is ArraySegment<T> && Equals((ArraySegment<T>)obj);
 
-        public bool Equals(ArraySegment<T> obj)
-        {
-            return obj._array == _array && obj._offset == _offset && obj._count == _count;
-        }
+        public bool Equals(ArraySegment<T> obj) =>
+            obj._array == _array && obj._offset == _offset && obj._count == _count;
 
         public ArraySegment<T> Slice(int index)
         {
@@ -184,15 +163,9 @@ namespace System
             return array;
         }
 
-        public static bool operator ==(ArraySegment<T> a, ArraySegment<T> b)
-        {
-            return a.Equals(b);
-        }
+        public static bool operator ==(ArraySegment<T> a, ArraySegment<T> b) => a.Equals(b);
 
-        public static bool operator !=(ArraySegment<T> a, ArraySegment<T> b)
-        {
-            return !(a == b);
-        }
+        public static bool operator !=(ArraySegment<T> a, ArraySegment<T> b) => !(a == b);
 
         public static implicit operator ArraySegment<T>(T[] array) => array != null ? new ArraySegment<T>(array) : default;
 
@@ -230,15 +203,9 @@ namespace System
             return index >= 0 ? index - _offset : -1;
         }
 
-        void IList<T>.Insert(int index, T item)
-        {
-            ThrowHelper.ThrowNotSupportedException();
-        }
+        void IList<T>.Insert(int index, T item) => ThrowHelper.ThrowNotSupportedException();
 
-        void IList<T>.RemoveAt(int index)
-        {
-            ThrowHelper.ThrowNotSupportedException();
-        }
+        void IList<T>.RemoveAt(int index) => ThrowHelper.ThrowNotSupportedException();
         #endregion
 
         #region IReadOnlyList<T>
@@ -256,25 +223,14 @@ namespace System
         #endregion IReadOnlyList<T>
 
         #region ICollection<T>
-        bool ICollection<T>.IsReadOnly
-        {
-            get
-            {
-                // the indexer setter does not throw an exception although IsReadOnly is true.
-                // This is to match the behavior of arrays.
-                return true;
-            }
-        }
+        bool ICollection<T>.IsReadOnly =>
+            // the indexer setter does not throw an exception although IsReadOnly is true.
+            // This is to match the behavior of arrays.
+            true;
 
-        void ICollection<T>.Add(T item)
-        {
-            ThrowHelper.ThrowNotSupportedException();
-        }
+        void ICollection<T>.Add(T item) => ThrowHelper.ThrowNotSupportedException();
 
-        void ICollection<T>.Clear()
-        {
-            ThrowHelper.ThrowNotSupportedException();
-        }
+        void ICollection<T>.Clear() => ThrowHelper.ThrowNotSupportedException();
 
         bool ICollection<T>.Contains(T item)
         {
@@ -338,7 +294,7 @@ namespace System
                 if (_current < _end)
                 {
                     _current++;
-                    return (_current < _end);
+                    return _current < _end;
                 }
                 return false;
             }

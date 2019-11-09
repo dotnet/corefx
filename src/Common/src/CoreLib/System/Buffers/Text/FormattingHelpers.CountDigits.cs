@@ -39,7 +39,7 @@ namespace System.Buffers.Text
             }
             else if (part < 100)
             {
-                digits += 1;
+                digits++;
             }
             else if (part < 1000)
             {
@@ -72,7 +72,7 @@ namespace System.Buffers.Text
             int digits = 1;
             if (value >= 100000)
             {
-                value = value / 100000;
+                value /= 100000;
                 digits += 5;
             }
 
@@ -82,7 +82,7 @@ namespace System.Buffers.Text
             }
             else if (value < 100)
             {
-                digits += 1;
+                digits++;
             }
             else if (value < 1000)
             {

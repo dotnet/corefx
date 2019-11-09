@@ -26,17 +26,17 @@ namespace System.Text.RegularExpressions
     {
         internal const int MaxOptionShift = 10;
 
-        protected internal string pattern;                   // The string pattern provided
-        protected internal RegexOptions roptions;            // the top-level options from the options string
-        protected internal RegexRunnerFactory factory;
-        protected internal Hashtable caps;                   // if captures are sparse, this is the hashtable capnum->index
-        protected internal Hashtable capnames;               // if named captures are used, this maps names->index
-        protected internal string[] capslist;                // if captures are sparse or named captures are used, this is the sorted list of names
-        protected internal int capsize;                      // the size of the capture array
+        protected internal string? pattern;                   // The string pattern provided
+        protected internal RegexOptions roptions;             // the top-level options from the options string
+        protected internal RegexRunnerFactory? factory;
+        protected internal Hashtable? caps;                   // if captures are sparse, this is the hashtable capnum->index
+        protected internal Hashtable? capnames;               // if named captures are used, this maps names->index
+        protected internal string[]? capslist;                // if captures are sparse or named captures are used, this is the sorted list of names
+        protected internal int capsize;                       // the size of the capture array
 
-        internal ExclusiveReference _runnerref;              // cached runner
-        internal WeakReference<RegexReplacement> _replref; // cached parsed replacement pattern
-        internal RegexCode _code;                            // if interpreted, this is the code for RegexInterpreter
+        internal ExclusiveReference? _runnerref;              // cached runner
+        internal WeakReference<RegexReplacement?>? _replref;  // cached parsed replacement pattern
+        internal RegexCode? _code;                            // if interpreted, this is the code for RegexInterpreter
         internal bool _refsInitialized = false;
 
         protected Regex()
@@ -48,37 +48,37 @@ namespace System.Text.RegularExpressions
         /// Creates and compiles a regular expression object for the specified regular
         /// expression.
         /// </summary>
-        public Regex(string pattern)
-            : this(pattern, RegexOptions.None, s_defaultMatchTimeout, false)
-        {
-        }
+        public Regex(string pattern) =>
+            Init(pattern, RegexOptions.None, s_defaultMatchTimeout, addToCache: false);
+
+        /// <summary>
+        /// Creates and compiles a regular expression object for the specified regular
+        /// expression, and adds it to the cache.
+        /// </summary>
+        private Regex(string pattern, bool addToCache) =>
+            Init(pattern, RegexOptions.None, s_defaultMatchTimeout, addToCache);
 
         /// <summary>
         /// Creates and compiles a regular expression object for the
         /// specified regular expression with options that modify the pattern.
         /// </summary>
-        public Regex(string pattern, RegexOptions options)
-            : this(pattern, options, s_defaultMatchTimeout, false)
-        {
-        }
+        public Regex(string pattern, RegexOptions options) =>
+            InitWithPossibleCompilation(pattern, options, s_defaultMatchTimeout, addToCache: false);
 
-        public Regex(string pattern, RegexOptions options, TimeSpan matchTimeout)
-            : this(pattern, options, matchTimeout, false)
-        {
-        }
+        public Regex(string pattern, RegexOptions options, TimeSpan matchTimeout) =>
+            InitWithPossibleCompilation(pattern, options, matchTimeout, addToCache: false);
 
-        protected Regex(SerializationInfo info, StreamingContext context)
-            : this(info.GetString("pattern"), (RegexOptions)info.GetInt32("options"))
-        {
-            throw new PlatformNotSupportedException();
-        }
+        private Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, bool addToCache) =>
+            InitWithPossibleCompilation(pattern, options, matchTimeout, addToCache);
 
-        void ISerializable.GetObjectData(SerializationInfo si, StreamingContext context)
-        {
-            throw new PlatformNotSupportedException();
-        }
-
-        private Regex(string pattern, RegexOptions options, TimeSpan matchTimeout, bool addToCache)
+        /// <summary>Initializes the instance.</summary>
+        /// <remarks>
+        /// This is separated out of the constructor to allow the Regex ctor that doesn't
+        /// take a RegexOptions to avoid rooting the regex compiler, such that it can be trimmed away.
+        /// If <paramref name="options"/> may possibly include RegexOptions.Compiled, InitWithPossibleCompilation
+        /// must be invoked instead.
+        /// </remarks>
+        private CachedCodeEntry? Init(string pattern, RegexOptions options, TimeSpan matchTimeout, bool addToCache)
         {
             if (pattern == null)
             {
@@ -116,12 +116,12 @@ namespace System.Text.RegularExpressions
                 CultureInfo.InvariantCulture :
                 CultureInfo.CurrentCulture;
             var key = new CachedCodeEntryKey(options, culture.ToString(), pattern);
-            CachedCodeEntry cached = GetCachedCode(key, false);
+            CachedCodeEntry? cached = GetCachedCode(key, false);
 
             if (cached == null)
             {
                 // Parse the input
-                RegexTree tree = RegexParser.Parse(pattern, roptions, culture);
+                RegexTree? tree = RegexParser.Parse(pattern, roptions, culture);
 
                 // Extract the relevant information
                 capnames = tree.CapNames;
@@ -153,11 +153,19 @@ namespace System.Text.RegularExpressions
                 _refsInitialized = true;
             }
 
+            return cached;
+        }
+
+        /// <summary>Initializes the instance.</summary>
+        private void InitWithPossibleCompilation(string pattern, RegexOptions options, TimeSpan matchTimeout, bool addToCache)
+        {
+            CachedCodeEntry? cached = Init(pattern, options, matchTimeout, addToCache);
+
 #if FEATURE_COMPILED
             // if the compile option is set, then compile the code if it's not already
             if (UseOptionC() && factory == null)
             {
-                factory = Compile(_code, roptions);
+                factory = Compile(_code!, roptions);
 
                 if (addToCache && cached != null)
                 {
@@ -169,8 +177,14 @@ namespace System.Text.RegularExpressions
 #endif
         }
 
-        [CLSCompliant(false)]
-        protected IDictionary Caps
+        protected Regex(SerializationInfo info, StreamingContext context) =>
+            throw new PlatformNotSupportedException();
+
+        void ISerializable.GetObjectData(SerializationInfo si, StreamingContext context) =>
+            throw new PlatformNotSupportedException();
+
+        [CLSCompliant(false), DisallowNull]
+        protected IDictionary? Caps
         {
             get
             {
@@ -185,8 +199,8 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        [CLSCompliant(false)]
-        protected IDictionary CapNames
+        [CLSCompliant(false), DisallowNull]
+        protected IDictionary? CapNames
         {
             get
             {
@@ -210,7 +224,7 @@ namespace System.Text.RegularExpressions
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
         private RegexRunnerFactory Compile(RegexCode code, RegexOptions roptions)
         {
-            return RegexCompiler.Compile(code, roptions);
+            return RegexCompiler.Compile(code!, roptions);
         }
 #endif
 
@@ -272,7 +286,7 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Returns the regular expression pattern passed into the constructor
         /// </summary>
-        public override string ToString() => pattern;
+        public override string ToString() => pattern!;
 
         /*
          * Returns an array of the group names that are used to capture groups
@@ -301,7 +315,7 @@ namespace System.Text.RegularExpressions
             else
             {
                 result = new string[capslist.Length];
-                Array.Copy(capslist, 0, result, 0, capslist.Length);
+                Array.Copy(capslist, result, capslist.Length);
             }
 
             return result;
@@ -338,7 +352,7 @@ namespace System.Text.RegularExpressions
                 IDictionaryEnumerator de = caps.GetEnumerator();
                 while (de.MoveNext())
                 {
-                    result[(int)de.Value] = (int)de.Key;
+                    result[(int)de.Value!] = (int)de.Key;
                 }
             }
 
@@ -432,14 +446,14 @@ namespace System.Text.RegularExpressions
 
             _refsInitialized = true;
             _runnerref = new ExclusiveReference();
-            _replref = new WeakReference<RegexReplacement>(null);
+            _replref = new WeakReference<RegexReplacement?>(null);
         }
 
         /// <summary>
         /// Internal worker called by all the public APIs
         /// </summary>
         /// <returns></returns>
-        internal Match Run(bool quick, int prevlen, string input, int beginning, int length, int startat)
+        internal Match? Run(bool quick, int prevlen, string input, int beginning, int length, int startat)
         {
             if (startat < 0 || startat > input.Length)
                 throw new ArgumentOutOfRangeException(nameof(startat), SR.BeginIndexNotNegative);
@@ -448,7 +462,7 @@ namespace System.Text.RegularExpressions
                 throw new ArgumentOutOfRangeException(nameof(length), SR.LengthNotNegative);
 
             // There may be a cached runner; grab ownership of it if we can.
-            RegexRunner runner = _runnerref.Get();
+            RegexRunner? runner = _runnerref!.Get();
 
             // Create a RegexRunner instance if we need to
             if (runner == null)
@@ -457,10 +471,10 @@ namespace System.Text.RegularExpressions
                 if (factory != null)
                     runner = factory.CreateInstance();
                 else
-                    runner = new RegexInterpreter(_code, UseOptionInvariant() ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
+                    runner = new RegexInterpreter(_code!, UseOptionInvariant() ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
             }
 
-            Match match;
+            Match? match;
             try
             {
                 // Do the scan starting at the requested position

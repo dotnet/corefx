@@ -111,7 +111,7 @@ namespace System.Diagnostics
         /// use the debugger's line mapping logic.
         /// </summary>
         public StackFrame(string? fileName, int lineNumber, int colNumber)
-            : this (fileName, lineNumber)
+            : this(fileName, lineNumber)
         {
             _columnNumber = colNumber;
         }
@@ -203,7 +203,7 @@ namespace System.Diagnostics
                     bool fFirstTyParam = true;
                     while (k < typars.Length)
                     {
-                        if (fFirstTyParam == false)
+                        if (!fFirstTyParam)
                             sb.Append(',');
                         else
                             fFirstTyParam = false;
@@ -240,7 +240,7 @@ namespace System.Diagnostics
             {
                 sb.Append("<null>");
             }
-            sb.Append(Environment.NewLine);
+            sb.Append(Environment.NewLineConst);
 
             return sb.ToString();
         }

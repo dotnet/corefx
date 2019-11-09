@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
@@ -66,7 +65,7 @@ namespace System
                 }
 
                 string objectDisposed = SR.Format(SR.ObjectDisposed_ObjectName_Name, name);
-                return base.Message + Environment.NewLine + objectDisposed;
+                return base.Message + Environment.NewLineConst + objectDisposed;
             }
         }
 

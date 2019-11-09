@@ -68,7 +68,7 @@ namespace System.Data
             else if (_argumentCount == _arguments.Length)
             {
                 ExpressionNode[] bigger = new ExpressionNode[_argumentCount * 2];
-                Array.Copy(_arguments, 0, bigger, 0, _argumentCount);
+                Array.Copy(_arguments, bigger, _argumentCount);
                 _arguments = bigger;
             }
             _arguments[_argumentCount++] = argument;
@@ -312,20 +312,14 @@ namespace System.Data
                     Debug.Assert(_argumentCount == 1, "Invalid argument argumentCount for " + s_funcs[_info]._name + " : " + _argumentCount.ToString(FormatProvider));
 
                     storageType = DataStorage.GetStorageType(argumentValues[0].GetType());
-                    switch (storageType)
+                    return storageType switch
                     {
-                        case StorageType.Boolean:
-                            return (bool)argumentValues[0];
-                        case StorageType.Int32:
-                            return ((int)argumentValues[0] != 0);
-                        case StorageType.Double:
-                            return ((double)argumentValues[0] != 0.0);
-                        case StorageType.String:
-                            return bool.Parse((string)argumentValues[0]);
-                        default:
-                            throw ExprException.DatatypeConvertion(argumentValues[0].GetType(), typeof(bool));
-                    }
-
+                        StorageType.Boolean => (bool)argumentValues[0],
+                        StorageType.Int32 => ((int)argumentValues[0] != 0),
+                        StorageType.Double => ((double)argumentValues[0] != 0.0),
+                        StorageType.String => bool.Parse((string)argumentValues[0]),
+                        _ => throw ExprException.DatatypeConvertion(argumentValues[0].GetType(), typeof(bool)),
+                    };
                 case FunctionId.cInt:
                     Debug.Assert(_argumentCount == 1, "Invalid argument argumentCount for " + s_funcs[_info]._name + " : " + _argumentCount.ToString(FormatProvider));
                     return Convert.ToInt32(argumentValues[0], FormatProvider);

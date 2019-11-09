@@ -93,7 +93,7 @@ namespace System.Text.Json.Serialization.Tests
         // Call only when testing serialization.
         public void Initialize()
         {
-            MyStringIEnumerableWrapper = new StringIEnumerableWrapper() { "Hello" };
+            MyStringIEnumerableWrapper = new StringIEnumerableWrapper(new List<string>{ "Hello" });
         }
     }
 
@@ -111,7 +111,7 @@ namespace System.Text.Json.Serialization.Tests
         // Call only when testing serialization.
         public void Initialize()
         {
-            MyStringIReadOnlyCollectionWrapper = new StringIReadOnlyCollectionWrapper() { "Hello" };
+            MyStringIReadOnlyCollectionWrapper = new StringIReadOnlyCollectionWrapper(new List<string> { "Hello" });
         }
     }
 
@@ -129,7 +129,7 @@ namespace System.Text.Json.Serialization.Tests
         // Call only when testing serialization.
         public void Initialize()
         {
-            MyStringIReadOnlyListWrapper = new StringIReadOnlyListWrapper() { "Hello" };
+            MyStringIReadOnlyListWrapper = new StringIReadOnlyListWrapper(new List<string> { "Hello" });
         }
     }
 
@@ -156,10 +156,11 @@ namespace System.Text.Json.Serialization.Tests
     {
         private readonly List<string> _list = new List<string>();
 
-        // For populating test data only. We can't rely on this method for real input.
-        public void Add(string item)
+        public StringIEnumerableWrapper() { }
+
+        public StringIEnumerableWrapper(List<string> items)
         {
-            _list.Add(item);
+            _list = items;
         }
 
         public IEnumerator<string> GetEnumerator()
@@ -177,9 +178,11 @@ namespace System.Text.Json.Serialization.Tests
     {
         private readonly List<T> _list = new List<T>();
 
-        public void Add(T item)
+        public GenericIEnumerableWrapper() { }
+
+        public GenericIEnumerableWrapper(List<T> items)
         {
-            _list.Add(item);
+            _list = items;
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -199,9 +202,9 @@ namespace System.Text.Json.Serialization.Tests
 
         public int Count => _list.Count;
 
-        public bool IsReadOnly => ((ICollection<string>)_list).IsReadOnly;
+        public virtual bool IsReadOnly => ((ICollection<string>)_list).IsReadOnly;
 
-        public void Add(string item)
+        public virtual void Add(string item)
         {
             _list.Add(item);
         }
@@ -237,6 +240,11 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
+    public class ReadOnlyStringICollectionWrapper : StringICollectionWrapper
+    {
+        public override bool IsReadOnly => true;
+    }
+
     public class StringIListWrapper : IList<string>
     {
         private readonly List<string> _list = new List<string>();
@@ -245,9 +253,9 @@ namespace System.Text.Json.Serialization.Tests
 
         public int Count => _list.Count;
 
-        public bool IsReadOnly => ((IList<string>)_list).IsReadOnly;
+        public virtual bool IsReadOnly => ((IList<string>)_list).IsReadOnly;
 
-        public void Add(string item)
+        public virtual void Add(string item)
         {
             _list.Add(item);
         }
@@ -296,6 +304,11 @@ namespace System.Text.Json.Serialization.Tests
         {
             return ((IList<string>)_list).GetEnumerator();
         }
+    }
+
+    public class ReadOnlyStringIListWrapper : StringIListWrapper
+    {
+        public override bool IsReadOnly => true;
     }
 
     public class GenericIListWrapper<T> : IList<T>
@@ -407,10 +420,11 @@ namespace System.Text.Json.Serialization.Tests
     {
         private readonly List<string> _list = new List<string>();
 
-        // For populating test data only. We cannot assume actual input will have this method.
-        public void Add(string item)
+        public StringIReadOnlyCollectionWrapper() { }
+
+        public StringIReadOnlyCollectionWrapper(List<string> list)
         {
-            _list.Add(item);
+            _list = list;
         }
 
         public int Count => _list.Count;
@@ -430,9 +444,11 @@ namespace System.Text.Json.Serialization.Tests
     {
         private readonly List<T> _list = new List<T>();
 
-        public void Add(T item)
+        public GenericIReadOnlyCollectionWrapper() { }
+
+        public GenericIReadOnlyCollectionWrapper(List<T> list)
         {
-            _list.Add(item);
+            _list = list;
         }
 
         public int Count => _list.Count;
@@ -452,10 +468,11 @@ namespace System.Text.Json.Serialization.Tests
     {
         private readonly List<string> _list = new List<string>();
 
-        // For populating test data only. We cannot assume actual input will have this method.
-        public void Add(string item)
+        public StringIReadOnlyListWrapper() { }
+
+        public StringIReadOnlyListWrapper(List<string> list)
         {
-            _list.Add(item);
+            _list = list;
         }
 
         public string this[int index] => _list[index];
@@ -477,9 +494,11 @@ namespace System.Text.Json.Serialization.Tests
     {
         private readonly List<T> _list = new List<T>();
 
-        public void Add(T item)
+        public GenericIReadOnlyListWrapper() { }
+
+        public GenericIReadOnlyListWrapper(List<T> list)
         {
-            _list.Add(item);
+            _list = list;
         }
 
         public T this[int index] => _list[index];
@@ -714,9 +733,9 @@ namespace System.Text.Json.Serialization.Tests
 
         public int Count => ((IDictionary<string, string>)_dictionary).Count;
 
-        public bool IsReadOnly => ((IDictionary<string, string>)_dictionary).IsReadOnly;
+        public virtual bool IsReadOnly => ((IDictionary<string, string>)_dictionary).IsReadOnly;
 
-        public void Add(string key, string value)
+        public virtual void Add(string key, string value)
         {
             ((IDictionary<string, string>)_dictionary).Add(key, value);
         }
@@ -770,6 +789,11 @@ namespace System.Text.Json.Serialization.Tests
         {
             return ((IDictionary<string, string>)_dictionary).GetEnumerator();
         }
+    }
+
+    public class ReadOnlyStringToStringIDictionaryWrapper : StringToStringIDictionaryWrapper
+    {
+        public override bool IsReadOnly => true;
     }
 
     public class StringToObjectIDictionaryWrapper : IDictionary<string, object>
@@ -960,6 +984,14 @@ namespace System.Text.Json.Serialization.Tests
     }
 
     public class StringListWrapper : List<string> { }
+
+    class MyMyList<T> : GenericListWrapper<T>
+    {
+    }
+
+    class MyListString : GenericListWrapper<string>
+    {
+    }
 
     public class GenericListWrapper<T> : List<T> { }
 

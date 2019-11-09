@@ -7,43 +7,75 @@ trigger:
   branches:
     include:
     - master
-    - release/3.*
+    - release/3.* # TODO: (Consolidation) Remove when consolidated
   paths:
     exclude:
-    - Documentation/*
-    - /*.md
+    - Documentation/* # TODO: (Consolidation) Remove when consolidated
+    - docs/*
+    - CODE-OF-CONDUCT.md
+    - CONTRIBUTING.md
+    - LICENSE.TXT
+    - PATENTS.TXT
+    - README.md
+    - SECURITY.md
+    - THIRD-PARTY-NOTICES.TXT
+    - src/installer/*
+    - src/coreclr/*
+    - eng/pipelines/coreclr/*
+    - eng/pipelines/installer/*
 
 pr:
   branches:
     include:
     - master
-    - release/3.*
+    - release/3.* # TODO: (Consolidation) Remove when consolidated
   paths:
     exclude:
-    - Documentation/*
-    - /*.md
+    - Documentation/* # TODO: (Consolidation) Remove when consolidated
+    - docs/*
+    - CODE-OF-CONDUCT.md
+    - CONTRIBUTING.md
+    - LICENSE.TXT
+    - PATENTS.TXT
+    - README.md
+    - SECURITY.md
+    - THIRD-PARTY-NOTICES.TXT
+    - src/installer/*
+    - src/coreclr/*
+    - eng/pipelines/coreclr/*
+    - eng/pipelines/installer/*
 
 resources:
   containers:
-  - container: rhel7_container
-    image: microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2
+  - container: centos7_container
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-f39df28-20191023143754
 
-  - container: rhel6_container
-    image: microsoft/dotnet-buildtools-prereqs:centos-6-376e1a3-20174311014331
+  - container: centos6_container
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:centos-6-f39df28-20191023143802
 
-  - container: alpine_36_container
-    image: microsoft/dotnet-buildtools-prereqs:alpine-3.6-WithNode-f4d3fe3-20181213005010
+  - container: alpine_39_container
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.9-WithNode-0fc54a3-20190918214015
 
   - container: alpine_37_arm64_container
-    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-alpine10fcdcf-20190208200917
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-16.04-cross-arm64-alpine-406629a-20191023143847
 
   - container: ubuntu_1604_arm64_cross_container
-    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180315221921
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-16.04-cross-arm64-cfdd435-20191023143847
 
   - container: ubuntu_1604_arm_cross_container
-    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-ef0ac75-20175511035548
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-16.04-cross-14.04-23cacb0-20191023143847
+
+  - container: ubuntu_1604
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-16.04-a50a721-20191023143845
 
 variables:
+  - ${{ if contains(variables['Build.DefinitionName'], 'runtime') }}: # TODO: (Consolidation) remove this condition
+    - template: variables.yml
+
+  # TODO: (Consolidation) remove this conditional block
+  - ${{ if not(contains(variables['Build.DefinitionName'], 'runtime')) }}:
+    - template: /eng/pipelines/variables.yml
+
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-Blob-Feed
     - group: corefx-sdl-validation
@@ -58,32 +90,32 @@ variables:
 
 stages:
   # Windows legs
-  - template: /eng/pipelines/windows.yml
+  - template: ${{ variables['pipelinesPath'] }}/windows.yml
     parameters:
       isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
       fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
   # Linux legs
-  - template: /eng/pipelines/linux.yml
+  - template: ${{ variables['pipelinesPath'] }}/linux.yml
     parameters:
       isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
       fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
   # MacOS legs
-  - template: /eng/pipelines/macos.yml
+  - template: ${{ variables['pipelinesPath'] }}/macos.yml
     parameters:
       isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
       fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
     # FreeBSD leg is only for official builds
-    # - template: /eng/pipelines/freebsd.yml
+    # - template: ${{ variables['pipelinesPath'] }}/freebsd.yml
     #   parameters:
     #     isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
     #     fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
   # Publish and validation steps. Only run in official builds
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-    - template: /eng/pipelines/pre-publish.yml
+    - template: ${{ variables['pipelinesPath'] }}/pre-publish.yml
       parameters:
         dependsOn:
           - WindowsStage
@@ -93,19 +125,18 @@ stages:
 
     - template: eng\common\templates\post-build\post-build.yml
       parameters:
-        dependsOn:
+        validateDependsOn:
           - PrePublish
         enableSymbolValidation: false # https://github.com/dotnet/arcade/issues/2871
-        enableSourceLinkValidation: false # https://github.com/dotnet/arcade/issues/3603
         SDLValidationParameters:
           enable: true
           params: ' -SourceToolsList @("policheck","credscan")
-          -TsaInstanceURL "https://devdiv.visualstudio.com/"
-          -TsaProjectName "DEVDIV"
+          -TsaInstanceURL "$(TsaInstanceURL)"
+          -TsaProjectName "$(TsaProjectName)"
           -TsaNotificationEmail "$(TsaNotificationEmail)"
           -TsaCodebaseAdmin "$(TsaCodebaseAdmin)"
-          -TsaBugAreaPath "DevDiv\\NET\\NET Core "
-          -TsaIterationPath "DevDiv"
+          -TsaBugAreaPath "$(TsaBugAreaPath)"
+          -TsaIterationPath "$(TsaIterationPath)"
           -TsaRepositoryName "CoreFX"
           -TsaCodebaseName "CoreFX"
           -TsaPublish $True'

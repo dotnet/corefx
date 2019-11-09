@@ -15,7 +15,7 @@ using X509IssuerSerial = System.Security.Cryptography.Xml.X509IssuerSerial;
 
 using Microsoft.Win32.SafeHandles;
 
-using CryptProvParam=Interop.Advapi32.CryptProvParam;
+using CryptProvParam = Interop.Advapi32.CryptProvParam;
 using static Interop.Crypt32;
 
 namespace Internal.Cryptography.Pal.Windows
@@ -267,24 +267,14 @@ namespace Internal.Cryptography.Pal.Windows
                                     throw Marshal.GetLastWin32Error().ToCryptographicException();
                             }
 
-                            switch (rc2Parameters.dwVersion)
+                            keyLength = rc2Parameters.dwVersion switch
                             {
-                                case CryptRc2Version.CRYPT_RC2_40BIT_VERSION:
-                                    keyLength = KeyLengths.Rc2_40Bit;
-                                    break;
-                                case CryptRc2Version.CRYPT_RC2_56BIT_VERSION:
-                                    keyLength = KeyLengths.Rc2_56Bit;
-                                    break;
-                                case CryptRc2Version.CRYPT_RC2_64BIT_VERSION:
-                                    keyLength = KeyLengths.Rc2_64Bit;
-                                    break;
-                                case CryptRc2Version.CRYPT_RC2_128BIT_VERSION:
-                                    keyLength = KeyLengths.Rc2_128Bit;
-                                    break;
-                                default:
-                                    keyLength = 0;
-                                    break;
-                            }
+                                CryptRc2Version.CRYPT_RC2_40BIT_VERSION => KeyLengths.Rc2_40Bit,
+                                CryptRc2Version.CRYPT_RC2_56BIT_VERSION => KeyLengths.Rc2_56Bit,
+                                CryptRc2Version.CRYPT_RC2_64BIT_VERSION => KeyLengths.Rc2_64Bit,
+                                CryptRc2Version.CRYPT_RC2_128BIT_VERSION => KeyLengths.Rc2_128Bit,
+                                _ => 0,
+                            };
                         }
                         break;
                     }

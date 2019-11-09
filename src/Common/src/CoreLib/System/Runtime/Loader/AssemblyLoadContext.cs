@@ -227,9 +227,9 @@ namespace System.Runtime.Loader
 
         public static AssemblyLoadContext Default => DefaultAssemblyLoadContext.s_loadContext;
 
-        public bool IsCollectible { get { return _isCollectible;} }
+        public bool IsCollectible => _isCollectible;
 
-        public string? Name { get { return _name;} }
+        public string? Name => _name;
 
         public override string ToString() => "\"" + Name + "\" " + GetType().ToString() + " #" + _id;
 
@@ -299,7 +299,7 @@ namespace System.Runtime.Loader
 
             if (PathInternal.IsPartiallyQualified(assemblyPath))
             {
-                throw new ArgumentException(SR.Argument_AbsolutePathRequired, nameof(assemblyPath));
+                throw new ArgumentException(SR.Format(SR.Argument_AbsolutePathRequired, assemblyPath), nameof(assemblyPath));
             }
 
             lock (_unloadLock)
@@ -319,12 +319,12 @@ namespace System.Runtime.Loader
 
             if (PathInternal.IsPartiallyQualified(nativeImagePath))
             {
-                throw new ArgumentException(SR.Argument_AbsolutePathRequired, nameof(nativeImagePath));
+                throw new ArgumentException(SR.Format(SR.Argument_AbsolutePathRequired, nativeImagePath), nameof(nativeImagePath));
             }
 
             if (assemblyPath != null && PathInternal.IsPartiallyQualified(assemblyPath))
             {
-                throw new ArgumentException(SR.Argument_AbsolutePathRequired, nameof(assemblyPath));
+                throw new ArgumentException(SR.Format(SR.Argument_AbsolutePathRequired, assemblyPath), nameof(assemblyPath));
             }
 
             lock (_unloadLock)
@@ -394,10 +394,10 @@ namespace System.Runtime.Loader
 
             if (PathInternal.IsPartiallyQualified(unmanagedDllPath))
             {
-                throw new ArgumentException(SR.Argument_AbsolutePathRequired, nameof(unmanagedDllPath));
+                throw new ArgumentException(SR.Format(SR.Argument_AbsolutePathRequired, unmanagedDllPath), nameof(unmanagedDllPath));
             }
 
-            return InternalLoadUnmanagedDllFromPath(unmanagedDllPath);
+            return NativeLibrary.Load(unmanagedDllPath);
         }
 
         // Custom AssemblyLoadContext implementations can override this
@@ -405,7 +405,7 @@ namespace System.Runtime.Loader
         // This function needs to return the HMODULE of the dll it loads
         protected virtual IntPtr LoadUnmanagedDll(string unmanagedDllName)
         {
-            //defer to default coreclr policy of loading unmanaged dll
+            // defer to default coreclr policy of loading unmanaged dll
             return IntPtr.Zero;
         }
 
@@ -424,7 +424,7 @@ namespace System.Runtime.Loader
         {
             lock (s_allContexts)
             {
-                foreach (var alcAlive in s_allContexts)
+                foreach (KeyValuePair<long, WeakReference<AssemblyLoadContext>> alcAlive in s_allContexts)
                 {
                     if (alcAlive.Value.TryGetTarget(out AssemblyLoadContext? alc))
                     {
@@ -468,10 +468,7 @@ namespace System.Runtime.Loader
         ///
         /// For more details see https://github.com/dotnet/coreclr/blob/master/Documentation/design-docs/AssemblyLoadContext.ContextualReflection.md
         /// </remarks>
-        public static AssemblyLoadContext? CurrentContextualReflectionContext
-        {
-            get { return s_asyncLocalCurrent?.Value; }
-        }
+        public static AssemblyLoadContext? CurrentContextualReflectionContext => s_asyncLocalCurrent?.Value;
 
         private static void SetCurrentContextualReflectionContext(AssemblyLoadContext? value)
         {
@@ -555,6 +552,7 @@ namespace System.Runtime.Loader
             }
         }
 
+#if !CORERT
         // This method is invoked by the VM when using the host-provided assembly load context
         // implementation.
         private static Assembly? Resolve(IntPtr gchManagedAssemblyLoadContext, AssemblyName assemblyName)
@@ -606,7 +604,7 @@ namespace System.Runtime.Loader
             return null;
         }
 
-        private Assembly ValidateAssemblyNameWithSimpleName(Assembly assembly, string? requestedSimpleName)
+        private static Assembly ValidateAssemblyNameWithSimpleName(Assembly assembly, string? requestedSimpleName)
         {
             // Get the name of the loaded assembly
             string? loadedSimpleName = null;
@@ -660,17 +658,60 @@ namespace System.Runtime.Loader
             return assembly;
         }
 
+        // This method is called by the VM.
+        private static void OnAssemblyLoad(RuntimeAssembly assembly)
+        {
+            AssemblyLoad?.Invoke(AppDomain.CurrentDomain, new AssemblyLoadEventArgs(assembly));
+        }
+
+        // This method is called by the VM.
+        private static RuntimeAssembly? OnResourceResolve(RuntimeAssembly assembly, string resourceName)
+        {
+            return InvokeResolveEvent(ResourceResolve, assembly, resourceName);
+        }
+
+        // This method is called by the VM
+        private static RuntimeAssembly? OnTypeResolve(RuntimeAssembly assembly, string typeName)
+        {
+            return InvokeResolveEvent(TypeResolve, assembly, typeName);
+        }
+
+        // This method is called by the VM.
+        private static RuntimeAssembly? OnAssemblyResolve(RuntimeAssembly assembly, string assemblyFullName)
+        {
+            return InvokeResolveEvent(AssemblyResolve, assembly, assemblyFullName);
+        }
+
+        private static RuntimeAssembly? InvokeResolveEvent(ResolveEventHandler? eventHandler, RuntimeAssembly assembly, string name)
+        {
+            if (eventHandler == null)
+                return null;
+
+            var args = new ResolveEventArgs(name, assembly);
+
+            foreach (ResolveEventHandler handler in eventHandler.GetInvocationList())
+            {
+                Assembly? asm = handler(AppDomain.CurrentDomain, args);
+                RuntimeAssembly? ret = GetRuntimeAssembly(asm);
+                if (ret != null)
+                    return ret;
+            }
+
+            return null;
+        }
+#endif // !CORERT
+
         private Assembly? ResolveSatelliteAssembly(AssemblyName assemblyName)
         {
             // Called by native runtime when CultureName is not empty
             Debug.Assert(assemblyName.CultureName?.Length > 0);
 
-            string satelliteSuffix = ".resources";
+            const string SatelliteSuffix = ".resources";
 
-            if (assemblyName.Name == null || !assemblyName.Name.EndsWith(satelliteSuffix, StringComparison.Ordinal))
+            if (assemblyName.Name == null || !assemblyName.Name.EndsWith(SatelliteSuffix, StringComparison.Ordinal))
                 return null;
 
-            string parentAssemblyName = assemblyName.Name.Substring(0, assemblyName.Name.Length - satelliteSuffix.Length);
+            string parentAssemblyName = assemblyName.Name.Substring(0, assemblyName.Name.Length - SatelliteSuffix.Length);
 
             Assembly parentAssembly = LoadFromAssemblyName(new AssemblyName(parentAssemblyName));
 

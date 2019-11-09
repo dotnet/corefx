@@ -424,15 +424,12 @@ namespace System.Xml
                     settings.NameTable = _xnt;
                 }
                 // 0=>auto, 1=>doc/pre-dtd, 2=>doc/pre-elem, 3=>doc/instance -1=>doc/post-elem, 9=>frag
-                switch (_docState)
+                settings.ConformanceLevel = _docState switch
                 {
-                    case 0:
-                        settings.ConformanceLevel = ConformanceLevel.Auto; break;
-                    case 9:
-                        settings.ConformanceLevel = ConformanceLevel.Fragment; break;
-                    default:
-                        settings.ConformanceLevel = ConformanceLevel.Document; break;
-                }
+                    0 => ConformanceLevel.Auto,
+                    9 => ConformanceLevel.Fragment,
+                    _ => ConformanceLevel.Document,
+                };
                 settings.CheckCharacters = _checkCharacters;
                 settings.IgnoreWhitespace = _ignoreWhitespace;
                 settings.IgnoreProcessingInstructions = _ignorePIs;
@@ -986,7 +983,7 @@ namespace System.Xml
 
         // Do setup work for ReadContentAsXXX methods
         // If ready for a typed value read, returns true, otherwise returns
-        //  false to indicate caller should ball back to XmlReader.ReadContentAsXXX
+        //  false to indicate caller should fall back to XmlReader.ReadContentAsXXX
         // Special-Case: returns true and positioned on Element or EndElem to force parse of empty-string
         private bool SetupContentAsXXX(string name)
         {
@@ -1902,7 +1899,7 @@ namespace System.Xml
             if (symNum == symtable.Length)
             {
                 string[] n = new string[checked(symNum * 2)];
-                System.Array.Copy(symtable, 0, n, 0, symNum);
+                System.Array.Copy(symtable, n, symNum);
                 _symbolTables.symtable = symtable = n;
             }
             symtable[symNum] = _xnt.Add(txt);
@@ -1918,7 +1915,7 @@ namespace System.Xml
             if (qnameNum == qnametable.Length)
             {
                 QName[] n = new QName[checked(qnameNum * 2)];
-                System.Array.Copy(qnametable, 0, n, 0, qnameNum);
+                System.Array.Copy(qnametable, n, qnameNum);
                 _symbolTables.qnametable = qnametable = n;
             }
             string[] symtable = _symbolTables.symtable;
@@ -2421,7 +2418,7 @@ namespace System.Xml
             int newcount = _elementStack.Length * 2;
             ElemInfo[] n = new ElemInfo[newcount];
 
-            System.Array.Copy(_elementStack, 0, n, 0, _elementStack.Length);
+            System.Array.Copy(_elementStack, n, _elementStack.Length);
             _elementStack = n;
         }
 
@@ -2430,7 +2427,7 @@ namespace System.Xml
             int newcount = _attributes.Length * 2;
             AttrInfo[] n = new AttrInfo[newcount];
 
-            System.Array.Copy(_attributes, 0, n, 0, _attrCount);
+            System.Array.Copy(_attributes, n, _attrCount);
             _attributes = n;
         }
 
@@ -2781,7 +2778,7 @@ namespace System.Xml
 
         private void FinishCDATA()
         {
-            for (;;)
+            while (true)
             {
                 switch (PeekToken())
                 {
@@ -3506,7 +3503,7 @@ namespace System.Xml
                 if (!attr)
                 {
                     // scan if this is whitespace
-                    for (;;)
+                    while (true)
                     {
                         int posNext = pos + 2;
                         if (posNext > end)
@@ -3517,10 +3514,10 @@ namespace System.Xml
                     }
                 }
 
-                for (;;)
+                while (true)
                 {
                     char ch;
-                    for (;;)
+                    while (true)
                     {
                         int posNext = pos + 2;
                         if (posNext > end)
@@ -3846,20 +3843,13 @@ namespace System.Xml
         private DateTimeOffset ValueAsDateTimeOffset()
         {
             CheckValueTokenBounds();
-            switch (_token)
+            return _token switch
             {
-                case BinXmlToken.XSD_KATMAI_DATEOFFSET:
-                    return BinXmlDateTime.XsdKatmaiDateOffsetToDateTimeOffset(_data, _tokDataPos);
-
-                case BinXmlToken.XSD_KATMAI_DATETIMEOFFSET:
-                    return BinXmlDateTime.XsdKatmaiDateTimeOffsetToDateTimeOffset(_data, _tokDataPos);
-
-                case BinXmlToken.XSD_KATMAI_TIMEOFFSET:
-                    return BinXmlDateTime.XsdKatmaiTimeOffsetToDateTimeOffset(_data, _tokDataPos);
-
-                default:
-                    throw ThrowUnexpectedToken(_token);
-            }
+                BinXmlToken.XSD_KATMAI_DATEOFFSET => BinXmlDateTime.XsdKatmaiDateOffsetToDateTimeOffset(_data, _tokDataPos),
+                BinXmlToken.XSD_KATMAI_DATETIMEOFFSET => BinXmlDateTime.XsdKatmaiDateTimeOffsetToDateTimeOffset(_data, _tokDataPos),
+                BinXmlToken.XSD_KATMAI_TIMEOFFSET => BinXmlDateTime.XsdKatmaiTimeOffsetToDateTimeOffset(_data, _tokDataPos),
+                _ => throw ThrowUnexpectedToken(_token),
+            };
         }
 
 

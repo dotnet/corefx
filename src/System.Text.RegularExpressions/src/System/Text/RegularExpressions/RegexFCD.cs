@@ -58,7 +58,7 @@ namespace System.Text.RegularExpressions
             Span<int> intSpan = stackalloc int[StackBufferSize];
 
             RegexFCD s = new RegexFCD(intSpan);
-            RegexFC fc = s.RegexFCFromRegexTree(t);
+            RegexFC? fc = s.RegexFCFromRegexTree(t);
             s.Dispose();
 
             if (fc == null || fc._nullable)
@@ -76,10 +76,10 @@ namespace System.Text.RegularExpressions
         public static RegexPrefix Prefix(RegexTree tree)
         {
             RegexNode curNode = tree.Root;
-            RegexNode concatNode = null;
+            RegexNode? concatNode = null;
             int nextChild = 0;
 
-            for (; ;)
+            while (true)
             {
                 switch (curNode.NType)
                 {
@@ -103,11 +103,11 @@ namespace System.Text.RegularExpressions
                         // In release, cutoff at a length to which we can still reasonably construct a string
                         // In debug, use a smaller cutoff to exercise the cutoff path in tests
                         const int Cutoff =
-                        #if DEBUG
+#if DEBUG
                             50;
-                        #else
+#else
                             1_000_000;
-                        #endif
+#endif
 
                         if (curNode.M > 0 && curNode.M < Cutoff)
                         {
@@ -121,7 +121,7 @@ namespace System.Text.RegularExpressions
                         return new RegexPrefix(curNode.Ch.ToString(), 0 != (curNode.Options & RegexOptions.IgnoreCase));
 
                     case RegexNode.Multi:
-                        return new RegexPrefix(curNode.Str, 0 != (curNode.Options & RegexOptions.IgnoreCase));
+                        return new RegexPrefix(curNode.Str!, 0 != (curNode.Options & RegexOptions.IgnoreCase));
 
                     case RegexNode.Bol:
                     case RegexNode.Eol:
@@ -154,13 +154,13 @@ namespace System.Text.RegularExpressions
         public static int Anchors(RegexTree tree)
         {
             RegexNode curNode;
-            RegexNode concatNode = null;
+            RegexNode? concatNode = null;
             int nextChild = 0;
             int result = 0;
 
             curNode = tree.Root;
 
-            for (; ;)
+            while (true)
             {
                 switch (curNode.NType)
                 {
@@ -207,21 +207,19 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Convert anchor type to anchor bit.
         /// </summary>
-        private static int AnchorFromType(int type)
-        {
-            switch (type)
+        private static int AnchorFromType(int type) =>
+            type switch
             {
-                case RegexNode.Bol: return Bol;
-                case RegexNode.Eol: return Eol;
-                case RegexNode.Boundary: return Boundary;
-                case RegexNode.ECMABoundary: return ECMABoundary;
-                case RegexNode.Beginning: return Beginning;
-                case RegexNode.Start: return Start;
-                case RegexNode.EndZ: return EndZ;
-                case RegexNode.End: return End;
-                default: return 0;
-            }
-        }
+                RegexNode.Bol => Bol,
+                RegexNode.Eol => Eol,
+                RegexNode.Boundary => Boundary,
+                RegexNode.ECMABoundary => ECMABoundary,
+                RegexNode.Beginning => Beginning,
+                RegexNode.Start => Start,
+                RegexNode.EndZ => EndZ,
+                RegexNode.End => End,
+                _ => 0,
+            };
 
 #if DEBUG
         public static string AnchorDescription(int anchors)
@@ -309,12 +307,12 @@ namespace System.Text.RegularExpressions
         /// through the tree and calls CalculateFC to emits code before
         /// and after each child of an interior node, and at each leaf.
         /// </summary>
-        private RegexFC RegexFCFromRegexTree(RegexTree tree)
+        private RegexFC? RegexFCFromRegexTree(RegexTree tree)
         {
-            RegexNode curNode = tree.Root;
+            RegexNode? curNode = tree.Root;
             int curChild = 0;
 
-            for (; ;)
+            while (true)
             {
                 if (curNode.Children == null)
                 {
@@ -351,7 +349,7 @@ namespace System.Text.RegularExpressions
                 curChild = PopInt();
                 curNode = curNode.Next;
 
-                CalculateFC(curNode.NType | AfterChild, curNode, curChild);
+                CalculateFC(curNode!.NType | AfterChild, curNode, curChild);
                 if (_failed)
                     return null;
 
@@ -480,7 +478,7 @@ namespace System.Text.RegularExpressions
                     break;
 
                 case RegexNode.Multi:
-                    if (node.Str.Length == 0)
+                    if (node.Str!.Length == 0)
                         PushFC(new RegexFC(true));
                     else if (!rtl)
                         PushFC(new RegexFC(node.Str[0], false, false, ci));
@@ -489,12 +487,12 @@ namespace System.Text.RegularExpressions
                     break;
 
                 case RegexNode.Set:
-                    PushFC(new RegexFC(node.Str, false, ci));
+                    PushFC(new RegexFC(node.Str!, false, ci));
                     break;
 
                 case RegexNode.Setloop:
                 case RegexNode.Setlazy:
-                    PushFC(new RegexFC(node.Str, node.M == 0, ci));
+                    PushFC(new RegexFC(node.Str!, node.M == 0, ci));
                     break;
 
                 case RegexNode.Ref:
