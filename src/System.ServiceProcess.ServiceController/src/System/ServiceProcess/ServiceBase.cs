@@ -587,29 +587,28 @@ namespace System.ServiceProcess
         ///       contains multiple associated services. Loads the specified services into memory so they can be
         ///       started.</para>
         /// </devdoc>
-        public static void Run(ServiceBase[] services)
+        public static unsafe void Run(ServiceBase[] services)
         {
             if (services == null || services.Length == 0)
                 throw new ArgumentException(SR.NoServices);
 
-            int sizeOfSERVICE_TABLE_ENTRY = Marshal.SizeOf<SERVICE_TABLE_ENTRY>();
-
-            IntPtr entriesPointer = Marshal.AllocHGlobal(checked((services.Length + 1) * sizeOfSERVICE_TABLE_ENTRY));
+            IntPtr entriesPointer = Marshal.AllocHGlobal(checked((services.Length + 1) * Marshal.SizeOf<SERVICE_TABLE_ENTRY>()));
+            Span<SERVICE_TABLE_ENTRY> entries = new Span<SERVICE_TABLE_ENTRY>((void*)entriesPointer, services.Length + 1);
             try
             {
                 bool multipleServices = services.Length > 1;
 
-                for (int index = 0; index < services.Length; ++index)
+                for (int index = 0; index < entries.Length - 1; ++index)
                 {
+                    entries[index] = default; // Clear out the entry before we do anything, so if anything fails we can know how much we've successfully allocated so far.
                     ServiceBase service = services[index];
                     service.Initialize(multipleServices);
-                    // Make sure that name field is freed after use.
-                    SERVICE_TABLE_ENTRY entry = service.GetEntry();
-                    Marshal.StructureToPtr(entry, entriesPointer + sizeOfSERVICE_TABLE_ENTRY * index, false);
+                    // This method allocates on unmanaged heap; Make sure that the contents are freed after use.
+                    entries[index] = service.GetEntry();
                 }
 
                 // The members of the last entry in the table must have NULL values to designate the end of the table.
-                Marshal.StructureToPtr(new SERVICE_TABLE_ENTRY(), entriesPointer + sizeOfSERVICE_TABLE_ENTRY * services.Length, false);
+                entries[entries.Length - 1] = new SERVICE_TABLE_ENTRY();
 
                 // While the service is running, this function will never return. It will return when the service
                 // is stopped.
@@ -649,13 +648,11 @@ namespace System.ServiceProcess
             {
                 // Free the pointer to the name of the service on the unmanaged heap.
                 // We don't need to free the last element in the unmanaged array since the last element have null values (denotes the end of the table).
-                for (int i = 0; i < services.Length; i++)
+                // Entries other than the last entry having a null pointer means that we failed while processing the entries for some reason
+                // and only elements up to this point has been successfully allocated so far (thus have to be deallocated)
+                for (int i = 0; i < entries.Length - 1 && entries[i].name != IntPtr.Zero; i++)
                 {
-                    SERVICE_TABLE_ENTRY entry = Marshal.PtrToStructure<SERVICE_TABLE_ENTRY>(entriesPointer + sizeOfSERVICE_TABLE_ENTRY * i);
-                    if (entry.name != IntPtr.Zero)
-                    {
-                        Marshal.FreeHGlobal(entry.name);
-                    }
+                    Marshal.FreeHGlobal(entries[i].name);
                 }
 
                 // Free the unmanaged array containing the entries.
@@ -720,7 +717,7 @@ namespace System.ServiceProcess
             _nameFrozen = true;
             SERVICE_TABLE_ENTRY entry = new SERVICE_TABLE_ENTRY()
             {
-                callback = _mainCallback,
+                callback = Marshal.GetFunctionPointerForDelegate(_mainCallback),
                 name = Marshal.StringToHGlobalUni(_serviceName)
             };
             return entry;
