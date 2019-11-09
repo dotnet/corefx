@@ -219,11 +219,8 @@ namespace System.Text.Json
             }
             else
             {
-                // Could not create an instance to be returned. For derived types, this means there is no parameterless ctor.
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                    jsonPropertyInfo.DeclaredPropertyType,
-                    jsonPropertyInfo.ParentClassType,
-                    jsonPropertyInfo.PropertyInfo);
+                ThrowHelper.ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(jsonPropertyInfo.DeclaredPropertyType);
+                return null;
             }
         }
 
@@ -263,11 +260,8 @@ namespace System.Text.Json
             }
             else
             {
-                // Could not create an instance to be returned. For derived types, this means there is no parameterless ctor.
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                    jsonPropertyInfo.DeclaredPropertyType,
-                    jsonPropertyInfo.ParentClassType,
-                    jsonPropertyInfo.PropertyInfo);
+                ThrowHelper.ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(jsonPropertyInfo.DeclaredPropertyType);
+                return null;
             }
         }
 
