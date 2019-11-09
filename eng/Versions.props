@@ -51,7 +51,7 @@
     <MicrosoftNETCorePlatformsVersion>5.0.0-alpha.1.19559.1</MicrosoftNETCorePlatformsVersion>
     <runtimenativeSystemIOPortsVersion>5.0.0-alpha.1.19559.1</runtimenativeSystemIOPortsVersion>
     <!-- Standard dependencies -->
-    <NETStandardLibraryVersion>2.2.0-prerelease.19557.1</NETStandardLibraryVersion>
+    <NETStandardLibraryVersion>2.2.0-prerelease.19558.1</NETStandardLibraryVersion>
     <!-- dotnet-optimization dependencies -->
     <optimizationwindows_ntx64IBCCoreFxVersion>99.99.99-master-20190716.1</optimizationwindows_ntx64IBCCoreFxVersion>
     <!-- sni -->
