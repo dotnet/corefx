@@ -648,9 +648,7 @@ namespace System.ServiceProcess
             {
                 // Free the pointer to the name of the service on the unmanaged heap.
                 // We don't need to free the last element in the unmanaged array since the last element have null values (denotes the end of the table).
-                // Entries other than the last entry having a null pointer means that we failed while processing the entries for some reason
-                // and only elements up to this point has been successfully allocated so far (thus have to be deallocated)
-                for (int i = 0; i < services.Length && entries[i].name != IntPtr.Zero; i++)
+                for (int i = 0; i < services.Length; i++)
                 {
                     Marshal.FreeHGlobal(entries[i].name);
                 }
