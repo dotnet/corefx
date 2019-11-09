@@ -206,7 +206,6 @@ namespace System.IO
         #region DirectoryInfo Create
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void DirectoryInfo_Create_NullDirectoryInfo()
         {
             DirectoryInfo info = null;
@@ -226,7 +225,6 @@ namespace System.IO
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void DirectoryInfo_Create_NullDirectorySecurity()
         {
             DirectoryInfo info = new DirectoryInfo("path");
@@ -245,7 +243,6 @@ namespace System.IO
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void DirectoryInfo_Create_NotFound()
         {
             using var directory = new TempDirectory();
@@ -267,7 +264,6 @@ namespace System.IO
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void DirectoryInfo_Create_DefaultDirectorySecurity()
         {
             DirectorySecurity security = new DirectorySecurity();
@@ -275,7 +271,6 @@ namespace System.IO
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Allow)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Deny)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.WriteData, AccessControlType.Allow)]
@@ -296,7 +291,6 @@ namespace System.IO
         #region FileInfo Create
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void FileInfo_Create_NullFileInfo()
         {
             FileInfo info = null;
@@ -316,7 +310,6 @@ namespace System.IO
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void FileInfo_Create_NullFileSecurity()
         {
             FileInfo info = new FileInfo("path");
@@ -335,7 +328,6 @@ namespace System.IO
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void FileInfo_Create_NotFound()
         {
             using var directory = new TempDirectory();
@@ -357,7 +349,6 @@ namespace System.IO
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [InlineData((FileMode)int.MinValue)]
         [InlineData((FileMode)0)]
         [InlineData((FileMode)int.MaxValue)]
@@ -380,7 +371,6 @@ namespace System.IO
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [InlineData((FileShare)(-1))]
         [InlineData((FileShare)int.MaxValue)]
         public void FileInfo_Create_FileSecurity_InvalidFileShare(FileShare invalidFileShare)
@@ -402,7 +392,6 @@ namespace System.IO
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [InlineData(int.MinValue)]
         [InlineData(0)]
         public void FileInfo_Create_FileSecurity_InvalidBufferSize(int invalidBufferSize)
@@ -424,7 +413,6 @@ namespace System.IO
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [InlineData(FileMode.Truncate, FileSystemRights.Read)]
         [InlineData(FileMode.Truncate, FileSystemRights.ReadData)]
         [InlineData(FileMode.CreateNew, FileSystemRights.Read)]
@@ -452,7 +440,6 @@ namespace System.IO
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void FileInfo_Create_DefaultFileSecurity()
         {
             FileSecurity security = new FileSecurity();
@@ -460,7 +447,6 @@ namespace System.IO
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Allow)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Deny)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.WriteData, AccessControlType.Allow)]
