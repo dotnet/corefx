@@ -121,6 +121,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\BCrypt\Interop.BCryptKeyDataBlob.cs">
       <Link>Internal\Windows\BCrypt\Interop.BCryptKeyDataBlob.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\BCrypt\Interop.BCryptImportKey.cs">
+      <Link>Internal\Windows\BCrypt\Interop.BCryptImportKey.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\BCrypt\TripleDesBCryptModes.cs">
       <Link>Interop\Windows\BCrypt\TripleDesBCryptModes.cs</Link>
     </Compile>

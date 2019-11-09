@@ -309,6 +309,9 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\BCrypt\Interop.BCryptGenRandom.cs">
       <Link>Common\CoreLib\Interop\Windows\BCrypt\Interop.BCryptGenRandom.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\BCrypt\Interop.BCryptImportKey.cs">
+      <Link>Common\CoreLib\Interop\Windows\BCrypt\Interop.BCryptImportKey.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\BCrypt\Interop.NTSTATUS.cs">
       <Link>Common\CoreLib\Interop\Windows\BCrypt\Interop.NTSTATUS.cs</Link>
     </Compile>
