@@ -592,15 +592,15 @@ namespace System.ServiceProcess
             if (services == null || services.Length == 0)
                 throw new ArgumentException(SR.NoServices);
 
-            IntPtr entriesPointer = Marshal.AllocHGlobal(checked((services.Length + 1) * Marshal.SizeOf<SERVICE_TABLE_ENTRY>()));
+            IntPtr entriesPointer = Marshal.AllocHGlobal(checked((services.Length + 1) * sizeof(SERVICE_TABLE_ENTRY)));
             Span<SERVICE_TABLE_ENTRY> entries = new Span<SERVICE_TABLE_ENTRY>((void*)entriesPointer, services.Length + 1);
+            entries.Clear();
             try
             {
                 bool multipleServices = services.Length > 1;
 
-                for (int index = 0; index < entries.Length - 1; ++index)
+                for (int index = 0; index < services.Length; ++index)
                 {
-                    entries[index] = default; // Clear out the entry before we do anything, so if anything fails we can know how much we've successfully allocated so far.
                     ServiceBase service = services[index];
                     service.Initialize(multipleServices);
                     // This method allocates on unmanaged heap; Make sure that the contents are freed after use.
@@ -608,7 +608,7 @@ namespace System.ServiceProcess
                 }
 
                 // The members of the last entry in the table must have NULL values to designate the end of the table.
-                entries[entries.Length - 1] = new SERVICE_TABLE_ENTRY();
+                entries[entries.Length - 1] = default;
 
                 // While the service is running, this function will never return. It will return when the service
                 // is stopped.
@@ -650,7 +650,7 @@ namespace System.ServiceProcess
                 // We don't need to free the last element in the unmanaged array since the last element have null values (denotes the end of the table).
                 // Entries other than the last entry having a null pointer means that we failed while processing the entries for some reason
                 // and only elements up to this point has been successfully allocated so far (thus have to be deallocated)
-                for (int i = 0; i < entries.Length - 1 && entries[i].name != IntPtr.Zero; i++)
+                for (int i = 0; i < services.Length && entries[i].name != IntPtr.Zero; i++)
                 {
                     Marshal.FreeHGlobal(entries[i].name);
                 }
@@ -715,12 +715,11 @@ namespace System.ServiceProcess
         private SERVICE_TABLE_ENTRY GetEntry()
         {
             _nameFrozen = true;
-            SERVICE_TABLE_ENTRY entry = new SERVICE_TABLE_ENTRY()
+            return new SERVICE_TABLE_ENTRY()
             {
                 callback = Marshal.GetFunctionPointerForDelegate(_mainCallback),
                 name = Marshal.StringToHGlobalUni(_serviceName)
             };
-            return entry;
         }
 
         private int ServiceCommandCallbackEx(int command, int eventType, IntPtr eventData, IntPtr eventContext)
