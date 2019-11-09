@@ -24,7 +24,7 @@ namespace System.IO.Tests
             Interop.Sys.GetRLimit(Interop.Sys.RlimitResources.RLIMIT_NOFILE, out Interop.Sys.RLimit limits);
             _output.WriteLine("File descriptor limit is {0}", limits.CurrentLimit);
 
-            if (limits.CurrentLimit > 10_000)
+            if (limits.CurrentLimit > 50_000)
             {
                 throw new SkipTestException($"File descriptor limit is too high {limits.CurrentLimit}.");
             }
