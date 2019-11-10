@@ -17,12 +17,18 @@ namespace System.IO.Ports
 
             foreach (string name in Directory.GetFiles("/dev", "ttyd*"))
             {
-                ports.Add(name);
+                if (!name.EndsWith(".init") && !name.EndsWith(".lock"))
+                {
+                    ports.Add(name);
+                }
             }
 
-            foreach (string name in Directory.GetFiles("/dev", "cuad*"))
+            foreach (string name in Directory.GetFiles("/dev", "cuau*"))
             {
-                ports.Add(name);
+                if (!name.EndsWith(".init") && !name.EndsWith(".lock"))
+                {
+                    ports.Add(name);
+                }
             }
 
             return ports.ToArray();
