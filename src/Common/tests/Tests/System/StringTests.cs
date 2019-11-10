@@ -4488,6 +4488,8 @@ namespace System.Tests
         [InlineData("Hello", 'l', '!', "He!!o")]
         [InlineData("Hello", 'e', 'e', "Hello")]
         [InlineData("Hello", 'a', 'b', "Hello")]
+        [InlineData("This is a very nice sentence", 'z', 'y', "This is a very nice sentence")]
+        [InlineData("This is a very nice sentence", 'i', 'I', "ThIs Is a very nIce sentence")]
         public static void Replace_Char_Char(string s, char oldChar, char newChar, string expected)
         {
             Assert.Equal(expected, s.Replace(oldChar, newChar));
