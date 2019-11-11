@@ -4493,7 +4493,7 @@ namespace System.Tests
         // Three leading 'a's before a match (copyLength > 0), Single iteration of vectorised path; no remainders through non-vectorised path
         [InlineData("aaaAaaaaaaa", 'A', 'a', "aaaaaaaaaaa")]
         // Single iteration of vectorised path; 3 remainders through non-vectorised path
-        [InlineData("AaaaaaaaaAa", 'A', 'a', "aaaaaaaaaAa")]
+        [InlineData("AaaaaaaaaAa", 'A', 'a', "aaaaaaaaaaa")]
         // Three matches, vectorised path; 4 remainders through non-vectorised path
         [InlineData("This is a very nice sentence", 'i', 'I', "ThIs Is a very nIce sentence")]
         // Three leading 'a's before a match (copyLength > 0), no remainders through non-vectorised path
