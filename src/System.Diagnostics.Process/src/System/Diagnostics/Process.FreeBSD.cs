@@ -79,7 +79,7 @@ namespace System.Diagnostics
                         throw new Win32Exception(SR.ProcessInformationUnavailable);
                     }
 
-                    return  processInfo->ki_ppid;
+                    return processInfo->ki_ppid;
                 }
                 finally
                 {
