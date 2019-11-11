@@ -72,7 +72,6 @@ namespace System.Diagnostics
                 EnsureState(State.HaveNonExitedId);
 
                 Interop.Process.kinfo_proc* processInfo = Interop.Process.GetProcInfo(_processId, false, out int count);
-
                 try
                 {
                     if (count <= 0)
