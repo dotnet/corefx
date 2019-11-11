@@ -20,6 +20,8 @@ namespace System.Net.Quic
     public static class QuicImplementationProviders
     {
         public static System.Net.Quic.Implementations.QuicImplementationProvider Mock { get { throw null; } }
+
+        public static System.Net.Quic.Implementations.QuicImplementationProvider Default { get { throw null; } }
     }
 }
 namespace System.Net.Quic.Implementations

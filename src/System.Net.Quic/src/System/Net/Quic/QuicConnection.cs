@@ -20,7 +20,7 @@ namespace System.Net.Quic
         /// <param name="sslClientAuthenticationOptions">TLS options</param>
         /// <param name="localEndPoint">The local endpoint to connect from.</param>
         public QuicConnection(IPEndPoint remoteEndPoint, SslClientAuthenticationOptions sslClientAuthenticationOptions, IPEndPoint localEndPoint = null)
-            : this(null, remoteEndPoint, sslClientAuthenticationOptions, localEndPoint)
+            : this(QuicImplementationProviders.Default, remoteEndPoint, sslClientAuthenticationOptions, localEndPoint)
         {
         }
 
