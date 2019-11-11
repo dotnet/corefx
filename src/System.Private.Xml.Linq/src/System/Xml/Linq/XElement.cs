@@ -131,13 +131,7 @@ namespace System.Xml.Linq
             AddContentSkipNotify(other.content);
         }
 
-#if uap
-        // XmlSerializer needs to reflect on the default constructor of XElement.
-        // We need to make the ctor public on UWP to keep the metadata for it.
-        public XElement()
-#else
         internal XElement()
-#endif
             : this("default")
         {
         }
@@ -850,7 +844,7 @@ namespace System.Xml.Linq
         {
             if (await reader.MoveToContentAsync().ConfigureAwait(false) != XmlNodeType.Element) throw new InvalidOperationException(SR.Format(SR.InvalidOperation_ExpectedNodeType, XmlNodeType.Element, reader.NodeType));
 
-            XElement e = new XElement(new AsyncConstructionSentry());
+            XElement e = new XElement(default(AsyncConstructionSentry));
             await e.ReadElementFromAsync(reader, options, cancellationToken).ConfigureAwait(false);
 
             cancellationToken.ThrowIfCancellationRequested();

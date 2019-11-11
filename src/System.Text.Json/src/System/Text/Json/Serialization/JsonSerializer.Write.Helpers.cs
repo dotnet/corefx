@@ -31,7 +31,7 @@ namespace System.Text.Json
                 // Nothing to do for typeof(object)
                 if (runtimeType != typeof(object))
                 {
-                    jsonPropertyInfo = jsonClassInfo.CreatePolymorphicProperty(jsonPropertyInfo, runtimeType, options);
+                    jsonPropertyInfo = jsonClassInfo.GetOrAddPolymorphicProperty(jsonPropertyInfo, runtimeType, options);
                 }
             }
         }
@@ -97,6 +97,11 @@ namespace System.Text.Json
                 options = JsonSerializerOptions.s_defaultOptions;
             }
 
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
             WriteCore(writer, value, type, options);
         }
 
@@ -111,6 +116,7 @@ namespace System.Text.Json
         private static void WriteCore(Utf8JsonWriter writer, object value, Type type, JsonSerializerOptions options)
         {
             Debug.Assert(type != null || value == null);
+            Debug.Assert(writer != null);
 
             if (value == null)
             {

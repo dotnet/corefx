@@ -1869,7 +1869,7 @@ namespace System.Xml.Schema
                 runningPositions = new List<RangePositionInfo>();
                 context.RunningPositions = runningPositions;
             }
-            RangePositionInfo rposInfo = new RangePositionInfo();
+            RangePositionInfo rposInfo = default;
             rposInfo.curpos = _firstpos.Clone();
 
             rposInfo.rangeCounters = new decimal[_minMaxNodesCount];
@@ -1987,15 +1987,15 @@ namespace System.Xml.Schema
                         rposInfo = runningPositions[j];
                         if (matchCount + 2 >= runningPositions.Count)
                         {
-                            runningPositions.Add(new RangePositionInfo());
-                            runningPositions.Add(new RangePositionInfo());
+                            runningPositions.Add(default(RangePositionInfo));
+                            runningPositions.Add(default(RangePositionInfo));
                         }
                         RangePositionInfo newRPosInfo = runningPositions[matchCount];
                         if (newRPosInfo.rangeCounters == null)
                         {
                             newRPosInfo.rangeCounters = new decimal[_minMaxNodesCount];
                         }
-                        Array.Copy(rposInfo.rangeCounters, 0, newRPosInfo.rangeCounters, 0, rposInfo.rangeCounters.Length);
+                        Array.Copy(rposInfo.rangeCounters, newRPosInfo.rangeCounters, rposInfo.rangeCounters.Length);
                         decimal count = ++newRPosInfo.rangeCounters[lrNode.Pos];
 
                         if (count == lrNode.Max)
@@ -2022,7 +2022,7 @@ namespace System.Xml.Schema
                             {
                                 newRPosInfo.rangeCounters = new decimal[_minMaxNodesCount];
                             }
-                            Array.Copy(rposInfo.rangeCounters, 0, newRPosInfo.rangeCounters, 0, rposInfo.rangeCounters.Length);
+                            Array.Copy(rposInfo.rangeCounters, newRPosInfo.rangeCounters, rposInfo.rangeCounters.Length);
                             newRPosInfo.curpos = _followpos[cPos];
                             newRPosInfo.rangeCounters[lrNode.Pos] = 0;
                             runningPositions[j] = newRPosInfo;

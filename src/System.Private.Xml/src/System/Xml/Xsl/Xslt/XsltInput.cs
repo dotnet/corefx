@@ -90,7 +90,7 @@ namespace System.Xml.Xsl.Xslt
                     newSize = position + 1;
                 }
                 Record[] tmp = new Record[newSize];
-                Array.Copy(_records, 0, tmp, 0, _records.Length);
+                Array.Copy(_records, tmp, _records.Length);
                 _records = tmp;
             }
         }
@@ -266,7 +266,7 @@ namespace System.Xml.Xsl.Xslt
             }
         }
 
-        private StringConcat _strConcat = new StringConcat();
+        private StringConcat _strConcat;
 
         // returns false if attribute is actualy namespace
         private bool ReadAttribute(ref Record rec)

@@ -17,11 +17,7 @@ namespace System.Net.Http
 {
     internal sealed class MacProxy : IWebProxy
     {
-        public ICredentials Credentials
-        {
-            get => null;
-            set => throw new NotSupportedException();
-        }
+        public ICredentials Credentials { get; set; }
 
         private static Uri GetProxyUri(string scheme, CFProxy proxy)
         {
@@ -66,7 +62,7 @@ namespace System.Net.Http
                 CFRunLoopStop(runLoop);
             };
 
-            var clientContext = new CFStreamClientContext();
+            CFStreamClientContext clientContext = default;
             CFRunLoopSourceRef loopSource =
                 proxy.ProxyType == CFProxy.kCFProxyTypeAutoConfigurationURL ?
                 CFNetworkExecuteProxyAutoConfigurationURL(proxy.AutoConfigurationURL, cfurl, cb, ref clientContext) :

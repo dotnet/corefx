@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -42,7 +43,7 @@ namespace System.Text.Json.Serialization
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
             }
 
-            if (state.Current.KeyName == null && state.Current.IsProcessingDictionaryOrIDictionaryConstructible())
+            if (state.Current.KeyName == null && state.Current.IsProcessingDictionary())
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
                 return;
@@ -127,6 +128,22 @@ namespace System.Text.Json.Serialization
         public override Type GetDictionaryConcreteType()
         {
             return typeof(Dictionary<string, TRuntimeProperty>);
+        }
+
+        public override void GetDictionaryKeyAndValueFromGenericDictionary(ref WriteStackFrame writeStackFrame, out string key, out object value)
+        {
+            if (writeStackFrame.CollectionEnumerator is IEnumerator<KeyValuePair<string, TRuntimeProperty>> genericEnumerator)
+            {
+                key = genericEnumerator.Current.Key;
+                value = genericEnumerator.Current.Value;
+            }
+            else
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    writeStackFrame.JsonPropertyInfo.DeclaredPropertyType,
+                    writeStackFrame.JsonPropertyInfo.ParentClassType,
+                    writeStackFrame.JsonPropertyInfo.PropertyInfo);
+            }
         }
     }
 }

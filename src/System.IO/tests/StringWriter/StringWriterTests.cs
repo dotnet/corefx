@@ -3,17 +3,16 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
+using System.Tests;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.IO.Tests
 {
-    public partial class StringWriterTests
+    public class StringWriterTests
     {
         static int[] iArrInvalidValues = new int[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, int.MinValue, short.MinValue };
         static int[] iArrLargeValues = new int[] { int.MaxValue, int.MaxValue - 1, int.MaxValue / 2, int.MaxValue / 10, int.MaxValue / 100 };
@@ -294,9 +293,8 @@ namespace System.IO.Tests
         [Fact]
         public static void TestWriteMisc()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("en-US")) // floating-point formatting comparison depends on culture
             {
-                CultureInfo.CurrentCulture = new CultureInfo("en-US"); // floating-point formatting comparison depends on culture
                 var sw = new StringWriter();
 
                 sw.Write(true);
@@ -310,7 +308,7 @@ namespace System.IO.Tests
                 sw.Write((ulong)ulong.MaxValue);
 
                 Assert.Equal("Truea1234.013452342.0123456-92233720368547758081234.5429496729518446744073709551615", sw.ToString());
-            }).Dispose();
+            }
         }
 
         [Fact]
@@ -324,9 +322,8 @@ namespace System.IO.Tests
         [Fact]
         public static void TestWriteLineMisc()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("en-US")) // floating-point formatting comparison depends on culture
             {
-                CultureInfo.CurrentCulture = new CultureInfo("en-US"); // floating-point formatting comparison depends on culture
                 var sw = new StringWriter();
                 sw.WriteLine((bool)false);
                 sw.WriteLine((char)'B');
@@ -339,7 +336,7 @@ namespace System.IO.Tests
                 Assert.Equal(
                     string.Format("False{0}B{0}987{0}875634{0}1.23457{0}45634563{0}18446744073709551615{0}", Environment.NewLine),
                     sw.ToString());
-            }).Dispose();
+            }
         }
 
         [Fact]
@@ -377,6 +374,101 @@ namespace System.IO.Tests
                     Assert.Equal(newLine + newLine, await sr.ReadToEndAsync());
                 }
             }
+        }
+
+        [Fact]
+        public async Task WriteSpanMemory_Success()
+        {
+            var sw = new StringWriter();
+
+            sw.Write((Span<char>)new char[0]);
+            sw.Write((Span<char>)new char[] { 'a' });
+            sw.Write((Span<char>)new char[] { 'b', 'c', 'd' });
+            sw.WriteLine((Span<char>)new char[] { 'e' });
+
+            await sw.WriteAsync((ReadOnlyMemory<char>)new char[0]);
+            await sw.WriteAsync((ReadOnlyMemory<char>)new char[] { 'f' });
+            await sw.WriteAsync((ReadOnlyMemory<char>)new char[] { 'g', 'h', 'i' });
+            await sw.WriteLineAsync((ReadOnlyMemory<char>)new char[] { 'j' });
+
+            Assert.Equal("abcde" + Environment.NewLine + "fghij" + Environment.NewLine, sw.ToString());
+        }
+
+        [Fact]
+        public async Task Precanceled_ThrowsException()
+        {
+            var writer = new StringWriter();
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => writer.WriteAsync(Memory<char>.Empty, new CancellationToken(true)));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => writer.WriteLineAsync(Memory<char>.Empty, new CancellationToken(true)));
+        }
+
+        [Fact]
+        public void TestWriteStringBuilder()
+        {
+            StringBuilder sb = getSb();
+            StringWriter sw = new StringWriter();
+            sw.Write(sb);
+            Assert.Equal(sb.ToString(), sw.ToString());
+        }
+
+        [Fact]
+        public async Task TestWriteAsyncStringBuilder()
+        {
+            StringBuilder sb = getSb();
+            StringWriter sw = new StringWriter();
+            await sw.WriteAsync(sb);
+            Assert.Equal(sb.ToString(), sw.ToString());
+        }
+
+        [Fact]
+        public void TestWriteAsyncStringBuilderCancelled()
+        {
+            StringBuilder sb = getSb();
+            StringWriter sw = new StringWriter();
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.Cancel();
+            Assert.Equal(TaskStatus.Canceled, sw.WriteAsync(sb, cts.Token).Status);
+        }
+
+        [Fact]
+        public void TestWriteLineStringBuilder()
+        {
+            StringBuilder sb = getSb();
+            StringWriter sw = new StringWriter();
+            sw.WriteLine(sb);
+            Assert.Equal(sb.ToString() + Environment.NewLine, sw.ToString());
+        }
+
+        [Fact]
+        public async Task TestWriteLineAsyncStringBuilder()
+        {
+            StringBuilder sb = getSb();
+            StringWriter sw = new StringWriter();
+            await sw.WriteLineAsync(sb);
+            Assert.Equal(sb.ToString() + Environment.NewLine, sw.ToString());
+        }
+
+        [Fact]
+        public void TestWriteLineAsyncStringBuilderCancelled()
+        {
+            StringBuilder sb = getSb();
+            StringWriter sw = new StringWriter();
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.Cancel();
+            Assert.Equal(TaskStatus.Canceled, sw.WriteLineAsync(sb, cts.Token).Status);
+        }
+
+        [Fact]
+        public void DisposeAsync_ClosesWriterAndLeavesBuilderAvailable()
+        {
+            var sb = new StringBuilder();
+            var sw = new StringWriter(sb);
+            sw.Write("hello");
+            Assert.True(sw.DisposeAsync().IsCompletedSuccessfully);
+            Assert.True(sw.DisposeAsync().IsCompletedSuccessfully);
+            Assert.Throws<ObjectDisposedException>(() => sw.Write(42));
+            Assert.Equal("hello", sb.ToString());
         }
     }
 }

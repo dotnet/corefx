@@ -6,6 +6,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Tests;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -71,9 +72,8 @@ namespace System.ComponentModel.Tests
         [Fact]
         public static void ConvertFrom_InstanceDescriptor()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("fr-FR"))
             {
-                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
                 DateTime testDateAndTime = DateTime.UtcNow;
                 ConstructorInfo ctor = typeof(DateTime).GetConstructor(new Type[]
                 {
@@ -90,7 +90,7 @@ namespace System.ComponentModel.Tests
                 const string format = "dd MMM yyyy hh:mm";
                 object o = s_converter.ConvertFrom(descriptor);
                 Assert.Equal(testDateAndTime.ToString(format), ((DateTime)o).ToString(format));
-            }).Dispose();
+            }
         }
 
         [Fact]
@@ -110,10 +110,8 @@ namespace System.ComponentModel.Tests
         [Fact]
         public static void ConvertTo_WithContext()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("pl-PL"))
             {
-                CultureInfo.CurrentCulture = new CultureInfo("pl-PL");
-
                 Assert.Throws<ArgumentNullException>(
                     () => s_converter.ConvertTo(s_context, null, c_conversionInputValue, null));
 
@@ -135,8 +133,7 @@ namespace System.ComponentModel.Tests
                     s_context, CultureInfo.InvariantCulture, new FormattableClass(), typeof(string)) as string;
                 Assert.NotNull(s);
                 Assert.Equal(FormattableClass.Token, s);
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <!-- This constant is only here for usage in $(CommonTestPath), since not all projects using these tests have been updated yet-->
     <DefineConstants>$(DefineConstants);STREAM_MEMORY_OVERLOADS_AVAILABLE</DefineConstants>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CompressionStreamUnitTests.Deflate.cs" />
@@ -52,7 +52,7 @@
     TODO: Remove when macOS 10.12 support ended.
   -->
   <ItemGroup>
-    <PackageReference Include="System.IO.Compression.TestData" Version="$(SystemIOCompressionTestDataPackageVersion)" ExcludeAssets="contentFiles" GeneratePathProperty="true" />
+    <PackageReference Include="System.IO.Compression.TestData" Version="$(SystemIOCompressionTestDataVersion)" ExcludeAssets="contentFiles" GeneratePathProperty="true" />
     <None Include="$(PkgSystem_IO_Compression_TestData)\contentFiles\any\any\**\*" CopyToOutputDirectory="PreserveNewest" Visible="false" />
   </ItemGroup>
 </Project>

@@ -38,13 +38,12 @@ namespace System.Runtime.ExceptionServices.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // Feature Corrupting Exceptions not present for Linux
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/21123", TargetFrameworkMonikers.Uap)]
         public static void ProcessExit_Called()
         {
             // We expect the launched process to crash; don't let it write the resulting AV message to the console.
             var psi = new ProcessStartInfo() { RedirectStandardError = true, RedirectStandardOutput = true };
 
-            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(() => { CauseAVInNative(); return RemoteExecutor.SuccessExitCode; }, new RemoteInvokeOptions { CheckExitCode = false, StartInfo = psi }))
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(() => CauseAVInNative(), new RemoteInvokeOptions { CheckExitCode = false, StartInfo = psi }))
             {
                 Process p = handle.Process;
                 p.WaitForExit();

@@ -527,7 +527,7 @@ namespace System.Drawing
             internal static extern int GdipGetFontUnit(HandleRef font, out GraphicsUnit unit);
 
             [DllImport(LibraryName, ExactSpelling = true)]
-            internal static extern int GdipGetLogFontW(HandleRef font, HandleRef graphics, ref LOGFONT lf);
+            internal static extern int GdipGetLogFontW(HandleRef font, HandleRef graphics, ref Interop.User32.LOGFONT lf);
 
             [DllImport(LibraryName, ExactSpelling = true)]
             internal static extern int GdipCreatePen1(int argb, float width, int unit, out IntPtr pen);
@@ -1374,7 +1374,7 @@ namespace System.Drawing
 
             public static StartupInput GetDefault()
             {
-                StartupInput result = new StartupInput();
+                StartupInput result = default;
                 result.GdiplusVersion = 1;
                 // result.DebugEventCallback = null;
                 result.SuppressBackgroundThread = false;

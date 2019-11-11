@@ -3,30 +3,22 @@
     <AssemblyName>System.Data.SqlClient</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);CS1573;nullable</NoWarn>
-    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
-    <IsUAPAssembly Condition="'$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'uap10.0.16299'">true</IsUAPAssembly>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(OSGroup)' == 'AnyOS'">SR.PlatformNotSupported_DataSqlClient</GeneratePlatformNotSupportedAssemblyMessage>
-    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.2'">4.0.0.0</AssemblyVersion>
-    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.3'">4.1.0.0</AssemblyVersion>
-    <DefineConstants Condition="'$(TargetsNetCoreApp)' != 'true'">$(DefineConstants);netstandard</DefineConstants>
-    <DefineConstants Condition="'$(TargetsNetCoreApp)' == 'true'">$(DefineConstants);netcoreapp</DefineConstants>
+    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard2.0'">4.6.0.0</AssemblyVersion>
+    <DefineConstants Condition="'$(TargetsNetCoreApp)' != 'true'">$(DefineConstants);NETSTANDARD2_0</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);FEATURE_TCPKEEPALIVE</DefineConstants>
+    <Nullable>annotations</Nullable>
     <DefineConstants Condition="'$(TargetGroup)' != 'netcoreapp'">$(DefineConstants);INTERNAL_NULLABLE_ATTRIBUTES</DefineConstants>
-    <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp-Debug;netcoreapp-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.1-Debug;netcoreapp2.1-Release;netcoreapp2.1-Unix-Debug;netcoreapp2.1-Unix-Release;netcoreapp2.1-Windows_NT-Debug;netcoreapp2.1-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release;netstandard1.2-Debug;netstandard1.2-Release;netstandard1.3-Debug;netstandard1.3-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uap10.0.16299-Windows_NT-Debug;uap10.0.16299-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.1-Debug;netcoreapp2.1-Release;netcoreapp2.1-Unix-Debug;netcoreapp2.1-Unix-Release;netcoreapp2.1-Windows_NT-Debug;netcoreapp2.1-Windows_NT-Release;netstandard2.0-Unix-Debug;netstandard2.0-Unix-Release;netstandard2.0-Windows_NT-Debug;netstandard2.0-Windows_NT-Release;</Configurations>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp'">
-    <Compile Include="$(CommonPath)\CoreLib\System\Diagnostics\CodeAnalysis\NullableAttributes.cs">
-      <Link>Common\CoreLib\System\Diagnostics\CodeAnalysis\NullableAttributes.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' OR '$(TargetsNetCoreApp)' == 'true' OR '$(IsUAPAssembly)' == 'true' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="System.Data.SqlClient.TypeForwards.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS' AND '$(TargetsNetCoreApp)' == 'true'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' and '$(OSGroup)' != 'AnyOS' and '$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="System\Data\SqlClient\PoolBlockingPeriod.cs" />
     <Compile Include="Microsoft\SqlServer\Server\SqlFacetAttribute.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' and '$(OSGroup)' != 'AnyOS'">
     <Compile Include="Microsoft\SqlServer\Server\ITypedGetters.cs" />
     <Compile Include="Microsoft\SqlServer\Server\ITypedGettersV3.cs" />
     <Compile Include="Microsoft\SqlServer\Server\ITypedSetters.cs" />
@@ -220,11 +212,11 @@
     <Compile Include="System\Data\SqlClient\SqlCredential.cs" />
   </ItemGroup>
   <!-- SqlFileStream Unix Netcoreapp only -->
-  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' AND '$(TargetsUnix)' == 'true'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' and '$(TargetsUnix)' == 'true'">
     <Compile Include="System\Data\SqlClient\SqlFileStream.Unsupported.cs" />
   </ItemGroup>
   <!-- SqlFileStream Windows Netcoreapp only -->
-  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' AND '$(TargetsWindows)' == 'true'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' and '$(TargetsWindows)' == 'true'">
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FileTypes.cs">
       <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.FileTypes.cs</Link>
     </Compile>
@@ -236,6 +228,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Windows.cs">
       <Link>Common\CoreLib\System\IO\PathInternal.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Runtime\InteropServices\SuppressGCTransitionAttribute.internal.cs" Condition="'$(TargetGroup)' != 'netcoreapp'">
+      <Link>Common\System\Runtime\InteropServices\SuppressGCTransitionAttribute.internal.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
       <Link>CoreLib\System\Text\ValueStringBuilder.cs</Link>
@@ -278,7 +273,7 @@
     </Compile>
     <Compile Include="System\Data\SqlClient\SqlFileStream.Windows.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS' AND '$(TargetsNetCoreApp)' == 'true'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' and '$(OSGroup)' != 'AnyOS' and '$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="System\Data\Common\DbConnectionStringCommon.NetCoreApp.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPool.NetCoreApp.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnectionString.NetCoreApp.cs" />
@@ -287,13 +282,13 @@
     <Compile Include="System\Data\SqlClient\TdsParser.NetCoreApp.cs" />
     <Compile Include="System\Data\SqlClient\SNI\SNIPacket.NetCoreApp.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS' AND '$(TargetsNetCoreApp)' != 'true'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' and '$(OSGroup)' != 'AnyOS' and '$(TargetsNetCoreApp)' != 'true'">
     <Compile Include="System\Data\SqlClient\SqlDelegatedTransaction.NetStandard.cs" />
     <Compile Include="System\Data\SqlClient\TdsParser.NetStandard.cs" />
     <Compile Include="System\Data\SqlClient\SNI\SNIPacket.NetStandard.cs" />
   </ItemGroup>
   <!-- Manage the SNI toggle for Windows netstandard and UWP -->
-  <ItemGroup Condition="('$(TargetGroup)' == 'netstandard' OR '$(TargetsNetCoreApp)' == 'true') AND '$(TargetsWindows)' == 'true'">
+  <ItemGroup Condition="('$(TargetFramework)' == 'netstandard2.0' or '$(TargetsNetCoreApp)' == 'true') and '$(TargetsWindows)' == 'true'">
     <!-- Manage the SNI toggle for Windows netstandard and UWP -->
     <Compile Include="System\Data\SqlClient\SNI\SNITcpHandle.Windows.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Windows.cs" />
@@ -301,18 +296,7 @@
     <Compile Include="System\Data\SqlClient\SessionHandle.Windows.cs" />
     <AdditionalFiles Include="$(MSBuildProjectDirectory)/*.analyzerdata.windows" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsUAPAssembly)' == 'true'">
-    <Compile Include="System\Data\SqlClient\SNI\SNITcpHandle.Windows.cs" />
-    <Compile Include="System\Data\SqlClient\TdsParserStateObjectFactory.Managed.cs" />
-    <Compile Include="System\Data\SqlClient\LocalDBAPI.uap.cs" />
-    <Compile Include="System\Data\SqlClient\SNI\LocalDB.uap.cs" />
-    <Compile Include="System\Data\ProviderBase\DbConnectionPoolIdentity.Unix.cs" />
-    <Compile Include="System\Data\SqlClient\TdsParser.Unix.cs" />
-    <Compile Include="System\Data\SqlClient\PacketHandle.Unix.cs" />
-    <Compile Include="System\Data\SqlClient\SessionHandle.Unix.cs" />
-  </ItemGroup>
-  <!-- Assets needed on Windows but should be avoided on UAP to avoid sni.dll -->
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true' and '$(IsUAPAssembly)' != 'true'">
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="System\Data\SqlClient\TdsParserStateObjectNative.cs" />
     <Compile Include="Interop\SNINativeMethodWrapper.Windows.cs" />
     <Compile Include="System\Data\SqlClient\TdsParserSafeHandles.cs" />
@@ -439,7 +423,7 @@
     </Compile>
   </ItemGroup>
   <!-- Common (Windows and Unix) dependencies for MANAGED_SNI build -->
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' and '$(OSGroup)' != 'AnyOS'">
     <Reference Include="System.Memory" />
     <Compile Include="$(CommonPath)\System\Net\ContextFlagsPal.cs">
       <Link>Common\System\Net\ContextFlagsPal.cs</Link>
@@ -466,7 +450,7 @@
       <Link>Common\System\Net\NegotiationInfoClass.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
+  <ItemGroup Condition=" '$(TargetsWindows)' != 'true' And '$(IsPartialFacadeAssembly)' != 'true' and '$(OSGroup)' != 'AnyOS'">
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolIdentity.Unix.cs" />
     <Compile Include="Interop\SNINativeMethodWrapper.Unix.cs" />
     <Compile Include="$(CommonPath)\System\Net\Security\NegotiateStreamPal.Unix.cs">
@@ -516,33 +500,32 @@
     <Compile Include="System\Data\SqlClient\PacketHandle.Unix.cs" />
     <Compile Include="System\Data\SqlClient\SessionHandle.Unix.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true' and '$(IsUAPAssembly)' != 'true'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true'">
     <Reference Include="Microsoft.Win32.Registry" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
-    <Reference Condition="'$(TargetGroup)' != 'netstandard'" Include="System.Data.Common" />
+    <Reference Condition="'$(TargetFramework)' != 'netstandard2.0'" Include="System.Data.Common" />
     <Reference Include="System.Globalization" />
     <Reference Include="System.IO" />
+    <Reference Include="System.ObjectModel" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Xml.ReaderWriter" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' and '$(OSGroup)' != 'AnyOS'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Buffers" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.Primitives" />
-    <Reference Include="System.ComponentModel.TypeConverter" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.DiagnosticSource" />
     <Reference Include="System.Diagnostics.Process" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.Tracing" />
     <Reference Include="System.Linq" />
-    <Reference Include="System.ObjectModel" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation" />
@@ -563,13 +546,10 @@
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Net.NameResolution" />
   </ItemGroup>
-  <ItemGroup Condition="('$(OSGroup)' != 'AnyOS' AND '$(IsUAPAssembly)' == 'true') OR '$(TargetsNetCoreApp)' == 'true'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Reference Include="System.Transactions.Local" />
     <Reference Include="System.Collections.NonGeneric" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System.Data" />
+    <Reference Include="System.ComponentModel.TypeConverter" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\System.Data.SqlClient.SqlMetaData.xml">

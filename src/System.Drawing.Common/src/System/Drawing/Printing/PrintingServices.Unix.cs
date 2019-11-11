@@ -98,11 +98,7 @@ namespace System.Drawing.Printing
             }
             catch (DllNotFoundException)
             {
-#if NETCORE
                 System.Diagnostics.Debug.WriteLine("libcups not found. To have printing support, you need cups installed");
-#else
-                Console.WriteLine("libcups not found. To have printing support, you need cups installed");
-#endif
                 return false;
             }
 
@@ -124,11 +120,7 @@ namespace System.Drawing.Printing
             }
             catch (Exception)
             {
-#if NETCORE
                 System.Diagnostics.Debug.WriteLine("There was an error opening the printer {0}. Please check your cups installation.");
-#else
-                Console.WriteLine("There was an error opening the printer {0}. Please check your cups installation.");
-#endif
             }
             return IntPtr.Zero;
         }
@@ -910,7 +902,7 @@ namespace System.Drawing.Printing
                 default_page_settings.PrinterResolution.X,
                 default_page_settings.PrinterResolution.Y, ref graphics);
 
-            DOCINFO doc = new DOCINFO();
+            DOCINFO doc = default;
             doc.filename = name;
             doc.settings = settings;
             doc.default_page_settings = default_page_settings;

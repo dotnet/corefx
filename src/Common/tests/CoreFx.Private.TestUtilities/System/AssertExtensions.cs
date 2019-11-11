@@ -21,6 +21,12 @@ namespace System
             Assert.Equal(expectedMessage, Assert.Throws<T>(action).Message);
         }
 
+        public static void ThrowsContains<T>(Action action, string expectedMessageContent)
+            where T : Exception
+        {
+            Assert.Contains(expectedMessageContent, Assert.Throws<T>(action).Message);
+        }
+
         public static void Throws<T>(string netCoreParamName, string netFxParamName, Action action)
             where T : ArgumentException
         {
@@ -351,7 +357,7 @@ namespace System
         /// </summary>
         /// <param name="expected">The array that <paramref name="actual"/> should be equal to.</param>
         /// <param name="actual"></param>
-        public static void Equal<T>(T[] expected, T[] actual) where T: IEquatable<T>
+        public static void Equal<T>(T[] expected, T[] actual) where T : IEquatable<T>
         {
             // Use the SequenceEqual to compare the arrays for better performance. The default Assert.Equal method compares
             // the arrays by boxing each element that is very slow for large arrays.
@@ -416,7 +422,7 @@ namespace System
                 exception = ex;
             }
 
-            if ( exception == null)
+            if (exception == null)
             {
                 throw new ThrowsException(typeof(E));
             }
