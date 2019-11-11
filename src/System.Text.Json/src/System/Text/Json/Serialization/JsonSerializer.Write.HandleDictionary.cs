@@ -79,7 +79,12 @@ namespace System.Text.Json
                     var enumerator = (IDictionaryEnumerator)state.Current.CollectionEnumerator;
                     object value = enumerator.Value;
                     state.Push(elementClassInfo, value);
-                    state.Current.KeyName = options.DictionaryKeyPolicy?.ConvertName((string)enumerator.Key) ?? (string)enumerator.Key;
+                    var key = (string)enumerator.Key;
+                    if (options?.DictionaryKeyPolicy != null && state.Current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing)
+                    {
+                        key = options.DictionaryKeyPolicy.ConvertName(key);
+                    }
+                    state.Current.KeyName = key;
                 }
 
                 return false;

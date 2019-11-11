@@ -187,7 +187,7 @@ namespace System.Text.Json.Serialization.Tests
         }
         
         [Fact]
-        public static void CamelCaseSerialize_ForNonPrimitiveTypes()
+        public static void CamelCaseSerialize_ApplyDictionaryKeyPolicy()
         {
             const string JsonCamel = @"{""keyDict"":{""keyString"":""text"",""keyNumber"":1000,""keyBool"":true},""keyList"":[1,2,3]}";
             var options = new JsonSerializerOptions
@@ -210,6 +210,30 @@ namespace System.Text.Json.Serialization.Tests
             });
             
             Assert.Equal(JsonCamel, json);
+        }
+        
+        [Fact]
+        public static void SerializationWithJsonExtensionDataAttribute_IgoneDictionaryKeyPolicy()
+        {
+            var expectedJson = @"{""KeyInt"":1000,""KeyString"":""text"",""KeyBool"":true}";
+            var obj = new ClassWithExtensionDataProperty();
+            obj.Data = new Dictionary<string, object>()
+            {
+                { "KeyInt", 1000 },
+                { "KeyString", "text" },
+                { "KeyBool", true }
+            };
+            string json = JsonSerializer.Serialize(obj, new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            });
+            Assert.Equal(expectedJson, json);
+        }
+
+        private class ClassWithExtensionDataProperty
+        {
+           [JsonExtensionData]
+            public Dictionary<string, object> Data { get; set; }
         }
     }
 }
