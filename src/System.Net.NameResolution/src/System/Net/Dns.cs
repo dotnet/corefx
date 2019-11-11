@@ -35,7 +35,7 @@ namespace System.Net
 
             if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"Invalid address {address}");
+                if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"Invalid address '{address}'");
                 throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, nameof(address)));
             }
 
@@ -61,7 +61,7 @@ namespace System.Net
             {
                 if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
                 {
-                    if (NetEventSource.IsEnabled) NetEventSource.Error(hostNameOrAddress, $"Invalid address {address}");
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"Invalid address '{address}'");
                     throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, nameof(hostNameOrAddress)));
                 }
 
@@ -82,8 +82,8 @@ namespace System.Net
             {
                 NetEventSource.Enter(hostNameOrAddress, hostNameOrAddress);
                 Task<IPHostEntry> t = GetHostEntryCoreAsync(hostNameOrAddress, justReturnParsedIp: false, throwOnIIPAny: true);
-                t.ContinueWith((t, o) => NetEventSource.Exit(hostNameOrAddress, $"{t.Result} with {((IPHostEntry)t.Result).AddressList.Length} entries"),
-                    null, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+                t.ContinueWith((t, s) => NetEventSource.Exit((string)s, $"{t.Result} with {((IPHostEntry)t.Result).AddressList.Length} entries"),
+                    hostNameOrAddress, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
                 return t;
             }
             else
@@ -105,13 +105,13 @@ namespace System.Net
 
             if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"Invalid address {address}");
+                if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"Invalid address '{address}'");
                 throw new ArgumentException(SR.net_invalid_ip_addr, nameof(address));
             }
 
             return RunAsync(s => {
                     IPHostEntry ipHostEntry = GetHostEntryCore((IPAddress)s);
-                    if (NetEventSource.IsEnabled) NetEventSource.Exit(address, $"{ipHostEntry} with {ipHostEntry.AddressList.Length} entries");
+                    if (NetEventSource.IsEnabled) NetEventSource.Exit((IPAddress)s, $"{ipHostEntry} with {ipHostEntry.AddressList.Length} entries");
                     return ipHostEntry;
                 }, address);
         }
@@ -162,7 +162,7 @@ namespace System.Net
             {
                 if (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any))
                 {
-                    if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"Invalid address {address}");
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"Invalid address '{address}'");
                     throw new ArgumentException(SR.Format(SR.net_invalid_ip_addr, nameof(hostNameOrAddress)));
                 }
 
@@ -406,7 +406,7 @@ namespace System.Net
 
             if (errorCode != SocketError.Success)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"forward lookup for {name} failed with {errorCode}");
+                if (NetEventSource.IsEnabled) NetEventSource.Error(address, $"forward lookup for '{name}' failed with {errorCode}");
             }
 
             // One of three things happened:
@@ -445,7 +445,7 @@ namespace System.Net
             {
                 if (throwOnIIPAny && (ipAddress.Equals(IPAddress.Any) || ipAddress.Equals(IPAddress.IPv6Any)))
                 {
-                    if (NetEventSource.IsEnabled) NetEventSource.Error(hostName, $"Invalid address {ipAddress}");
+                    if (NetEventSource.IsEnabled) NetEventSource.Error(hostName, $"Invalid address '{ipAddress}'");
                     throw new ArgumentException(SR.net_invalid_ip_addr, nameof(hostName));
                 }
 
