@@ -83,7 +83,7 @@ namespace Microsoft.Win32.SafeHandles
             status = Interop.NetSecurityNative.AcquireAcceptorCred(out minorStatus, out retHandle);
             if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
             {
-                throw new Interop.NetSecurityNative.GssApiException(status, minorStatus, null);
+                throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
             }
 
             return retHandle;
@@ -125,7 +125,7 @@ namespace Microsoft.Win32.SafeHandles
                 if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
                 {
                     retHandle.Dispose();
-                    throw new Interop.NetSecurityNative.GssApiException(status, minorStatus, null);
+                    throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
                 }
             }
 

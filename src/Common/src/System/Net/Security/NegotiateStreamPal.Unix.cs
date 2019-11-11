@@ -255,15 +255,15 @@ namespace System.Net.Security
                     throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
                 }
 
-                byte[] tokenBytes = token.ToByteArray();
+                ReadOnlySpan<byte> tokenBytes = token.Span;
                 int length = tokenBytes.Length;
                 if (length > 0 && tokenBytes[length - 1] == '\0')
                 {
                     // Some GSS-API providers (gss-ntlmssp) include the terminating null with strings, so skip that.
-                    --length;
+                    tokenBytes = tokenBytes.Slice(0, length - 1);
                 }
 
-                return Encoding.UTF8.GetString(tokenBytes, 0, length);
+                return Encoding.UTF8.GetString(tokenBytes);
             }
             finally
             {
@@ -288,7 +288,7 @@ namespace System.Net.Security
                 if (NetEventSource.IsEnabled)
                 {
                     string protocol = isNtlmOnly ? "NTLM" : "SPNEGO";
-                    NetEventSource.Info(null, $"requested protocol = {protocol}, target = {targetName}");
+                    NetEventSource.Info(context, $"requested protocol = {protocol}, target = {targetName}");
                 }
 
                 context = new SafeDeleteNegoContext(credential, targetName);
@@ -319,7 +319,7 @@ namespace System.Net.Security
                     if (NetEventSource.IsEnabled)
                     {
                         string protocol = isNtlmOnly ? "NTLM" : isNtlmUsed ? "SPNEGO-NTLM" : "SPNEGO-Kerberos";
-                        NetEventSource.Info(null, $"actual protocol = {protocol}");
+                        NetEventSource.Info(context, $"actual protocol = {protocol}");
                     }
 
                     // Populate protocol used for authentication
@@ -435,7 +435,7 @@ namespace System.Net.Security
                     if (NetEventSource.IsEnabled)
                     {
                         string protocol = isNtlmUsed ? "SPNEGO-NTLM" : "SPNEGO-Kerberos";
-                        NetEventSource.Info(null, $"AcceptSecurityContext: actual protocol = {protocol}");
+                        NetEventSource.Info(securityContext, $"AcceptSecurityContext: actual protocol = {protocol}");
                     }
 
                     negoContext.SetAuthenticationPackage(isNtlmUsed);

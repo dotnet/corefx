@@ -21,11 +21,7 @@ namespace System.Net.Security
         {
             get
             {
-                if (_acceptorCredential == null)
-                {
-                    _acceptorCredential = SafeGssCredHandle.CreateAcceptor();
-                }
-
+                _acceptorCredential ??= SafeGssCredHandle.CreateAcceptor();
                 return _acceptorCredential;
             }
         }
