@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text.Json.Serialization.Tests.Schemas.BlogPost;
+using System.Text.Json.Serialization.Tests.Schemas.Order;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -265,17 +265,17 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Theory]
-        [InlineData(1, true, true)]
-        [InlineData(1, true, false)]
+//      [InlineData(1, true, true)]   ActiveIssue https://github.com/dotnet/corefx/issues/41598
+//      [InlineData(1, true, false)]
         [InlineData(1, false, true)]
         [InlineData(1, false, false)]
-        [InlineData(10, true, false)]
+//        [InlineData(10, true, false)]
         [InlineData(10, false, false)]
-        [InlineData(100, true, false)]
-        [InlineData(1000, true, false)]
+        [InlineData(100, false, false)]
+        [InlineData(1000, false, false)]
         public static async Task VeryLargeJsonFileTest(int payloadSize, bool ignoreNull, bool writeIndented)
         {
-            List<Post> list = PopulateLargeObject(payloadSize);
+            List<Order> list = PopulateLargeObject(payloadSize);
 
             JsonSerializerOptions options = new JsonSerializerOptions
             {
@@ -287,7 +287,7 @@ namespace System.Text.Json.Serialization.Tests
 
             // Sync case.
             {
-                List<Post> deserializedList = JsonSerializer.Deserialize<List<Post>>(json, options);
+                List<Order> deserializedList = JsonSerializer.Deserialize<List<Order>>(json, options);
                 Assert.Equal(payloadSize, deserializedList.Count);
 
                 string jsonSerialized = JsonSerializer.Serialize(deserializedList, options);
@@ -302,30 +302,30 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(json, jsonSerialized);
 
                 memoryStream.Position = 0;
-                List<Post> deserializedList = await JsonSerializer.DeserializeAsync<List<Post>>(memoryStream, options);
+                List<Order> deserializedList = await JsonSerializer.DeserializeAsync<List<Order>>(memoryStream, options);
                 Assert.Equal(payloadSize, deserializedList.Count);
             }
         }
 
         [Theory]
-        [InlineData(1, true, true)]
-        [InlineData(1, true, false)]
+/*        [InlineData(1, true, true)]
+        [InlineData(1, true, false)]*/
         [InlineData(1, false, true)]
         [InlineData(1, false, false)]
-        [InlineData(2, true, false)]
+//        [InlineData(2, true, false)]
         [InlineData(2, false, false)]
-        [InlineData(4, true, false)]
-        [InlineData(8, true, false)]
-        [InlineData(16, true, false)]
+        [InlineData(4, false, false)]
+        [InlineData(8, false, false)]
+        [InlineData(16, false, false)]
         public static async Task DeepNestedJsonFileTest(int depthFactor, bool ignoreNull, bool writeIndented)
         {
             int length = 10 * depthFactor;
-            List<Post>[] posts = new List<Post>[length];
-            posts[0] = PopulateLargeObject(1);
+            List<Order>[] orders = new List<Order>[length];
+            orders[0] = PopulateLargeObject(1);
             for (int i = 1; i < length; i++ )
             {
-                posts[i] = PopulateLargeObject(1);
-                posts[i - 1][0].Value.PrimaryTopic.RelatedTopics = posts[i];
+                orders[i] = PopulateLargeObject(1);
+                orders[i - 1][0].RelatedOrder = orders[i];
             }
 
             JsonSerializerOptions options = new JsonSerializerOptions()
@@ -334,11 +334,11 @@ namespace System.Text.Json.Serialization.Tests
                 IgnoreNullValues = ignoreNull,
                 WriteIndented = writeIndented
             };
-            string json = JsonSerializer.Serialize(posts[0], options);
+            string json = JsonSerializer.Serialize(orders[0], options);
 
             // Sync case.
             {
-                List<Post> deserializedList = JsonSerializer.Deserialize<List<Post>>(json, options);
+                List<Order> deserializedList = JsonSerializer.Deserialize<List<Order>>(json, options);
 
                 string jsonSerialized = JsonSerializer.Serialize(deserializedList, options);
                 Assert.Equal(json, jsonSerialized);
@@ -347,12 +347,12 @@ namespace System.Text.Json.Serialization.Tests
             // Async case.
             using (var memoryStream = new MemoryStream())
             {
-                await JsonSerializer.SerializeAsync(memoryStream, posts[0], options);
+                await JsonSerializer.SerializeAsync(memoryStream, orders[0], options);
                 string jsonSerialized = Encoding.UTF8.GetString(memoryStream.ToArray());
                 Assert.Equal(json, jsonSerialized);
 
                 memoryStream.Position = 0;
-                List<Post> deserializedList = await JsonSerializer.DeserializeAsync<List<Post>>(memoryStream, options);
+                List<Order> deserializedList = await JsonSerializer.DeserializeAsync<List<Order>>(memoryStream, options);
             }
         }
 
@@ -362,14 +362,14 @@ namespace System.Text.Json.Serialization.Tests
         public static async Task DeepNestedJsonFileCircularDependencyTest(int depthFactor)
         {
             int length = 10 * depthFactor;
-            List<Post>[] posts = new List<Post>[length];
-            posts[0] = PopulateLargeObject(1000);
+            List<Order>[] orders = new List<Order>[length];
+            orders[0] = PopulateLargeObject(1000);
             for (int i = 1; i < length; i++)
             {
-                posts[i] = PopulateLargeObject(1);
-                posts[i - 1][0].Value.PrimaryTopic.RelatedTopics = posts[i];
+                orders[i] = PopulateLargeObject(1);
+                orders[i - 1][0].RelatedOrder = orders[i];
             }
-            posts[length - 1][0].Value.PrimaryTopic.RelatedTopics = posts[0];
+            orders[length - 1][0].RelatedOrder = orders[0];
 
             JsonSerializerOptions options = new JsonSerializerOptions()
             {
@@ -377,11 +377,11 @@ namespace System.Text.Json.Serialization.Tests
                 IgnoreNullValues = true
             };
 
-            Assert.Throws<JsonException> (() => JsonSerializer.Serialize(posts[0], options));
+            Assert.Throws<JsonException> (() => JsonSerializer.Serialize(orders[0], options));
 
             using (var memoryStream = new MemoryStream())
             {
-                await Assert.ThrowsAsync<JsonException>(async () => await JsonSerializer.SerializeAsync(memoryStream, posts[0], options));
+                await Assert.ThrowsAsync<JsonException>(async () => await JsonSerializer.SerializeAsync(memoryStream, orders[0], options));
             }
         }
 
@@ -444,454 +444,186 @@ namespace System.Text.Json.Serialization.Tests
             return list;
         }
 
-        private static List<Post> PopulateLargeObject(int size)
+        private static List<Order> PopulateLargeObject(int size)
         {
-            List<Post> posts = new List<Post>(size);
+            List<Order> orders = new List<Order>(size);
             for (int i = 0; i < size; i++)
             {
-                Post post = new Post
+                Order order = new Order
                 {
-                    Value = new Value
+                    OrderNumber = i,
+                    Customer = new User
                     {
-                        Id = Guid.NewGuid(),
-                        VersionId = $"version{i}",
-                        CreatorId = $"{i}creatorId",
-                        HomeCollectionId = $"HomeCollectionId{i}",
-                        Title = $"The Adventure of the Engineer’s Thumb {i}",
-                        LatestVersion = $"LatestVersion{i}.{i}",
-                        LatestPublishedVersion = $"LatestPublishedVersion{i}",
-                        DetectedLanguage = "en",
-                        HasUnpublishedEdits = i % 2 == 0,
-                        Vote = i % 2 == 1,
-                        LatestRev = size + i,
-                        CreatedAt = DateTime.Today,
-                        DeletedAt = DateTime.Now.AddDays(i),
-                        FirstPublishedAt = DateTime.Today,
-                        UpdatedAt = DateTime.Now,
-                        ExperimentalCss = string.Empty,
-                        DisplayAuthor = $"Author: {i}",
-                        Content = new Content()
-                        {
-                            Subtitle = $"The Five Orange Pips {i}",
-                            BodyModel = new BodyModel()
-                            {
-                                Paragraphs = new List<Paragraph>(),  
-                                Sections = new List<Section>()
-                            },
-                            PostDisplay = new PostDisplay { Coverless = i % 3 == 0 }
-                        },
-                        Virtuals = new Virtuals
-                        {
-                            AllowNotes = i % 2 == 0,
-                            PreviewImage = new PreviewImage
-                            {
-                                ImageId = $"1-Image-{i}.jpeg",  
-                                OriginalWidth = 1200 + i,
-                                OriginalHeight = 400 + i,
-                                Strategy = "resample",
-                                Height = i,
-                                Width = i + i
-                            },
-                            WordCount = 1000 + i,
-                            ImageCount = i,
-                            ReadingTime = 3.14 + i,
-                            Subtitle = "Lorem ipsam subtitle of virtuals",
-                            UserPostRelation = new UserPostRelation
-                            {
-                                UserId = $"UserPostRelation_UsrId{i}",
-                                PostId = $"UserPostRelation_PostId{i}",
-                                ViewedAt = DateTime.Now,
-                                PresentedCountInStream = i,
-                                LastReadSectionName = $"Last Read Section {i}",
-                                ClapCount = 0
-                            },
-                            UsersBySocialRecommends = new List<object>(),
-                            NoIndex = false,
-                            IsBookmarked = true,
-                            Recommends = 10 + i,
-                            Tags = new List<Tag>
-                            {
-                                new Tag
-                                {
-                                    Slug = "csharp",
-                                    Name = "C#",
-                                    PostCount = 98130,
-                                    Metadata = new Metadata1
-                                    {
-                                        PostCount = 98130,
-                                        CoverImage = new CoverImage
-                                        {
-                                            Id = "CoverImageId.png",
-                                            OriginalWidth = 1112,
-                                            OriginalHeight = 556,
-                                            IsFeatured = true,
-                                            FocusPercentX = 30,
-                                            FocusPercentY = 44
-                                        }
-                                    },
-                                    Type = "Tag"
-                                },
-                                new Tag
-                                {
-                                    Slug =  "software-engineering",
-                                    Name = "Software Engineering",
-                                    PostCount = 62810,
-                                    Metadata = new Metadata1
-                                    {
-                                        PostCount = 62810,
-                                        CoverImage = new CoverImage
-                                        {
-                                            Id = "cover-image-id-b",
-                                            OriginalWidth = 812,
-                                            OriginalHeight = 461,
-                                            IsFeatured = true,
-                                            UnsplashPhotoId = "PhotoId1"
-                                        }
-                                    },
-                                    Type = "Tag"
-                                }
-                            },
-                            SocialRecommendsCount = i / 2,
-                            ResponsesCreatedCount = 2 + i,
-                            Links = new Links {
-                                Entries = new List<Entry>
-                                {
-                                    new Entry
-                                    {
-                                        Url = new Uri("http://dotnet.test/link/entries/entry/1"),
-                                        Alts = new List<Alt>(),
-                                        HttpStatus = HttpStatusCode.OK
-                                    },
-                                    new Entry
-                                    {
-                                        Url = new Uri("http://dotnet.test/link/entries/entry/2"),
-                                        Alts = new List<Alt>
-                                        {
-                                            new Alt
-                                            {
-                                                Type = 3,
-                                                Url = new Uri("http://dotnet.test/link/entries/alts/1")
-                                            },
-                                            new Alt
-                                            {
-                                                Type = 2,
-                                                Url = new Uri("http://dotnet.test/link/entries/alts/2")
-                                            }
-                                        },
-                                        HttpStatus = HttpStatusCode.Accepted
-                                    }
-                                },
-                                Version = $"0.{i}",
-                                GeneratedAt = new DateTime(2019, 12, 28)
-                            },
-                            IsLockedPreviewOnly = false,
-                            TotalClapCount = 4000 + i,
-                            SectionCount = i,
-                            Topics = new List<Topic>
-                            {
-                                new Topic
-                                {
-                                    TopicId = "TopicID52b64",
-                                    Slug = "development",
-                                    CreatedAt  = 1493934116328,
-                                    DeletedAt = 0,
-                                    Image = new Image
-                                    {
-                                        Id = "1*TopitImageid@2x.jpeg",
-                                        OriginalWidth = 6016,
-                                        OriginalHeight = 4016
-                                    },
-                                    Name = "Development",
-                                    Description = "Once upon a time.",
-                                    RelatedTopics = new List<Post>(),
-                                    Visibility = 1,
-                                    Type = "Topic"
-                                 }
-                            }
-                        },
-                        Coverless = i % 3 == 0,
-                        Slug = $"Lorem ipsam mampsa sorem{i}",
-                        TranslationSourcePostId = string.Empty,
-                        TranslationSourceCreatorId = string.Empty,
-                        IsApprovedTranslation = false,
-                        InResponseToPostId = string.Empty,
-                        InResponseToRemovedAt = i,
-                        IsTitleSynthesized = false,
-                        AllowResponses = true,
-                        ImportedUrl = string.Empty,
-                        ImportedPublishedAt = 0,
-                        Visibility = 1,
-                        UniqueSlug = $"There were doors all round the hall, but they were all locked {i}",
-                        PreviewContent = new PreviewContent {
-                            BodyModel = new BodyModel
-                            {
-                                Paragraphs = new List<Paragraph>
-                                {
-                                    new Paragraph
-                                    {
-                                        Name = "previewImage",
-                                        Type = 4,
-                                        Text = string.Empty,
-                                        Layout = 10,
-                                        Metadata = new Metadata
-                                        {
-                                            Id = "1-pararagraph-id.jpeg",
-                                            OriginalWidth = 1200,
-                                            OriginalHeight = 412,
-                                            IsFeatured = true
-                                        }
-                                    },
-                                    new Paragraph
-                                    {
-                                        Name = "Paragraph 2",
-                                        Type = 3,
-                                        Text = "There were doors all round the hall, but they were all locked",
-                                        Markups = new List<Markup>(),
-                                        Alignment = 1
-                                    },
-                                    new Paragraph
-                                    {
-                                        Name = "Paragraph 3",
-                                        Type = 13,
-                                        Text = "There were doors all round the hall, but they were all locked",
-                                        Markups = new List<Markup>
-                                        {
-                                            new Markup
-                                            {
-                                                Type = 3,
-                                                Start = 35,
-                                                End = 42,
-                                                Href = new Uri("http://dotnet.test/markup"),
-                                                Title = string.Empty,
-                                                Rel = string.Empty,
-                                                AnchorType = 0
-                                            } 
-                                        },
-                                        Alignment = 1
-                                    }
-                                },
-                                Sections = new List<Section>
-                                {
-                                    new Section
-                                    {
-                                        StartIndex = 0  
-                                    }
-                                }
-                            },
-                            IsFullContent = false,
-                            Subtitle = "There were doors all round the hall, but they were all locked"
-                        },
-                        License = i,
-                        InResponseToMediaResourceId = string.Empty,
-                        CanonicalUrl = new Uri("http://dotnet.test/CanonicalUrl"),
-                        ApprovedHomeCollectionId = string.Empty,
-                        NewsletterId = string.Empty + i,
-                        WebCanonicalUrl = new Uri("http://dotnet.test/WebCanonicalUrl"),
-                        MediumUrl = new Uri("http://dotnet.test/MediumUrl"),
-                        MigrationId = string.Empty,
-                        NotifyFollowers = true,
-                        NotifyFacebook = false,
-                        NotifyTwitter = false,
-                        ResponseHiddenOnParentPostAt = 0,
-                        IsSeries = false,
-                        IsSubscriptionLocked = false,
-                        SeriesLastAppendedAt = 0,
-                        AudioVersionDurationSec = 0,
-                        SequenceId = string.Empty,
-                        IsNsfw = false,
-                        IsEligibleForRevenue = false,
-                        IsBlockedFromHightower = false,
-                        LockedPostSource = 0,
-                        HightowerMinimumGuaranteeStartsAt = 0,
-                        HightowerMinimumGuaranteeEndsAt = 0,
-                        FeatureLockRequestAcceptedAt = i,
-                        MongerRequestType = 1,
-                        LayerCake = i + 2,
-                        SocialTitle = string.Empty,
-                        SocialDek = $"Social dek{i}",
-                        EditorialPreviewTitle = string.Empty,
-                        EditorialPreviewDek = string.Empty,
-                        CurationEligibleAt = i,
-                        PrimaryTopic = new Topic
-                        {
-                            TopicId = $"{i}decTopicId",
-                            Slug = "programming",
-                            CreatedAt = 1493934116328,
-                            DeletedAt = 0,
-                            Image = new Image
-                            {
-                                
-                            },
-                            Name = "Programming",
-                            Description = "Lorem ipsam programming.",
-                            RelatedTopics = new List<Post>(),
-                            Visibility = i,
-                            RelatedTags = new List<object>(),
-                            RelatedTopicIds = new List<object>(),
-                            Type = "Topic"
-                        },
-                        PrimaryTopicId = $"{i}PrimaryTopicId",
-                        IsProxyPost = false,
-                        ProxyPostFaviconUrl = string.Empty,
-                        ProxyPostProviderName = "ProxyPostProviderName",
-                        ProxyPostType = 0,
-                        Type = "Post"
+                        UserId = "222ffbbb888kkk",
+                        Name = "John Doe",
+                        Username = "johndoe",
+                        CreatedAt = new DateTime(),
+                        ImageId = string.Empty,
+                        UserType = UserType.Customer,
+                        UpdatedAt = new DateTime(),
+                        TwitterId = string.Empty,
+                        FacebookId = "9988998877662222111",
+                        SubscriptionType = 2,
+                        IsNew = true,
+                        IsEmployee = false
                     },
-                    MentionedUsers = new List<MentionedUser>
+                    ShippingInfo = new List<ShippingInfo>
                     {
-                        new MentionedUser()
+                        new ShippingInfo()
                         {
-                            UserId = "cccccaaaabbbbbb",
-                            Name = "Lorem Ipsam ",
-                            Username = "loremipsam",
-                            CreatedAt = 1438064675373,
-                            ImageId = string.Empty,
-                            BackgroundImageId = string.Empty,
-                            Bio = string.Empty,
-                            TwitterScreenName = string.Empty,
-                            FacebookAccountId = "9988998877662222111",
-                            AllowNotes = 1,
-                            MediumMemberAt = 0,
-                            IsNsfw = false,
-                            IsWriterProgramEnrolled = true,
-                            IsQuarantined = false,
-                            Type = "User"
+                            OrderNumber = i,
+                            Employee = new User
+                            {
+                                UserId = "222ffbbb888" + i,
+                                Name = "Shipping Coordinator",
+                                Username = "coordinator" + i,
+                                CreatedAt = new DateTime(),
+                                ImageId = string.Empty,
+                                UserType = UserType.Employee,
+                                UpdatedAt = new DateTime(),
+                                TwitterId = string.Empty,
+                                SubscriptionType = 0,
+                                IsEmployee = true
+                            },
+                            CarrierId = "TTT123999MMM",
+                            ShippingType = "Ground",
+                            EstimatedDelivery = new DateTime(),
+                            Tracking = new Uri("http://TestShipCompany.test/track/123" + i),
+                            CarrierName = "TestShipCompany",
+                            HandlingInstruction = "Do cats eat bats? Do cats eat bats. Do cats eat bats? Do cats eat bats. Do cats eat bats? Do cats eat bats. Do cats eat bats? Do cats eat bats",
+                            CurrentStatus = "Out for delivery",
+                            IsDangerous = false
                         }
-                    }, 
-                    Collaborators = new List<Collaborator>
+                    },
+                    OneTime = true,
+                    Cancelled = false,
+                    IsGift = i % 2 == 0,
+                    IsGPickUp = i % 5 == 0,
+                    ShippingAddress = new Address()
                     {
-                        new Collaborator
+                        City = "Redmond"
+                    },
+                    PickupAddress = new Address
+                    {
+                        City = "Bellevue"
+                    },
+                    Coupon = SampleEnumInt64.Max,
+                    UserInteractions = new List<Comment>
+                    {
+                        new Comment
                         {
-                            User  = new User
+                            Id = 200 + i,
+                            OrderNumber = i,
+                            Customer = new User
                             {
                                 UserId = "222ffbbb888kkk",
-                                Name = "Green Field",
-                                Username = "greenfield",
-                                CreatedAt = 1438064675373,
+                                Name = "John Doe",
+                                Username = "johndoe",
+                                CreatedAt = new DateTime(),
                                 ImageId = string.Empty,
-                                BackgroundImageId = string.Empty,
-                                Bio = string.Empty,
-                                TwitterScreenName = string.Empty,
-                                FacebookAccountId = "123456789123465",
-                                AllowNotes = 1,
-                                MediumMemberAt = 0,
-                                IsNsfw = false,
-                                IsWriterProgramEnrolled = true,
-                                IsQuarantined = false,
-                                Type = "User"
+                                UserType = UserType.Customer,
+                                UpdatedAt = new DateTime(),
+                                TwitterId = "twitterId" + i,
+                                FacebookId = "9988998877662222111",
+                                SubscriptionType = 2,
+                                IsNew = true,
+                                IsEmployee = false
                             },
-                            State = "visible"
+                            Title = "Green Field",
+                            Message = "Down, down, down. Would the fall never come to an end! ‘I wonder how many miles I’ve fallen by this time. I think—’ (for, you see, Alice had learnt several things of this sort in her lessons in the schoolroom, and though this was not a very good opportunity for showing off her knowledge, as there was no one to listen to her, still it was good practice to say it over) ‘—yes, that’s about the right distance—but then I wonder what Latitude or Longitude I’ve got to",
+                            Responses = new List<Comment>()
                         }
                     },
-                    HideMeter = false,
-                    CollectionUserRelations = new List<CollectionUserRelation>
+                    Created = new DateTime(2019, 11, 10),
+                    Confirmed = new DateTime(2019, 11, 11),
+                    ShippingDate = new DateTime(2019, 11, 12),
+                    EstimatedDelivery = new DateTime(2019, 11, 15),
+                    ReviewedBy = new User()
                     {
-                        new CollectionUserRelation
-                        {
-                            CollectionId = "6666ddd777ddd",
-                            Role = "ADMIN",
-                            UserId = "9999ddd9999"
-                        }
-                    },
-                    References = new References
-                    {
-                        User = new User
-                        {
-                            UserId = $"777hhh99888",
-                            Username = "johndoe",
-                            Name = "John Doe",
-                            CreatedAt = 1456628553936,
-                            ImageId = $"{i}image-id-A.jpeg",
-                            BackgroundImageId = string.Empty,
-                            Bio = "Do cats eat bats? Do cats eat bats. Do cats eat bats? Do cats eat bats. Do cats eat bats? Do cats eat bats. Do cats eat bats? Do cats eat bats",
-                            TwitterScreenName = "JohnDoe",
-                            SocialStats = new SocialStats
-                            {
-                                UserId = "777hhh99888",
-                                UsersFollowedByCount = 40 + i,
-                                UsersFollowedCount = i,
-                                Type = "SocialStats"
-                            },
-                            Social = new Social
-                            {
-                                UserId = "2299kkhhh77gglll",
-                                TargetUserId = "22kkoobbb777",
-                                Type = "Social"
-                            },
-                            FacebookAccountId = string.Empty,
-                            AllowNotes = 1,
-                            MediumMemberAt = 0,
-                            IsNsfw = false,
-                            IsWriterProgramEnrolled = true,
-                            IsQuarantined = false,
-                            Type = "User"
-                        },
-                        Social = new Social
-                        {
-                            UserId = "888hh99kkk222",
-                            TargetUserId = "2299kkhhh77gglll",
-                            Type = "Social"
-                        },
-                        SocialStats = new SocialStats
-                        {
-                            UserId = "2299kkhhh77gglll",
-                            UsersFollowedByCount = 40 + i,
-                            UsersFollowedCount = i,
-                            Type = "SocialStats"
-                        }
-                    } 
+                        UserId = "222ffbbb888" + i,
+                        Name = "Shipping Coordinator",
+                        Username = "coordinator" + i,
+                        CreatedAt = new DateTime(),
+                        ImageId = string.Empty,
+                        UserType = UserType.Employee,
+                        UpdatedAt = new DateTime(),
+                        TwitterId = string.Empty,
+                        SubscriptionType = 0,
+                        IsEmployee = true
+                    }
                 };
-            
+                List<Product> products = new List<Product>();
                 for (int j = 0; j < i % 4; j++)
                 {
-                    Paragraph purpleParagraph = new Paragraph
+                    Product product = new Product()
                     {
-                        Name = $"a{i}b{j}",
-                        Type = i,
-                        Text = "Down, down, down. Would the fall never come to an end! ‘I wonder how many miles I’ve fallen by this time. I think—’ (for, you see, Alice had learnt several things of this sort in her lessons in the schoolroom, and though this was not a very good opportunity for showing off her knowledge, as there was no one to listen to her, still it was good practice to say it over) ‘—yes, that’s about the right distance—but then I wonder what Latitude or Longitude I’ve got to",
-                        Markups = new List<Markup>(), 
+                        ProductId = Guid.NewGuid(),
+                        Name = "Surface Pro",
+                        SKU = "LL123" + j,
+                        Brand = new TestClassWithInitializedProperties(),
+                        ProductCategory = new SimpleTestClassWithNonGenericCollectionWrappers(),
+                        Description = "Down, down, down. Would the fall never come to an end! ‘I wonder how many miles I’ve fallen by this time. I think—’ (for, you see, Alice had learnt several things of this sort in her lessons in the schoolroom, and though this was not a very good opportunity for showing off her knowledge, as there was no one to listen to her, still it was good practice to say it over) ‘—yes, that’s about the right distance—but then I wonder what Latitude or Longitude I’ve got to",
+                        Created = new DateTime(2000, 10, 12),
+                        Title = "Surface Pro 6 for Business - 512GB",
+                        Price = new Price(),
+                        BestChoice = true,
+                        AverageStars = 4.8f,
+                        Featured = true,
+                        ProductRestrictions = new TestClassWithInitializedProperties(),
+                        SalesInfo = new SimpleTestClassWithGenericCollectionWrappers(),
+                        Origin = SampleEnum.One,
+                        Manufacturer = new BasicCompany(),
+                        Fragile = true,
+                        DetailsUrl = new Uri("http://dotnet.test/link/entries/entry/1"),
+                        NetWeight = 2.7m,
+                        GrossWeight = 3.3m,
+                        Length = i,
+                        Height = i + 1,
+                        Width = i + 2,
+                        FeaturedImage = new FeaturedImage(),
+                        PreviewImage = new PreviewImage(),
+                        KeyWords = new List<string> { "surface", "pro", "laptop" },
+                        RelatedImages = new List<Image>(),
+                        RelatedVideo = new Uri("http://dotnet.test/link/entries/entry/2"),
+                        GuaranteeStartsAt = new DateTime(),
+                        GuaranteeEndsAt = new DateTime(),
+                        IsActive = true,
+                        RelatedProducts = new List<Product>()
                     };
-                    if (j % 2 == 0)
+                    product.SalesInfo.Initialize();
+                    List<Review> reviews = new List<Review>();
+                    for (int k = 0; k < i % 3; k++)
                     {
-                        purpleParagraph.Layout = j;
-                        for (int a = j % 5; a >= 0; a--)
-                        {
-                            purpleParagraph.Markups.Add(new Markup
-                            {
-                                Type = j,
-                                AnchorType = a,
-                                Href = new Uri($"http://github.test/JohnDoe{i}{j}"),
-                                Rel = "nofollow noopener",
-                                Start = i,
-                                End = i + j
-                            });
-                        }                      
-                    }
-                    if (j % 3 == 0)
-                    {
-                        purpleParagraph.Metadata = new Metadata
-                        {
-                            IsFeatured = i % 6 == 0,
-                            Id = $"{i}*{j}paragraph-id.png",
-                            OriginalHeight = 500 + i + j,
-                            OriginalWidth = 500 + i + j
-                        };
-                    }
-                    post.Value.Content.BodyModel.Paragraphs.Add(purpleParagraph);
-                }
 
-                for (int j = 0; j < i % 3; j++)
-                {
-                    Section section = new Section
-                    {
-                        Name = $"ca{i}{j}",
-                        StartIndex = i + j
-                    };
-                    post.Value.Content.BodyModel.Sections.Add(section);
+                        Review review = new Review
+                        {
+                            Customer = new User
+                            {
+                                UserId = "333344445555",
+                                Name = "Customer" + i + k,
+                                Username = "cust" + i + k,
+                                CreatedAt = new DateTime(),
+                                ImageId = string.Empty,
+                                UserType = UserType.Customer,
+                                SubscriptionType = k
+                            },
+                            ProductSku = product.SKU,
+                            CustomerName = "Customer" + i + k,
+                            Stars = j + k,
+                            Title = $"Title {i}{j}{k}",
+                            Comment = "",
+                            Images = new List<Uri>{ new Uri($"http://dotnet.test/link/images/image/{k}"), new Uri($"http://dotnet.test/link/images/image/{j}")},
+                            ReviewId = i + j +k
+                        };
+                        reviews.Add(review);
+                    }
+                    product.Reviews = reviews;
+                    products.Add(product);
                 }
-                posts.Add(post);
+                order.Products = products;
+                orders.Add(order);
             }
-            return posts;
+            return orders;
         }
     }
 
