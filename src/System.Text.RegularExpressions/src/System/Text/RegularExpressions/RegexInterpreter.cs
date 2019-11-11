@@ -884,7 +884,7 @@ namespace System.Text.RegularExpressions
                             break;
                         if (rightChars == 1 && CharAt(Textpos()) != '\r' && CharAt(Textpos()) != '\n')
                             break;
-                        if (rightChars == 2 && (CharAt(Textpos()) != '\r' || CharAt(Textpos()+1) != '\n'))
+                        if (rightChars == 2 && (CharAt(Textpos()) != '\r' || CharAt(Textpos() + 1) != '\n'))
                             break;
                         advance = 0;
                         continue;

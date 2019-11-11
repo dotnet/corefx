@@ -370,7 +370,19 @@ namespace System.Text.RegularExpressions
                         if (UseOptionS())
                             AddUnitSet(RegexCharClass.AnyClass);
                         else
-                            AddUnitNotone('\n');
+                        {
+                            if (UseOptionA())
+                            {
+                                // Allow everything from RegexCharClass.AnyClass except '\r' and '\n'
+                                RegexCharClass anyClass = RegexCharClass.Parse(RegexCharClass.AnyClass);
+                                RegexCharClass lecc = new RegexCharClass(); // line ending character class
+                                lecc.AddChar('\r');
+                                lecc.AddChar('\n');
+                                AddUnitSet(anyClass.AddSubtraction(lecc).ToStringClass());
+                            }
+                            else
+                                AddUnitNotone('\n');
+                        }
                         break;
 
                     case '{':
