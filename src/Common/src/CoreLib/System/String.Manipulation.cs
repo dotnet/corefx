@@ -36,12 +36,12 @@ namespace System
         {
             if (arg0 == null)
             {
-                arg0 = string.Empty;
+                return arg1?.ToString() ?? string.Empty;
             }
 
             if (arg1 == null)
             {
-                arg1 = string.Empty;
+                return arg0?.ToString() ?? string.Empty;
             }
             return Concat(arg0.ToString(), arg1.ToString());
         }
