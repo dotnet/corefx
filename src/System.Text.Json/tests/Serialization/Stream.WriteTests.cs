@@ -269,7 +269,7 @@ namespace System.Text.Json.Serialization.Tests
 //      [InlineData(1, true, false)]
         [InlineData(1, false, true)]
         [InlineData(1, false, false)]
-//        [InlineData(10, true, false)]
+//      [InlineData(10, true, false)]
         [InlineData(10, false, false)]
         [InlineData(100, false, false)]
         [InlineData(1000, false, false)]
