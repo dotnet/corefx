@@ -2,6 +2,7 @@
   <PropertyGroup>
     <!-- The .NET Core product branding version -->
     <ProductVersion>5.0.0</ProductVersion>
+    <AssemblyVersion>5.0.0.0</AssemblyVersion>
     <MajorVersion>5</MajorVersion>
     <MinorVersion>0</MinorVersion>
     <PatchVersion>0</PatchVersion>
