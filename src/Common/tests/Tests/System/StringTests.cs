@@ -4485,16 +4485,24 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("Hello", 'l', '!', "He!!o")] // 2 match, non-vectorised path
-        [InlineData("Hello", 'e', 'e', "Hello")] // oldChar and newChar are same; nothing to replace
-        [InlineData("Hello", 'a', 'b', "Hello")] // No match
-        [InlineData("This is a very nice sentence", 'z', 'y', "This is a very nice sentence")] // No match
+        // -------------------- For Vector<ushort>.Count == 8 (SSE2 / ARM NEON) --------------------
         [InlineData("Aaaaaaaa", 'A', 'a', "aaaaaaaa")] // Single iteration of vectorised path; no remainders through non-vectorised path
         // Three leading 'a's before a match (copyLength > 0), Single iteration of vectorised path; no remainders through non-vectorised path
         [InlineData("aaaAaaaaaaa", 'A', 'a', "aaaaaaaaaaa")]
         // Single iteration of vectorised path; 3 remainders through non-vectorised path
         [InlineData("AaaaaaaaaAa", 'A', 'a', "aaaaaaaaaaa")]
-        // Three matches, vectorised path; 4 remainders through non-vectorised path
+        // ------------------------- For Vector<ushort>.Count == 16 (AVX2) -------------------------
+        [InlineData("AaaaaaaaAaaaaaaa", 'A', 'a', "aaaaaaaaaaaaaaaa")] // Single iteration of vectorised path; no remainders through non-vectorised path
+        // Three leading 'a's before a match (copyLength > 0), Single iteration of vectorised path; no remainders through non-vectorised path
+        [InlineData("aaaAaaaaaaaAaaaaaaa", 'A', 'a', "aaaaaaaaaaaaaaaaaaa")]
+        // Single iteration of vectorised path; 3 remainders through non-vectorised path
+        [InlineData("AaaaaaaaAaaaaaaaaAa", 'A', 'a', "aaaaaaaaaaaaaaaaaaa")]
+        // ----------------------------------- General test data -----------------------------------
+        [InlineData("Hello", 'l', '!', "He!!o")] // 2 match, non-vectorised path
+        [InlineData("Hello", 'e', 'e', "Hello")] // oldChar and newChar are same; nothing to replace
+        [InlineData("Hello", 'a', 'b', "Hello")] // No match
+        [InlineData("This is a very nice sentence", 'z', 'y', "This is a very nice sentence")] // No match
+        // Three matches, vectorised path; 4(128bit)/12(256bit) remainders through non-vectorised path
         [InlineData("This is a very nice sentence", 'i', 'I', "ThIs Is a very nIce sentence")]
         // Three leading 'a's before a match (copyLength > 0), no remainders through non-vectorised path
         [InlineData("aaaAaaaaaaaBAbbbbbbCcccccccDddAdddd", 'A', 'a', "aaaaaaaaaaaBabbbbbbCcccccccDddadddd")]
