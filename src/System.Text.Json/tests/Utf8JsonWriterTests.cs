@@ -4665,7 +4665,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public void OutputConsistentWithJsonEncodedText()
         {
-            string jsonEncodedText = $"{{\"{JsonEncodedText.Encode("propertyName+1")}\": \"{JsonEncodedText.Encode("value+1")}\"}}";
+            string jsonEncodedText = $"{{\"{JsonEncodedText.Encode("propertyName+1")}\":\"{JsonEncodedText.Encode("value+1")}\"}}";
             
             var output = new ArrayBufferWriter<byte>(1024);
 
