@@ -213,15 +213,13 @@ namespace System.Text.Json
             }
 
             JsonClassInfo runtimeClassInfo = jsonPropertyInfo.RuntimeClassInfo;
-            if (runtimeClassInfo.CreateObject != null)
-            {
-                return runtimeClassInfo.CreateObject();
-            }
-            else
+
+            if (runtimeClassInfo.CreateObject == null)
             {
                 ThrowHelper.ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(jsonPropertyInfo.DeclaredPropertyType);
-                return null;
             }
+
+            return runtimeClassInfo.CreateObject();
         }
 
         public static object CreateDictionaryValue(ref ReadStack state)
@@ -254,15 +252,13 @@ namespace System.Text.Json
             }
 
             JsonClassInfo runtimeClassInfo = jsonPropertyInfo.RuntimeClassInfo;
-            if (runtimeClassInfo.CreateObject != null)
-            {
-                return runtimeClassInfo.CreateObject();
-            }
-            else
+
+            if (runtimeClassInfo.CreateObject == null)
             {
                 ThrowHelper.ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(jsonPropertyInfo.DeclaredPropertyType);
-                return null;
             }
+
+            return runtimeClassInfo.CreateObject();
         }
 
         public Type GetElementType()
