@@ -28,6 +28,10 @@
     <Compile Include="InteropTests.cs" />
     <Compile Include="LoadFromFileTests.cs" />
     <Compile Include="NameTests.cs" />
+    <Compile Include="PfxFormatTests.cs" />
+    <Compile Include="PfxFormatTests.SingleCertGenerator.cs" />
+    <Compile Include="PfxFormatTests_Collection.cs" />
+    <Compile Include="PfxFormatTests_SingleCert.cs" />
     <Compile Include="PfxTests.cs" />
     <Compile Include="PropsTests.cs" />
     <Compile Include="PublicKeyTests.cs" />
@@ -59,7 +63,7 @@
     <Compile Include="RSAOther.cs" />
     <Compile Include="TestDataGenerator.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(TargetsOSX)' != 'true' ">
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' and '$(TargetsOSX)' != 'true' ">
     <Compile Include="X509FilesystemTests.Unix.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>

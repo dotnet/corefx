@@ -359,6 +359,16 @@ check_c_source_compiles(
     "
     HAVE_SENDFILE_6)
 
+check_c_source_compiles(
+    "
+    #include <stdlib.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <sys/uio.h>
+    int main(void) { int i = sendfile(0, 0, 0, 0, NULL, NULL, 0); return 0; }
+    "
+    HAVE_SENDFILE_7)
+
 check_symbol_exists(
     clonefile
     "sys/clonefile.h"
@@ -610,6 +620,7 @@ check_c_source_compiles(
     "
     #include <sys/types.h>
     #include <sys/socketvar.h>
+    #include <sys/queue.h>
     #include <netinet/in.h>
     #include <netinet/ip.h>
     #include <netinet/tcp.h>
@@ -735,40 +746,6 @@ if (HAVE_INOTIFY_INIT AND HAVE_INOTIFY_ADD_WATCH AND HAVE_INOTIFY_RM_WATCH)
 elseif (CMAKE_SYSTEM_NAME STREQUAL Linux)
     message(FATAL_ERROR "Cannot find inotify functions on a Linux platform.")
 endif()
-
-check_c_source_compiles(
-    "
-    #include <curl/multi.h>
-    int main(void) { int i = CURLM_ADDED_ALREADY; return 0; }
-    "
-    HAVE_CURLM_ADDED_ALREADY)
-
-check_c_source_compiles(
-    "
-    #include <curl/multi.h>
-    int main(void) { int i = CURL_HTTP_VERSION_2TLS; return 0; }
-    "
-    HAVE_CURL_HTTP_VERSION_2TLS)
-
-check_c_source_compiles(
-    "
-    #include <curl/multi.h>
-    int main(void) { int i = CURLPIPE_MULTIPLEX; return 0; }
-    "
-    HAVE_CURLPIPE_MULTIPLEX)
-
-check_c_source_compiles(
-    "
-    #include <curl/curl.h>
-    int main(void)
-    {
-        int i = CURL_SSLVERSION_TLSv1_0;
-        i = CURL_SSLVERSION_TLSv1_1;
-        i = CURL_SSLVERSION_TLSv1_2;
-        return 0;
-    }
-    "
-    HAVE_CURL_SSLVERSION_TLSv1_012)
 
 option(HeimdalGssApi "use heimdal implementation of GssApi" OFF)
 

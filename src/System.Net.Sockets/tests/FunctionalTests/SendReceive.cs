@@ -766,7 +766,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)] // SendBufferSize, ReceiveBufferSize = 0 not supported on OSX.
+        [PlatformSpecific(~(TestPlatforms.OSX | TestPlatforms.FreeBSD))] // SendBufferSize, ReceiveBufferSize = 0 not supported on BSD like stacks.
         public async Task SendRecv_NoBuffering_Success()
         {
             if (UsesSync) return;
@@ -1207,7 +1207,7 @@ namespace System.Net.Sockets.Tests
                         Assert.Equal(SocketError.Success, error);
                     } while (bytesReceivedTotal != SegmentCount);
 
-                    Assert.Equal(sendBuffer, receiveBuffer);
+                    AssertExtensions.Equal(sendBuffer, receiveBuffer);
                 }
             }
         }

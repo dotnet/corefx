@@ -1616,7 +1616,7 @@ namespace System.Net.Http.Functional.Tests
 
                 using (HttpClient client = CreateHttpClient(handler))
                 {
-                    SetDefaultRequestVersion(client, HttpVersion.Version20);
+                    client.DefaultRequestVersion = HttpVersion.Version20;
                     Task<string> request1 = client.GetStringAsync(url);
 
                     Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
@@ -2089,6 +2089,8 @@ namespace System.Net.Http.Functional.Tests
         }
     }
 
+    // Test only WinHttpHandler since the CurlHandler was removed
+    [PlatformSpecific(TestPlatforms.Windows)]
     public sealed class SocketsHttpHandler_ExternalConfiguration_Test : HttpClientHandlerTestBase
     {
         public SocketsHttpHandler_ExternalConfiguration_Test(ITestOutputHelper output) : base(output) { }

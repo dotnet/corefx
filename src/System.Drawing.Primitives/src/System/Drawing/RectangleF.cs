@@ -16,7 +16,7 @@ namespace System.Drawing
         /// <summary>
         /// Initializes a new instance of the <see cref='System.Drawing.RectangleF'/> class.
         /// </summary>
-        public static readonly RectangleF Empty = new RectangleF();
+        public static readonly RectangleF Empty;
 
         private float x; // Do not rename (binary serialization)
         private float y; // Do not rename (binary serialization)
@@ -258,7 +258,7 @@ namespace System.Drawing
         /// <summary>
         /// Determines if this rectangle intersects with rect.
         /// </summary>
-        public bool IntersectsWith(RectangleF rect) =>
+        public readonly bool IntersectsWith(RectangleF rect) =>
             (rect.X < X + Width) && (X < rect.X + rect.Width) && (rect.Y < Y + Height) && (Y < rect.Y + rect.Height);
 
         /// <summary>
