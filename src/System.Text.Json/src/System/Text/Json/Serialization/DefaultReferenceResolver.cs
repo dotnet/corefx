@@ -2,9 +2,6 @@
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// TODO.
-    /// </summary>
     internal sealed class DefaultReferenceResolver : ReferenceResolver
     {
         private uint _referenceCount;

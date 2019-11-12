@@ -26,6 +26,7 @@
     <Compile Include="System\Text\Json\Serialization\ReferenceHandlingOnSerialize.cs" />
     <Compile Include="System\Text\Json\Serialization\ReferenceHandlingStrategy.cs" />
     <Compile Include="System\Text\Json\Serialization\ReferenceResolver.cs" />
+    <Compile Include="System\Text\Json\Serialization\ResolvedReferenceHandling.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.Serialization.cs" />
     <Compile Include="System\Text\Json\Document\JsonDocument.cs" />
@@ -121,7 +122,6 @@
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.HandleDictionary.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.HandleEnumerable.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.HandleObject.cs" />
-    <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.HandleReference.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.Helpers.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.Stream.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.String.cs" />

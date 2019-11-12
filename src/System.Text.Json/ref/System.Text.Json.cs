@@ -724,17 +724,6 @@ namespace System.Text.Json
         public void WriteStringValue(string value) { }
         public void WriteStringValue(System.Text.Json.JsonEncodedText value) { }
     }
-
-    public abstract class ReferenceResolver
-    {
-        public abstract void AddReference(string key, object value);
-
-        public abstract string GetReference(object value);
-
-        public abstract object ResolveReference(string key);
-
-        public abstract bool IsReferenced(object value);
-    }
 }
 namespace System.Text.Json.Serialization
 {
