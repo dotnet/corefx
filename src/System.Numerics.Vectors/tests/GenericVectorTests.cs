@@ -466,21 +466,9 @@ namespace System.Numerics.Tests
         public void GetHashCodeDouble() { TestGetHashCode<double>(); }
         private void TestGetHashCode<T>() where T : struct
         {
-            T[] values1 = GenerateRandomValuesForVector<T>();
-            Vector<T> v1 = new Vector<T>(values1);
-            int hash = v1.GetHashCode();
-
-            int expected = 0;
-            for (int g = 0; g < Vector<T>.Count; g++)
-            {
-                unchecked
-                {
-                    uint shift5 = ((uint)expected << 5) | ((uint)expected >> 27);
-                    expected = ((int)shift5 + expected) ^ v1[g].GetHashCode();
-                }
-            }
-
-            Assert.Equal(expected, hash);
+            T[] values = GenerateRandomValuesForVector<T>();
+            Vector<T> v = new Vector<T>(values);
+            Assert.Equal(v.GetHashCode(), v.GetHashCode());
         }
 
         [Fact]
@@ -1614,7 +1602,7 @@ namespace System.Numerics.Tests
             }
             while (Util.AnyEqual(values1, values2));
 
-            Array.Copy(values1, 0, values2, 0, Vector<T>.Count / 2);
+            Array.Copy(values1, values2, Vector<T>.Count / 2);
             Vector<T> vec1 = new Vector<T>(values1);
             Vector<T> vec2 = new Vector<T>(values2);
 
@@ -1659,7 +1647,7 @@ namespace System.Numerics.Tests
             }
             while (Util.AnyEqual(values1, values2));
 
-            Array.Copy(values1, 0, values2, 0, Vector<T>.Count / 2);
+            Array.Copy(values1, values2, Vector<T>.Count / 2);
             Vector<T> vec1 = new Vector<T>(values1);
             Vector<T> vec2 = new Vector<T>(values2);
 
@@ -1707,7 +1695,7 @@ namespace System.Numerics.Tests
             }
             while (Util.AnyEqual(values1, values2));
 
-            Array.Copy(values1, 0, values2, 0, Vector<T>.Count / 2);
+            Array.Copy(values1, values2, Vector<T>.Count / 2);
             Vector<T> vec1 = new Vector<T>(values1);
             Vector<T> vec2 = new Vector<T>(values2);
 

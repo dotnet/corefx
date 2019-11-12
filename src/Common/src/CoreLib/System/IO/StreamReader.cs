@@ -471,7 +471,6 @@ namespace System.IO
                 CompressBuffer(2);
                 changedEncoding = true;
             }
-
             else if (_byteBuffer[0] == 0xFF && _byteBuffer[1] == 0xFE)
             {
                 // Little Endian Unicode, or possibly little endian UTF32
@@ -488,7 +487,6 @@ namespace System.IO
                     changedEncoding = true;
                 }
             }
-
             else if (_byteLen >= 3 && _byteBuffer[0] == 0xEF && _byteBuffer[1] == 0xBB && _byteBuffer[2] == 0xBF)
             {
                 // UTF-8
@@ -812,11 +810,9 @@ namespace System.IO
                     }
                     i++;
                 } while (i < _charLen);
+
                 i = _charLen - _charPos;
-                if (sb == null)
-                {
-                    sb = new StringBuilder(i + 80);
-                }
+                sb ??= new StringBuilder(i + 80);
                 sb.Append(_charBuffer, _charPos, i);
             } while (ReadBuffer() > 0);
             return sb.ToString();
@@ -844,7 +840,7 @@ namespace System.IO
 
         private async Task<string?> ReadLineAsyncInternal()
         {
-            if (_charPos == _charLen && (await ReadBufferAsync().ConfigureAwait(false)) == 0)
+            if (_charPos == _charLen && (await ReadBufferAsync(CancellationToken.None).ConfigureAwait(false)) == 0)
             {
                 return null;
             }
@@ -880,7 +876,7 @@ namespace System.IO
 
                         _charPos = tmpCharPos = i + 1;
 
-                        if (ch == '\r' && (tmpCharPos < tmpCharLen || (await ReadBufferAsync().ConfigureAwait(false)) > 0))
+                        if (ch == '\r' && (tmpCharPos < tmpCharLen || (await ReadBufferAsync(CancellationToken.None).ConfigureAwait(false)) > 0))
                         {
                             tmpCharPos = _charPos;
                             if (_charBuffer[tmpCharPos] == '\n')
@@ -896,12 +892,9 @@ namespace System.IO
                 } while (i < tmpCharLen);
 
                 i = tmpCharLen - tmpCharPos;
-                if (sb == null)
-                {
-                    sb = new StringBuilder(i + 80);
-                }
+                sb ??= new StringBuilder(i + 80);
                 sb.Append(tmpCharBuffer, tmpCharPos, i);
-            } while (await ReadBufferAsync().ConfigureAwait(false) > 0);
+            } while (await ReadBufferAsync(CancellationToken.None).ConfigureAwait(false) > 0);
 
             return sb.ToString();
         }
@@ -935,7 +928,7 @@ namespace System.IO
                 int tmpCharPos = _charPos;
                 sb.Append(_charBuffer, tmpCharPos, _charLen - tmpCharPos);
                 _charPos = _charLen;  // We consumed these characters
-                await ReadBufferAsync().ConfigureAwait(false);
+                await ReadBufferAsync(CancellationToken.None).ConfigureAwait(false);
             } while (_charLen > 0);
 
             return sb.ToString();
@@ -968,7 +961,7 @@ namespace System.IO
             ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
-            Task<int> task = ReadAsyncInternal(new Memory<char>(buffer, index, count), default).AsTask();
+            Task<int> task = ReadAsyncInternal(new Memory<char>(buffer, index, count), CancellationToken.None).AsTask();
             _asyncReadTask = task;
 
             return task;
@@ -995,7 +988,7 @@ namespace System.IO
 
         internal override async ValueTask<int> ReadAsyncInternal(Memory<char> buffer, CancellationToken cancellationToken)
         {
-            if (_charPos == _charLen && (await ReadBufferAsync().ConfigureAwait(false)) == 0)
+            if (_charPos == _charLen && (await ReadBufferAsync(cancellationToken).ConfigureAwait(false)) == 0)
             {
                 return 0;
             }
@@ -1225,7 +1218,7 @@ namespace System.IO
             return new ValueTask<int>(t);
         }
 
-        private async ValueTask<int> ReadBufferAsync()
+        private async ValueTask<int> ReadBufferAsync(CancellationToken cancellationToken)
         {
             _charLen = 0;
             _charPos = 0;
@@ -1242,7 +1235,7 @@ namespace System.IO
                 {
                     Debug.Assert(_bytePos <= _encoding.Preamble.Length, "possible bug in _compressPreamble. Are two threads using this StreamReader at the same time?");
                     int tmpBytePos = _bytePos;
-                    int len = await tmpStream.ReadAsync(new Memory<byte>(tmpByteBuffer, tmpBytePos, tmpByteBuffer.Length - tmpBytePos)).ConfigureAwait(false);
+                    int len = await tmpStream.ReadAsync(new Memory<byte>(tmpByteBuffer, tmpBytePos, tmpByteBuffer.Length - tmpBytePos), cancellationToken).ConfigureAwait(false);
                     Debug.Assert(len >= 0, "Stream.Read returned a negative number!  This is a bug in your stream class.");
 
                     if (len == 0)
@@ -1264,7 +1257,7 @@ namespace System.IO
                 else
                 {
                     Debug.Assert(_bytePos == 0, "_bytePos can be non zero only when we are trying to _checkPreamble. Are two threads using this StreamReader at the same time?");
-                    _byteLen = await tmpStream.ReadAsync(new Memory<byte>(tmpByteBuffer)).ConfigureAwait(false);
+                    _byteLen = await tmpStream.ReadAsync(new Memory<byte>(tmpByteBuffer), cancellationToken).ConfigureAwait(false);
                     Debug.Assert(_byteLen >= 0, "Stream.Read returned a negative number!  Bug in stream class.");
 
                     if (_byteLen == 0)  // We're at EOF
@@ -1330,7 +1323,6 @@ namespace System.IO
                 return -1;
             }
 
-            [SuppressMessage("Microsoft.Contracts", "CC1055")]  // Skip extra error checking to avoid *potential* AppCompat problems.
             public override int Read(char[] buffer, int index, int count)
             {
                 return 0;

@@ -658,15 +658,20 @@ namespace System.Linq
 
             public int GetCount(bool onlyIfCheap)
             {
-                // In case someone uses Count() to force evaluation of
-                // the selector, run it provided `onlyIfCheap` is false.
-
                 if (!onlyIfCheap)
                 {
+                    // In case someone uses Count() to force evaluation of
+                    // the selector, run it provided `onlyIfCheap` is false.
+
+                    int count = 0;
+
                     foreach (TSource item in _source)
                     {
                         _selector(item);
+                        checked { count++; }
                     }
+
+                    return count;
                 }
 
                 return _source.GetCount(onlyIfCheap);
@@ -678,6 +683,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
+        [DebuggerDisplay("Count = {Count}")]
         private sealed class SelectListPartitionIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
         {
             private readonly IList<TSource> _source;

@@ -4,8 +4,13 @@ setlocal
 :SetupArgs
 :: Initialize the args that will be passed to cmake
 set __nativeWindowsDir=%~dp0\Windows
-set __artifactsDir=%~dp0..\..\artifacts
-set __rootDir=%~dp0..\..
+:: TODO: (Consolidation) Remove when consolidated
+if exist "%~dp0..\..\..\.dotnet-runtime-placeholder" (
+    set __repoRoot=%~dp0..\..\..
+) else (
+    set __repoRoot=%~dp0..\..
+)
+set __artifactsDir=%__repoRoot%\artifacts
 set __CMakeBinDir=""
 set __IntermediatesDir=""
 set __BuildArch=x64
@@ -159,10 +164,6 @@ popd
 IF ERRORLEVEL 1 (
     goto :Failure
 )
-
-:: Copy results to native_aot since packaging expects a copy there too
-mkdir "%__artifactsDir%\bin\native\%__outConfig%-aot"
-copy "%__artifactsDir%\bin\native\%__outConfig%\*" "%__artifactsDir%\bin\native\%__outConfig%-aot"
 
 exit /B 0
 

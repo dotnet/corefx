@@ -95,15 +95,8 @@ namespace System.Threading
         /// <value>true if the event has is set; otherwise, false.</value>
         public bool IsSet
         {
-            get
-            {
-                return 0 != ExtractStatePortion(m_combinedState, SignalledState_BitMask);
-            }
-
-            private set
-            {
-                UpdateStateAtomically(((value) ? 1 : 0) << SignalledState_ShiftCount, SignalledState_BitMask);
-            }
+            get => 0 != ExtractStatePortion(m_combinedState, SignalledState_BitMask);
+            private set => UpdateStateAtomically(((value) ? 1 : 0) << SignalledState_ShiftCount, SignalledState_BitMask);
         }
 
         /// <summary>
@@ -111,11 +104,7 @@ namespace System.Threading
         /// </summary>
         public int SpinCount
         {
-            get
-            {
-                return ExtractStatePortionAndShiftRight(m_combinedState, SpinCountState_BitMask, SpinCountState_ShiftCount);
-            }
-
+            get => ExtractStatePortionAndShiftRight(m_combinedState, SpinCountState_BitMask, SpinCountState_ShiftCount);
             private set
             {
                 Debug.Assert(value >= 0, "SpinCount is a restricted-width integer. The value supplied is outside the legal range.");
@@ -130,11 +119,7 @@ namespace System.Threading
         /// </summary>
         private int Waiters
         {
-            get
-            {
-                return ExtractStatePortionAndShiftRight(m_combinedState, NumWaitersState_BitMask, NumWaitersState_ShiftCount);
-            }
-
+            get => ExtractStatePortionAndShiftRight(m_combinedState, NumWaitersState_BitMask, NumWaitersState_ShiftCount);
             set
             {
                 // setting to <0 would indicate an internal flaw, hence Assert is appropriate.
@@ -217,7 +202,7 @@ namespace System.Threading
             Debug.Assert(DEFAULT_SPIN_SP >= 0, "Internal error - DEFAULT_SPIN_SP is outside the legal range.");
             Debug.Assert(DEFAULT_SPIN_SP <= SpinCountState_MaxValue, "Internal error - DEFAULT_SPIN_SP is outside the legal range.");
 
-            SpinCount = PlatformHelper.IsSingleProcessor ? DEFAULT_SPIN_SP : spinCount;
+            SpinCount = Environment.IsSingleProcessor ? DEFAULT_SPIN_SP : spinCount;
         }
 
         /// <summary>
@@ -238,8 +223,7 @@ namespace System.Threading
         /// being stored and used. The event will be signaled or unsignaled depending on
         /// the state of the thin-event itself, with synchronization taken into account.
         /// </summary>
-        /// <returns>True if a new event was created and stored, false otherwise.</returns>
-        private bool LazyInitializeEvent()
+        private void LazyInitializeEvent()
         {
             bool preInitializeIsSet = IsSet;
             ManualResetEvent newEventObj = new ManualResetEvent(preInitializeIsSet);
@@ -250,8 +234,6 @@ namespace System.Threading
             {
                 // Someone else set the value due to a race condition. Destroy the garbage event.
                 newEventObj.Dispose();
-
-                return false;
             }
             else
             {
@@ -276,8 +258,6 @@ namespace System.Threading
                         }
                     }
                 }
-
-                return true;
             }
         }
 
@@ -380,7 +360,7 @@ namespace System.Threading
         /// </remarks>
         public void Wait()
         {
-            Wait(Timeout.Infinite, new CancellationToken());
+            Wait(Timeout.Infinite, CancellationToken.None);
         }
 
         /// <summary>
@@ -426,7 +406,7 @@ namespace System.Threading
                 throw new ArgumentOutOfRangeException(nameof(timeout));
             }
 
-            return Wait((int)totalMilliseconds, new CancellationToken());
+            return Wait((int)totalMilliseconds, CancellationToken.None);
         }
 
         /// <summary>
@@ -475,7 +455,7 @@ namespace System.Threading
         /// </exception>
         public bool Wait(int millisecondsTimeout)
         {
-            return Wait(millisecondsTimeout, new CancellationToken());
+            return Wait(millisecondsTimeout, CancellationToken.None);
         }
 
         /// <summary>
@@ -534,7 +514,7 @@ namespace System.Threading
 
                 // Spin
                 int spinCount = SpinCount;
-                var spinner = new SpinWait();
+                SpinWait spinner = default;
                 while (spinner.Count < spinCount)
                 {
                     spinner.SpinOnce(sleep1Threshold: -1);
@@ -690,11 +670,11 @@ namespace System.Threading
         /// <param name="updateBitsMask">The mask used to set the bits</param>
         private void UpdateStateAtomically(int newBits, int updateBitsMask)
         {
-            SpinWait sw = new SpinWait();
+            SpinWait sw = default;
 
             Debug.Assert((newBits | updateBitsMask) == updateBitsMask, "newBits do not fall within the updateBitsMask.");
 
-            do
+            while (true)
             {
                 int oldState = m_combinedState; // cache the old value for testing in CAS
 
@@ -708,7 +688,7 @@ namespace System.Threading
                 }
 
                 sw.SpinOnce(sleep1Threshold: -1);
-            } while (true);
+            }
         }
 
         /// <summary>

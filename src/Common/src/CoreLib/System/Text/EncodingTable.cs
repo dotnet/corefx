@@ -33,8 +33,7 @@ namespace System.Text
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            object? codePageObj;
-            codePageObj = s_nameToCodePage[name];
+            object? codePageObj = s_nameToCodePage[name];
 
             if (codePageObj != null)
             {
@@ -179,7 +178,7 @@ namespace System.Text
             string displayName = GetDisplayName(codePage, index);
             uint flags = s_flags[index];
 
-            return new CodePageDataItem(codePage, uiFamilyCodePage, webName, headerName, bodyName, displayName, flags);
+            return new CodePageDataItem(uiFamilyCodePage, webName, headerName, bodyName, displayName, flags);
         }
 
         private static string GetDisplayName(int codePage, int englishNameIndex)

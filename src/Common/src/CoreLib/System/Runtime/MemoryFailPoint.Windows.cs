@@ -17,7 +17,7 @@ namespace System.Runtime
         private static bool CheckForAvailableMemory(out ulong availPageFile, out ulong totalAddressSpaceFree)
         {
             bool r;
-            Interop.Kernel32.MEMORYSTATUSEX memory = new Interop.Kernel32.MEMORYSTATUSEX();
+            Interop.Kernel32.MEMORYSTATUSEX memory = default;
             r = Interop.Kernel32.GlobalMemoryStatusEx(ref memory);
             if (!r)
                 throw Win32Marshal.GetExceptionForLastWin32Error();
@@ -27,11 +27,10 @@ namespace System.Runtime
             return true;
         }
 
-        // Based on the shouldThrow parameter, this will throw an exception, or
-        // returns whether there is enough space.  In all cases, we update
-        // our last known free address space, hopefully avoiding needing to
-        // probe again.
-        private static unsafe bool CheckForFreeAddressSpace(ulong size, bool shouldThrow)
+        // Based on the shouldThrow parameter, this will throw an exception.
+        // In all cases, we update our last known free address space, hopefully
+        // avoiding needing to probe again.
+        private static unsafe void CheckForFreeAddressSpace(ulong size, bool shouldThrow)
         {
             // Start walking the address space at 0.  VirtualAlloc may wrap
             // around the address space.  We don't need to find the exact
@@ -50,7 +49,6 @@ namespace System.Runtime
 
             if (freeSpaceAfterGCHeap < size && shouldThrow)
                 throw new InsufficientMemoryException(SR.InsufficientMemory_MemFailPoint_VAFrag);
-            return freeSpaceAfterGCHeap >= size;
         }
 
         // Returns the amount of consecutive free memory available in a block
@@ -63,7 +61,7 @@ namespace System.Runtime
                 return 0;
 
             ulong largestFreeRegion = 0;
-            Interop.Kernel32.MEMORY_BASIC_INFORMATION memInfo = new Interop.Kernel32.MEMORY_BASIC_INFORMATION();
+            Interop.Kernel32.MEMORY_BASIC_INFORMATION memInfo = default;
             UIntPtr sizeOfMemInfo = (UIntPtr)sizeof(Interop.Kernel32.MEMORY_BASIC_INFORMATION);
 
             while (((ulong)address) + size < s_topOfMemory)

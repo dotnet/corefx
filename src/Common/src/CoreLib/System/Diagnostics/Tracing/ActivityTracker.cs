@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
 #if ES_BUILD_STANDALONE
 using System;
 using System.Diagnostics;
@@ -42,7 +41,6 @@ namespace System.Diagnostics.Tracing
     /// </summary>
     internal class ActivityTracker
     {
-
         /// <summary>
         /// Called on work item begins.  The activity name = providerName + activityName without 'Start' suffix.
         /// It updates CurrentActivityId to track.
@@ -54,7 +52,7 @@ namespace System.Diagnostics.Tracing
         ///
         /// If activity tracing is not on, then activityId and relatedActivityId are not set
         /// </summary>
-        public void OnStart(string providerName, string activityName, int task, ref Guid activityId, ref Guid relatedActivityId, EventActivityOptions options)
+        public void OnStart(string providerName, string activityName, int task, ref Guid activityId, ref Guid relatedActivityId, EventActivityOptions options, bool useTplSource = true)
         {
             if (m_current == null)        // We are not enabled
             {
@@ -64,23 +62,23 @@ namespace System.Diagnostics.Tracing
                 if (m_checkedForEnable)
                     return;
                 m_checkedForEnable = true;
-                if (TplEventSource.Log.IsEnabled(EventLevel.Informational, TplEventSource.Keywords.TasksFlowActivityIds))
+                if (useTplSource && TplEventSource.Log.IsEnabled(EventLevel.Informational, TplEventSource.Keywords.TasksFlowActivityIds))
                     Enable();
                 if (m_current == null)
                     return;
             }
-
 
             Debug.Assert((options & EventActivityOptions.Disable) == 0);
 
             ActivityInfo? currentActivity = m_current.Value;
             string fullActivityName = NormalizeActivityName(providerName, activityName, task);
 
-            TplEventSource log = TplEventSource.Log;
-            if (log.Debug)
+            TplEventSource? log = useTplSource ? TplEventSource.Log : null;
+            bool tplDebug = log != null && log.Debug;
+            if (tplDebug)
             {
-                log.DebugFacilityMessage("OnStartEnter", fullActivityName);
-                log.DebugFacilityMessage("OnStartEnterActivityState", ActivityInfo.LiveActivities(currentActivity));
+                log!.DebugFacilityMessage("OnStartEnter", fullActivityName);
+                log!.DebugFacilityMessage("OnStartEnterActivityState", ActivityInfo.LiveActivities(currentActivity));
             }
 
             if (currentActivity != null)
@@ -90,8 +88,8 @@ namespace System.Diagnostics.Tracing
                 {
                     activityId = Guid.Empty;
                     relatedActivityId = Guid.Empty;
-                    if (log.Debug)
-                        log.DebugFacilityMessage("OnStartRET", "Fail");
+                    if (tplDebug)
+                        log!.DebugFacilityMessage("OnStartRET", "Fail");
                     return;
                 }
                 // Check for recursion, and force-stop any activities if the activity already started.
@@ -123,10 +121,10 @@ namespace System.Diagnostics.Tracing
             // Remember the current ID so we can log it
             activityId = newActivity.ActivityId;
 
-            if (log.Debug)
+            if (tplDebug)
             {
-                log.DebugFacilityMessage("OnStartRetActivityState", ActivityInfo.LiveActivities(newActivity));
-                log.DebugFacilityMessage1("OnStartRet", activityId.ToString(), relatedActivityId.ToString());
+                log!.DebugFacilityMessage("OnStartRetActivityState", ActivityInfo.LiveActivities(newActivity));
+                log!.DebugFacilityMessage1("OnStartRet", activityId.ToString(), relatedActivityId.ToString());
             }
         }
 
@@ -136,18 +134,19 @@ namespace System.Diagnostics.Tracing
         ///
         /// If activity tracing is not on, then activityId and relatedActivityId are not set
         /// </summary>
-        public void OnStop(string providerName, string activityName, int task, ref Guid activityId)
+        public void OnStop(string providerName, string activityName, int task, ref Guid activityId, bool useTplSource = true)
         {
             if (m_current == null)        // We are not enabled
                 return;
 
             string fullActivityName = NormalizeActivityName(providerName, activityName, task);
 
-            TplEventSource log = TplEventSource.Log;
-            if (log.Debug)
+            TplEventSource? log = useTplSource ? TplEventSource.Log : null;
+            bool tplDebug = log != null && log.Debug;
+            if (tplDebug)
             {
-                log.DebugFacilityMessage("OnStopEnter", fullActivityName);
-                log.DebugFacilityMessage("OnStopEnterActivityState", ActivityInfo.LiveActivities(m_current.Value));
+                log!.DebugFacilityMessage("OnStopEnter", fullActivityName);
+                log!.DebugFacilityMessage("OnStopEnterActivityState", ActivityInfo.LiveActivities(m_current.Value));
             }
 
             while (true) // This is a retry loop.
@@ -165,8 +164,8 @@ namespace System.Diagnostics.Tracing
                 {
                     activityId = Guid.Empty;
                     // TODO add some logging about this. Basically could not find matching start.
-                    if (log.Debug)
-                        log.DebugFacilityMessage("OnStopRET", "Fail");
+                    if (tplDebug)
+                        log!.DebugFacilityMessage("OnStopRET", "Fail");
                     return;
                 }
 
@@ -184,8 +183,7 @@ namespace System.Diagnostics.Tracing
                     if (orphan.CanBeOrphan())
                     {
                         // We can't pop anything after we see a valid orphan, remember this for later when we update m_current.
-                        if (newCurrentActivity == null)
-                            newCurrentActivity = orphan;
+                        newCurrentActivity ??= orphan;
                     }
                     else
                     {
@@ -201,15 +199,14 @@ namespace System.Diagnostics.Tracing
                     // I succeeded stopping this activity. Now we update our m_current pointer
 
                     // If I haven't yet determined the new current activity, it is my creator.
-                    if (newCurrentActivity == null)
-                        newCurrentActivity = activityToStop.m_creator;
+                    newCurrentActivity ??= activityToStop.m_creator;
 
                     m_current.Value = newCurrentActivity;
 
-                    if (log.Debug)
+                    if (tplDebug)
                     {
-                        log.DebugFacilityMessage("OnStopRetActivityState", ActivityInfo.LiveActivities(newCurrentActivity));
-                        log.DebugFacilityMessage("OnStopRet", activityId.ToString());
+                        log!.DebugFacilityMessage("OnStopRetActivityState", ActivityInfo.LiveActivities(newCurrentActivity));
+                        log!.DebugFacilityMessage("OnStopRet", activityId.ToString());
                     }
                     return;
                 }
@@ -244,13 +241,12 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public static ActivityTracker Instance => s_activityTrackerInstance;
 
-
         #region private
 
         /// <summary>
         /// Searched for a active (nonstopped) activity with the given name.  Returns null if not found.
         /// </summary>
-        private ActivityInfo? FindActiveActivity(string name, ActivityInfo? startLocation)
+        private static ActivityInfo? FindActiveActivity(string name, ActivityInfo? startLocation)
         {
             ActivityInfo? activity = startLocation;
             while (activity != null)
@@ -266,7 +262,7 @@ namespace System.Diagnostics.Tracing
         /// Strip out "Start" or "End" suffix from activity name and add providerName prefix.
         /// If 'task'  it does not end in Start or Stop and Task is non-zero use that as the name of the activity
         /// </summary>
-        private string NormalizeActivityName(string providerName, string activityName, int task)
+        private static string NormalizeActivityName(string providerName, string activityName, int task)
         {
             // We use provider name to distinguish between activities from different providers.
 
@@ -394,7 +390,6 @@ namespace System.Diagnostics.Tracing
 
                     activityPathGuidOffset = AddIdToGuid(outPtr, activityPathGuidOffsetStart, (uint)m_uniqueId);
 
-
                     // If the path does not fit, Make a GUID by incrementing rather than as a path, keeping as much of the path as possible
                     if (12 < activityPathGuidOffset)
                         CreateOverflowGuid(outPtr);
@@ -508,7 +503,7 @@ namespace System.Diagnostics.Tracing
                             break;
                         }
                         *ptr++ = (byte)id;
-                        id = (id >> 8);
+                        id >>= 8;
                         --len;
                     }
                 }

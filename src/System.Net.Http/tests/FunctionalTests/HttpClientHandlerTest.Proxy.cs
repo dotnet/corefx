@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +18,6 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
     public abstract class HttpClientHandler_Proxy_Test : HttpClientHandlerTestBase
     {
         public HttpClientHandler_Proxy_Test(ITestOutputHelper output) : base(output) { }
@@ -67,13 +67,6 @@ namespace System.Net.Http.Functional.Tests
             bool secureServer,
             bool proxyClosesConnectionAfterFirst407Response)
         {
-            if (PlatformDetection.IsFedora && IsCurlHandler)
-            {
-                // CurlHandler seems unstable on Fedora26 and returns error
-                // "System.Net.Http.CurlException : Failure when receiving data from the peer".
-                return;
-            }
-
             if (PlatformDetection.IsWindowsNanoServer && IsWinHttpHandler && proxyAuthScheme == AuthenticationSchemes.Digest)
             {
                 // WinHTTP doesn't support Digest very well and is disabled on Nano.
@@ -87,12 +80,6 @@ namespace System.Net.Http.Functional.Tests
                 // System.Net.Security.NegotiateStreamPal.AcquireCredentialsHandle():
                 //        "GSSAPI operation failed with error - An invalid status code was supplied
                 //         Configuration file does not specify default realm)."
-                return;
-            }
-
-            if (IsCurlHandler && proxyAuthScheme != AuthenticationSchemes.Basic)
-            {
-                // Issue #27870 curl HttpHandler can only do basic auth to proxy.
                 return;
             }
 
@@ -145,8 +132,6 @@ namespace System.Net.Http.Functional.Tests
                         string body = await response.Content.ReadAsStringAsync();
                         Assert.Contains(proxyServer.ViaHeader, body);
                     }
-
-                    return RemoteExecutor.SuccessExitCode;
                 }
             }, UseSocketsHttpHandler.ToString(), UseHttp2.ToString()).Dispose();
         }
@@ -195,9 +180,8 @@ namespace System.Net.Http.Functional.Tests
                             _output.WriteLine($"expectedAuth={expectedAuth}");
                             string expectedAuthHash = Convert.ToBase64String(Encoding.UTF8.GetBytes(expectedAuth));
 
-                            // Check last request to proxy server. CurlHandler will use pre-auth for Basic proxy auth,
-                            // so there might only be 1 request received by the proxy server. Other handlers won't use
-                            // pre-auth for proxy so there would be 2 requests.
+                            // Check last request to proxy server. Handlers that don't use
+                            // pre-auth for proxy will make 2 requests.
                             int requestCount = proxyServer.Requests.Count;
                             _output.WriteLine($"proxyServer.Requests.Count={requestCount}");
                             Assert.Equal(BasicAuth, proxyServer.Requests[requestCount - 1].AuthorizationHeaderValueScheme);
@@ -251,7 +235,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 handler.Proxy = new WebProxy("https://" + Guid.NewGuid().ToString("N"));
 
-                Type expectedType = IsNetfxHandler || UseSocketsHttpHandler ?
+                Type expectedType = UseSocketsHttpHandler ?
                     typeof(NotSupportedException) :
                     typeof(HttpRequestException);
 
@@ -263,13 +247,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task Proxy_SendSecureRequestThruProxy_ConnectTunnelUsed()
         {
-            if (PlatformDetection.IsFedora && IsCurlHandler)
-            {
-                // CurlHandler seems unstable on Fedora26 and returns error
-                // "System.Net.Http.CurlException : Failure when receiving data from the peer".
-                return;
-            }
-
             using (LoopbackProxyServer proxyServer = LoopbackProxyServer.Create())
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
@@ -287,12 +264,6 @@ namespace System.Net.Http.Functional.Tests
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public async Task ProxyAuth_Digest_Succeeds()
         {
-            if (IsCurlHandler)
-            {
-                // Issue #27870 CurlHandler can only do basic auth to proxy.
-                return;
-            }
-
             const string expectedUsername = "testusername";
             const string expectedPassword = "testpassword";
             const string authHeader = "Proxy-Authenticate: Digest realm=\"NetCore\", nonce=\"PwOnWgAAAAAAjnbW438AAJSQi1kAAAAA\", qop=\"auth\", stale=false\r\n";
@@ -326,6 +297,84 @@ namespace System.Net.Http.Functional.Tests
                 }
             }, options);
 
+        }
+
+        [Fact]
+        public async Task MultiProxy_PAC_Failover_Succeeds()
+        {
+            if (!UseSocketsHttpHandler || !PlatformDetection.IsWindows)
+            {
+                // PAC-based failover is only supported on Windows/SocketsHttpHandler
+                return;
+            }
+
+            // Create our failing proxy server.
+            // Bind a port to reserve it, but don't start listening yet. The first Connect() should fail and cause a fail-over.
+            using Socket failingProxyServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            failingProxyServer.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+            var failingEndPoint = (IPEndPoint)failingProxyServer.LocalEndPoint;
+
+            using LoopbackProxyServer succeedingProxyServer = LoopbackProxyServer.Create();
+            string proxyConfigString = $"{failingEndPoint.Address}:{failingEndPoint.Port} {succeedingProxyServer.Uri.Host}:{succeedingProxyServer.Uri.Port}";
+
+            // Create a WinInetProxyHelper and override its values with our own.
+            object winInetProxyHelper = Activator.CreateInstance(typeof(HttpClient).Assembly.GetType("System.Net.Http.WinInetProxyHelper", true), true);
+            winInetProxyHelper.GetType().GetField("_autoConfigUrl", Reflection.BindingFlags.Instance | Reflection.BindingFlags.NonPublic).SetValue(winInetProxyHelper, null);
+            winInetProxyHelper.GetType().GetField("_autoDetect", Reflection.BindingFlags.Instance | Reflection.BindingFlags.NonPublic).SetValue(winInetProxyHelper, false);
+            winInetProxyHelper.GetType().GetField("_proxy", Reflection.BindingFlags.Instance | Reflection.BindingFlags.NonPublic).SetValue(winInetProxyHelper, proxyConfigString);
+            winInetProxyHelper.GetType().GetField("_proxyBypass", Reflection.BindingFlags.Instance | Reflection.BindingFlags.NonPublic).SetValue(winInetProxyHelper, null);
+
+            // Create a HttpWindowsProxy with our custom WinInetProxyHelper.
+            IWebProxy httpWindowsProxy = (IWebProxy)Activator.CreateInstance(typeof(HttpClient).Assembly.GetType("System.Net.Http.HttpWindowsProxy", true), Reflection.BindingFlags.NonPublic | Reflection.BindingFlags.Instance, null, new[] { winInetProxyHelper, null }, null);
+
+            Task<bool> nextFailedConnection = null;
+
+            // Run a request with that proxy.
+            Task requestTask = LoopbackServerFactory.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using HttpClientHandler handler = CreateHttpClientHandler();
+                    using HttpClient client = CreateHttpClient(handler);
+                    handler.Proxy = httpWindowsProxy;
+
+                    // First request is expected to hit the failing proxy server, then failover to the succeeding proxy server.
+                    Assert.Equal("foo", await client.GetStringAsync(uri));
+
+                    // Second request should start directly at the succeeding proxy server.
+                    // So, start listening on our failing proxy server to catch if it tries to connect.
+                    failingProxyServer.Listen(1);
+                    nextFailedConnection = WaitForNextFailedConnection();
+                    Assert.Equal("bar", await client.GetStringAsync(uri));
+                },
+                async server =>
+                {
+                    await server.HandleRequestAsync(statusCode: HttpStatusCode.OK, content: "foo");
+                    await server.HandleRequestAsync(statusCode: HttpStatusCode.OK, content: "bar");
+                });
+
+            // Wait for request to finish.
+            await requestTask;
+
+            // Triggers WaitForNextFailedConnection to stop, and then check
+            // to ensure we haven't got any further requests against it.
+            failingProxyServer.Dispose();
+            Assert.False(await nextFailedConnection);
+
+            Assert.Equal(2, succeedingProxyServer.Requests.Count);
+
+            async Task<bool> WaitForNextFailedConnection()
+            {
+                try
+                {
+                    (await failingProxyServer.AcceptAsync()).Dispose();
+                    return true;
+                }
+                catch (SocketException ex) when (ex.SocketErrorCode == SocketError.OperationAborted)
+                {
+                    // Dispose() of the loopback server will cause AcceptAsync() in EstablishConnectionAsync() to abort.
+                    return false;
+                }
+            }
         }
 
         public static IEnumerable<object[]> BypassedProxies()

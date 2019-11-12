@@ -92,7 +92,7 @@ namespace System.Threading
             }
 
             executionContext = executionContext.ShallowClone(isFlowSuppressed: true);
-            var asyncFlowControl = new AsyncFlowControl();
+            AsyncFlowControl asyncFlowControl = default;
             currentThread._executionContext = executionContext;
             asyncFlowControl.Initialize(currentThread);
             return asyncFlowControl;
@@ -632,14 +632,8 @@ namespace System.Threading
             return _thread?.GetHashCode() ?? 0;
         }
 
-        public static bool operator ==(AsyncFlowControl a, AsyncFlowControl b)
-        {
-            return a.Equals(b);
-        }
+        public static bool operator ==(AsyncFlowControl a, AsyncFlowControl b) => a.Equals(b);
 
-        public static bool operator !=(AsyncFlowControl a, AsyncFlowControl b)
-        {
-            return !(a == b);
-        }
+        public static bool operator !=(AsyncFlowControl a, AsyncFlowControl b) => !(a == b);
     }
 }

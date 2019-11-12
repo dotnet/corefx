@@ -211,7 +211,7 @@ namespace System.Resources
             MainAssembly = assembly;
             BaseNameField = baseName;
 
-            if (usingResourceSet != null && (usingResourceSet != s_minResourceSet) && !(usingResourceSet.IsSubclassOf(s_minResourceSet)))
+            if (usingResourceSet != null && (usingResourceSet != s_minResourceSet) && !usingResourceSet.IsSubclassOf(s_minResourceSet))
                 throw new ArgumentException(SR.Arg_ResMgrNotResSet, nameof(usingResourceSet));
             _userResourceSet = usingResourceSet;
 
@@ -236,7 +236,7 @@ namespace System.Resources
         // security check in each constructor prevents it.
         private void CommonAssemblyInit()
         {
-#if FEATURE_APPX || ENABLE_WINRT
+#if FEATURE_APPX
             SetUapConfiguration();
 #endif
 
@@ -260,8 +260,8 @@ namespace System.Resources
         // GetString or GetObject.
         public virtual bool IgnoreCase
         {
-            get { return _ignoreCase; }
-            set { _ignoreCase = value; }
+            get => _ignoreCase;
+            set => _ignoreCase = value;
         }
 
         // Returns the Type of the ResourceSet the ResourceManager uses
@@ -270,8 +270,8 @@ namespace System.Resources
 
         protected UltimateResourceFallbackLocation FallbackLocation
         {
-            get { return _fallbackLoc; }
-            set { _fallbackLoc = value; }
+            get => _fallbackLoc;
+            set => _fallbackLoc = value;
         }
 
         // Tells the ResourceManager to call Close on all ResourceSets and
@@ -599,7 +599,7 @@ namespace System.Resources
             if (null == name)
                 throw new ArgumentNullException(nameof(name));
 
-#if FEATURE_APPX || ENABLE_WINRT
+#if FEATURE_APPX
             if (_useUapResourceManagement)
             {
                 // Throws WinRT hresults.
@@ -608,10 +608,7 @@ namespace System.Resources
             }
 #endif
 
-            if (culture == null)
-            {
-                culture = CultureInfo.CurrentUICulture;
-            }
+            culture ??= CultureInfo.CurrentUICulture;
 
             ResourceSet? last = GetFirstResourceSet(culture);
 
@@ -775,37 +772,33 @@ namespace System.Resources
 
             internal CultureInfo? NeutralResourcesCulture
             {
-                get { return _rm._neutralResourcesCulture; }
-                set { _rm._neutralResourcesCulture = value; }
+                get => _rm._neutralResourcesCulture;
+                set => _rm._neutralResourcesCulture = value;
             }
 
-            internal string GetResourceFileName(CultureInfo culture)
-            {
-                return _rm.GetResourceFileName(culture);
-            }
+            internal string GetResourceFileName(CultureInfo culture) =>
+                _rm.GetResourceFileName(culture);
 
             // NEEDED ONLY BY ASSEMBLY-BASED
             internal bool LookedForSatelliteContractVersion
             {
-                get { return _rm._lookedForSatelliteContractVersion; }
-                set { _rm._lookedForSatelliteContractVersion = value; }
+                get => _rm._lookedForSatelliteContractVersion;
+                set => _rm._lookedForSatelliteContractVersion = value;
             }
 
             internal Version? SatelliteContractVersion
             {
-                get { return _rm._satelliteContractVersion; }
-                set { _rm._satelliteContractVersion = value; }
+                get => _rm._satelliteContractVersion;
+                set => _rm._satelliteContractVersion = value;
             }
 
-            internal Version? ObtainSatelliteContractVersion(Assembly a)
-            {
-                return ResourceManager.GetSatelliteContractVersion(a);
-            }
+            internal static Version? ObtainSatelliteContractVersion(Assembly a) =>
+                ResourceManager.GetSatelliteContractVersion(a);
 
             internal UltimateResourceFallbackLocation FallbackLoc
             {
-                get { return _rm.FallbackLocation; }
-                set { _rm._fallbackLoc = value; }
+                get => _rm.FallbackLocation;
+                set => _rm._fallbackLoc = value;
             }
 
             internal Assembly? MainAssembly => _rm.MainAssembly;

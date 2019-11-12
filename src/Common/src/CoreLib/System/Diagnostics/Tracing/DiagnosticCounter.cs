@@ -89,7 +89,7 @@ namespace System.Diagnostics.Tracing
         private string _displayName = "";
         public string DisplayName
         {
-            get { return _displayName; }
+            get => _displayName;
             set
             {
                 if (value == null)
@@ -101,7 +101,7 @@ namespace System.Diagnostics.Tracing
         private string _displayUnits = "";
         public string DisplayUnits
         {
-            get { return _displayUnits; }
+            get => _displayUnits;
             set
             {
                 if (value == null)
@@ -123,7 +123,7 @@ namespace System.Diagnostics.Tracing
 
         internal void ReportOutOfBandMessage(string message)
         {
-            EventSource.ReportOutOfBandMessage(message, true);
+            EventSource.ReportOutOfBandMessage(message);
         }
 
         internal string GetMetadataString()

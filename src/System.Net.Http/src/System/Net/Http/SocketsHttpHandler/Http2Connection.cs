@@ -26,6 +26,9 @@ namespace System.Net.Http
         private ArrayBuffer _outgoingBuffer;
         private ArrayBuffer _headerBuffer;
 
+        /// <summary>Reusable array used to get the values for each header being written to the wire.</summary>
+        private string[] _headerValues = Array.Empty<string>();
+
         private int _currentWriteSize;      // as passed to StartWriteAsync
 
         private readonly HPackDecoder _hpackDecoder;
@@ -105,7 +108,7 @@ namespace System.Net.Http
             _outgoingBuffer = new ArrayBuffer(InitialConnectionBufferSize);
             _headerBuffer = new ArrayBuffer(InitialConnectionBufferSize);
 
-            _hpackDecoder = new HPackDecoder(maxDynamicTableSize: 0, maxResponseHeadersLength: pool.Settings._maxResponseHeadersLength * 1024);
+            _hpackDecoder = new HPackDecoder(maxHeadersLength: pool.Settings._maxResponseHeadersLength * 1024);
 
             _httpStreams = new Dictionary<int, Http2Stream>();
 
@@ -124,10 +127,10 @@ namespace System.Net.Http
 
         private object SyncObject => _httpStreams;
 
-        public async Task SetupAsync()
+        public async ValueTask SetupAsync()
         {
             _outgoingBuffer.EnsureAvailableSpace(s_http2ConnectionPreface.Length +
-                FrameHeader.Size + (FrameHeader.SettingLength * 2) +
+                FrameHeader.Size + FrameHeader.SettingLength +
                 FrameHeader.Size + FrameHeader.WindowUpdateLength);
 
             // Send connection preface
@@ -135,16 +138,10 @@ namespace System.Net.Http
             _outgoingBuffer.Commit(s_http2ConnectionPreface.Length);
 
             // Send SETTINGS frame
-            WriteFrameHeader(new FrameHeader(FrameHeader.SettingLength * 2, FrameType.Settings, FrameFlags.None, 0));
+            WriteFrameHeader(new FrameHeader(FrameHeader.SettingLength, FrameType.Settings, FrameFlags.None, 0));
 
-            // First setting: Disable push promise
+            // Disable push promise
             BinaryPrimitives.WriteUInt16BigEndian(_outgoingBuffer.AvailableSpan, (ushort)SettingId.EnablePush);
-            _outgoingBuffer.Commit(2);
-            BinaryPrimitives.WriteUInt32BigEndian(_outgoingBuffer.AvailableSpan, 0);
-            _outgoingBuffer.Commit(4);
-
-            // Second setting: Set header table size to 0 to disable dynamic header compression
-            BinaryPrimitives.WriteUInt16BigEndian(_outgoingBuffer.AvailableSpan, (ushort)SettingId.HeaderTableSize);
             _outgoingBuffer.Commit(2);
             BinaryPrimitives.WriteUInt32BigEndian(_outgoingBuffer.AvailableSpan, 0);
             _outgoingBuffer.Commit(4);
@@ -162,7 +159,7 @@ namespace System.Net.Http
             _ = ProcessIncomingFramesAsync();
         }
 
-        private async Task EnsureIncomingBytesAsync(int minReadBytes)
+        private async ValueTask EnsureIncomingBytesAsync(int minReadBytes)
         {
             if (NetEventSource.IsEnabled) Trace($"{nameof(minReadBytes)}={minReadBytes}");
             if (_incomingBuffer.ActiveLength >= minReadBytes)
@@ -318,10 +315,7 @@ namespace System.Net.Http
             }
         }
 
-        private static readonly HPackDecoder.HeaderCallback s_http2StreamOnResponseHeader =
-            (state, name, value) => ((Http2Stream)state)?.OnResponseHeader(name, value);
-
-        private async Task ProcessHeadersFrame(FrameHeader frameHeader)
+        private async ValueTask ProcessHeadersFrame(FrameHeader frameHeader)
         {
             if (NetEventSource.IsEnabled) Trace($"{frameHeader}");
             Debug.Assert(frameHeader.Type == FrameType.Headers);
@@ -335,12 +329,11 @@ namespace System.Net.Http
             // We will still process the headers, to ensure the header decoding state is up-to-date,
             // but we will discard the decoded headers.
 
-            http2Stream?.OnResponseHeadersStart();
+            http2Stream?.OnHeadersStart();
 
             _hpackDecoder.Decode(
                 GetFrameData(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), frameHeader.PaddedFlag, frameHeader.PriorityFlag),
                 frameHeader.EndHeadersFlag,
-                s_http2StreamOnResponseHeader,
                 http2Stream);
             _incomingBuffer.Discard(frameHeader.Length);
 
@@ -356,7 +349,6 @@ namespace System.Net.Http
                 _hpackDecoder.Decode(
                     _incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length),
                     frameHeader.EndHeadersFlag,
-                    s_http2StreamOnResponseHeader,
                     http2Stream);
                 _incomingBuffer.Discard(frameHeader.Length);
             }
@@ -365,7 +357,7 @@ namespace System.Net.Http
 
             if (http2Stream != null)
             {
-                http2Stream.OnResponseHeadersComplete(endStream);
+                http2Stream.OnHeadersComplete(endStream);
             }
         }
 
@@ -785,7 +777,7 @@ namespace System.Net.Http
             }
         }
 
-        private async Task AcquireWriteLockAsync(CancellationToken cancellationToken)
+        private async ValueTask AcquireWriteLockAsync(CancellationToken cancellationToken)
         {
             Task acquireLockTask = _writerLock.WaitAsync(cancellationToken);
             if (!acquireLockTask.IsCompletedSuccessfully)
@@ -822,7 +814,7 @@ namespace System.Net.Http
             if (_abortException != null)
             {
                 _writerLock.Release();
-                throw new IOException(SR.net_http_request_aborted);
+                throw new IOException(SR.net_http_request_aborted, _abortException);
             }
         }
 
@@ -898,9 +890,9 @@ namespace System.Net.Http
             _headerBuffer.Commit(bytesWritten);
         }
 
-        private void WriteLiteralHeader(string name, string[] values)
+        private void WriteLiteralHeader(string name, ReadOnlySpan<string> values)
         {
-            if (NetEventSource.IsEnabled) Trace($"{nameof(name)}={name}, {nameof(values)}={string.Join(", ", values)}");
+            if (NetEventSource.IsEnabled) Trace($"{nameof(name)}={name}, {nameof(values)}={string.Join(", ", values.ToArray())}");
 
             int bytesWritten;
             while (!HPackEncoder.EncodeLiteralHeaderFieldWithoutIndexingNewName(name, values, HttpHeaderParser.DefaultSeparator, _headerBuffer.AvailableSpan, out bytesWritten))
@@ -911,9 +903,9 @@ namespace System.Net.Http
             _headerBuffer.Commit(bytesWritten);
         }
 
-        private void WriteLiteralHeaderValues(string[] values, string separator)
+        private void WriteLiteralHeaderValues(ReadOnlySpan<string> values, string separator)
         {
-            if (NetEventSource.IsEnabled) Trace($"{nameof(values)}={string.Join(separator, values)}");
+            if (NetEventSource.IsEnabled) Trace($"{nameof(values)}={string.Join(separator, values.ToArray())}");
 
             int bytesWritten;
             while (!HPackEncoder.EncodeStringLiterals(values, separator, _headerBuffer.AvailableSpan, out bytesWritten))
@@ -954,9 +946,16 @@ namespace System.Net.Http
         {
             if (NetEventSource.IsEnabled) Trace("");
 
-            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
+            if (headers.HeaderStore is null)
             {
-                Debug.Assert(header.Value.Length > 0, "No values for header??");
+                return;
+            }
+
+            foreach (KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo> header in headers.HeaderStore)
+            {
+                int headerValuesCount = HttpHeaders.GetValuesAsStrings(header.Key, header.Value, ref _headerValues);
+                Debug.Assert(headerValuesCount > 0, "No values for header??");
+                ReadOnlySpan<string> headerValues = _headerValues.AsSpan(0, headerValuesCount);
 
                 KnownHeader knownHeader = header.Key.KnownHeader;
                 if (knownHeader != null)
@@ -969,7 +968,7 @@ namespace System.Net.Http
                         if (header.Key.KnownHeader == KnownHeaders.TE)
                         {
                             // HTTP/2 allows only 'trailers' TE header. rfc7540 8.1.2.2
-                            foreach (string value in header.Value)
+                            foreach (string value in headerValues)
                             {
                                 if (string.Equals(value, "trailers", StringComparison.OrdinalIgnoreCase))
                                 {
@@ -984,7 +983,7 @@ namespace System.Net.Http
                         // For all other known headers, send them via their pre-encoded name and the associated value.
                         WriteBytes(knownHeader.Http2EncodedName);
                         string separator = null;
-                        if (header.Value.Length > 1)
+                        if (headerValues.Length > 1)
                         {
                             HttpHeaderParser parser = header.Key.Parser;
                             if (parser != null && parser.SupportsMultipleValues)
@@ -997,13 +996,13 @@ namespace System.Net.Http
                             }
                         }
 
-                        WriteLiteralHeaderValues(header.Value, separator);
+                        WriteLiteralHeaderValues(headerValues, separator);
                     }
                 }
                 else
                 {
                     // The header is not known: fall back to just encoding the header name and value(s).
-                    WriteLiteralHeader(header.Key.Name, header.Value);
+                    WriteLiteralHeader(header.Key.Name, headerValues);
                 }
             }
         }
@@ -1112,7 +1111,7 @@ namespace System.Net.Http
                 innerException = new ObjectDisposedException(nameof(Http2Connection));
             }
 
-            return new HttpRequestException(SR.net_http_client_execution_error, innerException, allowRetry: true);
+            return new HttpRequestException(SR.net_http_client_execution_error, innerException, allowRetry: RequestRetryType.RetryOnSameOrNextProxy);
         }
 
         private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken, bool mustFlush)

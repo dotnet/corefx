@@ -384,8 +384,7 @@ namespace System.IO
                     maxSize++;
             }
 
-            Span<char> initialBuffer = stackalloc char[260];    // MaxShortPath on Windows
-            var builder = new ValueStringBuilder(initialBuffer);
+            var builder = new ValueStringBuilder(stackalloc char[260]); // MaxShortPath on Windows
             builder.EnsureCapacity(maxSize);
 
             for (int i = firstComponent; i < paths.Length; i++)
@@ -492,14 +491,13 @@ namespace System.IO
             }
             maxSize += paths.Length - 1;
 
-            Span<char> initialBuffer = stackalloc char[260];    // MaxShortPath on Windows
-            var builder = new ValueStringBuilder(initialBuffer);
+            var builder = new ValueStringBuilder(stackalloc char[260]); // MaxShortPath on Windows
             builder.EnsureCapacity(maxSize);
 
             for (int i = 0; i < paths.Length; i++)
             {
                 string? path = paths[i];
-                if (path == null || path.Length == 0)
+                if (string.IsNullOrEmpty(path))
                 {
                     continue;
                 }
@@ -713,7 +711,6 @@ namespace System.IO
 
             fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second), t = &MemoryMarshal.GetReference(third), u = &MemoryMarshal.GetReference(fourth))
             {
-
 #if MS_IO_REDIST
                 return StringExtensions.Create(
 #else
@@ -780,7 +777,7 @@ namespace System.IO
             // Consume 3 MSB bits of b2, 1 MSB bit of b3, b4
             b2 >>= 5;
 
-            Debug.Assert(((b2 & 0xF8) == 0), "Unexpected set bits");
+            Debug.Assert((b2 & 0xF8) == 0, "Unexpected set bits");
 
             if ((b3 & 0x80) != 0)
                 b2 |= 0x08;
@@ -862,7 +859,8 @@ namespace System.IO
             //  C:\Foo\Bar C:\Bar\Bar L3, S2 -> ..\..\Bar\Bar
             //  C:\Foo\Foo C:\Foo\Bar L7, S1 -> ..\Bar
 
-            StringBuilder sb = StringBuilderCache.Acquire(Math.Max(relativeTo.Length, path.Length));
+            var sb = new ValueStringBuilder(stackalloc char[260]);
+            sb.EnsureCapacity(Math.Max(relativeTo.Length, path.Length));
 
             // Add parent segments for segments past the common on the "from" path
             if (commonLength < relativeToLength)
@@ -897,10 +895,10 @@ namespace System.IO
                     sb.Append(DirectorySeparatorChar);
                 }
 
-                sb.Append(path, commonLength, differenceLength);
+                sb.Append(path.AsSpan(commonLength, differenceLength));
             }
 
-            return StringBuilderCache.GetStringAndRelease(sb);
+            return sb.ToString();
         }
 
         /// <summary>Returns a comparison that can be used to compare file and directory names for equality.</summary>
@@ -935,6 +933,6 @@ namespace System.IO
         /// Returns true if the path ends in a directory separator.
         /// </summary>
         public static bool EndsInDirectorySeparator(string path)
-              => path != null && path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]);
+              => !string.IsNullOrEmpty(path) && PathInternal.IsDirectorySeparator(path[path.Length - 1]);
     }
 }

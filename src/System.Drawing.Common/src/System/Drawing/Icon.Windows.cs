@@ -14,11 +14,11 @@ using System.Runtime.Serialization;
 
 namespace System.Drawing
 {
-    [Serializable]
-    [TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-#if netcoreapp || netcoreapp30
+#if NETCOREAPP
     [TypeConverter("System.Drawing.IconConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #endif
+    [Serializable]
+    [TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public sealed partial class Icon : MarshalByRefObject, ICloneable, IDisposable, ISerializable
     {
 #if FINALIZATION_WATCH
@@ -217,9 +217,9 @@ namespace System.Drawing
             {
                 if (_iconSize.IsEmpty)
                 {
-                    var info = new SafeNativeMethods.ICONINFO();
+                    SafeNativeMethods.ICONINFO info = default;
                     SafeNativeMethods.GetIconInfo(new HandleRef(this, Handle), ref info);
-                    var bitmap = new SafeNativeMethods.BITMAP();
+                    SafeNativeMethods.BITMAP bitmap = default;
 
                     if (info.hbmColor != IntPtr.Zero)
                     {
@@ -227,7 +227,7 @@ namespace System.Drawing
                             new HandleRef(null, info.hbmColor),
                             sizeof(SafeNativeMethods.BITMAP),
                             ref bitmap);
-                        SafeNativeMethods.IntDeleteObject(new HandleRef(null, info.hbmColor));
+                        Interop.Gdi32.DeleteObject(info.hbmColor);
                         _iconSize = new Size((int)bitmap.bmWidth, (int)bitmap.bmHeight);
                     }
                     else if (info.hbmMask != IntPtr.Zero)
@@ -241,7 +241,7 @@ namespace System.Drawing
 
                     if (info.hbmMask != IntPtr.Zero)
                     {
-                        SafeNativeMethods.IntDeleteObject(new HandleRef(null, info.hbmMask));
+                        Interop.Gdi32.DeleteObject(info.hbmMask);
                     }
                 }
 
@@ -358,7 +358,7 @@ namespace System.Drawing
             // The ROP is SRCCOPY, so we can be simple here and take
             // advantage of clipping regions.  Drawing the cursor
             // is merely a matter of offsetting and clipping.
-            IntPtr hSaveRgn = SafeNativeMethods.SaveClipRgn(dc);
+            IntPtr hSaveRgn = SaveClipRgn(dc);
             try
             {
                 SafeNativeMethods.IntersectClipRect(new HandleRef(this, dc), targetX, targetY, targetX + clipWidth, targetY + clipHeight);
@@ -374,8 +374,28 @@ namespace System.Drawing
             }
             finally
             {
-                SafeNativeMethods.RestoreClipRgn(dc, hSaveRgn);
+                RestoreClipRgn(dc, hSaveRgn);
             }
+        }
+
+        private static IntPtr SaveClipRgn(IntPtr hDC)
+        {
+            IntPtr hTempRgn = Interop.Gdi32.CreateRectRgn(0, 0, 0, 0);
+            IntPtr hSaveRgn = IntPtr.Zero;
+
+            int result = Interop.Gdi32.GetClipRgn(hDC, hTempRgn);
+            if (result > 0)
+            {
+                hSaveRgn = hTempRgn;
+                hTempRgn = IntPtr.Zero;
+            }
+
+            return hSaveRgn;
+        }
+
+        private static void RestoreClipRgn(IntPtr hDC, IntPtr hRgn)
+        {
+            Interop.Gdi32.SelectClipRgn(new HandleRef(null, hDC), new HandleRef(null, hRgn));
         }
 
         internal void Draw(Graphics graphics, int x, int y)
@@ -450,10 +470,10 @@ namespace System.Drawing
 
             if (s_bitDepth == 0)
             {
-                IntPtr dc = UnsafeNativeMethods.GetDC(NativeMethods.NullHandleRef);
-                s_bitDepth = UnsafeNativeMethods.GetDeviceCaps(new HandleRef(null, dc), SafeNativeMethods.BITSPIXEL);
-                s_bitDepth *= UnsafeNativeMethods.GetDeviceCaps(new HandleRef(null, dc), SafeNativeMethods.PLANES);
-                UnsafeNativeMethods.ReleaseDC(NativeMethods.NullHandleRef, new HandleRef(null, dc));
+                IntPtr dc = Interop.User32.GetDC(IntPtr.Zero);
+                s_bitDepth = Interop.Gdi32.GetDeviceCaps(dc, Interop.Gdi32.DeviceCapability.BITSPIXEL);
+                s_bitDepth *= Interop.Gdi32.GetDeviceCaps(dc, Interop.Gdi32.DeviceCapability.PLANES);
+                Interop.User32.ReleaseDC(IntPtr.Zero, dc);
 
                 // If the bitdepth is 8, make it 4 because windows does not
                 // choose a 256 color icon if the display is running in 256 color mode
@@ -525,7 +545,7 @@ namespace System.Drawing
                         int thisDelta = Math.Abs(entry.bWidth - width) + Math.Abs(entry.bHeight - height);
 
                         if ((thisDelta < bestDelta) ||
-                            (thisDelta == bestDelta && (0 <= s_bitDepth && 0 > _bestBitDepth || _bestBitDepth > s_bitDepth && 0 < _bestBitDepth)))
+                            (thisDelta == bestDelta && (iconBitDepth <= s_bitDepth && iconBitDepth > _bestBitDepth || _bestBitDepth > s_bitDepth && iconBitDepth < _bestBitDepth)))
                         {
                             fUpdateBestFit = true;
                         }
@@ -740,9 +760,9 @@ namespace System.Drawing
             else if (_bestBitDepth == 0 || _bestBitDepth == 32)
             {
                 // This may be a 32bpp icon or an icon without any data.
-                var info = new SafeNativeMethods.ICONINFO();
+                SafeNativeMethods.ICONINFO info = default;
                 SafeNativeMethods.GetIconInfo(new HandleRef(this, _handle), ref info);
-                var bmp = new SafeNativeMethods.BITMAP();
+                SafeNativeMethods.BITMAP bmp = default;
                 try
                 {
                     if (info.hbmColor != IntPtr.Zero)
@@ -792,11 +812,11 @@ namespace System.Drawing
                 {
                     if (info.hbmColor != IntPtr.Zero)
                     {
-                        SafeNativeMethods.IntDeleteObject(new HandleRef(null, info.hbmColor));
+                        Interop.Gdi32.DeleteObject(info.hbmColor);
                     }
                     if (info.hbmMask != IntPtr.Zero)
                     {
-                        SafeNativeMethods.IntDeleteObject(new HandleRef(null, info.hbmMask));
+                        Interop.Gdi32.DeleteObject(info.hbmMask);
                     }
                 }
             }

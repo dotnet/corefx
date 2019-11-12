@@ -494,7 +494,7 @@ namespace System.Threading
                 // run the minor risk of having _callbackPartitions reinitialized (after it was cleared to null during Dispose).
                 if (_disposed)
                 {
-                    return new CancellationTokenRegistration();
+                    return default;
                 }
 
                 // Get the partitions...
@@ -697,7 +697,7 @@ namespace System.Threading
                         catch (Exception ex) when (!throwOnFirstException)
                         {
                             // Store the exception and continue
-                            (exceptionList ?? (exceptionList = new List<Exception>())).Add(ex);
+                            (exceptionList ??= new List<Exception>()).Add(ex);
                         }
 
                         // Drop the node. While we could add it to the free list, doing so has cost (we'd need to take the lock again)
@@ -726,7 +726,7 @@ namespace System.Threading
         /// <returns>A power of 2 representing the number of partitions to use.</returns>
         private static int GetPartitionCount()
         {
-            int procs = PlatformHelper.ProcessorCount;
+            int procs = Environment.ProcessorCount;
             int count =
                 procs > 8 ? 16 : // capped at 16 to limit memory usage on larger machines
                 procs > 4 ? 8 :
@@ -792,7 +792,7 @@ namespace System.Threading
         /// </summary>
         internal void WaitForCallbackToComplete(long id)
         {
-            var sw = new SpinWait();
+            SpinWait sw = default;
             while (ExecutingCallback == id)
             {
                 sw.SpinOnce();  // spin, as we assume callback execution is fast and that this situation is rare.

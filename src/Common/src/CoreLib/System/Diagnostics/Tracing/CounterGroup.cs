@@ -89,7 +89,7 @@ namespace System.Diagnostics.Tracing
             else if (eventSourceIndex >= CounterGroup.s_counterGroups.Length)
             {
                 WeakReference<CounterGroup>[] newCounterGroups = new WeakReference<CounterGroup>[eventSourceIndex + 1];
-                Array.Copy(CounterGroup.s_counterGroups, 0, newCounterGroups, 0, CounterGroup.s_counterGroups.Length);
+                Array.Copy(CounterGroup.s_counterGroups, newCounterGroups, CounterGroup.s_counterGroups.Length);
                 CounterGroup.s_counterGroups = newCounterGroups;
             }
         }
@@ -221,8 +221,6 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-
-
         private static Thread? s_pollingThread;
         // Used for sleeping for a certain amount of time while allowing the thread to be woken up
         private static AutoResetEvent? s_pollingThreadSleepEvent;
@@ -258,7 +256,6 @@ namespace System.Diagnostics.Tracing
                 sleepEvent?.WaitOne(sleepDurationInMilliseconds);
             }
         }
-
 
 #endregion // Timer Processing
 

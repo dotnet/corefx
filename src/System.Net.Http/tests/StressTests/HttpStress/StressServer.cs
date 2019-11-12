@@ -9,6 +9,7 @@ using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -34,14 +35,15 @@ namespace HttpStress
         // Header indicating expected response content length to be returned by the server
         public const string ExpectedResponseContentLength = "Expected-Response-Content-Length";
 
-        private EventListener _eventListener;
+        private EventListener? _eventListener;
         private readonly IWebHost _webHost;
 
-        public Uri ServerUri { get; }
+        public string ServerUri { get; }
 
         public StressServer(Configuration configuration)
         {
             ServerUri = configuration.ServerUri;
+            (string scheme, string hostname, int port) = ParseServerUri(configuration.ServerUri);
             IWebHostBuilder host = WebHost.CreateDefaultBuilder();
 
             if (configuration.UseHttpSys)
@@ -54,7 +56,7 @@ namespace HttpStress
                 // 3. Register the cert, e.g. netsh http add sslcert ipport=[::1]:5001 certhash=THUMBPRINTFROMABOVE appid="{some-guid}"
                 host = host.UseHttpSys(hso =>
                 {
-                    hso.UrlPrefixes.Add(ServerUri.ToString());
+                    hso.UrlPrefixes.Add(ServerUri);
                     hso.Authentication.Schemes = Microsoft.AspNetCore.Server.HttpSys.AuthenticationSchemes.None;
                     hso.Authentication.AllowAnonymous = true;
                     hso.MaxConnections = null;
@@ -76,16 +78,27 @@ namespace HttpStress
                     ko.Limits.Http2.InitialConnectionWindowSize = configuration.ServerInitialConnectionWindowSize ?? ko.Limits.Http2.InitialConnectionWindowSize;
                     ko.Limits.Http2.MaxRequestHeaderFieldSize = configuration.ServerMaxRequestHeaderFieldSize ?? ko.Limits.Http2.MaxRequestHeaderFieldSize;
 
-                    IPAddress iPAddress = Dns.GetHostAddresses(configuration.ServerUri.Host).First();
-
-                    ko.Listen(iPAddress, configuration.ServerUri.Port, listenOptions =>
+                    switch (hostname)
                     {
-                        if (configuration.ServerUri.Scheme == "https")
+                        case "+":
+                        case "*":
+                            ko.ListenAnyIP(port, ConfigureListenOptions);
+                            break;
+                        default:
+                            IPAddress iPAddress = Dns.GetHostAddresses(hostname).First();
+                            ko.Listen(iPAddress, port, ConfigureListenOptions);
+                            break;
+
+                    }
+
+                    void ConfigureListenOptions(ListenOptions listenOptions)
+                    {
+                        if (scheme == "https")
                         {
                             // Create self-signed cert for server.
                             using (RSA rsa = RSA.Create())
                             {
-                                var certReq = new CertificateRequest($"CN={ServerUri.Host}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                                var certReq = new CertificateRequest("CN=contoso.com", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                                 certReq.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
                                 certReq.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new OidCollection { new Oid("1.3.6.1.5.5.7.3.1") }, false));
                                 certReq.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, false));
@@ -104,7 +117,7 @@ namespace HttpStress
                                 HttpProtocols.Http2 :
                                 HttpProtocols.Http1 ;
                         }
-                    });
+                    }
                 });
             };
 
@@ -289,7 +302,7 @@ namespace HttpStress
 
         private void SetUpJustInTimeLogging()
         {
-            if (_eventListener == null)
+            if (_eventListener == null && !Console.IsInputRedirected)
             {
                 // If no command-line requested logging, enable the user to press 'L' to enable logging to the console
                 // during execution, so that it can be done just-in-time when something goes awry.
@@ -309,12 +322,34 @@ namespace HttpStress
             }
         }
 
+        private static (string scheme, string hostname, int port) ParseServerUri(string serverUri)
+        {
+            try
+            {
+                var uri = new Uri(serverUri);
+                return (uri.Scheme, uri.Host, uri.Port);
+            } 
+            catch (UriFormatException)
+            {
+                // Simple uri parser: used to parse values valid in Kestrel
+                // but not representable by the System.Uri class, e.g. https://+:5050
+                Match m = Regex.Match(serverUri, "^(?<scheme>https?)://(?<host>[^:/]+)(:(?<port>[0-9]+))?");
+
+                if (!m.Success) throw;
+
+                string scheme = m.Groups["scheme"].Value;
+                string hostname = m.Groups["host"].Value;
+                int port = m.Groups["port"].Success ? int.Parse(m.Groups["port"].Value) : (scheme == "https" ? 443 : 80);
+                return (scheme, hostname, port);
+            }
+        }
+
         /// <summary>EventListener that dumps HTTP events out to either the console or a stream writer.</summary>
         private sealed class HttpEventListener : EventListener
         {
-            private readonly StreamWriter _writer;
+            private readonly StreamWriter? _writer;
 
-            public HttpEventListener(StreamWriter writer = null) => _writer = writer;
+            public HttpEventListener(StreamWriter? writer = null) => _writer = writer;
 
             protected override void OnEventSourceCreated(EventSource eventSource)
             {
@@ -329,11 +364,11 @@ namespace HttpStress
                     if (_writer != null)
                     {
                         var sb = new StringBuilder().Append($"[{eventData.EventName}] ");
-                        for (int i = 0; i < eventData.Payload.Count; i++)
+                        for (int i = 0; i < eventData.Payload?.Count; i++)
                         {
                             if (i > 0)
                                 sb.Append(", ");
-                            sb.Append(eventData.PayloadNames[i]).Append(": ").Append(eventData.Payload[i]);
+                            sb.Append(eventData.PayloadNames?[i]).Append(": ").Append(eventData.Payload[i]);
                         }
                         _writer.WriteLine(sb);
                     }
@@ -342,12 +377,12 @@ namespace HttpStress
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.Write($"[{eventData.EventName}] ");
                         Console.ResetColor();
-                        for (int i = 0; i < eventData.Payload.Count; i++)
+                        for (int i = 0; i < eventData.Payload?.Count; i++)
                         {
                             if (i > 0)
                                 Console.Write(", ");
                             Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write(eventData.PayloadNames[i] + ": ");
+                            Console.Write(eventData.PayloadNames?[i] + ": ");
                             Console.ResetColor();
                             Console.Write(eventData.Payload[i]);
                         }
@@ -396,6 +431,5 @@ namespace HttpStress
 
             return true;
         }
-
     }
 }

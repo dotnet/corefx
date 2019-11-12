@@ -602,9 +602,6 @@ namespace System.Diagnostics.Contracts
 
         #endregion Quantifiers
 
-        #region Pointers
-        #endregion
-
         #region Misc.
 
         /// <summary>
@@ -640,8 +637,7 @@ namespace System.Diagnostics.Contracts
                 }
             }
 
-            if (probablyNotRewritten == null)
-                probablyNotRewritten = thisAssembly;
+            probablyNotRewritten ??= thisAssembly;
             string? simpleName = probablyNotRewritten.GetName().Name;
             ContractHelper.TriggerFailure(kind, SR.Format(SR.MustUseCCRewrite, contractKind, simpleName), null, null, null);
         }

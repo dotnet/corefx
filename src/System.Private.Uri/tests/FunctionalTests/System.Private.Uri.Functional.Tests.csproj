@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{B0FFC4A8-BAC3-4A7F-8FD5-5B680209371C}</ProjectGuid>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AppxUriValue.cs" />
@@ -24,9 +23,5 @@
     <Compile Include="UriRelativeResolutionTest.cs" />
     <Compile Include="UriTests.cs" />
     <Compile Include="WebSocketsUriParserTest.cs" />
-    <!-- Test common -->
-    <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
-      <Link>Common\System\ThreadCultureChange.cs</Link>
-    </Compile>
   </ItemGroup>
 </Project>

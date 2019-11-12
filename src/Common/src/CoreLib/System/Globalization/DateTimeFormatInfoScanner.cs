@@ -186,7 +186,7 @@ namespace System.Globalization
                 // Skip the current char since it is not a letter.
                 currentIndex++;
             }
-            return (currentIndex);
+            return currentIndex;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -212,12 +212,10 @@ namespace System.Globalization
                     return;
                 }
 
-                if (KnownWords.TryGetValue(str, out _) == false)
+                if (!KnownWords.TryGetValue(str, out _))
                 {
-                    if (m_dateWords == null)
-                    {
-                        m_dateWords = new List<string>();
-                    }
+                    m_dateWords ??= new List<string>();
+
                     if (formatPostfix == "MMMM")
                     {
                         // Add the word into the ArrayList as "\xfffe" + real month postfix.
@@ -323,7 +321,7 @@ namespace System.Globalization
                     index++;
                 }
             }
-            return (index);
+            return index;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -339,7 +337,7 @@ namespace System.Globalization
                 count++;
             }
             // Return the updated position.
-            return (index);
+            return index;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -372,7 +370,6 @@ namespace System.Globalization
             }
         }
 
-
         //
         // Flag used to trace the date patterns (yy/yyyyy/M/MM/MMM/MMM/d/dd) that we have seen.
         //
@@ -387,7 +384,6 @@ namespace System.Globalization
 
         // Check if we have found all of the year/month/day pattern.
         private FoundDatePattern _ymdFlags = FoundDatePattern.None;
-
 
         ////////////////////////////////////////////////////////////////////////////
         //
@@ -541,7 +537,6 @@ namespace System.Globalization
             return result;
         }
 
-
         ////////////////////////////////////////////////////////////////////////////
         //
         // Scan the month names to see if genitive month names are used, and return
@@ -551,8 +546,8 @@ namespace System.Globalization
         internal static FORMATFLAGS GetFormatFlagGenitiveMonth(string[] monthNames, string[] genitveMonthNames, string[] abbrevMonthNames, string[] genetiveAbbrevMonthNames)
         {
             // If we have different names in regular and genitive month names, use genitive month flag.
-            return ((!EqualStringArrays(monthNames, genitveMonthNames) || !EqualStringArrays(abbrevMonthNames, genetiveAbbrevMonthNames))
-                ? FORMATFLAGS.UseGenitiveMonth : 0);
+            return (!EqualStringArrays(monthNames, genitveMonthNames) || !EqualStringArrays(abbrevMonthNames, genetiveAbbrevMonthNames))
+                ? FORMATFLAGS.UseGenitiveMonth : 0;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -574,7 +569,7 @@ namespace System.Globalization
                     ArrayElementsHaveSpace(abbrevMonthNames) ||
                     ArrayElementsHaveSpace(genetiveAbbrevMonthNames)
                     ? FORMATFLAGS.UseSpacesInMonthNames : 0);
-            return (formatFlags);
+            return formatFlags;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -584,9 +579,9 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////////
         internal static FORMATFLAGS GetFormatFlagUseSpaceInDayNames(string[] dayNames, string[] abbrevDayNames)
         {
-            return ((ArrayElementsHaveSpace(dayNames) ||
+            return (ArrayElementsHaveSpace(dayNames) ||
                     ArrayElementsHaveSpace(abbrevDayNames))
-                    ? FORMATFLAGS.UseSpacesInDayNames : 0);
+                    ? FORMATFLAGS.UseSpacesInDayNames : 0;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -596,10 +591,9 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////////
         internal static FORMATFLAGS GetFormatFlagUseHebrewCalendar(int calID)
         {
-            return (calID == (int)CalendarId.HEBREW ?
-                FORMATFLAGS.UseHebrewParsing | FORMATFLAGS.UseLeapYearMonth : 0);
+            return calID == (int)CalendarId.HEBREW ?
+                FORMATFLAGS.UseHebrewParsing | FORMATFLAGS.UseLeapYearMonth : 0;
         }
-
 
         //-----------------------------------------------------------------------------
         // EqualStringArrays
@@ -658,7 +652,6 @@ namespace System.Globalization
 
             return false;
         }
-
 
         ////////////////////////////////////////////////////////////////////////////
         //

@@ -71,8 +71,7 @@ namespace System.Text
                 lock (InternalSyncObject)
                 {
                     // Double check before we do it again.
-                    if (_oFallback._arrayBestFit == null)
-                        _oFallback._arrayBestFit = fallback._encoding.GetBestFitUnicodeToBytesData();
+                    _oFallback._arrayBestFit ??= fallback._encoding.GetBestFitUnicodeToBytesData();
                 }
             }
         }
@@ -148,9 +147,8 @@ namespace System.Text
                 _iCount++;
 
             // Return true if we could do it.
-            return (_iCount >= 0 && _iCount <= _iSize);
+            return _iCount >= 0 && _iCount <= _iSize;
         }
-
 
         // How many characters left to output?
         public override int Remaining => (_iCount > 0) ? _iCount : 0;

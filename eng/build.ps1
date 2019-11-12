@@ -2,7 +2,7 @@
 Param(
   [switch][Alias('b')]$build,
   [switch][Alias('t')]$test,
-  [switch] $buildtests,
+  [switch]$buildtests,
   [string][Alias('c')]$configuration = "Debug",
   [string][Alias('f')]$framework,
   [string]$vs,
@@ -11,13 +11,12 @@ Param(
   [switch]$coverage,
   [string]$testscope,
   [string]$arch,
-  [switch]$clean,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
 function Get-Help() {
   Write-Host "Common settings:"
-  Write-Host "  -framework              Build framework: netcoreapp, netfx, uap (short: -f)"
+  Write-Host "  -framework              Build framework: netcoreapp, netfx (short: -f)"
   Write-Host "  -configuration <value>  Build configuration: Debug or Release (short: -c)"
   Write-Host "  -verbosity <value>      MSBuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
   Write-Host "  -binaryLog              Output binary log (short: -bl)"
@@ -56,25 +55,16 @@ if ($MyInvocation.InvocationName -eq ".") {
 }
 
 # Check if an action is passed in
-$actions = "r","restore","b","build","rebuild","deploy","deployDeps","test","integrationTest","sign","publish","buildtests"
+$actions = "r","restore","b","build","rebuild","deploy","deployDeps","test","integrationTest","sign","publish","buildtests","clean"
 $actionPassedIn = @(Compare-Object -ReferenceObject @($PSBoundParameters.Keys) -DifferenceObject $actions -ExcludeDifferent -IncludeEqual).Length -ne 0
 if ($null -ne $properties -and $actionPassedIn -ne $true) {
   $actionPassedIn = @(Compare-Object -ReferenceObject $properties -DifferenceObject $actions.ForEach({ "-" + $_ }) -ExcludeDifferent -IncludeEqual).Length -ne 0
 }
 
-if ($clean) {
-  $artifactsPath = "$PSScriptRoot\..\artifacts"
-  if(Test-Path $artifactsPath) {
-    Remove-Item -Recurse -Force $artifactsPath
-    Write-Host "Artifacts directory deleted."
-  }
-  if (!$actionPassedIn) {
-    exit 0
-  }
-}
-
 # VS Test Explorer support
 if ($vs) {
+  . $PSScriptRoot\common\tools.ps1
+
   if (-Not (Test-Path $vs)) {
     $vs = Join-Path "$PSScriptRoot\..\src" $vs | Join-Path -ChildPath "$vs.sln"
   }
@@ -83,6 +73,9 @@ if ($vs) {
 
   # This tells .NET Core to use the same dotnet.exe that build scripts use
   $env:DOTNET_ROOT="$PSScriptRoot\..\artifacts\bin\testhost\netcoreapp-Windows_NT-$configuration-$archTestHost";
+
+  # This tells MSBuild to load the SDK from the directory of the bootstrapped SDK
+  $env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR=InitializeDotNetCli -install:$false
 
   # This tells .NET Core not to go looking for .NET Core in other places
   $env:DOTNET_MULTILEVEL_LOOKUP=0;
@@ -120,9 +113,8 @@ foreach ($argument in $PSBoundParameters.Keys)
   switch($argument)
   {
     "build"             { $arguments += " -build" }
+    "buildtests"        { if ($build -eq $true) { $arguments += " /p:BuildTests=true" } else { $arguments += " -build /p:BuildTests=only" } }
     "test"              { $arguments += " -test" }
-    "buildtests"        { $arguments += " /p:BuildTests=true" }
-    "clean"             { }
     "configuration"     { $configuration = (Get-Culture).TextInfo.ToTitleCase($($PSBoundParameters[$argument])); $arguments += " /p:ConfigurationGroup=$configuration -configuration $configuration" }
     "framework"         { $arguments += " /p:TargetGroup=$($PSBoundParameters[$argument].ToLowerInvariant())"}
     "os"                { $arguments += " /p:OSGroup=$($PSBoundParameters[$argument])" }

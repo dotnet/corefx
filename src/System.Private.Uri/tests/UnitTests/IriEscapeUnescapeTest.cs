@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Text;
-using System.Common.Tests;
+using System.Tests;
 
 using Xunit;
 
@@ -183,16 +183,13 @@ namespace System.Net.Test.Uri.IriTest
             string[] results_en = new string[components.Length];
             string[] results_zh = new string[components.Length];
 
-
-            using (ThreadCultureChange helper = new ThreadCultureChange())
+            for (int i = 0; i < components.Length; i++)
             {
-                for (int i = 0; i < components.Length; i++)
-                {
-                    results_en[i] = EscapeUnescapeTestComponent(uriInput, components[i]);
-                }
+                results_en[i] = EscapeUnescapeTestComponent(uriInput, components[i]);
+            }
 
-                helper.ChangeCultureInfo("zh-cn");
-
+            using (new ThreadCultureChange("zh-cn"))
+            {
                 for (int i = 0; i < components.Length; i++)
                 {
                     results_zh[i] = EscapeUnescapeTestComponent(uriInput, components[i]);
@@ -308,15 +305,13 @@ namespace System.Net.Test.Uri.IriTest
 
         private void MatchUTF8SequenceTest(byte[] inbytes, int numBytes)
         {
-            using (ThreadCultureChange helper = new ThreadCultureChange())
+            MatchUTF8SequenceOverrunTest(inbytes, numBytes, true, false);
+            MatchUTF8SequenceOverrunTest(inbytes, numBytes, true, true);
+            MatchUTF8SequenceOverrunTest(inbytes, numBytes, false, false);
+            MatchUTF8SequenceOverrunTest(inbytes, numBytes, false, true);
+
+            using (new ThreadCultureChange("zh-cn"))
             {
-                MatchUTF8SequenceOverrunTest(inbytes, numBytes, true, false);
-                MatchUTF8SequenceOverrunTest(inbytes, numBytes, true, true);
-                MatchUTF8SequenceOverrunTest(inbytes, numBytes, false, false);
-                MatchUTF8SequenceOverrunTest(inbytes, numBytes, false, true);
-
-                helper.ChangeCultureInfo("zh-cn");
-
                 MatchUTF8SequenceOverrunTest(inbytes, numBytes, true, false);
                 MatchUTF8SequenceOverrunTest(inbytes, numBytes, true, true);
                 MatchUTF8SequenceOverrunTest(inbytes, numBytes, false, false);
@@ -342,28 +337,21 @@ namespace System.Net.Test.Uri.IriTest
             char[] unescapedChars = new char[inbytes.Length];
             chars.CopyTo(unescapedChars, 0);
 
-            HeapCheck hc = new HeapCheck(dest);
+            int expectedLength = inbytes.Length * 3;
+            ValueStringBuilder vsb = HeapCheck.CreateFilledPooledArray(expectedLength);
 
-            unsafe
-            {
-                fixed (char* pInput = hc.HeapBlock)
-                {
-                    int offset = hc.Offset;
-                    UriHelper.MatchUTF8Sequence(
-                        pInput,
-                        hc.HeapBlock,
-                        ref offset,
-                        unescapedChars,
-                        chars.Length,
-                        inbytes,
-                        numBytes,
-                        isQuery,
-                        iriParsing);
-                }
-            }
+            vsb.Length = 32;
+            UriHelper.MatchUTF8Sequence(
+                ref vsb,
+                unescapedChars,
+                chars.Length,
+                inbytes,
+                numBytes,
+                isQuery,
+                iriParsing);
 
             // Check for buffer under and overruns.
-            hc.ValidatePadding();
+            HeapCheck.ValidatePadding(vsb, expectedLength);
         }
 
         private class HeapCheck
@@ -408,13 +396,41 @@ namespace System.Net.Test.Uri.IriTest
             {
                 for (int i = 0; i < _memblock.Length; i++)
                 {
-                    if ((i < padding) || (i >= padding + _len))
+                    AssertValidPadding(i, _len, _memblock[i]);
+                }
+            }
+
+            public static void ValidatePadding(ValueStringBuilder pooledArray, int expectedLength)
+            {
+                for (int i = 0; i < pooledArray.Length; i++)
+                {
+                    if ((i < padding) || (i >= padding + expectedLength))
                     {
-                        Assert.True(
-                            (int)paddingValue == (int)_memblock[i],
-                            "Heap corruption detected: unexpected padding value at index: " + i +
-                            " Data allocated at idx: " + padding + " - " + (_len + padding - 1));
+                        AssertValidPadding(i, expectedLength, pooledArray[i]);
                     }
+                }
+            }
+
+            public static ValueStringBuilder CreateFilledPooledArray(int length)
+            {
+                int size = length + padding * 2;
+                ValueStringBuilder vsb = new ValueStringBuilder(size);
+                vsb.Length = size;
+                for (int i = 0; i < vsb.Length; i++)
+                {
+                    vsb[i] = paddingValue;
+                }
+                return vsb;
+            }
+
+            private static void AssertValidPadding(int i, int len, char memValue)
+            {
+                if ((i < padding) || (i >= padding + len))
+                {
+                    Assert.True(
+                        (int)paddingValue == (int)memValue,
+                        "Heap corruption detected: unexpected padding value at index: " + i +
+                        " Data allocated at idx: " + padding + " - " + (len + padding - 1));
                 }
             }
         }

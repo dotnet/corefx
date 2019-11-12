@@ -109,7 +109,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             CmsRecipient recipient,
             out bool v0Recipient)
         {
-            KeyTransRecipientInfoAsn ktri = new KeyTransRecipientInfoAsn();
+            KeyTransRecipientInfoAsn ktri = default;
 
             if (recipient.RecipientIdentifierType == SubjectIdentifierType.SubjectKeyIdentifier)
             {
@@ -189,7 +189,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                 return null;
             }
 
-#if netcoreapp || netcoreapp30 || netstandard21
+#if NETCOREAPP || NETSTANDARD2_1
             byte[] cek = null;
             int cekLength = 0;
 

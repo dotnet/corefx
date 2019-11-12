@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{4B93E684-0630-45F4-8F63-6C7788C9892F}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release</Configurations>
@@ -52,8 +51,10 @@
     <Compile Include="Imaging\ImageFormatTests.cs" />
     <Compile Include="Imaging\MetaHeaderTests.cs" />
     <Compile Include="Imaging\WmfPlaceableFileHeaderTests.cs" />
+    <Compile Include="Printing\PrintControllerTests.cs" />
     <Compile Include="Printing\PrintDocumentTests.cs" />
     <Compile Include="Printing\PrinterSettingsTests.cs" />
+    <Compile Include="Printing\PreviewPrintControllerTests.cs" />
     <Compile Include="RegionTests.cs" />
     <Compile Include="SolidBrushTests.cs" />
     <Compile Include="StringFormatTests.cs" />
@@ -83,15 +84,12 @@
     <Compile Include="$(CommonTestPath)\System\Drawing\Helpers.cs">
       <Link>Common\System\Drawing\Helpers.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
-      <Link>Common\System\ThreadCultureChange.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common.TestData" Version="$(SystemDrawingCommonTestDataPackageVersion)" GeneratePathProperty="true" />    
+    <PackageReference Include="System.Drawing.Common.TestData" Version="$(SystemDrawingCommonTestDataVersion)" GeneratePathProperty="true" />    
     <EmbeddedResource Include="$(PkgSystem_Drawing_Common_TestData)\contentFiles\any\any\bitmaps\48x48_multiple_entries_4bit.ico">
       <LogicalName>System.Drawing.Tests.48x48_multiple_entries_4bit.ico</LogicalName>
     </EmbeddedResource>

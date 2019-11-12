@@ -34,15 +34,8 @@ namespace System.Runtime.Serialization
         [ThreadStatic]
         private static DeserializationTracker? t_deserializationTracker;
 
-        private static DeserializationTracker GetThreadDeserializationTracker()
-        {
-            if (t_deserializationTracker == null)
-            {
-                t_deserializationTracker = new DeserializationTracker();
-            }
-
-            return t_deserializationTracker;
-        }
+        private static DeserializationTracker GetThreadDeserializationTracker() =>
+            t_deserializationTracker ??= new DeserializationTracker();
 #endif // !CORECLR
 
         // Returns true if deserialization is currently in progress
@@ -196,7 +189,7 @@ namespace System.Runtime.Serialization
 
         public string FullTypeName
         {
-            get { return _rootTypeName; }
+            get => _rootTypeName;
             set
             {
                 if (null == value)
@@ -211,7 +204,7 @@ namespace System.Runtime.Serialization
 
         public string AssemblyName
         {
-            get { return _rootTypeAssemblyName; }
+            get => _rootTypeAssemblyName;
             set
             {
                 if (null == value)
@@ -271,9 +264,9 @@ namespace System.Runtime.Serialization
             object[] newData = new object[newSize];
             Type[] newTypes = new Type[newSize];
 
-            Array.Copy(_names, 0, newMembers, 0, _count);
-            Array.Copy(_values, 0, newData, 0, _count);
-            Array.Copy(_types, 0, newTypes, 0, _count);
+            Array.Copy(_names, newMembers, _count);
+            Array.Copy(_values, newData, _count);
+            Array.Copy(_types, newTypes, _count);
 
             // Assign the new arrays back to the member vars.
             _names = newMembers;
@@ -526,7 +519,7 @@ namespace System.Runtime.Serialization
             if (value == null)
                 return null;
 
-            if (ReferenceEquals(foundType, type) || type.IsAssignableFrom(foundType) || value == null)
+            if (ReferenceEquals(foundType, type) || type.IsAssignableFrom(foundType))
             {
                 return value;
             }

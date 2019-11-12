@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Tests;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -80,12 +81,11 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(256)]
         public void Chr_CharCodeOutOfRange_ThrowsNotSupportedException(int charCode)
         {
-            RemoteExecutor.Invoke(charCodeInner =>
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            using (new ThreadCultureChange("en-US")) // Strings.Chr doesn't fail on these inputs for all code pages, e.g. 949
             {
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                CultureInfo.CurrentCulture = new CultureInfo("en-US"); // Strings.Chr doesn't fail on these inputs for all code pages, e.g. 949
-                AssertExtensions.Throws<ArgumentException>(null, () => Strings.Chr(int.Parse(charCodeInner, CultureInfo.InvariantCulture)));
-            }, charCode.ToString(CultureInfo.InvariantCulture)).Dispose();
+                AssertExtensions.Throws<ArgumentException>(null, () => Strings.Chr(charCode));
+            }
         }
 
         [Theory]
@@ -121,17 +121,12 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(255, 255)]
         public void Asc_Chr_Invariant(int charCode, int expected)
         {
-            RemoteExecutor.Invoke((charCodeString, expectedString) =>
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            using (new ThreadCultureChange(CultureInfo.InvariantCulture))
             {
-                int charCode = int.Parse(charCodeString);
-                int expected = int.Parse(expectedString);
-
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 Assert.Equal(1252, CultureInfo.CurrentCulture.TextInfo.ANSICodePage);
-
                 Assert.Equal(expected, Strings.Asc(Strings.Chr(charCode)));
-            }, charCode.ToString(), expected.ToString()).Dispose();
+            }
         }
 
         [ActiveIssue(39888, TargetFrameworkMonikers.NetFramework)]
@@ -146,17 +141,12 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(0xFFFF, 0xFF)]
         public void Asc_Chr_DoubleByte(int charCode, int expected)
         {
-            RemoteExecutor.Invoke((charCodeString, expectedString) =>
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            using (new ThreadCultureChange("ko-KR"))
             {
-                int charCode = int.Parse(charCodeString);
-                int expected = int.Parse(expectedString);
-
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                CultureInfo.CurrentCulture = new CultureInfo("ko-KR");
                 Assert.Equal(949, CultureInfo.CurrentCulture.TextInfo.ANSICodePage);
-
                 Assert.Equal(expected, (ushort)Strings.Asc(Strings.Chr(charCode)));
-            }, charCode.ToString(), expected.ToString()).Dispose();
+            }
         }
 
         [Theory]

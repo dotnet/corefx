@@ -17,12 +17,13 @@ namespace System.Runtime.InteropServices
     public readonly partial struct OSPlatform : System.IEquatable<System.Runtime.InteropServices.OSPlatform>
     {
         private readonly object _dummy;
+        private readonly int _dummyPrimitive;
         public static System.Runtime.InteropServices.OSPlatform FreeBSD { get { throw null; } }
         public static System.Runtime.InteropServices.OSPlatform Linux { get { throw null; } }
         public static System.Runtime.InteropServices.OSPlatform OSX { get { throw null; } }
         public static System.Runtime.InteropServices.OSPlatform Windows { get { throw null; } }
         public static System.Runtime.InteropServices.OSPlatform Create(string osPlatform) { throw null; }
-        public override bool Equals(object obj) { throw null; }
+        public override bool Equals(object? obj) { throw null; }
         public bool Equals(System.Runtime.InteropServices.OSPlatform other) { throw null; }
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.Runtime.InteropServices.OSPlatform left, System.Runtime.InteropServices.OSPlatform right) { throw null; }

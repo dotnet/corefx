@@ -61,7 +61,7 @@ namespace System
         {
             if (culture == null)
             {
-                throw new ArgumentException(nameof(culture));
+                throw new ArgumentNullException(nameof(culture));
             }
 
             return new CultureAwareComparer(culture, options);
@@ -274,7 +274,7 @@ namespace System
             {
                 return false;
             }
-            return (this._ignoreCase == comparer._ignoreCase);
+            return this._ignoreCase == comparer._ignoreCase;
         }
 
         public override int GetHashCode()

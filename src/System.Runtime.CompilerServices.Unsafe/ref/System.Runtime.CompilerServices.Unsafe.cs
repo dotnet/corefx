@@ -17,7 +17,11 @@ namespace System.Runtime.CompilerServices
         public static unsafe void* AsPointer<T>(ref T value) { throw null; }
         public static unsafe ref T AsRef<T>(void* source) { throw null; }
         public static ref T AsRef<T>(in T source) { throw null; }
-        public static T As<T>(object o) where T : class { throw null; }
+#if NETSTANDARD2_1
+        [return: System.Diagnostics.CodeAnalysis.MaybeNull]
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("o")]
+#endif
+        public static T As<T>(object? o) where T : class? { throw null; }
         public static ref TTo As<TFrom, TTo>(ref TFrom source) { throw null; }
         public static System.IntPtr ByteOffset<T>(ref T origin, ref T target) { throw null; }
         public static void CopyBlock(ref byte destination, ref byte source, uint byteCount) { }
@@ -35,6 +39,7 @@ namespace System.Runtime.CompilerServices
         public static T ReadUnaligned<T>(ref byte source) { throw null; }
         public static unsafe T ReadUnaligned<T>(void* source) { throw null; }
         public static unsafe T Read<T>(void* source) { throw null; }
+        public static void SkipInit<T>(out T value) { throw null; }
         public static int SizeOf<T>() { throw null; }
         public static ref T SubtractByteOffset<T>(ref T source, System.IntPtr byteOffset) { throw null; }
         public static unsafe void* Subtract<T>(void* source, int elementOffset) { throw null; }

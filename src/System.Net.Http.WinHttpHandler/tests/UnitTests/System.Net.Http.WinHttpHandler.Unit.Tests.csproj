@@ -1,6 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{A2ECDEDB-12B7-402C-9230-152B7601179F}</ProjectGuid>
     <NoWarn>$(NoWarn);0436</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
@@ -76,6 +75,9 @@
     <Compile Include="$(CommonPath)\System\Runtime\ExceptionServices\ExceptionStackTrace.cs">
       <Link>Common\System\Runtime\ExceptionServices\ExceptionStackTrace.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Text\SimpleRegex.cs">
+      <Link>Common\System\Text\SimpleRegex.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Threading\Tasks\RendezvousAwaitable.cs">
       <Link>Common\System\Threading\Tasks\RendezvousAwaitable.cs</Link>
     </Compile>
@@ -129,6 +131,15 @@
     </Compile>
     <Compile Include="..\..\..\System.Net.Http\src\System\Net\Http\SocketsHttpHandler\HttpWindowsProxy.cs">
       <Link>ProductionCode\HttpWindowsProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\System.Net.Http\src\System\Net\Http\SocketsHttpHandler\FailedProxyCache.cs">
+      <Link>ProductionCode\FailedProxyCache.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\System.Net.Http\src\System\Net\Http\SocketsHttpHandler\IMultiWebProxy.cs">
+      <Link>ProductionCode\IMultiWebProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\System.Net.Http\src\System\Net\Http\SocketsHttpHandler\MultiProxy.cs">
+      <Link>ProductionCode\MultiProxy.cs</Link>
     </Compile>
     <Compile Include="APICallHistory.cs" />
     <Compile Include="ClientCertificateHelper.cs" />

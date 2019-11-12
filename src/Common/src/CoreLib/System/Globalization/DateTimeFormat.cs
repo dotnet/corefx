@@ -156,7 +156,7 @@ namespace System
 
         ////////////////////////////////////////////////////////////////////////////
         //
-        // Format the positive integer value to a string and perfix with assigned
+        // Format the positive integer value to a string and prefix with assigned
         // length of leading zero.
         //
         // Parameters:
@@ -228,7 +228,7 @@ namespace System
             Debug.Assert(dayOfWeek >= 0 && dayOfWeek <= 6, "dayOfWeek >= 0 && dayOfWeek <= 6");
             if (repeat == 3)
             {
-                return (dtfi.GetAbbreviatedDayName((DayOfWeek)dayOfWeek));
+                return dtfi.GetAbbreviatedDayName((DayOfWeek)dayOfWeek);
             }
             // Call dtfi.GetDayName() here, instead of accessing DayNames property, because we don't
             // want a clone of DayNames, which will hurt perf.
@@ -274,7 +274,7 @@ namespace System
             12  Hebrew 11th Month
             13  Hebrew 12th Month
 
-            Therefore, if we are in a regular year, we have to increment the month name if moth is greater or eqaul to 7.
+            Therefore, if we are in a regular year, we have to increment the month name if month is greater or equal to 7.
         */
         private static string FormatHebrewMonthName(DateTime time, int month, int repeatCount, DateTimeFormatInfo dtfi)
         {
@@ -282,7 +282,7 @@ namespace System
             if (dtfi.Calendar.IsLeapYear(dtfi.Calendar.GetYear(time)))
             {
                 // This month is in a leap year
-                return dtfi.InternalGetMonthName(month, MonthNameStyles.LeapYear, (repeatCount == 3));
+                return dtfi.InternalGetMonthName(month, MonthNameStyles.LeapYear, repeatCount == 3);
             }
             // This is in a regular year.
             if (month >= 7)
@@ -291,14 +291,14 @@ namespace System
             }
             if (repeatCount == 3)
             {
-                return (dtfi.GetAbbreviatedMonthName(month));
+                return dtfi.GetAbbreviatedMonthName(month);
             }
-            return (dtfi.GetMonthName(month));
+            return dtfi.GetMonthName(month);
         }
 
         //
         // The pos should point to a quote character. This method will
-        // append to the result StringBuilder the string encloed by the quote character.
+        // append to the result StringBuilder the string enclosed by the quote character.
         //
         internal static int ParseQuoteString(ReadOnlySpan<char> format, int pos, StringBuilder result)
         {
@@ -352,7 +352,7 @@ namespace System
             //
             // Return the character count including the begin/end quote characters and enclosed string.
             //
-            return (pos - beginPos);
+            return pos - beginPos;
         }
 
         //
@@ -364,9 +364,9 @@ namespace System
         {
             if (pos >= format.Length - 1)
             {
-                return (-1);
+                return -1;
             }
-            return ((int)format[pos + 1]);
+            return (int)format[pos + 1];
         }
 
         //
@@ -439,7 +439,6 @@ namespace System
             return false;
         }
 
-
         //
         //  FormatCustomized
         //
@@ -457,10 +456,10 @@ namespace System
                 result = StringBuilderCache.Acquire();
             }
 
-            // This is a flag to indicate if we are format the dates using Hebrew calendar.
+            // This is a flag to indicate if we are formatting the dates using Hebrew calendar.
             bool isHebrewCalendar = (cal.ID == CalendarId.HEBREW);
             bool isJapaneseCalendar = (cal.ID == CalendarId.JAPAN);
-            // This is a flag to indicate if we are formating hour/minute/second only.
+            // This is a flag to indicate if we are formatting hour/minute/second only.
             bool bTimeOnly = true;
 
             int i = 0;
@@ -567,14 +566,14 @@ namespace System
                         }
                         else
                         {
-                            result.Append((dateTime.Hour < 12 ? dtfi.AMDesignator : dtfi.PMDesignator));
+                            result.Append(dateTime.Hour < 12 ? dtfi.AMDesignator : dtfi.PMDesignator);
                         }
                         break;
                     case 'd':
                         //
                         // tokenLen == 1 : Day of month as digits with no leading zero.
                         // tokenLen == 2 : Day of month as digits with leading zero for single-digit months.
-                        // tokenLen == 3 : Day of week as a three-leter abbreviation.
+                        // tokenLen == 3 : Day of week as a three-letter abbreviation.
                         // tokenLen >= 4 : Day of week as its full name.
                         //
                         tokenLen = ParseRepeatPattern(format, i, ch);
@@ -712,8 +711,8 @@ namespace System
                         // For example, format string "%d" will print day of month
                         // without leading zero.  Most of the cases, "%" can be ignored.
                         nextChar = ParseNextChar(format, i);
-                        // nextChar will be -1 if we already reach the end of the format string.
-                        // Besides, we will not allow "%%" appear in the pattern.
+                        // nextChar will be -1 if we have already reached the end of the format string.
+                        // Besides, we will not allow "%%" to appear in the pattern.
                         if (nextChar >= 0 && nextChar != '%')
                         {
                             char nextCharChar = (char)nextChar;
@@ -735,7 +734,7 @@ namespace System
                         }
                         break;
                     case '\\':
-                        // Escaped character.  Can be used to insert character into the format string.
+                        // Escaped character.  Can be used to insert a character into the format string.
                         // For exmple, "\d" will insert the character 'd' into the string.
                         //
                         // NOTENOTE : we can remove this format character if we enforce the enforced quote
@@ -746,7 +745,7 @@ namespace System
                         nextChar = ParseNextChar(format, i);
                         if (nextChar >= 0)
                         {
-                            result.Append(((char)nextChar));
+                            result.Append((char)nextChar);
                             tokenLen = 2;
                         }
                         else
@@ -775,8 +774,7 @@ namespace System
             return result;
         }
 
-
-        // output the 'z' famliy of formats, which output a the offset from UTC, e.g. "-07:30"
+        // output the 'z' family of formats, which output a the offset from UTC, e.g. "-07:30"
         private static void FormatCustomizedTimeZone(DateTime dateTime, TimeSpan offset, int tokenLen, bool timeOnly, StringBuilder result)
         {
             // See if the instance already has an offset
@@ -937,7 +935,6 @@ namespace System
             return realFormat;
         }
 
-
         // Expand a pre-defined format string (like "D" for long date) to the real format that
         // we are going to use in the date time parsing.
         // This method also convert the dateTime if necessary (e.g. when the format is in Universal time),
@@ -953,6 +950,7 @@ namespace System
                     break;
                 case 'r':
                 case 'R':       // RFC 1123 Standard
+                case 'u':       // Universal time in sortable format.
                     if (offset != NullOffset)
                     {
                         // Convert to UTC invariants mean this will be in range
@@ -961,14 +959,6 @@ namespace System
                     dtfi = DateTimeFormatInfo.InvariantInfo;
                     break;
                 case 's':       // Sortable without Time Zone Info
-                    dtfi = DateTimeFormatInfo.InvariantInfo;
-                    break;
-                case 'u':       // Universal time in sortable format.
-                    if (offset != NullOffset)
-                    {
-                        // Convert to UTC invariants mean this will be in range
-                        dateTime -= offset;
-                    }
                     dtfi = DateTimeFormatInfo.InvariantInfo;
                     break;
                 case 'U':       // Universal time in culture dependent format.
@@ -1146,7 +1136,7 @@ namespace System
                 }
                 else if (kind == DateTimeKind.Utc)
                 {
-                    charsRequired += 1;
+                    charsRequired++;
                 }
             }
             else
@@ -1268,7 +1258,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void WriteTwoDecimalDigits(uint value, Span<char> destination, int offset)
         {
-            Debug.Assert(0 <= value && value <= 99);
+            Debug.Assert(value <= 99);
 
             uint temp = '0' + value;
             value /= 10;
@@ -1283,7 +1273,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void WriteFourDecimalDigits(uint value, Span<char> buffer, int startingIndex = 0)
         {
-            Debug.Assert(0 <= value && value <= 9999);
+            Debug.Assert(value <= 9999);
 
             uint temp = '0' + value;
             value /= 10;

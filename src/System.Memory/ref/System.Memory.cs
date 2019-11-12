@@ -163,6 +163,12 @@ namespace System
 #nullable disable
             where T : System.IEquatable<T> { throw null; }
 #nullable restore
+        public static void Sort<T>(this System.Span<T> span) { }
+        public static void Sort<T, TComparer>(this System.Span<T> span, TComparer comparer) where TComparer : System.Collections.Generic.IComparer<T>? { }
+        public static void Sort<T>(this System.Span<T> span, System.Comparison<T> comparison) { }
+        public static void Sort<TKey, TValue>(this System.Span<TKey> keys, System.Span<TValue> items) { }
+        public static void Sort<TKey, TValue, TComparer>(this System.Span<TKey> keys, System.Span<TValue> items, TComparer comparer) where TComparer : System.Collections.Generic.IComparer<TKey>? { }
+        public static void Sort<TKey, TValue>(this System.Span<TKey> keys, System.Span<TValue> items, System.Comparison<TKey> comparison) { }
         public static bool StartsWith(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public static bool StartsWith<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> value)
 #nullable disable
@@ -388,6 +394,7 @@ namespace System.Buffers
         public partial struct Enumerator
         {
             private object _dummy;
+            private int _dummyPrimitive;
             public Enumerator(in System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
             public System.ReadOnlyMemory<T> Current { get { throw null; } }
             public bool MoveNext() { throw null; }
@@ -429,6 +436,7 @@ namespace System.Buffers
         public bool TryAdvanceToAny(System.ReadOnlySpan<T> delimiters, bool advancePastDelimiter = true) { throw null; }
         public readonly bool TryCopyTo(System.Span<T> destination) { throw null; }
         public readonly bool TryPeek(out T value) { throw null; }
+        public readonly bool TryPeek(long offset, out T value) { throw null; }
         public bool TryRead(out T value) { throw null; }
         public bool TryReadTo(out System.Buffers.ReadOnlySequence<T> sequence, System.ReadOnlySpan<T> delimiter, bool advancePastDelimiter = true) { throw null; }
         public bool TryReadTo(out System.Buffers.ReadOnlySequence<T> sequence, T delimiter, bool advancePastDelimiter = true) { throw null; }
@@ -644,8 +652,24 @@ namespace System.Runtime.InteropServices
 }
 namespace System.Text
 {
+    public static partial class EncodingExtensions
+    {
+        public static void Convert(this System.Text.Decoder decoder, in System.Buffers.ReadOnlySequence<byte> bytes, System.Buffers.IBufferWriter<char> writer, bool flush, out long charsUsed, out bool completed) { throw null; }
+        public static void Convert(this System.Text.Decoder decoder, System.ReadOnlySpan<byte> bytes, System.Buffers.IBufferWriter<char> writer, bool flush, out long charsUsed, out bool completed) { throw null; }
+        public static void Convert(this System.Text.Encoder encoder, in System.Buffers.ReadOnlySequence<char> chars, System.Buffers.IBufferWriter<byte> writer, bool flush, out long bytesUsed, out bool completed) { throw null; }
+        public static void Convert(this System.Text.Encoder encoder, System.ReadOnlySpan<char> chars, System.Buffers.IBufferWriter<byte> writer, bool flush, out long bytesUsed, out bool completed) { throw null; }
+        public static byte[] GetBytes(this System.Text.Encoding encoding, in System.Buffers.ReadOnlySequence<char> chars) { throw null; }
+        public static long GetBytes(this System.Text.Encoding encoding, in System.Buffers.ReadOnlySequence<char> chars, System.Buffers.IBufferWriter<byte> writer) { throw null; }
+        public static int GetBytes(this System.Text.Encoding encoding, in System.Buffers.ReadOnlySequence<char> chars, System.Span<byte> bytes) { throw null; }
+        public static long GetBytes(this System.Text.Encoding encoding, System.ReadOnlySpan<char> chars, System.Buffers.IBufferWriter<byte> writer) { throw null; }
+        public static long GetChars(this System.Text.Encoding encoding, in System.Buffers.ReadOnlySequence<byte> bytes, System.Buffers.IBufferWriter<char> writer) { throw null; }
+        public static int GetChars(this System.Text.Encoding encoding, in System.Buffers.ReadOnlySequence<byte> bytes, System.Span<char> chars) { throw null; }
+        public static long GetChars(this System.Text.Encoding encoding, System.ReadOnlySpan<byte> bytes, System.Buffers.IBufferWriter<char> writer) { throw null; }
+        public static string GetString(this System.Text.Encoding encoding, in System.Buffers.ReadOnlySequence<byte> bytes) { throw null; }
+    }
     public ref partial struct SpanRuneEnumerator
     {
+        private object _dummy;
         private int _dummyPrimitive;
         public System.Text.Rune Current { get { throw null; } }
         public System.Text.SpanRuneEnumerator GetEnumerator() { throw null; }

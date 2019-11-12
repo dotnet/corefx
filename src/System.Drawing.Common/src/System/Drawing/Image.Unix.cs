@@ -45,10 +45,6 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
-#if !NETCORE
-[Editor ("System.Drawing.Design.ImageEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
-[TypeConverter (typeof(ImageConverter))]
-#endif
     public abstract partial class Image
     {
         // public methods
@@ -106,7 +102,7 @@ namespace System.Drawing
             int propSize;
             IntPtr property;
             PropertyItem item = new PropertyItem();
-            GdipPropertyItem gdipProperty = new GdipPropertyItem();
+            GdipPropertyItem gdipProperty = default;
             int status;
 
             status = Gdip.GdipGetPropertyItemSize(nativeImage, propid,
@@ -293,7 +289,7 @@ namespace System.Drawing
             IntPtr dest = Marshal.AllocHGlobal(size);
             try
             {
-                GdipPropertyItem pi = new GdipPropertyItem();
+                GdipPropertyItem pi = default;
                 pi.id = propitem.Id;
                 pi.len = propitem.Len;
                 pi.type = propitem.Type;
@@ -401,7 +397,7 @@ namespace System.Drawing
                 int propNums, propsSize, propSize;
                 IntPtr properties, propPtr;
                 PropertyItem[] items;
-                GdipPropertyItem gdipProperty = new GdipPropertyItem();
+                GdipPropertyItem gdipProperty = default;
                 int status;
 
                 status = Gdip.GdipGetPropertySize(nativeImage, out propsSize, out propNums);

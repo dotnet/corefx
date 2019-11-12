@@ -1,30 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{6C314C9B-3D28-4B05-9B4C-B57A00A9B3B9}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants Condition="'$(TargetsUnix)' == 'true'">$(DefineConstants);Unix</DefineConstants>
     <TestRuntime>true</TestRuntime>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
-    <Compile Include="System\AppDomainTests.netcoreapp.cs" />
-    <Compile Include="System\Random.netcoreapp.cs" />
-    <Compile Include="System\IO\Path.IsPathFullyQualified.netcoreapp.cs" />
-    <Compile Include="System\IO\PathTestsBase.netcoreapp.cs" />
-    <Compile Include="System\IO\PathTests_Windows.netcoreapp.cs" />
-    <Compile Include="System\IO\PathTests.netcoreapp.cs" />
-    <Compile Include="System\IO\PathTests_Unix.cs" />
-    <Compile Include="System\IO\PathTests_Join.netcoreapp.cs" />
-    <Compile Include="System\Runtime\ProfileOptimization.netcoreapp.cs" />
-    <Compile Include="System\Runtime\CompilerServices\SwitchExpressionExceptionTests.cs" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="System\ApplicationIdTests.cs" />
     <Compile Include="System\Convert.cs" />
     <Compile Include="System\EnvironmentTests.cs" />
     <Compile Include="System\IO\PathTests.cs" />
     <Compile Include="System\IO\PathTests_Windows.cs" />
+    <Compile Include="System\IO\PathTests_Unix.cs" />
+    <Compile Include="System\IO\PathTests_Join.cs" />
     <Compile Include="System\OperatingSystemTests.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelperTests.cs" />
     <Compile Include="System\AppDomainTests.cs" />
@@ -32,14 +21,10 @@
     <Compile Include="System\MarshalByRefObjectTest.cs" />
     <Compile Include="TestHelpers.cs" />
     <Compile Include="System\BitConverterSpan.cs" />
-    <Compile Include="System\BitConverter.netcoreapp.cs" />
-    <Compile Include="System\Convert.netcoreapp.cs" />
     <Compile Include="System\IO\Path.GetRelativePath.cs" />
-    <Compile Include="System\MathTests.netcoreapp.cs" />
-    <Compile Include="System\MathF.netcoreapp.cs" />
+    <Compile Include="System\MathF.cs" />
     <Compile Include="System\Numerics\BitOperationsTests.cs" />
-    <Compile Include="System\StringComparer.netcoreapp.cs" />
-    <Compile Include="System\UnloadingAndProcessExitTests.netcoreapp.cs" />
+    <Compile Include="System\UnloadingAndProcessExitTests.cs" />
     <Compile Include="System\IO\Path.IsPathFullyQualified.cs" />
     <Compile Include="System\BitConverterArray.cs" />
     <Compile Include="System\BitConverterBase.cs" />
@@ -85,6 +70,9 @@
     <Compile Include="System\Progress.cs" />
     <Compile Include="System\Random.cs" />
     <Compile Include="System\StringComparer.cs" />
+    <Compile Include="System\Runtime\ProfileOptimization.cs" />
+    <Compile Include="System\Runtime\CompilerServices\SwitchExpressionExceptionTests.cs" />
+
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetNodeName.cs" Condition="'$(TargetsUnix)' == 'true'">
       <Link>Common\Interop\Unix\System.Native\Interop.GetNodeName.cs</Link>
     </Compile>
@@ -102,21 +90,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="AssemblyResolveTestApp\AssemblyResolveTestApp.csproj">
-      <Project>{ad83807c-8be5-4f27-85df-9793613233e1}</Project>
-      <Name>AssemblyResolveTestApp</Name>
-    </ProjectReference>
-    <ProjectReference Include="TestAppOutsideOfTPA\TestAppOutsideOfTPA.csproj">
-      <Project>{c44b33e3-f89f-40b9-b353-d380c1524988}</Project>
-      <Name>TestAppOutsideOfTPA</Name>
-    </ProjectReference>
-    <ProjectReference Include="VoidMainWithExitCodeApp\VoidMainWithExitCodeApp.csproj">
-      <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
-      <Name>VoidMainWithExitCodeApp</Name>
-    </ProjectReference>
-    <ProjectReference Include="TestApp\TestApp.csproj">
-      <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
-      <Name>TestApp</Name>
-    </ProjectReference>
+    <ProjectReference Include="AssemblyResolveTestApp\AssemblyResolveTestApp.csproj" />
+    <ProjectReference Include="TestAppOutsideOfTPA\TestAppOutsideOfTPA.csproj" />
+    <ProjectReference Include="VoidMainWithExitCodeApp\VoidMainWithExitCodeApp.csproj" />
+    <ProjectReference Include="TestApp\TestApp.csproj" />
+    <ProjectReference Include="TargetFrameworkNameTestApp\TargetFrameworkNameTestApp.csproj" Condition="'$(TargetsNetCoreApp)' == 'true'" />
   </ItemGroup>
 </Project>

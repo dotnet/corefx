@@ -52,10 +52,7 @@ namespace System.Threading
         [Obsolete("Use the SafeWaitHandle property instead.")]
         public virtual IntPtr Handle
         {
-            get
-            {
-                return _waitHandle == null ? InvalidHandle : _waitHandle.DangerousGetHandle();
-            }
+            get => _waitHandle == null ? InvalidHandle : _waitHandle.DangerousGetHandle();
             set
             {
                 if (value == InvalidHandle)
@@ -82,18 +79,8 @@ namespace System.Threading
         [AllowNull]
         public SafeWaitHandle SafeWaitHandle
         {
-            get
-            {
-                if (_waitHandle == null)
-                {
-                    _waitHandle = new SafeWaitHandle(InvalidHandle, false);
-                }
-                return _waitHandle;
-            }
-            set
-            {
-                _waitHandle = value;
-            }
+            get => _waitHandle ??= new SafeWaitHandle(InvalidHandle, false);
+            set => _waitHandle = value;
         }
 
         internal static int ToTimeoutMilliseconds(TimeSpan timeout)
@@ -206,7 +193,6 @@ namespace System.Threading
             Span<SafeWaitHandle?> safeWaitHandles,
             Span<IntPtr> unsafeWaitHandles)
         {
-            Debug.Assert(waitHandles != null);
             Debug.Assert(waitHandles.Length > 0);
             Debug.Assert(waitHandles.Length <= MaxWaitHandles);
 

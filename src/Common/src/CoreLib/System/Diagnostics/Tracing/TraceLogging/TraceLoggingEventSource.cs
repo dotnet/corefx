@@ -85,7 +85,7 @@ namespace System.Diagnostics.Tracing
             EventSourceSettings config,
             params string[]? traits)
             : this(
-                eventSourceName == null ? new Guid() : GenerateGuidFromName(eventSourceName.ToUpperInvariant()),
+                eventSourceName == null ? default : GenerateGuidFromName(eventSourceName.ToUpperInvariant()),
                 eventSourceName!,
                 config, traits)
         {
@@ -107,7 +107,7 @@ namespace System.Diagnostics.Tracing
                 return;
             }
 
-            var options = new EventSourceOptions();
+            EventSourceOptions options = default;
             this.WriteImpl(eventName, ref options, null, null, null, SimpleEventTypes<EmptyStruct>.Instance);
         }
 
@@ -158,7 +158,7 @@ namespace System.Diagnostics.Tracing
                 return;
             }
 
-            var options = new EventSourceOptions();
+            EventSourceOptions options = default;
             this.WriteImpl(eventName, ref options, data, null, null, SimpleEventTypes<T>.Instance);
         }
 
@@ -471,7 +471,7 @@ namespace System.Diagnostics.Tracing
                 }
                 finally
                 {
-                    this.WriteCleanup(pins, pinCount);
+                    WriteCleanup(pins, pinCount);
                 }
             }
 #endif // FEATURE_MANAGED_ETW
@@ -683,7 +683,6 @@ namespace System.Diagnostics.Tracing
                                 var eventData = (EventPayload?)(eventTypes.typeInfos[0].GetData(data));
                                 WriteToAllListeners(eventName, ref descriptor, nameInfo.tags, pActivityId, pRelatedActivityId, eventData);
                             }
-
                         }
                         catch (Exception ex)
                         {
@@ -695,7 +694,7 @@ namespace System.Diagnostics.Tracing
 #if FEATURE_MANAGED_ETW
                         finally
                         {
-                            this.WriteCleanup(pins, pinCount);
+                            WriteCleanup(pins, pinCount);
                         }
                     }
 #endif // FEATURE_MANAGED_ETW
@@ -741,7 +740,7 @@ namespace System.Diagnostics.Tracing
             System.Runtime.ConstrainedExecution.Cer.Success)]
 #endif
         [NonEvent]
-        private unsafe void WriteCleanup(GCHandle* pPins, int cPins)
+        private static unsafe void WriteCleanup(GCHandle* pPins, int cPins)
         {
             DataCollector.ThreadInstance.Disable();
 
@@ -843,7 +842,7 @@ namespace System.Diagnostics.Tracing
         {
             if ('0' <= c && c <= '9')
             {
-                return (c - '0');
+                return c - '0';
             }
             if ('a' <= c)
             {
@@ -851,7 +850,7 @@ namespace System.Diagnostics.Tracing
             }
             if ('A' <= c && c <= 'F')
             {
-                return (c - 'A' + 10);
+                return c - 'A' + 10;
             }
 
             throw new ArgumentException(SR.Format(SR.EventSource_BadHexDigit, c), "traits");

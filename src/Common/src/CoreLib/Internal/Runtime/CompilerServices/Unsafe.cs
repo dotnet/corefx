@@ -39,7 +39,7 @@ namespace Internal.Runtime.CompilerServices
     /// For internal use only. Contains generic, low-level functionality for manipulating pointers.
     /// </summary>
     [CLSCompliant(false)]
-    public static unsafe class Unsafe
+    public static unsafe partial class Unsafe
     {
         /// <summary>
         /// Returns a pointer to the given by-ref parameter.
@@ -386,6 +386,54 @@ namespace Internal.Runtime.CompilerServices
         public static IntPtr ByteOffset<T>(ref T origin, ref T target)
         {
             throw new PlatformNotSupportedException();
+        }
+
+        /// <summary>
+        /// Returns a by-ref to type <typeparamref name="T"/> that is a null reference.
+        /// </summary>
+        [Intrinsic]
+        [NonVersionable]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T NullRef<T>()
+        {
+            return ref Unsafe.AsRef<T>(null);
+
+            // ldc.i4.0
+            // conv.u
+            // ret
+        }
+
+        /// <summary>
+        /// Returns if a given by-ref to type <typeparamref name="T"/> is a null reference.
+        /// </summary>
+        /// <remarks>
+        /// This check is conceptually similar to "(void*)(&amp;source) == nullptr".
+        /// </remarks>
+        [Intrinsic]
+        [NonVersionable]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNullRef<T>(ref T source)
+        {
+            return Unsafe.AsPointer(ref source) == null;
+
+            // ldarg.0
+            // ldc.i4.0
+            // conv.u
+            // ceq
+            // ret
+        }
+
+        /// <summary>
+        /// Bypasses definite assignment rules by taking advantage of <c>out</c> semantics.
+        /// </summary>
+        [Intrinsic]
+        [NonVersionable]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SkipInit<T>(out T value)
+        {
+            throw new PlatformNotSupportedException();
+
+            // ret
         }
     }
 }

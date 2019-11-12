@@ -1205,10 +1205,8 @@ namespace System
         {
             while (--digits >= 0 || value != 0)
             {
-                // TODO https://github.com/dotnet/coreclr/issues/3439
-                uint newValue = value / 10;
-                *(--bufferEnd) = (byte)(value - (newValue * 10) + '0');
-                value = newValue;
+                value = Math.DivRem(value, 10, out uint remainder);
+                *(--bufferEnd) = (byte)(remainder + '0');
             }
             return bufferEnd;
         }
@@ -1217,15 +1215,13 @@ namespace System
         {
             while (--digits >= 0 || value != 0)
             {
-                // TODO https://github.com/dotnet/coreclr/issues/3439
-                uint newValue = value / 10;
-                *(--bufferEnd) = (char)(value - (newValue * 10) + '0');
-                value = newValue;
+                value = Math.DivRem(value, 10, out uint remainder);
+                *(--bufferEnd) = (char)(remainder + '0');
             }
             return bufferEnd;
         }
 
-        private static unsafe string UInt32ToDecStr(uint value, int digits)
+        internal static unsafe string UInt32ToDecStr(uint value, int digits)
         {
             int bufferLength = Math.Max(digits, FormattingHelpers.CountDigits(value));
 
@@ -1243,10 +1239,8 @@ namespace System
                 {
                     do
                     {
-                        // TODO https://github.com/dotnet/coreclr/issues/3439
-                        uint div = value / 10;
-                        *(--p) = (char)('0' + value - (div * 10));
-                        value = div;
+                        value = Math.DivRem(value, 10, out uint remainder);
+                        *(--p) = (char)(remainder + '0');
                     }
                     while (value != 0);
                 }
@@ -1276,10 +1270,8 @@ namespace System
                 {
                     do
                     {
-                        // TODO https://github.com/dotnet/coreclr/issues/3439
-                        uint div = value / 10;
-                        *(--p) = (char)('0' + value - (div * 10));
-                        value = div;
+                        value = Math.DivRem(value, 10, out uint remainder);
+                        *(--p) = (char)(remainder + '0');
                     }
                     while (value != 0);
                 }
@@ -1290,21 +1282,6 @@ namespace System
                 Debug.Assert(p == buffer);
             }
             return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe bool TryCopyTo(char* src, int length, Span<char> destination, out int charsWritten)
-        {
-            if (new ReadOnlySpan<char>(src, length).TryCopyTo(destination))
-            {
-                charsWritten = length;
-                return true;
-            }
-            else
-            {
-                charsWritten = 0;
-                return false;
-            }
         }
 
         private static unsafe void Int64ToNumber(long input, ref NumberBuffer number)
@@ -1481,7 +1458,7 @@ namespace System
             number.CheckConsistency();
         }
 
-        private static unsafe string UInt64ToDecStr(ulong value, int digits)
+        internal static unsafe string UInt64ToDecStr(ulong value, int digits)
         {
             if (digits < 1)
                 digits = 1;
@@ -2290,7 +2267,6 @@ namespace System
 
             char* digits = stackalloc char[MaxUInt32DecDigits];
             char* p = UInt32ToDecChars(digits + MaxUInt32DecDigits, (uint)value, minDigits);
-            int i = (int)(digits + MaxUInt32DecDigits - p);
             sb.Append(p, (int)(digits + MaxUInt32DecDigits - p));
         }
 
@@ -2440,7 +2416,7 @@ namespace System
                 // needs further thought for .NET 5 so that we can be spec compliant and so that users
                 // can get the desired rounding behavior for their needs.
 
-                return (digit >= '5');
+                return digit >= '5';
             }
         }
 
@@ -2466,8 +2442,7 @@ namespace System
                     {
                         case '\'':
                         case '"':
-                            while (src < format.Length && pFormat[src] != 0 && pFormat[src++] != ch)
-                                ;
+                            while (src < format.Length && pFormat[src] != 0 && pFormat[src++] != ch) ;
                             break;
                         case '\\':
                             if (src < format.Length && pFormat[src] != 0)

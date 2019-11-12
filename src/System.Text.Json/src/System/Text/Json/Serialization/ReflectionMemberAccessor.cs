@@ -42,6 +42,13 @@ namespace System.Text.Json
             return () => Activator.CreateInstance(type);
         }
 
+        public override Action<TProperty> CreateAddDelegate<TProperty>(MethodInfo addMethod, object target)
+        {
+            Debug.Assert(addMethod != null && target != null);
+            return (Action<TProperty>)addMethod.CreateDelegate(typeof(Action<TProperty>), target);
+        }
+
+        [PreserveDependency(".ctor()", "System.Text.Json.ImmutableEnumerableCreator`2")]
         public override ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType)
         {
             MethodInfo createRange = ImmutableCollectionCreateRangeMethod(constructingType, elementType);
@@ -64,9 +71,17 @@ namespace System.Text.Json
             return creator;
         }
 
-
+        [PreserveDependency(".ctor()", "System.Text.Json.ImmutableDictionaryCreator`2")]
         public override ImmutableCollectionCreator ImmutableDictionaryCreateRange(Type constructingType, Type collectionType, Type elementType)
         {
+            Debug.Assert(collectionType.IsGenericType);
+
+            // Only string keys are allowed.
+            if (collectionType.GetGenericArguments()[0] != typeof(string))
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(collectionType, parentType: null, memberInfo: null);
+            }
+
             MethodInfo createRange = ImmutableDictionaryCreateRangeMethod(constructingType, elementType);
 
             if (createRange == null)

@@ -127,11 +127,6 @@ namespace System.ComponentModel
             [typeof(Guid)] = typeof(GuidConverter),
             [typeof(Uri)] = typeof(UriTypeConverter),
             [typeof(Version)] = typeof(VersionConverter),
-            [typeof(Color)] = typeof(ColorConverter),
-            [typeof(Point)] = typeof(PointConverter),
-            [typeof(Rectangle)] = typeof(RectangleConverter),
-            [typeof(Size)] = typeof(SizeConverter),
-            [typeof(SizeF)] = typeof(SizeFConverter),
             // Special cases for things that are not bound to a specific type
             //
             [typeof(Array)] = typeof(ArrayConverter),
@@ -1006,7 +1001,7 @@ namespace System.ComponentModel
                     if (eventCount != events.Length)
                     {
                         EventDescriptor[] newEvents = new EventDescriptor[eventCount];
-                        Array.Copy(events, 0, newEvents, 0, eventCount);
+                        Array.Copy(events, newEvents, eventCount);
                         events = newEvents;
                     }
 
@@ -1195,7 +1190,7 @@ namespace System.ComponentModel
                     if (propertyCount != properties.Length)
                     {
                         PropertyDescriptor[] newProperties = new PropertyDescriptor[propertyCount];
-                        Array.Copy(properties, 0, newProperties, 0, propertyCount);
+                        Array.Copy(properties, newProperties, propertyCount);
                         properties = newProperties;
                     }
 

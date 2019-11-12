@@ -91,19 +91,17 @@ namespace System.Runtime
 
         private static long LastKnownFreeAddressSpace
         {
-            get { return Volatile.Read(ref s_hiddenLastKnownFreeAddressSpace); }
-            set { Volatile.Write(ref s_hiddenLastKnownFreeAddressSpace, value); }
+            get => Volatile.Read(ref s_hiddenLastKnownFreeAddressSpace);
+            set => Volatile.Write(ref s_hiddenLastKnownFreeAddressSpace, value);
         }
 
-        private static long AddToLastKnownFreeAddressSpace(long addend)
-        {
-            return Interlocked.Add(ref s_hiddenLastKnownFreeAddressSpace, addend);
-        }
+        private static void AddToLastKnownFreeAddressSpace(long addend) =>
+            Interlocked.Add(ref s_hiddenLastKnownFreeAddressSpace, addend);
 
         private static long LastTimeCheckingAddressSpace
         {
-            get { return Volatile.Read(ref s_hiddenLastTimeCheckingAddressSpace); }
-            set { Volatile.Write(ref s_hiddenLastTimeCheckingAddressSpace, value); }
+            get => Volatile.Read(ref s_hiddenLastTimeCheckingAddressSpace);
+            set => Volatile.Write(ref s_hiddenLastTimeCheckingAddressSpace, value);
         }
 
         // When allocating memory segment by segment, we've hit some cases
@@ -197,7 +195,7 @@ namespace System.Runtime
 
                 // Ensure our cached amount of free address space is not stale.
                 long now = Environment.TickCount;  // Handle wraparound.
-                if ((now > LastTimeCheckingAddressSpace + CheckThreshold || now < LastTimeCheckingAddressSpace) ||
+                if (now > LastTimeCheckingAddressSpace + CheckThreshold || now < LastTimeCheckingAddressSpace ||
                     LastKnownFreeAddressSpace < (long)segmentSize)
                 {
                     CheckForFreeAddressSpace(segmentSize, false);
@@ -339,11 +337,9 @@ namespace System.Runtime
             */
         }
 
-        internal static long AddMemoryFailPointReservation(long size)
-        {
+        internal static long AddMemoryFailPointReservation(long size) =>
             // Size can legitimately be negative - see Dispose.
-            return Interlocked.Add(ref s_failPointReservedMemory, (long)size);
-        }
+            Interlocked.Add(ref s_failPointReservedMemory, (long)size);
 
         internal static ulong MemoryFailPointReservedMemory
         {

@@ -1,9 +1,8 @@
 ﻿<Project DefaultTargets="Build">
   <PropertyGroup>
     <PackageConfigurations>
-      netstandard;
+      netstandard2.0;
       netcoreapp3.0;
-      uap-Windows_NT;
       net461;
     </PackageConfigurations>
     <BuildConfigurations>

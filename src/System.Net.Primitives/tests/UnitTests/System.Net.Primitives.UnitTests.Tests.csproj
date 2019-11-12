@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{FCFF9C63-CE7A-476E-8241-7B7236FFDBFB}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>169,649</NoWarn>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
@@ -59,6 +58,9 @@
     </Compile>
     <Compile Include="..\..\src\System\Net\IPAddressParser.cs">
       <Link>ProductionCode\System\Net\IPAddressParser.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Runtime\CompilerServices\PreserveDependencyAttribute.cs">
+      <Link>Common\System\Runtime\CompilerServices\PreserveDependencyAttribute.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

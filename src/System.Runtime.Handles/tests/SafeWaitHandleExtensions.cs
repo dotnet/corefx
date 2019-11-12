@@ -7,7 +7,7 @@ using System;
 using System.Threading;
 using Xunit;
 
-public partial class SafeWaitHandleExtensions_4000_Tests
+public partial class SafeWaitHandleExtensionsTests
 {
     public class MyWaitHandle : WaitHandle
     {
@@ -41,6 +41,9 @@ public partial class SafeWaitHandleExtensions_4000_Tests
         swh = wh.GetSafeWaitHandle();
         Assert.NotNull(swh);
         Assert.Equal(new IntPtr(-1), swh.DangerousGetHandle());
+        
+        // Prevent finalization. Closing of the bogus handle has unpredictable results.
+        swhExpected.SetHandleAsInvalid();
     }
 
     [Fact]

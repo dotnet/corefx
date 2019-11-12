@@ -10,6 +10,8 @@ using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     public class DnsEndPointTest : DualModeBase
     {
         private void OnConnectAsyncCompleted(object sender, SocketAsyncEventArgs args)
@@ -60,7 +62,7 @@ namespace System.Net.Sockets.Tests
             {
                 SocketException ex = Assert.ThrowsAny<SocketException>(() =>
                 {
-                    sock.Connect(new DnsEndPoint("notahostname.invalid.corp.microsoft.com", UnusedPort));
+                    sock.Connect(new DnsEndPoint(Configuration.Sockets.InvalidHost, UnusedPort));
                 });
 
                 SocketError errorCode = ex.SocketErrorCode;
@@ -150,7 +152,7 @@ namespace System.Net.Sockets.Tests
             {
                 SocketException ex = Assert.ThrowsAny<SocketException>(() =>
                 {
-                    IAsyncResult result = sock.BeginConnect(new DnsEndPoint("notahostname.invalid.corp.microsoft.com", UnusedPort), null, null);
+                    IAsyncResult result = sock.BeginConnect(new DnsEndPoint(Configuration.Sockets.InvalidHost, UnusedPort), null, null);
                     sock.EndConnect(result);
                 });
 
@@ -193,17 +195,19 @@ namespace System.Net.Sockets.Tests
             int port;
             using (SocketTestServer server = SocketTestServer.SocketTestServerFactory(type, IPAddress.Loopback, out port))
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            using (ManualResetEvent complete = new ManualResetEvent(false))
             {
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                 args.RemoteEndPoint = new DnsEndPoint("localhost", port);
                 args.Completed += OnConnectAsyncCompleted;
+
+                ManualResetEvent complete = new ManualResetEvent(false);
                 args.UserToken = complete;
 
                 bool willRaiseEvent = sock.ConnectAsync(args);
                 if (willRaiseEvent)
                 {
                     Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "Timed out while waiting for connection");
+                    complete.Dispose(); // only dispose on success as we know we're done with the instance
                 }
 
                 Assert.Equal(SocketError.Success, args.SocketError);
@@ -223,7 +227,6 @@ namespace System.Net.Sockets.Tests
             int port;
             using (SocketTestServer server = SocketTestServer.SocketTestServerFactory(type, IPAddress.Loopback, out port))
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            using (ManualResetEvent complete = new ManualResetEvent(false))
             {
                 sock.LingerState = new LingerOption(false, 0);
                 sock.NoDelay = true;
@@ -235,12 +238,15 @@ namespace System.Net.Sockets.Tests
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                 args.RemoteEndPoint = new DnsEndPoint("localhost", port);
                 args.Completed += OnConnectAsyncCompleted;
+
+                ManualResetEvent complete = new ManualResetEvent(false);
                 args.UserToken = complete;
 
                 bool willRaiseEvent = sock.ConnectAsync(args);
                 if (willRaiseEvent)
                 {
                     Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "Timed out while waiting for connection");
+                    complete.Dispose(); // only dispose on success as we know we're done with the instance
                 }
 
                 Assert.Equal(SocketError.Success, args.SocketError);
@@ -256,17 +262,19 @@ namespace System.Net.Sockets.Tests
             Assert.True(Capability.IPv4Support());
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.RemoteEndPoint = new DnsEndPoint("notahostname.invalid.corp.microsoft.com", UnusedPort);
+            args.RemoteEndPoint = new DnsEndPoint(Configuration.Sockets.InvalidHost, UnusedPort);
             args.Completed += OnConnectAsyncCompleted;
 
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            using (ManualResetEvent complete = new ManualResetEvent(false))
             {
+                ManualResetEvent complete = new ManualResetEvent(false);
                 args.UserToken = complete;
+
                 bool willRaiseEvent = sock.ConnectAsync(args);
                 if (willRaiseEvent)
                 {
                     Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "Timed out while waiting for connection");
+                    complete.Dispose(); // only dispose on success as we know we're done with the instance
                 }
 
                 AssertHostNotFoundOrNoData(args);
@@ -285,14 +293,15 @@ namespace System.Net.Sockets.Tests
             args.Completed += OnConnectAsyncCompleted;
 
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            using (ManualResetEvent complete = new ManualResetEvent(false))
             {
+                ManualResetEvent complete = new ManualResetEvent(false);
                 args.UserToken = complete;
 
                 bool willRaiseEvent = sock.ConnectAsync(args);
                 if (willRaiseEvent)
                 {
                     Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "Timed out while waiting for connection");
+                    complete.Dispose(); // only dispose on success as we know we're done with the instance
                 }
 
                 Assert.Equal(SocketError.ConnectionRefused, args.SocketError);
@@ -340,6 +349,7 @@ namespace System.Net.Sockets.Tests
                 Assert.True(Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, args));
 
                 Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "Timed out while waiting for connection");
+                complete.Dispose(); // only dispose on success as we know we're done with the instance
 
                 Assert.Equal(SocketError.Success, args.SocketError);
                 Assert.Null(args.ConnectByNameError);
@@ -356,7 +366,7 @@ namespace System.Net.Sockets.Tests
         public void Socket_StaticConnectAsync_HostNotFound()
         {
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.RemoteEndPoint = new DnsEndPoint("notahostname.invalid.corp.microsoft.com", UnusedPort);
+            args.RemoteEndPoint = new DnsEndPoint(Configuration.Sockets.InvalidHost, UnusedPort);
             args.Completed += OnConnectAsyncCompleted;
 
             ManualResetEvent complete = new ManualResetEvent(false);
@@ -369,6 +379,7 @@ namespace System.Net.Sockets.Tests
             }
 
             Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "Timed out while waiting for connection");
+            complete.Dispose(); // only dispose on success as we know we're done with the instance
 
             AssertHostNotFoundOrNoData(args);
 
@@ -395,6 +406,7 @@ namespace System.Net.Sockets.Tests
             }
 
             Assert.True(complete.WaitOne(TestSettings.PassingTestTimeout), "Timed out while waiting for connection");
+            complete.Dispose(); // only dispose on success as we know we're done with the instance
 
             Assert.Equal(SocketError.ConnectionRefused, args.SocketError);
             Assert.True(args.ConnectByNameError is SocketException);
