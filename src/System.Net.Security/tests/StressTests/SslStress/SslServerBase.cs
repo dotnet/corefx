@@ -64,8 +64,8 @@ namespace SslStress
         public async ValueTask StopAsync()
         {
             _cts.Cancel();
-            await _serverTask.Value;
             _listener.Stop();
+            await _serverTask.Value;
         }
 
         public Task Task
