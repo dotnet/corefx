@@ -8,6 +8,6 @@ namespace System.Net.Quic
     {
         public static Implementations.QuicImplementationProvider Mock { get; } = new Implementations.Mock.MockImplementationProvider();
 
-        public static Implementations.QuicImplementationProvider Default { get; } = Mock;
+        public static Implementations.QuicImplementationProvider Default => Mock;
     }
 }
