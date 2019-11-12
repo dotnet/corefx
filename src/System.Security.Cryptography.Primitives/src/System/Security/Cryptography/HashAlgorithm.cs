@@ -103,12 +103,20 @@ namespace System.Security.Cryptography
             byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
 
             int bytesRead;
+            int clearLimit = 0;
+
             while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
             {
+                if (bytesRead > clearLimit)
+                {
+                    clearLimit = bytesRead;
+                }
+
                 HashCore(buffer, 0, bytesRead);
             }
 
-            ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+            CryptographicOperations.ZeroMemory(buffer.AsSpan(0, clearLimit));
+            ArrayPool<byte>.Shared.Return(buffer, clearArray: false);
             return CaptureHashCodeAndReinitialize();
         }
 
@@ -129,15 +137,23 @@ namespace System.Security.Cryptography
             CancellationToken cancellationToken)
         {
             // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
-
+            byte[] rented = ArrayPool<byte>.Shared.Rent(4096);
+            Memory<byte> buffer = rented;
+            int clearLimit = 0;
             int bytesRead;
-            while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) > 0)
+
+            while ((bytesRead = await inputStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
             {
-                HashCore(buffer, 0, bytesRead);
+                if (bytesRead > clearLimit)
+                {
+                    clearLimit = bytesRead;
+                }
+
+                HashCore(rented, 0, bytesRead);
             }
 
-            ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+            CryptographicOperations.ZeroMemory(rented.AsSpan(0, clearLimit));
+            ArrayPool<byte>.Shared.Return(rented, clearArray: false);
             return CaptureHashCodeAndReinitialize();
         }
 
