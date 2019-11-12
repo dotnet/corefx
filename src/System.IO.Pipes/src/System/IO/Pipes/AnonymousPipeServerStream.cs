@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
 using System.Diagnostics.CodeAnalysis;
-using System.Security;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
@@ -65,14 +64,9 @@ namespace System.IO.Pipes
             State = PipeState.Connected;
         }
 
-        public AnonymousPipeServerStream(PipeDirection direction, HandleInheritability inheritability, int bufferSize)
-            : this(direction, inheritability, bufferSize, null)
-        {
-        }
-
         // bufferSize is used as a suggestion; specify 0 to let OS decide
         // This constructor instantiates the PipeSecurity using just the inheritability flag
-        internal AnonymousPipeServerStream(PipeDirection direction, HandleInheritability inheritability, int bufferSize, PipeSecurity pipeSecurity)
+        public AnonymousPipeServerStream(PipeDirection direction, HandleInheritability inheritability, int bufferSize)
             : base(direction, bufferSize)
         {
             if (direction == PipeDirection.InOut)
@@ -84,7 +78,7 @@ namespace System.IO.Pipes
                 throw new ArgumentOutOfRangeException(nameof(inheritability), SR.ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable);
             }
 
-            Create(direction, inheritability, bufferSize, pipeSecurity);
+            Create(direction, inheritability, bufferSize);
         }
 
         ~AnonymousPipeServerStream()

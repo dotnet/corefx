@@ -13,6 +13,29 @@ namespace System.IO.Pipes
     /// </summary>
     public sealed partial class AnonymousPipeServerStream : PipeStream
     {
+        // bufferSize is used as a suggestion; specify 0 to let OS decide
+        // This constructor instantiates the PipeSecurity using just the inheritability flag
+        internal AnonymousPipeServerStream(PipeDirection direction, HandleInheritability inheritability, int bufferSize, PipeSecurity pipeSecurity)
+            : base(direction, bufferSize)
+        {
+            if (direction == PipeDirection.InOut)
+            {
+                throw new NotSupportedException(SR.NotSupported_AnonymousPipeUnidirectional);
+            }
+            if (inheritability < HandleInheritability.None || inheritability > HandleInheritability.Inheritable)
+            {
+                throw new ArgumentOutOfRangeException(nameof(inheritability), SR.ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable);
+            }
+
+            Create(direction, inheritability, bufferSize, pipeSecurity);
+        }
+
+        // Creates the anonymous pipe.
+        private void Create(PipeDirection direction, HandleInheritability inheritability, int bufferSize)
+        {
+            Create(direction, inheritability, bufferSize, null);
+        }
+
         // Creates the anonymous pipe. This overload is used in Mono to implement public constructors.
         internal void Create(PipeDirection direction, HandleInheritability inheritability, int bufferSize, PipeSecurity pipeSecurity)
         {
