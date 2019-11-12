@@ -292,7 +292,7 @@ internal static partial class Interop
                 {
                     sendCount = BioRead(context.OutputBio, sendBuf, sendCount);
                 }
-                catch (Exception e) when (handshakeException != null)
+                catch (Exception) when (handshakeException != null)
                 {
                     // If we already have handshake exception, ignore any exception from BioRead().
                 }
