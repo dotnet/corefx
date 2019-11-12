@@ -319,17 +319,15 @@ namespace System.Transactions
         //
         public override bool Equals(object? obj)
         {
-            Transaction? transaction = obj as Transaction;
-
             // If we can't cast the object as a Transaction, it must not be equal
             // to this, which is a Transaction.
-            if (null == transaction)
+            if (obj is Transaction transaction)
             {
-                return false;
+                // Check the internal transaction object for equality.
+                return _internalTransaction.TransactionHash == transaction._internalTransaction.TransactionHash;
             }
 
-            // Check the internal transaction object for equality.
-            return _internalTransaction.TransactionHash == transaction._internalTransaction.TransactionHash;
+            return false;
         }
 
         public static bool operator ==(Transaction? x, Transaction? y)

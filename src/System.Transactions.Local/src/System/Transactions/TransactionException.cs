@@ -121,7 +121,7 @@ namespace System.Transactions
             return Create(messagewithTxId, innerException);
         }
 
-        internal static TransactionException Create(TraceSourceType traceSource, string? message, Exception innerException, Guid distributedTxId)
+        internal static TransactionException Create(TraceSourceType traceSource, string? message, Exception? innerException, Guid distributedTxId)
         {
             string? messagewithTxId = message;
             if (IncludeDistributedTxId(distributedTxId))

@@ -65,8 +65,8 @@ namespace System.Transactions
                 while (e.MoveNext())
                 {
                     WeakReference weakRef = (WeakReference)e.Value!;
-                    Transaction? tx = (Transaction?)weakRef.Target;
-                    if (tx != null)
+
+                    if (weakRef.Target is Transaction tx)
                     {
                         TransactionEventArgs args = new TransactionEventArgs();
                         args._transaction = tx.InternalClone();
@@ -99,7 +99,8 @@ namespace System.Transactions
         // CurrentDelegate
         //
         // Store a delegate to be used to query for an external current transaction.
-        [DisallowNull] public static HostCurrentTransactionCallback? HostCurrentCallback
+        [DisallowNull]
+        public static HostCurrentTransactionCallback? HostCurrentCallback
         {
             // get_HostCurrentCallback is used from get_CurrentTransaction, which doesn't have any permission requirements.
             // We don't expose what is returned from this property in that case.  But we don't want just anybody being able
