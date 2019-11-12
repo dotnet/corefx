@@ -25,7 +25,7 @@ namespace System.Text.Json
                 if (state.Current.CurrentValue == null)
                 {
                     state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, options, writeNull: true);
-                    return WriteEndObject(ref state);
+                    return WriteEndObject(ref state, writer, options);
                 }
 
                 //Handle reference here
@@ -35,12 +35,12 @@ namespace System.Text.Json
                 //if seen before
                 //just write { "$ref": "#" } and finish processing the object/array.
 
-                ResolvedReferenceHandling handling = state.HandleReference(ref state, out string referenceId, out bool writeAsReference, threshold: options.EffectiveMaxDepth, currentDepth: writer.CurrentDepth);//ResolveReferenceHandling(options, ref state, out string referenceId, out bool writeAsReference);
+                ResolvedReferenceHandling handling = state.HandleReference(ref state, out string referenceId, out bool writeAsReference, threshold: options.EffectiveMaxDepth, currentDepth: writer.CurrentDepth);
 
                 if (handling == ResolvedReferenceHandling.Ignore)
                 {
                     //Reference loop found, do not write anything and pop the frame from the stack.
-                    return WriteEndObject(ref state);
+                    return WriteEndObject(ref state, writer, options);
                 }
 
                 //state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, options);
@@ -48,7 +48,7 @@ namespace System.Text.Json
 
                 if (handling == ResolvedReferenceHandling.IsReference)
                 {
-                    return WriteEndObject(ref state);
+                    return WriteEndObject(ref state, writer, options);
                 }
 
                 state.Current.MoveToNextProperty = true;
@@ -72,14 +72,14 @@ namespace System.Text.Json
             }
 
             writer.WriteEndObject();
-            return WriteEndObject(ref state);
+            return WriteEndObject(ref state, writer, options);
         }
 
-        private static bool WriteEndObject(ref WriteStack state)
+        private static bool WriteEndObject(ref WriteStack state, Utf8JsonWriter writer, JsonSerializerOptions options)
         {
             if (state.Current.PopStackOnEndObject)
             {
-                state.Pop();
+                state.Pop(writer, options);
             }
 
             return true;

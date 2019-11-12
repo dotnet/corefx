@@ -11,7 +11,7 @@ namespace System.Text.Json
 
     internal delegate void WriteStart(ref WriteStackFrame frame, ClassType classType, Utf8JsonWriter writer, JsonSerializerOptions options, bool writeNull = false, bool writeAsReference = false, string referenceId = null);
 
-    internal delegate void PopReference(ref WriteStack state, bool isCollectionProperty);
+    internal delegate void PopReference(ref WriteStack state, bool isCollectionProperty, int threshold, int currentDepth);
 
     public static partial class JsonSerializer
     {
@@ -56,7 +56,7 @@ namespace System.Text.Json
                 }
             }
 
-            //not meant for this.
+            //params not meant for this code path.
             skip = default;
             referenceId = default;
             return ResolvedReferenceHandling.None;
@@ -193,10 +193,22 @@ namespace System.Text.Json
             }
         }
 
-        //TODO: add a method for Error that takes place only after MaxDepth threshold.
-        private static void PopReference(ref WriteStack state, bool isCollectionProperty)
+        private static void PopReference(ref WriteStack state, bool isCollectionProperty, int threshold, int currentDepth)
         {
             if (!state.Current.KeepReferenceInSet) // Only remove objects that are the first reference in the stack.
+            {
+                object value = isCollectionProperty ?
+                    (IEnumerable)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue) :
+                    state.Current.CurrentValue;
+
+                state.PopStackReference(value);
+            }
+        }
+
+        private static void PopReferenceAfterThreshold(ref WriteStack state, bool isCollectionProperty, int threshold, int currentDepth)
+        {
+            // For performance, start detecting circular references after certain threshold.
+            if (currentDepth >= threshold)
             {
                 object value = isCollectionProperty ?
                     (IEnumerable)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue) :

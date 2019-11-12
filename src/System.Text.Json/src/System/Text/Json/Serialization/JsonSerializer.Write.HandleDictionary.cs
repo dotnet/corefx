@@ -35,7 +35,7 @@ namespace System.Text.Json
 
                     if (state.Current.PopStackOnEndCollection)
                     {
-                        state.Pop();
+                        state.Pop(writer, options);
                     }
 
                     return true;
@@ -45,7 +45,7 @@ namespace System.Text.Json
                 if (handling == ResolvedReferenceHandling.Ignore)
                 {
                     //Reference loop found, do not write anything and pop the frame from the stack.
-                    return WriteEndDictionary(ref state);
+                    return WriteEndDictionary(ref state, writer, options);
                 }
 
                 // Let the dictionary return the default IEnumerator from its IEnumerable.GetEnumerator().
@@ -62,7 +62,7 @@ namespace System.Text.Json
                 // Return when writeAsReference is true.
                 if (handling == ResolvedReferenceHandling.IsReference)
                 {
-                    return WriteEndDictionary(ref state);
+                    return WriteEndDictionary(ref state, writer, options);
                 }
             }
 
@@ -112,18 +112,18 @@ namespace System.Text.Json
                 writer.WriteEndObject();
             }
 
-            return WriteEndDictionary(ref state);
+            return WriteEndDictionary(ref state, writer, options);
         }
 
-        private static bool WriteEndDictionary(ref WriteStack state)
+        private static bool WriteEndDictionary(ref WriteStack state, Utf8JsonWriter writer, JsonSerializerOptions options)
         {
             if (state.Current.PopStackOnEndCollection)
             {
-                state.Pop();
+                state.Pop(writer, options);
             }
             else
             {
-                state.PopReference(ref state, true);
+                state.PopReference(ref state, true, options.EffectiveMaxDepth, writer.CurrentDepth);
                 state.Current.EndDictionary();
             }
 

@@ -138,7 +138,7 @@ namespace System.Text.Json
                 {
                     state.WriteStart = WriteReferenceObjectOrArrayStart;
                     state.HandleReference = PreserveReferencesStrategy;
-                    state.PopReference = (ref WriteStack _, bool __) => { }; //enpty delegate, we should not use the reference stack when optiong-in for preserve.
+                    state.PopReference = (ref WriteStack _, bool __, int ___, int ____) => { }; //enpty delegate, we dont need to use the reference stack when optiong-in for preserve.
                 }
                 else if (options.ReferenceHandlingOnSerialize == ReferenceHandlingOnSerialize.Ignore)
                 {
@@ -150,7 +150,7 @@ namespace System.Text.Json
                 {
                     state.WriteStart = WriteObjectOrArrayStart;
                     state.HandleReference = ThrowOnReferencesStrategy;
-                    state.PopReference = PopReference;
+                    state.PopReference = PopReferenceAfterThreshold;
                 }
 
                 Write(writer, writer.CurrentDepth, flushThreshold: -1, options, ref state);

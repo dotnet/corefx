@@ -33,7 +33,7 @@ namespace System.Text.Json
 
                     if (state.Current.PopStackOnEndCollection)
                     {
-                        state.Pop();
+                        state.Pop(writer, options);
                     }
 
                     return true;
@@ -44,7 +44,7 @@ namespace System.Text.Json
                 if (handling == ResolvedReferenceHandling.Ignore)
                 {
                     //Reference loop found and ignore handling specified, do not write anything and pop the frame from the stack in case the array has an independant frame.
-                    return WriteEndArray(ref state);
+                    return WriteEndArray(ref state, writer, options);
                 }
                 state.Current.CollectionEnumerator = enumerable.GetEnumerator();
 
@@ -53,7 +53,7 @@ namespace System.Text.Json
                 if (handling == ResolvedReferenceHandling.IsReference)
                 {
                     // We don't need to enumerate, this is a reference and was already written in WriteObjectOrArrayStart.
-                    return WriteEndArray(ref state);
+                    return WriteEndArray(ref state, writer, options);
                 }
             }
 
@@ -94,18 +94,18 @@ namespace System.Text.Json
                 writer.WriteEndObject();
             }
 
-            return WriteEndArray(ref state);
+            return WriteEndArray(ref state, writer, options);
         }
 
-        private static bool WriteEndArray(ref WriteStack state)
+        private static bool WriteEndArray(ref WriteStack state, Utf8JsonWriter writer, JsonSerializerOptions options)
         {
             if (state.Current.PopStackOnEndCollection)
             {
-                state.Pop();
+                state.Pop(writer, options);
             }
             else
             {
-                state.PopReference(ref state, true);
+                state.PopReference(ref state, true, options.EffectiveMaxDepth, writer.CurrentDepth);
                 state.Current.EndArray();
             }
 

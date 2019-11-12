@@ -65,11 +65,11 @@ namespace System.Text.Json
             }
         }
 
-        public void Pop()
+        public void Pop(Utf8JsonWriter writer, JsonSerializerOptions options)
         {
             Debug.Assert(_index > 0);
 
-            PopReference(ref this, false);
+            PopReference(ref this, false, options.EffectiveMaxDepth, writer.CurrentDepth);
 
             Current = _previous[--_index];
         }
