@@ -61,6 +61,7 @@ namespace SslStress
             {
                 // Start the client.
                 Console.WriteLine($"Starting {config.MaxConnections} client workers.");
+                Console.WriteLine();
 
                 client = new StressClient(config);
                 client.Start();

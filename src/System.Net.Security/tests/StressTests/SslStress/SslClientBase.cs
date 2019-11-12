@@ -136,7 +136,7 @@ namespace SslStress
             lock (Console.Out)
             {
                 Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine("HttpStress Run Final Report");
+                Console.WriteLine("SslStress Run Final Report");
                 Console.WriteLine();
 
                 _aggregator.PrintCurrentResults(_stopwatch.Elapsed);
