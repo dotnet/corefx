@@ -61,12 +61,40 @@ namespace System.Runtime.Intrinsics.X86
         ///   LDDQU xmm, m128
         /// </summary>
         public static unsafe Vector128<sbyte> LoadDquVector128(sbyte* address) => LoadDquVector128(address);
+        /// <summary>
+        /// __m128i _mm_lddqu_si128 (__m128i const* mem_addr)
+        ///   LDDQU xmm, m128
+        /// </summary>
         public static unsafe Vector128<byte> LoadDquVector128(byte* address) => LoadDquVector128(address);
+        /// <summary>
+        /// __m128i _mm_lddqu_si128 (__m128i const* mem_addr)
+        ///   LDDQU xmm, m128
+        /// </summary>
         public static unsafe Vector128<short> LoadDquVector128(short* address) => LoadDquVector128(address);
+        /// <summary>
+        /// __m128i _mm_lddqu_si128 (__m128i const* mem_addr)
+        ///   LDDQU xmm, m128
+        /// </summary>
         public static unsafe Vector128<ushort> LoadDquVector128(ushort* address) => LoadDquVector128(address);
+        /// <summary>
+        /// __m128i _mm_lddqu_si128 (__m128i const* mem_addr)
+        ///   LDDQU xmm, m128
+        /// </summary>
         public static unsafe Vector128<int> LoadDquVector128(int* address) => LoadDquVector128(address);
+        /// <summary>
+        /// __m128i _mm_lddqu_si128 (__m128i const* mem_addr)
+        ///   LDDQU xmm, m128
+        /// </summary>
         public static unsafe Vector128<uint> LoadDquVector128(uint* address) => LoadDquVector128(address);
+        /// <summary>
+        /// __m128i _mm_lddqu_si128 (__m128i const* mem_addr)
+        ///   LDDQU xmm, m128
+        /// </summary>
         public static unsafe Vector128<long> LoadDquVector128(long* address) => LoadDquVector128(address);
+        /// <summary>
+        /// __m128i _mm_lddqu_si128 (__m128i const* mem_addr)
+        ///   LDDQU xmm, m128
+        /// </summary>
         public static unsafe Vector128<ulong> LoadDquVector128(ulong* address) => LoadDquVector128(address);
 
         /// <summary>
