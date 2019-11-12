@@ -11,12 +11,13 @@ namespace System.Drawing
     /// </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+    [TypeConverter("System.Drawing.SizeFConverter, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public struct SizeF : IEquatable<SizeF>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref='System.Drawing.SizeF'/> class.
         /// </summary>
-        public static readonly SizeF Empty = new SizeF();
+        public static readonly SizeF Empty;
         private float width; // Do not rename (binary serialization)
         private float height; // Do not rename (binary serialization)
 

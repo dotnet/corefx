@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configurations>netcoreapp-Linux-Debug;netcoreapp-Linux-Release;netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Linux-Debug;netcoreapp-Linux-Release;netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcore-FreeBSD-Debug;netcore-FreeBSD-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="FileSystemWatcher.cs" />
@@ -30,6 +30,15 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempDirectory.cs">
       <Link>Common\System\IO\TempDirectory.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsLinux)' == 'true' or '$(TargetsOSX)' == 'true' ">
+    <Compile Include="FileSystemWatcher.Unix.cs" />
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ResourceLimits.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.ResourceLimits.cs</Link>
     </Compile>
   </ItemGroup>
 </Project>

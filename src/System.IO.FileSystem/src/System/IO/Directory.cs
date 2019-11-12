@@ -227,15 +227,9 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(path));
 
             string fullPath = Path.GetFullPath(path);
-            string root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath.AsSpan()));
+            string root = Path.GetPathRoot(fullPath);
 
             return root;
-        }
-
-        internal static string InternalGetDirectoryRoot(string path)
-        {
-            if (path == null) return null;
-            return path.Substring(0, PathInternal.GetRootLength(path.AsSpan()));
         }
 
         public static string GetCurrentDirectory() => Environment.CurrentDirectory;
@@ -268,14 +262,25 @@ namespace System.IO
             string fulldestDirName = Path.GetFullPath(destDirName);
             string destPath = PathInternal.EnsureTrailingSeparator(fulldestDirName);
 
-            StringComparison pathComparison = PathInternal.StringComparison;
+            string sourceDirNameFromFullPath = Path.GetFileName(fullsourceDirName);
+            string destDirNameFromFullPath = Path.GetFileName(fulldestDirName);
 
-            if (string.Equals(sourcePath, destPath, pathComparison))
+            StringComparison fileSystemSensitivity = PathInternal.StringComparison;
+            bool directoriesAreCaseVariants = !string.Equals(sourceDirNameFromFullPath, destDirNameFromFullPath, StringComparison.Ordinal)
+                && string.Equals(sourceDirNameFromFullPath, destDirNameFromFullPath, StringComparison.OrdinalIgnoreCase);
+            bool sameDirectoryDifferentCase = directoriesAreCaseVariants
+                                                && string.Equals(destDirNameFromFullPath, sourceDirNameFromFullPath, fileSystemSensitivity);
+
+            // If the destination directories are the exact same name
+            if (!sameDirectoryDifferentCase
+                && string.Equals(sourcePath, destPath, fileSystemSensitivity))
                 throw new IOException(SR.IO_SourceDestMustBeDifferent);
 
             string sourceRoot = Path.GetPathRoot(sourcePath);
             string destinationRoot = Path.GetPathRoot(destPath);
-            if (!string.Equals(sourceRoot, destinationRoot, pathComparison))
+
+            // Compare paths for the same, skip this step if we already know the paths are identical.
+            if (!string.Equals(sourceRoot, destinationRoot, StringComparison.OrdinalIgnoreCase))
                 throw new IOException(SR.IO_SourceDestMustHaveSameRoot);
 
             // Windows will throw if the source file/directory doesn't exist, we preemptively check
@@ -283,7 +288,12 @@ namespace System.IO
             if (!FileSystem.DirectoryExists(fullsourceDirName) && !FileSystem.FileExists(fullsourceDirName))
                 throw new DirectoryNotFoundException(SR.Format(SR.IO_PathNotFound_Path, fullsourceDirName));
 
-            if (FileSystem.DirectoryExists(fulldestDirName))
+            if (!sameDirectoryDifferentCase // This check is to allowing renaming of directories
+                && FileSystem.DirectoryExists(fulldestDirName))
+                throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
+
+            // If the directories aren't the same and the OS says the directory exists already, fail.
+            if (!sameDirectoryDifferentCase && Directory.Exists(fulldestDirName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
             FileSystem.MoveDirectory(fullsourceDirName, fulldestDirName);

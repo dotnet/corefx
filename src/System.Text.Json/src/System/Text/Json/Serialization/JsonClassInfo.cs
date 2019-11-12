@@ -3,13 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -26,6 +26,9 @@ namespace System.Text.Json
 
         // All of the serializable properties on a POCO (except the optional extension property) keyed on property name.
         public volatile Dictionary<string, JsonPropertyInfo> PropertyCache;
+
+        // Serializable runtime/polymorphic properties, keyed on property and runtime type.
+        public ConcurrentDictionary<(JsonPropertyInfo, Type), JsonPropertyInfo> RuntimePropertyCache;
 
         // All of the serializable properties on a POCO including the optional extension property.
         // Used for performance during serialization instead of 'PropertyCache' above.
@@ -197,62 +200,22 @@ namespace System.Text.Json
                 case ClassType.Enumerable:
                 case ClassType.Dictionary:
                     {
-                        // Add a single property that maps to the class type so we can have policies applied.
                         ElementType = elementType;
                         AddItemToObject = addMethod;
-
-                        // A policy property is not a real property on a type; instead it leverages the existing converter
-                        // logic and generic support to avoid boxing. It is used with values types, elements from collections and
-                        // dictionaries, and collections themselves. Typically it would represent a CLR type such as System.String.
-                        PolicyProperty = CreateProperty(
-                            declaredPropertyType: type,
-                            runtimePropertyType: runtimeType,
-                            propertyInfo: null, // Not a real property so this is null.
-                            parentClassType: typeof(object),
-                            collectionElementType: elementType,
-                            nullableUnderlyingType,
-                            converter: null,
-                            ClassType,
-                            options);
-
+                        PolicyProperty = CreatePolicyProperty(type, runtimeType, elementType, nullableUnderlyingType, converter: null, ClassType, options);
                         CreateObject = options.MemberAccessorStrategy.CreateConstructor(PolicyProperty.RuntimePropertyType);
                     }
                     break;
                 case ClassType.Value:
                     {
                         CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
-
-                        // Add a single property that maps to the class type so we can have policies applied.
-                        //AddPolicyPropertyForValue(type, options);
-                        PolicyProperty = CreateProperty(
-                            declaredPropertyType: type,
-                            runtimePropertyType: runtimeType,
-                            propertyInfo: null, // Not a real property so this is null.
-                            parentClassType: typeof(object),
-                            collectionElementType: null,
-                            nullableUnderlyingType,
-                            converter,
-                            ClassType,
-                            options);
+                        PolicyProperty = CreatePolicyProperty(type, runtimeType, elementType: null, nullableUnderlyingType, converter, ClassType, options);
                     }
                     break;
                 case ClassType.Unknown:
                     {
                         CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
-
-                        // Add a single property that maps to the class type so we can have policies applied.
-                        //AddPolicyPropertyForValue(type, options);
-                        PolicyProperty = CreateProperty(
-                            declaredPropertyType: type,
-                            runtimePropertyType: runtimeType,
-                            propertyInfo: null, // Not a real property so this is null.
-                            parentClassType: typeof(object),
-                            collectionElementType: null,
-                            nullableUnderlyingType,
-                            converter,
-                            ClassType,
-                            options);
-
+                        PolicyProperty = CreatePolicyProperty(type, runtimeType, elementType: null, nullableUnderlyingType, converter, ClassType, options);
                         PropertyCache = new Dictionary<string, JsonPropertyInfo>();
                         PropertyCacheArray = Array.Empty<JsonPropertyInfo>();
                     }
@@ -368,6 +331,9 @@ namespace System.Text.Json
             // No cached item was found. Try the main list which has all of the properties.
 
             string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
+
+            Debug.Assert(PropertyCache != null);
+
             if (!PropertyCache.TryGetValue(stringPropertyName, out info))
             {
                 info = JsonPropertyInfo.s_missingProperty;

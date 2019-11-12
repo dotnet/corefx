@@ -11,8 +11,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
+using System.Security.Cryptography.Asn1.Pkcs7;
 using System.Security.Cryptography.Pkcs;
-using System.Security.Cryptography.Pkcs.Asn1;
 using System.Security.Cryptography.X509Certificates;
 using X509IssuerSerial = System.Security.Cryptography.Xml.X509IssuerSerial;
 
@@ -107,7 +107,7 @@ namespace Internal.Cryptography
 
             if (idx != 0)
             {
-                Array.Copy(arr, 0, tmp, 0, idx);
+                Array.Copy(arr, tmp, idx);
             }
 
             if (idx < tmp.Length)

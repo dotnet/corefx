@@ -11,9 +11,10 @@ namespace System.Drawing
     /// </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+    [TypeConverter("System.Drawing.RectangleConverter, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public struct Rectangle : IEquatable<Rectangle>
     {
-        public static readonly Rectangle Empty = new Rectangle();
+        public static readonly Rectangle Empty;
 
         private int x; // Do not rename (binary serialization)
         private int y; // Do not rename (binary serialization)
@@ -235,7 +236,7 @@ namespace System.Drawing
             (X <= rect.X) && (rect.X + rect.Width <= X + Width) &&
             (Y <= rect.Y) && (rect.Y + rect.Height <= Y + Height);
 
-        public override int GetHashCode() => HashCode.Combine(X, Y, Width, Height);
+        public override readonly int GetHashCode() => HashCode.Combine(X, Y, Width, Height);
 
         /// <summary>
         /// Inflates this <see cref='System.Drawing.Rectangle'/> by the specified amount.

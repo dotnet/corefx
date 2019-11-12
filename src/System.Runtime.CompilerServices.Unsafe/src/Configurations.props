@@ -3,11 +3,13 @@
     <PackageConfigurations>
       netcoreapp2.0;
       netstandard1.0;
-      netstandard;
+      netstandard2.0;
+      net45;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
-      netcoreapp
+      netcoreapp;
+      netfx;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

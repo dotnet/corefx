@@ -11,12 +11,13 @@ namespace System.Drawing
     /// </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+    [TypeConverter("System.Drawing.PointConverter, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public struct Point : IEquatable<Point>
     {
         /// <summary>
         /// Creates a new instance of the <see cref='System.Drawing.Point'/> class with member data left uninitialized.
         /// </summary>
-        public static readonly Point Empty = new Point();
+        public static readonly Point Empty;
 
         private int x; // Do not rename (binary serialization)
         private int y; // Do not rename (binary serialization)

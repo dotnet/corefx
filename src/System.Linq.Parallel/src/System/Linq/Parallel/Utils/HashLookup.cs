@@ -9,6 +9,7 @@
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -23,7 +24,7 @@ namespace System.Linq.Parallel
         private Slot[] slots;
         private int count;
         private int freeList;
-        private readonly IEqualityComparer<TKey> comparer;
+        private readonly IEqualityComparer<TKey>? comparer;
 
         private const int HashCodeMask = 0x7fffffff;
 
@@ -31,7 +32,7 @@ namespace System.Linq.Parallel
         {
         }
 
-        internal HashLookup(IEqualityComparer<TKey> comparer)
+        internal HashLookup(IEqualityComparer<TKey>? comparer)
         {
             this.comparer = comparer;
             buckets = new int[7];
@@ -46,7 +47,7 @@ namespace System.Linq.Parallel
         }
 
         // Check whether value is in set
-        internal bool TryGetValue(TKey key, ref TValue value)
+        internal bool TryGetValue(TKey key, [MaybeNullWhen(false), AllowNull] ref TValue value)
         {
             return Find(key, false, false, ref value);
         }
@@ -128,7 +129,7 @@ namespace System.Linq.Parallel
             int newSize = checked(count * 2 + 1);
             int[] newBuckets = new int[newSize];
             Slot[] newSlots = new Slot[newSize];
-            Array.Copy(slots, 0, newSlots, 0, count);
+            Array.Copy(slots, newSlots, count);
             for (int i = 0; i < count; i++)
             {
                 int bucket = newSlots[i].hashCode % newSize;

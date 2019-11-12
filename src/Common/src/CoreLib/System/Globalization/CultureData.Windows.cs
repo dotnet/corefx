@@ -6,9 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-#if ENABLE_WINRT
-using Internal.Runtime.Augments;
-#endif
 using Internal.Runtime.CompilerServices;
 
 namespace System.Globalization
@@ -259,7 +256,7 @@ namespace System.Globalization
             Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert(regionName != null);
 
-            EnumLocaleData context = new EnumLocaleData();
+            EnumLocaleData context;
             context.cultureName = null;
             context.regionName = regionName;
 
@@ -279,15 +276,12 @@ namespace System.Globalization
 
         private string GetLanguageDisplayName(string cultureName)
         {
-#if ENABLE_WINRT
-            return WinRTInterop.Callbacks.GetLanguageDisplayName(cultureName);
-#else
             // Usually the UI culture shouldn't be different than what we got from WinRT except
             // if DefaultThreadCurrentUICulture was set
             CultureInfo? ci;
 
             if (CultureInfo.DefaultThreadCurrentUICulture != null &&
-                ((ci = GetUserDefaultCulture()) != null) &&
+                ((ci = CultureInfo.GetUserDefaultCulture()) != null) &&
                 !CultureInfo.DefaultThreadCurrentUICulture.Name.Equals(ci.Name))
             {
                 return NativeName;
@@ -296,14 +290,10 @@ namespace System.Globalization
             {
                 return GetLocaleInfo(cultureName, LocaleStringData.LocalizedDisplayName);
             }
-#endif // ENABLE_WINRT
         }
 
-        private string GetRegionDisplayName(string isoCountryCode)
+        private string GetRegionDisplayName()
         {
-#if ENABLE_WINRT
-            return WinRTInterop.Callbacks.GetRegionDisplayName(isoCountryCode);
-#else
             // If the current UI culture matching the OS UI language, we'll get the display name from the OS.
             // otherwise, we use the native name as we don't carry resources for the region display names anyway.
             if (CultureInfo.CurrentUICulture.Name.Equals(CultureInfo.UserDefaultUICulture.Name))
@@ -312,16 +302,6 @@ namespace System.Globalization
             }
 
             return NativeCountryName;
-#endif // ENABLE_WINRT
-        }
-
-        private static CultureInfo GetUserDefaultCulture()
-        {
-#if ENABLE_WINRT
-            return (CultureInfo)WinRTInterop.Callbacks.GetUserDefaultCulture();
-#else
-            return CultureInfo.GetUserDefaultCulture();
-#endif // ENABLE_WINRT
         }
 
         // PAL methods end here.
@@ -561,7 +541,7 @@ namespace System.Globalization
 
         private static unsafe string[]? nativeEnumTimeFormats(string localeName, uint dwFlags, bool useUserOverride)
         {
-            EnumData data = new EnumData();
+            EnumData data = default;
             data.strings = new List<string>();
 
             // Now call the enumeration API. Work is done by our callback function
@@ -689,7 +669,7 @@ namespace System.Globalization
                 flags |= Interop.Kernel32.LOCALE_SUPPLEMENTAL;
             }
 
-            EnumData context = new EnumData();
+            EnumData context = default;
             context.strings = new List<string>();
 
             unsafe
@@ -717,7 +697,7 @@ namespace System.Globalization
         {
             get
             {
-                EnumData context = new EnumData();
+                EnumData context = default;
                 context.strings = new List<string>();
 
                 unsafe

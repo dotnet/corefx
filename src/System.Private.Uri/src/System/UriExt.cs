@@ -5,6 +5,7 @@
 using System.Globalization;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace System
 {
@@ -545,26 +546,21 @@ namespace System
             if (stringToUnescape.Length == 0)
                 return string.Empty;
 
-            unsafe
-            {
-                fixed (char* pStr = stringToUnescape)
-                {
-                    int position;
-                    for (position = 0; position < stringToUnescape.Length; ++position)
-                        if (pStr[position] == '%')
-                            break;
+            int position = stringToUnescape.IndexOf('%');
+            if (position == -1)
+                return stringToUnescape;
 
-                    if (position == stringToUnescape.Length)
-                        return stringToUnescape;
+            var vsb = new ValueStringBuilder(stackalloc char[256]);
+            vsb.EnsureCapacity(stringToUnescape.Length);
 
-                    UnescapeMode unescapeMode = UnescapeMode.Unescape | UnescapeMode.UnescapeAll;
-                    position = 0;
-                    char[] dest = new char[stringToUnescape.Length];
-                    dest = UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, dest, ref position,
-                        c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
-                    return new string(dest, 0, position);
-                }
-            }
+            vsb.Append(stringToUnescape.AsSpan(0, position));
+            UriHelper.UnescapeString(
+                stringToUnescape, position, stringToUnescape.Length, ref vsb,
+                c_DummyChar, c_DummyChar, c_DummyChar,
+                UnescapeMode.Unescape | UnescapeMode.UnescapeAll,
+                syntax: null, isQuery: false);
+
+            return vsb.ToString();
         }
 
         // Where stringToEscape is intended to be a completely unescaped URI string.

@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -303,6 +302,8 @@ namespace System.Text.Json
 
         public void DetermineEnumerablePopulationStrategy(object targetEnumerable)
         {
+            Debug.Assert(JsonPropertyInfo.ClassType == ClassType.Enumerable);
+
             if (JsonPropertyInfo.RuntimeClassInfo.AddItemToObject != null)
             {
                 if (!JsonPropertyInfo.TryCreateEnumerableAddMethod(targetEnumerable, out object addMethodDelegate))
@@ -338,6 +339,8 @@ namespace System.Text.Json
 
         public void DetermineIfDictionaryCanBePopulated(object targetDictionary)
         {
+            Debug.Assert(JsonPropertyInfo.ClassType == ClassType.Dictionary);
+
             if (!JsonPropertyInfo.CanPopulateDictionary(targetDictionary))
             {
                 throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(

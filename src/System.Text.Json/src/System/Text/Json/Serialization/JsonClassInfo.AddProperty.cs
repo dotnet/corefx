@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace System.Text.Json
 {
@@ -42,6 +45,8 @@ namespace System.Text.Json
                 options);
         }
 
+        [PreserveDependency(".ctor()", "System.Text.Json.JsonPropertyInfoNullable`2")]
+        [PreserveDependency(".ctor()", "System.Text.Json.Serialization.JsonPropertyInfoNotNullableContravariant`4")]
         internal static JsonPropertyInfo CreateProperty(
             Type declaredPropertyType,
             Type runtimePropertyType,
@@ -114,7 +119,37 @@ namespace System.Text.Json
             return jsonPropertyInfo;
         }
 
-        internal JsonPropertyInfo CreateRootObject(JsonSerializerOptions options)
+        /// <summary>
+        /// Create a <see cref="JsonPropertyInfo"/> for a given Type.
+        /// A policy property is not a real property on a type; instead it leverages the existing converter
+        /// logic and generic support to avoid boxing. It is used with values types, elements from collections and
+        /// dictionaries, and collections themselves. Typically it would represent a CLR type such as System.String.
+        /// </summary>
+        internal static JsonPropertyInfo CreatePolicyProperty(
+            Type declaredPropertyType,
+            Type runtimePropertyType,
+            Type elementType,
+            Type nullableUnderlyingType,
+            JsonConverter converter,
+            ClassType classType,
+            JsonSerializerOptions options)
+        {
+            return CreateProperty(
+                declaredPropertyType: declaredPropertyType,
+                runtimePropertyType: runtimePropertyType,
+                propertyInfo: null, // Not a real property so this is null.
+                parentClassType: typeof(object), // a dummy value (not used)
+                collectionElementType : elementType,
+                nullableUnderlyingType,
+                converter : converter,
+                classType : classType,
+                options);
+        }
+
+        /// <summary>
+        /// Create a <see cref="JsonPropertyInfo"/> for a given Type.
+        /// </summary>
+        internal JsonPropertyInfo CreateRootProperty(JsonSerializerOptions options)
         {
             JsonConverter converter = options.DetermineConverterForProperty(Type, Type, propertyInfo: null);
 
@@ -122,7 +157,7 @@ namespace System.Text.Json
                 declaredPropertyType: Type,
                 runtimePropertyType: Type,
                 propertyInfo: null,
-                parentClassType: Type,
+                parentClassType: typeof(object), // a dummy value (not used)
                 ElementType,
                 Nullable.GetUnderlyingType(Type),
                 converter,
@@ -130,33 +165,44 @@ namespace System.Text.Json
                 options);
         }
 
-        internal JsonPropertyInfo CreatePolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
+        internal JsonPropertyInfo GetOrAddPolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
-            ClassType classType = GetClassType(
-                runtimePropertyType,
-                Type,
-                property.PropertyInfo,
-                out _,
-                out Type elementType,
-                out Type nullableType,
-                out _,
-                out JsonConverter converter,
-                checkForAddMethod: false,
-                options);
+            static JsonPropertyInfo CreateRuntimeProperty((JsonPropertyInfo property, Type runtimePropertyType) key, (JsonSerializerOptions options, Type classType) arg)
+            {
+                ClassType classType = GetClassType(
+                    key.runtimePropertyType,
+                    arg.classType,
+                    key.property.PropertyInfo,
+                    out _,
+                    out Type elementType,
+                    out Type nullableType,
+                    out _,
+                    out JsonConverter converter,
+                    checkForAddMethod: false,
+                    arg.options);
 
-            JsonPropertyInfo runtimeProperty = CreateProperty(
-                property.DeclaredPropertyType,
-                runtimePropertyType,
-                property.PropertyInfo,
-                parentClassType: Type,
-                collectionElementType: elementType,
-                nullableType,
-                converter,
-                classType,
-                options: options);
-            property.CopyRuntimeSettingsTo(runtimeProperty);
+                JsonPropertyInfo runtimeProperty = CreateProperty(
+                    key.property.DeclaredPropertyType,
+                    key.runtimePropertyType,
+                    key.property.PropertyInfo,
+                    parentClassType: arg.classType,
+                    collectionElementType: elementType,
+                    nullableType,
+                    converter,
+                    classType,
+                    options: arg.options);
+                key.property.CopyRuntimeSettingsTo(runtimeProperty);
 
-            return runtimeProperty;
+                return runtimeProperty;
+            }
+
+            ConcurrentDictionary<(JsonPropertyInfo, Type), JsonPropertyInfo> cache =
+                LazyInitializer.EnsureInitialized(ref RuntimePropertyCache, () => new ConcurrentDictionary<(JsonPropertyInfo, Type), JsonPropertyInfo>());
+#if BUILDING_INBOX_LIBRARY
+            return cache.GetOrAdd((property, runtimePropertyType), (key, arg) => CreateRuntimeProperty(key, arg), (options, Type));
+#else
+            return cache.GetOrAdd((property, runtimePropertyType), key => CreateRuntimeProperty(key, (options, Type)));
+#endif
         }
     }
 }

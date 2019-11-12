@@ -634,7 +634,7 @@ namespace System.Collections.Concurrent
             {
                 if (queue._currentOp != (int)Operation.None)
                 {
-                    var spinner = new SpinWait();
+                    SpinWait spinner = default;
                     do { spinner.SpinOnce(); }
                     while (queue._currentOp != (int)Operation.None);
                 }
@@ -796,7 +796,7 @@ namespace System.Collections.Concurrent
                             int headIdx = head & _mask;
                             if (headIdx == 0)
                             {
-                                Array.Copy(_array, 0, newArray, 0, _array.Length);
+                                Array.Copy(_array, newArray, _array.Length);
                             }
                             else
                             {
@@ -975,7 +975,7 @@ namespace System.Collections.Concurrent
                         // steal operations happening at the time.
                         if ((head - (_tailIndex - 2) >= 0) && _currentOp == (int)Operation.Add)
                         {
-                            var spinner = new SpinWait();
+                            SpinWait spinner = default;
                             do
                             {
                                 spinner.SpinOnce();
