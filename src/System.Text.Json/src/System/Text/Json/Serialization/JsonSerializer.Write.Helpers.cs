@@ -134,6 +134,25 @@ namespace System.Text.Json
                 state.Current.Initialize(type, options);
                 state.Current.CurrentValue = value;
 
+                if (options.ReferenceHandlingOnSerialize == ReferenceHandlingOnSerialize.Preserve)
+                {
+                    state.WriteStart = WriteReferenceObjectOrArrayStart;
+                    state.HandleReference = PreserveReferencesStrategy;
+                    state.PopReference = (ref WriteStack _, bool __) => { }; //enpty delegate, we should not use the reference stack when optiong-in for preserve.
+                }
+                else if (options.ReferenceHandlingOnSerialize == ReferenceHandlingOnSerialize.Ignore)
+                {
+                    state.WriteStart = WriteObjectOrArrayStart;
+                    state.HandleReference = IgnoreReferencesStrategy;
+                    state.PopReference = PopReference;
+                }
+                else
+                {
+                    state.WriteStart = WriteObjectOrArrayStart;
+                    state.HandleReference = ThrowOnReferencesStrategy;
+                    state.PopReference = PopReference;
+                }
+
                 Write(writer, writer.CurrentDepth, flushThreshold: -1, options, ref state);
             }
 

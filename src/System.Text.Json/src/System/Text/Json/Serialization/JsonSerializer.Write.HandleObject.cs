@@ -29,13 +29,13 @@ namespace System.Text.Json
                 }
 
                 //Handle reference here
-                //if you need to preserve te reference, either add $id or replace it all with $ref
                 //if first seen
                 //just write the property $id for objects;
-                //or write { "$id": "#", "$values": current array } for arrays. || also try creating an object with said properties and push it to the stack.
-                //if seen before just write { "$ref": "#" } instead of whatever the value is.
+                //or write { "$id": "#", "$values": current array } for arrays.
+                //if seen before
+                //just write { "$ref": "#" } and finish processing the object/array.
 
-                ResolvedReferenceHandling handling = ResolveReferenceHandling(options, ref state, out int referenceId, out bool writeAsReference);
+                ResolvedReferenceHandling handling = state.HandleReference(ref state, out string referenceId, out bool writeAsReference, threshold: options.EffectiveMaxDepth, currentDepth: writer.CurrentDepth);//ResolveReferenceHandling(options, ref state, out string referenceId, out bool writeAsReference);
 
                 if (handling == ResolvedReferenceHandling.Ignore)
                 {
@@ -43,9 +43,10 @@ namespace System.Text.Json
                     return WriteEndObject(ref state);
                 }
 
-                state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
+                //state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, options);
+                state.WriteStart(ref state.Current, ClassType.Object, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
 
-                if (writeAsReference)
+                if (handling == ResolvedReferenceHandling.IsReference)
                 {
                     return WriteEndObject(ref state);
                 }

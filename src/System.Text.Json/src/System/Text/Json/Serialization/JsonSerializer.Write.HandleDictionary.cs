@@ -40,8 +40,8 @@ namespace System.Text.Json
 
                     return true;
                 }
-                // TODO Potentially: enumerable must be passed as param to avoid using ReturnValue, run tests where dictionary is a property to confirm this.
-                ResolvedReferenceHandling handling = ResolveReferenceHandling(options, ref state, out int referenceId, out bool writeAsReference, enumerable);
+
+                ResolvedReferenceHandling handling = state.HandleReference(ref state, out string referenceId, out bool writeAsReference, enumerable, options.EffectiveMaxDepth, writer.CurrentDepth);
                 if (handling == ResolvedReferenceHandling.Ignore)
                 {
                     //Reference loop found, do not write anything and pop the frame from the stack.
@@ -52,16 +52,15 @@ namespace System.Text.Json
                 // For IDictionary-derived classes this is normally be IDictionaryEnumerator.
                 // For IDictionary<TKey, TVale>-derived classes this is normally IDictionaryEnumerator as well
                 // but may be IEnumerable<KeyValuePair<TKey, TValue>> if the dictionary only supports generics.
-                state.Current.CollectionEnumerable = enumerable;
                 state.Current.CollectionEnumerator = enumerable.GetEnumerator();
 
                 if (state.Current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing)
                 {
-                    state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
+                    state.WriteStart(ref state.Current, ClassType.Dictionary, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
                 }
 
-                // TODO: Return when writeAsReference is true, don't know why is missing.
-                if (writeAsReference)
+                // Return when writeAsReference is true.
+                if (handling == ResolvedReferenceHandling.IsReference)
                 {
                     return WriteEndDictionary(ref state);
                 }
@@ -124,7 +123,7 @@ namespace System.Text.Json
             }
             else
             {
-                state.PopStackReference(state.Current.CollectionEnumerable);
+                state.PopReference(ref state, true);
                 state.Current.EndDictionary();
             }
 

@@ -14,8 +14,12 @@ namespace System.Text.Json
         public WriteStackFrame Current;
         private List<WriteStackFrame> _previous;
         private int _index;
-        private Dictionary<object, int> _preservedReferences;
-        private HashSet<object> _referenceLoopStack;
+
+        private ReferenceResolver _referenceResolver;
+        private HashSet<object> _referenceStack;
+        public ReferenceHandlingStrategy HandleReference;
+        public WriteStart WriteStart;
+        public PopReference PopReference;
 
         public void Push()
         {
@@ -65,10 +69,7 @@ namespace System.Text.Json
         {
             Debug.Assert(_index > 0);
 
-            if (!Current.KeepReferenceInSet) // Only remove objects that are the first reference in the stack.
-            {
-                PopStackReference(Current.CurrentValue);
-            }
+            PopReference(ref this, false);
 
             Current = _previous[--_index];
         }
@@ -116,31 +117,28 @@ namespace System.Text.Json
 
         public bool AddStackReference(object value)
         {
-            if (_referenceLoopStack == null)
+            if (_referenceStack == null)
             {
-                _referenceLoopStack = new HashSet<object>(ReferenceEqualsEqualityComparer.Comparer);
+                _referenceStack = new HashSet<object>(ReferenceEqualsEqualityComparer<object>.Comparer);
             }
 
-            return _referenceLoopStack.Add(value);
+            return _referenceStack.Add(value);
         }
 
-        public void PopStackReference(object value) => _referenceLoopStack?.Remove(value);
+        public void PopStackReference(object value) => _referenceStack?.Remove(value);
 
-        public bool AddPreservedReference(object value, out int id)
+        // true if reference already existed; otherwise, false;
+        public bool GetPreservedReference(object value, out string id)
         {
-            if (_preservedReferences == null)
+            if (_referenceResolver == null)
             {
-                _preservedReferences = new Dictionary<object, int>(ReferenceEqualsEqualityComparer.Comparer);
-                _preservedReferences[value] = id = 1;
-                return true;
-            }
-            else if (!_preservedReferences.TryGetValue(value, out id))
-            {
-                _preservedReferences[value] = id = _preservedReferences.Count + 1;
-                return true; //new value.
+                _referenceResolver = new DefaultReferenceResolver();
             }
 
-            return false; //value already in dictionary.
+            bool isReference = _referenceResolver.IsReferenced(value);
+            id = _referenceResolver.GetReference(value);
+
+            return isReference;
         }
     }
 }

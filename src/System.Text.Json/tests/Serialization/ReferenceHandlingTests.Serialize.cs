@@ -254,6 +254,22 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(expected, actual);
         }
+
+        [Fact]
+        public static void DictionaryNTimesUsingIgnore()
+        {
+            Dictionary<string, Employee> root = new Dictionary<string, Employee>();
+            Employee elem = new Employee();
+            elem.Contacts = root;
+            elem.Contacts2 = root;
+
+            root["angela"] = elem;
+
+            string expected = JsonConvert.SerializeObject(root, JsonNetSettings(ReferenceHandlingOnSerialize.Ignore));
+            string actual = JsonSerializer.Serialize(root, SystemTextJsonOptions(ReferenceHandlingOnSerialize.Ignore));
+
+            Assert.Equal(expected, actual);
+        }
         #endregion
 
         #region Root Array
@@ -363,56 +379,19 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(expected, actual);
         }
-        #endregion
-
-        #region JsonReferenceHandlingAttribute
-        private class EmployeeAnnotatedProperty
-        {
-            public string Name { get; set; }
-            [JsonReferenceHandling(ReferenceHandlingOnSerialize.Ignore)]
-            [JsonProperty(ReferenceLoopHandling = ReferenceLoopHandling.Ignore)]
-            public EmployeeAnnotatedProperty Manager { get; set; }
-            public List<EmployeeAnnotatedProperty> Subordinates { get; set; }
-        }
 
         [Fact]
-        public static void ObjectPropertyAttribute()
+        public static void ArrayNTimesUsingIgnore()
         {
-            EmployeeAnnotatedProperty root = new EmployeeAnnotatedProperty { Name = "Angela" };
-            EmployeeAnnotatedProperty node = new EmployeeAnnotatedProperty { Name = "Bob" };
+            List<Employee> root = new List<Employee>();
+            Employee elem = new Employee();
+            elem.Subordinates = root;
+            elem.Subordinates2 = root;
 
-            root.Subordinates = new List<EmployeeAnnotatedProperty> { node };
-            node.Manager = root;
+            root.Add(elem);
 
-            string expected = JsonConvert.SerializeObject(root);
-            string actual = JsonSerializer.Serialize(root);
-
-            Assert.Equal(expected, actual);
-        }
-
-        [JsonReferenceHandling(ReferenceHandlingOnSerialize.Preserve)]
-        [JsonObject(IsReference = true, ItemReferenceLoopHandling = ReferenceLoopHandling.Serialize)]
-        private class EmployeeAnnotatedClass
-        {
-            public string Name { get; set; }
-            public EmployeeAnnotatedClass Manager { get; set; }
-            //Need to ignore on collections due Newtonsoft's JsonObjectAttribute does not preserves them, that's a bug on their end.
-            [JsonReferenceHandling(ReferenceHandlingOnSerialize.Ignore)]
-            [JsonProperty(ReferenceLoopHandling = ReferenceLoopHandling.Ignore, IsReference = false)]
-            public List<EmployeeAnnotatedClass> Subordinates { get; set; }
-        }
-
-        [Fact]
-        public static void ObjectClassAttribute()
-        {
-            EmployeeAnnotatedClass root = new EmployeeAnnotatedClass { Name = "Angela" };
-            EmployeeAnnotatedClass node = new EmployeeAnnotatedClass { Name = "Bob" };
-
-            root.Subordinates = new List<EmployeeAnnotatedClass> { node };
-            node.Manager = root;
-
-            string expected = JsonConvert.SerializeObject(root);
-            string actual = JsonSerializer.Serialize(root);
+            string expected = JsonConvert.SerializeObject(root, JsonNetSettings(ReferenceHandlingOnSerialize.Ignore));
+            string actual = JsonSerializer.Serialize(root, SystemTextJsonOptions(ReferenceHandlingOnSerialize.Ignore));
 
             Assert.Equal(expected, actual);
         }

@@ -4,16 +4,16 @@ using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
-    internal class ReferenceEqualsEqualityComparer : IEqualityComparer<object>
+    internal class ReferenceEqualsEqualityComparer<T> : IEqualityComparer<T>
     {
-        public static ReferenceEqualsEqualityComparer Comparer => new ReferenceEqualsEqualityComparer();
+        public static ReferenceEqualsEqualityComparer<T> Comparer => new ReferenceEqualsEqualityComparer<T>();
 
-        bool IEqualityComparer<object>.Equals(object x, object y)
+        bool IEqualityComparer<T>.Equals(T x, T y)
         {
             return ReferenceEquals(x, y);
         }
 
-        int IEqualityComparer<object>.GetHashCode(object obj)
+        int IEqualityComparer<T>.GetHashCode(T obj)
         {
             return GetHashCode();
         }

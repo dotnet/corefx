@@ -39,19 +39,18 @@ namespace System.Text.Json
                     return true;
                 }
 
-                ResolvedReferenceHandling handling = ResolveReferenceHandling(options, ref state, out int referenceId, out bool writeAsReference, enumerable);
+                ResolvedReferenceHandling handling = state.HandleReference(ref state, out string referenceId, out bool writeAsReference, enumerable, options.EffectiveMaxDepth, writer.CurrentDepth);
 
                 if (handling == ResolvedReferenceHandling.Ignore)
                 {
                     //Reference loop found and ignore handling specified, do not write anything and pop the frame from the stack in case the array has an independant frame.
                     return WriteEndArray(ref state);
                 }
-                state.Current.CollectionEnumerable = enumerable;
                 state.Current.CollectionEnumerator = enumerable.GetEnumerator();
 
-                state.Current.WriteObjectOrArrayStart(ClassType.Enumerable, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
+                state.WriteStart(ref state.Current, ClassType.Enumerable, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
 
-                if (writeAsReference)
+                if (handling == ResolvedReferenceHandling.IsReference)
                 {
                     // We don't need to enumerate, this is a reference and was already written in WriteObjectOrArrayStart.
                     return WriteEndArray(ref state);
@@ -106,7 +105,7 @@ namespace System.Text.Json
             }
             else
             {
-                state.PopStackReference(state.Current.CollectionEnumerable);
+                state.PopReference(ref state, true);
                 state.Current.EndArray();
             }
 

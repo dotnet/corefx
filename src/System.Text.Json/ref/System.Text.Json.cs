@@ -724,6 +724,17 @@ namespace System.Text.Json
         public void WriteStringValue(string value) { }
         public void WriteStringValue(System.Text.Json.JsonEncodedText value) { }
     }
+
+    public abstract class ReferenceResolver
+    {
+        public abstract void AddReference(string key, object value);
+
+        public abstract string GetReference(object value);
+
+        public abstract object ResolveReference(string key);
+
+        public abstract bool IsReferenced(object value);
+    }
 }
 namespace System.Text.Json.Serialization
 {
@@ -778,14 +789,5 @@ namespace System.Text.Json.Serialization
         public JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy namingPolicy = null, bool allowIntegerValues = true) { }
         public override bool CanConvert(System.Type typeToConvert) { throw null; }
         public override System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { throw null; }
-    }
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
-    public sealed class JsonReferenceHandlingAttribute : JsonAttribute
-    {
-        public JsonReferenceHandlingAttribute(ReferenceHandlingOnSerialize handling)
-        {
-            Handling = handling;
-        }
-        public ReferenceHandlingOnSerialize Handling { get; }
     }
 }
