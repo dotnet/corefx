@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace System.Text.Json.Serialization.Tests.Schemas.Order
+namespace System.Text.Json.Serialization.Tests.Schemas.OrderPayload
 { 
     public class Order
     {
@@ -26,7 +26,7 @@ namespace System.Text.Json.Serialization.Tests.Schemas.Order
         public DateTime ShippingDate { get; set; }
         public DateTime EstimatedDelivery { get; set; }
         public IEnumerable<Order> RelatedOrder { get; set; }
-		public User ReviewedBy { get; set; }
+        public User ReviewedBy { get; set; }
     }
     
     public class Product
@@ -156,6 +156,7 @@ namespace System.Text.Json.Serialization.Tests.Schemas.Order
         public bool IsEmployee { get; set; }
         public UserType UserType { get; set; }
     }
+
     public enum UserType
     {
         Customer = 1,
