@@ -43,7 +43,7 @@ namespace System.Net.Security.Tests
         [Fact]
         public async Task ClientAsyncAuthenticate_ServerNoEncryption_NoConnect()
         {
-            // Don't use Tls13  since we are trying to use NullEncryption
+            // Don't use Tls13 since we are trying to use NullEncryption
             Type expectedExceptionType = TestConfiguration.SupportsHandshakeAlerts && TestConfiguration.SupportsNullEncryption ?
                 typeof(AuthenticationException) :
                 typeof(IOException);

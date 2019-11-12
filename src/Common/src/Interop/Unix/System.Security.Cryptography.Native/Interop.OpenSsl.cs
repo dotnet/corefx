@@ -276,9 +276,8 @@ internal static partial class Interop
 
                 if ((retVal != -1) || (error != Ssl.SslErrorCode.SSL_ERROR_WANT_READ))
                 {
-                    // Handsahke failed but even if Handshake does not want to read, there may be Alert going out.
-                    // To handle that we will fall-through block bellow to pull it out and we will fail after
-                    // while preserving original error.
+                    // Handshake failed, but even if the handshake does not need to read, there may be an Alert going out.
+                    // To handle that we will fall-through the block below to pull it out, and we will fail after.
                     handshakeException = new SslException(SR.Format(SR.net_ssl_handshake_failed_error, error), innerError);
                     Crypto.ErrClearError();
                 }
@@ -296,7 +295,6 @@ internal static partial class Interop
                 catch (Exception e) when (handshakeException != null)
                 {
                     // If we already have handshake exception, ignore any exception from BioRead().
-                    handshakeException = e;
                 }
                 finally
                 {

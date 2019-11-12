@@ -660,6 +660,7 @@ namespace System.Net.Security
             // Optional output buffer that may need to be freed.
             SafeFreeContextBuffer outFreeContextBuffer = null;
             Span<Interop.SspiCli.SecBuffer> outUnmanagedBuffer = stackalloc Interop.SspiCli.SecBuffer[2];
+            outUnmanagedBuffer[1].pvBuffer = IntPtr.Zero;
             try
             {
                 Span<Interop.SspiCli.SecBuffer> inUnmanagedBuffer = stackalloc Interop.SspiCli.SecBuffer[inSecurityBufferDescriptor.cBuffers];
@@ -707,7 +708,6 @@ namespace System.Net.Security
 
                         outUnmanagedBuffer[1].cbBuffer = 0;
                         outUnmanagedBuffer[1].BufferType = SecurityBufferType.SECBUFFER_ALERT;
-                        outUnmanagedBuffer[1].pvBuffer = IntPtr.Zero;
 
                         if (isSspiAllocated)
                         {
@@ -759,9 +759,7 @@ namespace System.Net.Security
                 outFreeContextBuffer?.Dispose();
                 if (outUnmanagedBuffer[1].pvBuffer != IntPtr.Zero)
                 {
-                    outFreeContextBuffer = SafeFreeContextBuffer.CreateEmptyHandle();
-                    outFreeContextBuffer.Set(outUnmanagedBuffer[1].pvBuffer);
-                    outFreeContextBuffer.Dispose();
+                    Interop.SspiCli.FreeContextBuffer(outUnmanagedBuffer[1].pvBuffer);
                 }
             }
 
