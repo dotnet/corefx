@@ -127,7 +127,7 @@ namespace SslStress
                 RunMode = parseResult.ValueForOption<RunMode>("-m"),
                 MaxConnections = parseResult.ValueForOption<int>("-n"),
                 ServerEndpoint = IPEndPoint.Parse(parseResult.ValueForOption<string>("-e")),
-                MaxExecutionTime = parseResult.ValueForOption<double?>("-M").Select(TimeSpan.FromMinutes),
+                MaxExecutionTime = parseResult.ValueForOption<double?>("-t").Select(TimeSpan.FromMinutes),
                 MaxBufferLength = parseResult.ValueForOption<int>("-l"),
                 ConnectionLifetime = TimeSpan.FromSeconds(parseResult.ValueForOption<double>("-L")),
                 DisplayInterval = TimeSpan.FromSeconds(parseResult.ValueForOption<double>("-i")),
