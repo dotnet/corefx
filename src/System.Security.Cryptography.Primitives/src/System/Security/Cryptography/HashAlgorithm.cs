@@ -4,6 +4,8 @@
 
 using System.Buffers;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Security.Cryptography
 {
@@ -102,6 +104,35 @@ namespace System.Security.Cryptography
 
             int bytesRead;
             while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                HashCore(buffer, 0, bytesRead);
+            }
+
+            ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+            return CaptureHashCodeAndReinitialize();
+        }
+
+        public Task<byte[]> ComputeHashAsync(
+            Stream inputStream,
+            CancellationToken cancellationToken = default)
+        {
+            if (inputStream == null)
+                throw new ArgumentNullException(nameof(inputStream));
+            if (_disposed)
+                throw new ObjectDisposedException(null);
+
+            return ComputeHashAsyncCore(inputStream, cancellationToken);
+        }
+
+        private async Task<byte[]> ComputeHashAsyncCore(
+            Stream inputStream,
+            CancellationToken cancellationToken)
+        {
+            // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
+
+            int bytesRead;
+            while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) > 0)
             {
                 HashCore(buffer, 0, bytesRead);
             }
