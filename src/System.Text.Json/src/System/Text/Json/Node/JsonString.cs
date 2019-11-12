@@ -240,7 +240,7 @@ namespace System.Text.Json
 
             byte[] arrayToReturnToPool = null;
             Span<byte> buffer = bufferSize <= JsonConstants.StackallocThreshold
-                ? stackalloc byte[bufferSize]
+                ? stackalloc byte[JsonConstants.StackallocThreshold]
                 : arrayToReturnToPool = ArrayPool<byte>.Shared.Rent(bufferSize);
             try
             {
