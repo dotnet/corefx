@@ -498,11 +498,23 @@ namespace System.Text.Json.Serialization.Tests
             private ImmutableArray<string> _immutableArray = default;
             private ImmutableList<string> _immutableList = null;
 
-            public string[] Array { get => _array ?? new string[] { " -1" }; set { _array = value; } }
+            public string[] Array
+            {
+                get => _array ?? new string[] { "-1" };
+                set { _array = value; }
+            }
 
-            public List<string> List { get => _list ?? new List<string> { "-1" }; set { _list = value; } }
+            public List<string> List
+            {
+                get => _list ?? new List<string> { "-1" };
+                set { _list = value; }
+            }
 
-            public StringListWrapper ListWrapper { get => _listWrapper ?? new StringListWrapper { "-1" }; set { _listWrapper = value; } }
+            public StringListWrapper ListWrapper
+            {
+                get => _listWrapper ?? new StringListWrapper { "-1" };
+                set { _listWrapper = value; }
+            }
 
             public ImmutableArray<string> MyImmutableArray
             {
@@ -516,16 +528,51 @@ namespace System.Text.Json.Serialization.Tests
                 set { _immutableList = value; }
             }
 
-            internal object GetRawArray { get { return _array; } }
-            internal object GetRawList { get { return _list; } }
-            internal object GetRawListWrapper { get { return _listWrapper; } }
-            internal object GetRawImmutableArray { get { return _immutableArray; } }
-            internal object GetRawImmutableList { get { return _immutableList; } }
+            internal object GetRawArray => _array;
+            internal object GetRawList => _list;
+            internal object GetRawListWrapper => _listWrapper;
+            internal object GetRawImmutableArray => _immutableArray;
+            internal object GetRawImmutableList => _immutableList;
         }
 
         [Fact]
         public static void ClassWithNonNullEnumerableGettersIsParsed()
         {
+            static void TestRoundTrip(ClassWithNonNullEnumerableGetters obj)
+            {
+                ClassWithNonNullEnumerableGetters roundtrip = JsonSerializer.Deserialize<ClassWithNonNullEnumerableGetters>(JsonSerializer.Serialize(obj));
+
+                if (obj.Array != null)
+                {
+                    Assert.Equal(obj.Array.Length, roundtrip.Array.Length);
+                    Assert.Equal(obj.List.Count, roundtrip.List.Count);
+                    Assert.Equal(obj.ListWrapper.Count, roundtrip.ListWrapper.Count);
+                    Assert.Equal(obj.MyImmutableArray.Length, roundtrip.MyImmutableArray.Length);
+                    Assert.Equal(obj.MyImmutableList.Count, roundtrip.MyImmutableList.Count);
+
+                    if (obj.Array.Length > 0)
+                    {
+                        Assert.Equal(obj.Array[0], roundtrip.Array[0]);
+                        Assert.Equal(obj.List[0], roundtrip.List[0]);
+                        Assert.Equal(obj.ListWrapper[0], roundtrip.ListWrapper[0]);
+                        Assert.Equal(obj.MyImmutableArray[0], roundtrip.MyImmutableArray[0]);
+                        Assert.Equal(obj.MyImmutableList[0], roundtrip.MyImmutableList[0]);
+                    }
+                }
+                else
+                {
+                    Assert.Null(obj.GetRawArray);
+                    Assert.Null(obj.GetRawList);
+                    Assert.Null(obj.GetRawListWrapper);
+                    Assert.Null(obj.GetRawImmutableList);
+                    Assert.Null(roundtrip.GetRawArray);
+                    Assert.Null(roundtrip.GetRawList);
+                    Assert.Null(roundtrip.GetRawListWrapper);
+                    Assert.Null(roundtrip.GetRawImmutableList);
+                    Assert.Equal(obj.GetRawImmutableArray, roundtrip.GetRawImmutableArray);
+                }
+            }
+
             const string inputJsonWithCollectionElements =
                 @"{
                     ""Array"":[""1""],
@@ -551,6 +598,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(1, obj.MyImmutableList.Count);
             Assert.Equal("5", obj.MyImmutableList[0]);
 
+            TestRoundTrip(obj);
+
             const string inputJsonWithoutCollectionElements =
                 @"{
                     ""Array"":[],
@@ -566,6 +615,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, obj.ListWrapper.Count);
             Assert.Equal(0, obj.MyImmutableArray.Length);
             Assert.Equal(0, obj.MyImmutableList.Count);
+            TestRoundTrip(obj);
 
             // Skip ImmutableArray due to https://github.com/dotnet/corefx/issues/42399.
             const string inputJsonWithNullCollections =
@@ -577,10 +627,7 @@ namespace System.Text.Json.Serialization.Tests
                 }";
 
             obj = JsonSerializer.Deserialize<ClassWithNonNullEnumerableGetters>(inputJsonWithNullCollections);
-            Assert.Null(obj.GetRawArray);
-            Assert.Null(obj.GetRawList);
-            Assert.Null(obj.GetRawListWrapper);
-            Assert.Null(obj.GetRawImmutableList);
+            TestRoundTrip(obj);
         }
     }
 }
