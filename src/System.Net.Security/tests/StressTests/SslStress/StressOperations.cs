@@ -269,7 +269,7 @@ namespace SslStress
                 DataSegment chunk = serializer.Deserialize(buffer);
                 try
                 {
-                    await serializer.SerializeAsync(sslStream, chunk);
+                    await serializer.SerializeAsync(sslStream, chunk, token: token);
                     sslStream.WriteByte((byte)'\n');
                     await sslStream.FlushAsync(token);
                 }
