@@ -64,7 +64,6 @@ namespace SslStress
         public async ValueTask StopAsync()
         {
             _cts.Cancel();
-            _listener.Stop();
             await _serverTask.Value;
         }
 
@@ -79,11 +78,18 @@ namespace SslStress
 
         public ValueTask DisposeAsync() => StopAsync();
 
-        private Task StartCore()
+        private async Task StartCore()
         {
             _listener.Start();
             IEnumerable<Task> workers = Enumerable.Range(1, _config.MaxConnections).Select(_ => RunSingleWorker());
-            return Task.WhenAll(workers);
+            try
+            {
+                await Task.WhenAll(workers);
+            }
+            finally
+            {
+                _listener.Stop();
+            }
 
             async Task RunSingleWorker()
             {
@@ -91,7 +97,7 @@ namespace SslStress
                 {
                     try
                     {
-                        using TcpClient client = await _listener.AcceptTcpClientAsync();
+                        using TcpClient client = await AcceptTcpClientAsync(_cts.Token);
                         using SslStream stream = await EstablishSslStream(client.GetStream(), _cts.Token);
                         await HandleConnection(stream, client, _cts.Token);
                     }
@@ -110,6 +116,22 @@ namespace SslStress
                         }
                     }
                 }
+            }
+
+            async Task<TcpClient> AcceptTcpClientAsync(CancellationToken token)
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    if (_listener.Pending())
+                    {
+                        return await _listener.AcceptTcpClientAsync();
+                    }
+
+                    await Task.Delay(20);
+                }
+
+                token.ThrowIfCancellationRequested();
+                throw new Exception("internal error");
             }
         }
 
