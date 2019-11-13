@@ -478,7 +478,6 @@ namespace System.Data.OleDb
             IntPtr chapter = SafeNativeMethods.InterlockedExchangePointer(ADP.IntPtrOffset(buffer, valueOffset), ADP.PtrZero);
             if (ODB.DB_NULL_HCHAPTER != chapter)
             {
-                int refCount;
                 chapteredRowset.ReleaseChapter(chapter, out _);
             }
         }
