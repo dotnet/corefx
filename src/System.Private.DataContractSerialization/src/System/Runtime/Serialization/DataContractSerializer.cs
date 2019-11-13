@@ -43,7 +43,7 @@ namespace System.Runtime.Serialization
             {
                 if (_optionAlreadySet)
                 {
-                    throw new InvalidOperationException(SR.CanOnlySetOnce);
+                    throw new InvalidOperationException(SR.CannotSetTwice);
                 }
                 _optionAlreadySet = true;
                 _option = value;

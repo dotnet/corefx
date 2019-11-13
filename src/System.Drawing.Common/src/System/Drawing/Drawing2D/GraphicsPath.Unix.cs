@@ -185,7 +185,7 @@ namespace System.Drawing.Drawing2D
                 int status = Gdip.GdipGetPointCount(_nativePath, out count);
                 Gdip.CheckStatus(status);
                 if (count == 0)
-                    throw new ArgumentException(nameof(PathPoints));
+                    throw new ArgumentException("PathPoints");
 
                 PointF[] points = new PointF[count];
                 status = Gdip.GdipGetPathPoints(_nativePath, points, count);
@@ -203,7 +203,7 @@ namespace System.Drawing.Drawing2D
                 int status = Gdip.GdipGetPointCount(_nativePath, out count);
                 Gdip.CheckStatus(status);
                 if (count == 0)
-                    throw new ArgumentException(nameof(PathTypes));
+                    throw new ArgumentException("PathTypes");
 
                 byte[] types = new byte[count];
                 status = Gdip.GdipGetPathTypes(_nativePath, types, count);

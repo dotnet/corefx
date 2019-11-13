@@ -749,7 +749,7 @@ namespace System.Numerics.Tensors
                 }
                 if (array.Length < index + Length)
                 {
-                    throw new ArgumentException(SR.NumberGreaterThenAvaliableSpace, nameof(array));
+                    throw new ArgumentException(SR.NumberGreaterThenAvailableSpace, nameof(array));
                 }
 
                 for (int i = 0; i < length; i++)
@@ -892,7 +892,7 @@ namespace System.Numerics.Tensors
             }
             if (array.Length < arrayIndex + Length)
             {
-                throw new ArgumentException(SR.NumberGreaterThenAvaliableSpace, nameof(array));
+                throw new ArgumentException(SR.NumberGreaterThenAvailableSpace, nameof(array));
             }
 
             for (int i = 0; i < length; i++)
@@ -994,7 +994,7 @@ namespace System.Numerics.Tensors
             {
                 if (dimensions[i] != other.dimensions[i])
                 {
-                    throw new ArgumentException(SR.Format(SR.CannotCompareWithDifferningDimension, nameof(Tensor<T>), i, dimensions[i], other.dimensions[i]), nameof(other));
+                    throw new ArgumentException(SR.Format(SR.CannotCompareWithDifferentDimension, nameof(Tensor<T>), i, dimensions[i], other.dimensions[i]), nameof(other));
                 }
             }
 
@@ -1040,7 +1040,7 @@ namespace System.Numerics.Tensors
                 var otherDimension = other.GetLength(i);
                 if (dimensions[i] != otherDimension)
                 {
-                    throw new ArgumentException(SR.Format(SR.CannotCompareToWithDifferningDimension, nameof(Tensor<T>), nameof(Array), i, dimensions[i], otherDimension), nameof(other));
+                    throw new ArgumentException(SR.Format(SR.CannotCompareToWithDifferentDimension, nameof(Tensor<T>), nameof(Array), i, dimensions[i], otherDimension), nameof(other));
                 }
             }
 
@@ -1096,7 +1096,7 @@ namespace System.Numerics.Tensors
             {
                 if (dimensions[i] != other.dimensions[i])
                 {
-                    throw new ArgumentException(SR.Format(SR.CannotCompareWithDifferningDimension, nameof(Tensor<T>), i, dimensions[i], other.dimensions[i]), nameof(other));
+                    throw new ArgumentException(SR.Format(SR.CannotCompareWithDifferentDimension, nameof(Tensor<T>), i, dimensions[i], other.dimensions[i]), nameof(other));
                 }
             }
 
@@ -1139,7 +1139,7 @@ namespace System.Numerics.Tensors
                 var otherDimension = other.GetLength(i);
                 if (dimensions[i] != otherDimension)
                 {
-                    throw new ArgumentException(SR.Format(SR.CannotCompareToWithDifferningDimension, nameof(Tensor<T>), nameof(Array), i, dimensions[i], otherDimension), nameof(other));
+                    throw new ArgumentException(SR.Format(SR.CannotCompareToWithDifferentDimension, nameof(Tensor<T>), nameof(Array), i, dimensions[i], otherDimension), nameof(other));
                 }
             }
 

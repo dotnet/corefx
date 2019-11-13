@@ -72,7 +72,7 @@ namespace System.Numerics.Tensors
 
             if (Length != memory.Length)
             {
-                throw new ArgumentException(SR.Format(SR.LenghtMustMatch, nameof(memory), memory.Length, nameof(dimensions), Length));
+                throw new ArgumentException(SR.Format(SR.LengthMustMatch, nameof(memory), memory.Length, nameof(dimensions), Length));
             }
         }
 
@@ -109,7 +109,7 @@ namespace System.Numerics.Tensors
             }
             if (array.Length < arrayIndex + Length)
             {
-                throw new ArgumentException(SR.NumberGreaterThenAvaliableSpace, nameof(array));
+                throw new ArgumentException(SR.NumberGreaterThenAvailableSpace, nameof(array));
             }
 
             Buffer.Span.CopyTo(array.AsSpan(arrayIndex));

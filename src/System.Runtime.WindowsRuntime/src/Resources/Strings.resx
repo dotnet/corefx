@@ -339,6 +339,6 @@
     <value>Windows Runtime (WinRT) is not supported on this platform.</value>
   </data>
   <data name="InvalidAction" xml:space="preserve">
-    <value>Invalid action value: {0}</value>
+    <value>Invalid action value: '{0}'.</value>
   </data>
 </root>
