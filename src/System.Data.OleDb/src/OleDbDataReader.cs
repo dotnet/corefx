@@ -1166,7 +1166,7 @@ namespace System.Data.OleDb
             {
                 throw ADP.ArgumentNull("values");
             }
-            _ = DoValueCheck(0);
+            DoValueCheck(0);
             int count = Math.Min(values.Length, _visibleFieldCount);
             for (int i = 0; (i < _metadata.Length) && (i < count); ++i)
             {
