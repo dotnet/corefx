@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 
@@ -18,7 +17,10 @@ namespace System.Text.Json
     {
         private static void HandleStartObject(JsonSerializerOptions options, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingDictionaryOrIDictionaryConstructible());
+            Debug.Assert(!state.Current.IsProcessingDictionary());
+
+            // Note: unless we are a root object, we are going to push a property onto the ReadStack
+            // in the if/else if check below.
 
             if (state.Current.IsProcessingEnumerable())
             {
@@ -57,7 +59,14 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    // A nested object within an enumerable.
+                    // A nested object within an enumerable (non-dictionary).
+
+                    if (!state.Current.CollectionPropertyInitialized)
+                    {
+                        // We have bad JSON: enumerable element appeared without preceding StartArray token.
+                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonPropertyInfo.DeclaredPropertyType);
+                    }
+
                     Type objType = state.Current.GetElementType();
                     state.Push();
                     state.Current.Initialize(objType, options);
@@ -65,7 +74,9 @@ namespace System.Text.Json
             }
             else if (state.Current.JsonPropertyInfo != null)
             {
-                // Nested object.
+                // Nested object within an object.
+                Debug.Assert(state.Current.IsProcessingObject(ClassType.Object));
+
                 Type objType = state.Current.JsonPropertyInfo.RuntimePropertyType;
                 state.Push();
                 state.Current.Initialize(objType, options);
@@ -73,34 +84,39 @@ namespace System.Text.Json
 
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
-            if (classInfo.CreateObject is null && classInfo.ClassType == ClassType.Object)
+            if (state.Current.IsProcessingObject(ClassType.Dictionary))
             {
-                if (classInfo.Type.IsInterface)
-                {
-                    ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(classInfo.Type);
-                }
-                else
-                {
-                    ThrowHelper.ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(classInfo.Type);
-                }
-            }
+                object value = ReadStackFrame.CreateDictionaryValue(ref state);
 
-            if (state.Current.IsProcessingIDictionaryConstructible())
+                // If value is not null, then we don't have a converter so apply the value.
+                if (value != null)
+                {
+                    state.Current.ReturnValue = value;
+                    state.Current.DetermineIfDictionaryCanBePopulated(state.Current.ReturnValue);
+                }
+
+                state.Current.CollectionPropertyInitialized = true;
+            }
+            else if (state.Current.IsProcessingObject(ClassType.Object))
             {
-                state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
+                if (classInfo.CreateObject == null)
+                {
+                    ThrowHelper.ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(classInfo.Type);
+                }
+
+                state.Current.ReturnValue = classInfo.CreateObject();
             }
             else
             {
-                state.Current.ReturnValue = classInfo.CreateObject();
+                // Only dictionaries or objects are valid given the `StartObject` token.
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type);
             }
         }
 
         private static void HandleEndObject(ref ReadStack state)
         {
             // Only allow dictionaries to be processed here if this is the DataExtensionProperty or a reference object evaluated as null and is now finishing the dictionary object.
-            Debug.Assert(
-                (!state.Current.IsProcessingDictionary() || (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo || state.Current.ShouldHandleReference)) &&
-                !state.Current.IsProcessingIDictionaryConstructible());
+            Debug.Assert(!state.Current.IsProcessingDictionary() || state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo || state.Current.ShouldHandleReference);
 
             // Check if we are trying to build the sorted cache.
             if (state.Current.PropertyRefCache != null)
@@ -133,6 +149,7 @@ namespace System.Text.Json
             else
             {
                 state.Pop();
+
                 ApplyObjectToEnumerable(value, ref state);
             }
         }

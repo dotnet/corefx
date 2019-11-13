@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
 using Xunit.Sdk;
+using Xunit.Abstractions;
 
 namespace System.IO.Tests
 {
@@ -57,17 +58,32 @@ namespace System.IO.Tests
         /// Watches the Created WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Created event is thrown by the watcher.
         /// </summary>
-        public static (AutoResetEvent EventOccured, FileSystemEventHandler Handler) WatchCreated(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent EventOccured, FileSystemEventHandler Handler) WatchCreated(FileSystemWatcher watcher, string[] expectedPaths = null, ITestOutputHelper _output = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
             FileSystemEventHandler handler = (o, e) =>
             {
+                if (e.ChangeType != WatcherChangeTypes.Created)
+                {
+                    _output?.WriteLine("Unexpected event {0} while waiting for {1}", e.ChangeType, WatcherChangeTypes.Created);
+                    Assert.Equal(WatcherChangeTypes.Created, e.ChangeType);
+                }
+
                 Assert.Equal(WatcherChangeTypes.Created, e.ChangeType);
                 if (expectedPaths != null)
                 {
-                    Assert.Contains(Path.GetFullPath(e.FullPath), expectedPaths);
+                    try
+                    {
+                        Assert.Contains(Path.GetFullPath(e.FullPath), expectedPaths);
+                    }
+                    catch (Exception ex)
+                    {
+                        _output?.WriteLine(ex.ToString());
+                        throw;
+                    }
                 }
+
                 eventOccurred.Set();
             };
 
@@ -79,15 +95,28 @@ namespace System.IO.Tests
         /// Watches the Renamed WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Renamed event is thrown by the watcher.
         /// </summary>
-        public static (AutoResetEvent EventOccured, FileSystemEventHandler Handler) WatchDeleted(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent EventOccured, FileSystemEventHandler Handler) WatchDeleted(FileSystemWatcher watcher, string[] expectedPaths = null, ITestOutputHelper _output = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
             FileSystemEventHandler handler = (o, e) =>
             {
-                Assert.Equal(WatcherChangeTypes.Deleted, e.ChangeType);
+                if (e.ChangeType != WatcherChangeTypes.Deleted)
+                {
+                    _output?.WriteLine("Unexpected event {0} while waiting for {1}", e.ChangeType, WatcherChangeTypes.Deleted);
+                    Assert.Equal(WatcherChangeTypes.Deleted, e.ChangeType);
+                }
+
                 if (expectedPaths != null)
                 {
-                    Assert.Contains(Path.GetFullPath(e.FullPath), expectedPaths);
+                    try
+                    {
+                        Assert.Contains(Path.GetFullPath(e.FullPath), expectedPaths);
+                    }
+                    catch (Exception ex)
+                    {
+                        _output?.WriteLine(ex.ToString());
+                        throw;
+                    }
                 }
                 eventOccurred.Set();
             };
@@ -100,16 +129,29 @@ namespace System.IO.Tests
         /// Watches the Renamed WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Renamed event is thrown by the watcher.
         /// </summary>
-        public static (AutoResetEvent EventOccured, RenamedEventHandler Handler) WatchRenamed(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent EventOccured, RenamedEventHandler Handler) WatchRenamed(FileSystemWatcher watcher, string[] expectedPaths = null, ITestOutputHelper _output = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
             RenamedEventHandler handler = (o, e) =>
             {
-                Assert.Equal(WatcherChangeTypes.Renamed, e.ChangeType);
+                if (e.ChangeType != WatcherChangeTypes.Renamed)
+                {
+                    _output?.WriteLine("Unexpected event {0} while waiting for {1}", e.ChangeType, WatcherChangeTypes.Renamed);
+                    Assert.Equal(WatcherChangeTypes.Renamed, e.ChangeType);
+                }
+
                 if (expectedPaths != null)
                 {
-                    Assert.Contains(Path.GetFullPath(e.FullPath), expectedPaths);
+                    try
+                    {
+                        Assert.Contains(Path.GetFullPath(e.FullPath), expectedPaths);
+                    }
+                    catch (Exception ex)
+                    {
+                        _output?.WriteLine(ex.ToString());
+                        throw;
+                    }
                 }
                 eventOccurred.Set();
             };
@@ -490,6 +532,82 @@ namespace System.IO.Tests
             }
 
             return newWatcher;
+        }
+
+        internal readonly struct FiredEvent
+        {
+            public FiredEvent(WatcherChangeTypes eventType, string dir1, string dir2 = "") => (EventType, Dir1, Dir2) = (eventType, dir1, dir2);
+
+            public readonly WatcherChangeTypes EventType;
+            public readonly string Dir1;
+            public readonly string Dir2;
+
+            public override bool Equals(object obj) => obj is FiredEvent evt && Equals(evt);
+
+            public bool Equals(FiredEvent other) => EventType == other.EventType &&
+                Dir1 == other.Dir1 &&
+                Dir2 == other.Dir2;
+
+
+            public override int GetHashCode() => EventType.GetHashCode() ^ Dir1.GetHashCode() ^ Dir2.GetHashCode();
+
+            public override string ToString() => $"{EventType} {Dir1} {Dir2}";
+
+        }
+
+        // Observe until an expected count of events is triggered, otherwise fail. Return all collected events.
+        internal static List<FiredEvent> ExpectEvents(FileSystemWatcher watcher, int expectedEvents, Action action)
+        {
+            using var eventsOccured = new AutoResetEvent(false);
+            var eventsOrrures = 0;
+
+            var events = new List<FiredEvent>();
+
+            ErrorEventArgs error = null;
+
+            FileSystemEventHandler fileWatcherEvent = (_, e) => AddEvent(e.ChangeType, e.FullPath);
+            RenamedEventHandler renameWatcherEvent = (_, e) => AddEvent(e.ChangeType, e.FullPath, e.OldFullPath);
+            ErrorEventHandler errorHandler = (_, e) => error ??= e ?? new ErrorEventArgs(null);
+
+            watcher.Changed += fileWatcherEvent;
+            watcher.Created += fileWatcherEvent;
+            watcher.Deleted += fileWatcherEvent;
+            watcher.Renamed += renameWatcherEvent;
+            watcher.Error += errorHandler;
+
+            bool raisingEvent = watcher.EnableRaisingEvents;
+            watcher.EnableRaisingEvents = true;
+
+            try
+            {
+                action();
+                eventsOccured.WaitOne(new TimeSpan(0, 0, 5));
+            }
+            finally
+            {
+                watcher.Changed -= fileWatcherEvent;
+                watcher.Created -= fileWatcherEvent;
+                watcher.Deleted -= fileWatcherEvent;
+                watcher.Renamed -= renameWatcherEvent;
+                watcher.Error -= errorHandler;
+                watcher.EnableRaisingEvents = raisingEvent;
+            }
+
+            if (error != null)
+            {
+                Assert.False(true, $"Filewatcher error event triggered: { error.GetException()?.Message ?? "Unknow error" }");
+            }
+
+            return events;
+
+            void AddEvent(WatcherChangeTypes eventType, string dir1, string dir2 = "")
+            {
+                events.Add(new FiredEvent(eventType, dir1, dir2));
+                if (Interlocked.Increment(ref eventsOrrures) == expectedEvents)
+                {
+                    eventsOccured.Set();
+                }
+            }
         }
     }
 }

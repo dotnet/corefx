@@ -214,7 +214,6 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(false, 10, 1024)]
         [InlineData(true, 10, 1024)]
-        [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
         public async Task NamedPipeViaFileStream_AllDataCopied(bool useAsync, int writeSize, int numWrites)
         {
             long totalLength = writeSize * numWrites;
@@ -238,7 +237,7 @@ namespace System.IO.Tests
                 });
 
                 Assert.True(WaitNamedPipeW(@"\\.\pipe\" + name, -1));
-                using (SafeFileHandle clientHandle = CreateFileW(@"\\.\pipe\" + name, GENERIC_READ, FileShare.None, IntPtr.Zero, FileMode.Open, (int)pipeOptions, IntPtr.Zero))
+                using (SafeFileHandle clientHandle = CreateFileW(@"\\.\pipe\" + name, Interop.Kernel32.GenericOperations.GENERIC_READ, FileShare.None, IntPtr.Zero, FileMode.Open, (int)pipeOptions, IntPtr.Zero))
                 using (var client = new FileStream(clientHandle, FileAccess.Read, bufferSize: 3, isAsync: useAsync))
                 {
                     Task copyTask = client.CopyToAsync(results, (int)totalLength);
@@ -253,7 +252,6 @@ namespace System.IO.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)] // Uses P/Invokes to create async pipe handle
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Out of current directory operation.")]
         [Fact]
         public async Task NamedPipeViaFileStream_CancellationRequested_OperationCanceled()
         {
@@ -263,7 +261,7 @@ namespace System.IO.Tests
                 Task serverTask = server.WaitForConnectionAsync();
 
                 Assert.True(WaitNamedPipeW(@"\\.\pipe\" + name, -1));
-                using (SafeFileHandle clientHandle = CreateFileW(@"\\.\pipe\" + name, GENERIC_READ, FileShare.None, IntPtr.Zero, FileMode.Open, (int)PipeOptions.Asynchronous, IntPtr.Zero))
+                using (SafeFileHandle clientHandle = CreateFileW(@"\\.\pipe\" + name, Interop.Kernel32.GenericOperations.GENERIC_READ, FileShare.None, IntPtr.Zero, FileMode.Open, (int)PipeOptions.Asynchronous, IntPtr.Zero))
                 using (var client = new FileStream(clientHandle, FileAccess.Read, bufferSize: 3, isAsync: true))
                 {
                     await serverTask;
@@ -329,7 +327,6 @@ namespace System.IO.Tests
             string lpFileName, int dwDesiredAccess, FileShare dwShareMode,
             IntPtr securityAttrs, FileMode dwCreationDisposition, int dwFlagsAndAttributes, IntPtr hTemplateFile);
 
-        internal const int GENERIC_READ = unchecked((int)0x80000000);
         #endregion
     }
 }

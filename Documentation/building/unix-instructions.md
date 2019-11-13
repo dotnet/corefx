@@ -1,5 +1,6 @@
-Building CoreFX on FreeBSD, Linux and OS X
+Building CoreFX on Linux and OS X
 ==========================================
+
 ## Building
 
 1. Install the prerequisites ([Linux](#user-content-linux), [macOS](#user-content-macos))
@@ -30,17 +31,16 @@ For Ubuntu 14.04, the following packages should be installed to build the native
 components
 
 * git
-* clang-3.9
+* clang-9
 * cmake
 * make
 * libc6-dev
 * libssl-dev
 * libkrb5-dev
-* libcurl4-openssl-dev
 * zlib1g-dev
 
-`sudo apt-get install git clang-3.9 cmake make libc6-dev libssl-dev libkrb5-dev
-libcurl4-openssl-dev zlib1g-dev`
+`sudo apt-get install git clang-9 cmake make libc6-dev libssl-dev libkrb5-dev
+zlib1g-dev`
 
 #### Managed build
 
@@ -130,3 +130,8 @@ If you see errors along the lines of `SendFailure (Error writing headers)` you m
 mozroots --import --sync
 ```
 
+---
+
+## FreeBSD
+
+Build instructions for FreeBSD can be found [here](freebsd-instructions.md).

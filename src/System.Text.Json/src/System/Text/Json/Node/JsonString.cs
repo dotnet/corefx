@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Buffers;
+using System.Diagnostics;
 
 namespace System.Text.Json
 {
@@ -46,7 +48,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentOutOfRangeException">
         ///   The date and time is outside the range of dates supported by the calendar used by the invariant culture.
         /// </exception>
-        public JsonString(DateTime value) => Value = value.ToString("s", CultureInfo.InvariantCulture);
+        public JsonString(DateTime value) => Value = JsonHelpers.FormatDateTime(value);
 
         /// <summary>
         ///  Initializes a new instance of the <see cref="JsonString"/> with an ISO 8601 representation of the <see cref="DateTimeOffset"/> structure.
@@ -55,7 +57,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentOutOfRangeException">
         ///   The date and time is outside the range of dates supported by the calendar used by the invariant culture.
         /// </exception>
-        public JsonString(DateTimeOffset value) => Value = value.ToString("s", CultureInfo.InvariantCulture);
+        public JsonString(DateTimeOffset value) => Value = JsonHelpers.FormatDateTimeOffset(value);
 
         /// <summary>
         ///   Gets or sets the text value represented by the instance.
@@ -82,7 +84,7 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   Text value of this instance is not in an ISO 8601 defined DateTime format.
         /// </exception>
-        public DateTime GetDateTime() => DateTime.ParseExact(_value, "s", CultureInfo.InvariantCulture);
+        public DateTime GetDateTime() => JsonHelpers.TryParseAsISO(_value.AsSpan(), out DateTime value) ? value : throw new FormatException(SR.FormatDateTime);
 
         /// <summary>
         ///   Converts the ISO 8601 text value of this instance to <see cref="DateTimeOffset"/> equivalent.
@@ -91,7 +93,7 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   Text value of this instance is not in an ISO 8601 defined DateTimeOffset format.
         /// </exception>
-        public DateTimeOffset GetDateTimeOffset() => DateTimeOffset.ParseExact(_value, "s", CultureInfo.InvariantCulture);
+        public DateTimeOffset GetDateTimeOffset() => JsonHelpers.TryParseAsISO(_value.AsSpan(), out DateTimeOffset value) ? value : throw new FormatException(SR.FormatDateTimeOffset);
 
         /// <summary>
         ///   Converts the text value of this instance to its <see cref="Guid"/> equivalent.
@@ -114,7 +116,7 @@ namespace System.Text.Json
         ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetDateTime(out DateTime value) => DateTime.TryParseExact(_value, "s", CultureInfo.InvariantCulture, DateTimeStyles.None, out value);
+        public bool TryGetDateTime(out DateTime value) => JsonHelpers.TryParseAsISO(_value.AsSpan(), out value);
 
         /// <summary>
         ///   Converts the ISO 8601 text value of this instance to its <see cref="DateTimeOffset"/> equivalent.
@@ -128,7 +130,7 @@ namespace System.Text.Json
         ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetDateTimeOffset(out DateTimeOffset value) => DateTimeOffset.TryParseExact(_value, "s", CultureInfo.InvariantCulture, DateTimeStyles.None, out value);
+        public bool TryGetDateTimeOffset(out DateTimeOffset value) => JsonHelpers.TryParseAsISO(_value.AsSpan(), out value);
 
         /// <summary>
         ///   Converts the text value of this instance to its <see cref="Guid"/> equivalent.
@@ -208,5 +210,73 @@ namespace System.Text.Json
         ///   Returns <see cref="JsonValueKind.String"/>
         /// </summary>
         public override JsonValueKind ValueKind { get => JsonValueKind.String; }
+
+        /// <summary>
+        ///   Converts the text value of this instance, which should encode binary data as base-64 digits, to an equivalent 8-bit unsigned <see cref="byte"/> array.
+        ///   The return value indicates wether the conversion succeeded.
+        /// </summary>
+        /// <param name="value">
+        ///   When this method returns, contains the <see cref="byte"/> array equivalent of the text contained in this instance,
+        ///   if the conversion succeeded.
+        /// </param>
+        /// <returns>
+        ///   <see langword="true"/> if text was converted successfully; othwerwise returns <see langword="false"/>.
+        /// </returns>
+        internal bool TryGetBytesFromBase64(out byte[] value)
+        {
+            Debug.Assert(_value != null);
+
+            // Shortest length of a base-64 string is 4 characters.
+            if (_value.Length < 4)
+            {
+                value = default;
+                return false;
+            }
+
+#if BUILDING_INBOX_LIBRARY
+            // we decode string -> byte, so the resulting length will
+            // be /4 * 3 - padding. To be on the safe side, keep padding and slice later
+            int bufferSize = _value.Length / 4 * 3;
+
+            byte[] arrayToReturnToPool = null;
+            Span<byte> buffer = bufferSize <= JsonConstants.StackallocThreshold
+                ? stackalloc byte[JsonConstants.StackallocThreshold]
+                : arrayToReturnToPool = ArrayPool<byte>.Shared.Rent(bufferSize);
+            try
+            {
+                if (Convert.TryFromBase64String(_value, buffer, out int bytesWritten))
+                {
+                    buffer = buffer.Slice(0, bytesWritten);
+                    value = buffer.ToArray();
+                    return true;
+                }
+                else
+                {
+                    value = default;
+                    return false;
+                }
+            }
+            finally
+            {
+                if (arrayToReturnToPool != null)
+                {
+                    buffer.Clear();
+                    ArrayPool<byte>.Shared.Return(arrayToReturnToPool);
+                }
+            }
+
+#else
+            try
+            {
+                value = Convert.FromBase64String(_value);
+                return true;
+            }
+            catch (FormatException)
+            {
+                value = null;
+                return false;
+            }
+#endif
+        }
     }
 }

@@ -62,6 +62,40 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        public void DataNotFlushedOnCompleteWithException()
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes("Hello World");
+            var stream = new MemoryStream();
+            PipeWriter writer = PipeWriter.Create(stream, new StreamPipeWriterOptions(leaveOpen: true));
+
+            bytes.AsSpan().CopyTo(writer.GetSpan(bytes.Length));
+            writer.Advance(bytes.Length);
+
+            Assert.Equal(0, stream.Length);
+
+            writer.Complete(new Exception());
+
+            Assert.Equal(0, stream.Length);
+        }
+
+        [Fact]
+        public async Task DataNotFlushedOnCompleteAsyncWithException()
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes("Hello World");
+            var stream = new MemoryStream();
+            PipeWriter writer = PipeWriter.Create(stream, new StreamPipeWriterOptions(leaveOpen: true));
+
+            bytes.AsSpan().CopyTo(writer.GetSpan(bytes.Length));
+            writer.Advance(bytes.Length);
+
+            Assert.Equal(0, stream.Length);
+
+            await writer.CompleteAsync(new Exception());
+
+            Assert.Equal(0, stream.Length);
+        }
+
+        [Fact]
         public async Task CompleteAsyncDoesNotThrowObjectDisposedException()
         {
             byte[] bytes = Encoding.ASCII.GetBytes("Hello World");
@@ -573,7 +607,7 @@ namespace System.IO.Pipelines.Tests
                 throw new OperationCanceledException();
             }
 
-#if netcoreapp
+#if NETCOREAPP
             public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
             {
                 throw new OperationCanceledException();

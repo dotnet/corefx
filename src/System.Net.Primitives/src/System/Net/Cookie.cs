@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace System.Net
@@ -67,33 +67,9 @@ namespace System.Net
 
         private string m_domainKey = string.Empty; // Do not rename (binary serialization)
 
-        /*
-            TODO: #13607
-            VSO 449560
-            Reflecting on internal method won't work on AOT without rd.xml and DisableReflection
-            block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
-            public, this is a temporary workaround till that happens.
-        */
-#if uap
-        public
-#else
-        internal
-#endif
-        bool IsQuotedVersion = false;
+        internal bool IsQuotedVersion = false;
 
-        /*
-            TODO: #13607
-            VSO 449560
-            Reflecting on internal method won't work on AOT without rd.xml and DisableReflection
-            block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
-            public, this is a temporary workaround till that happens.
-        */
-#if uap
-        public
-#else
-        internal
-#endif
-        bool IsQuotedDomain = false;
+        internal bool IsQuotedDomain = false;
 
 #if DEBUG
         static Cookie()
@@ -102,10 +78,24 @@ namespace System.Net
         }
 #endif
 
+        // These PreserveDependency attributes are a workaround for https://github.com/dotnet/corefx/issues/13607.
+        // HttpListener uses the non-public ToServerString, which isn't used by anything else in this assembly,
+        // and which accesses other internals and can't be moved to HttpListener (at least not without incurring
+        // functional differences).  However, once we do our initial System.Net.Primitives build and ToServerString
+        // survives to it, we no longer want the PreserveDependencyAttribute to remain around, so that ToServerString
+        // can be trimmed out if the relevant functionality from HttpListener isn't used when performing whole-app
+        // analysis.  As such, when trimming System.Net.Primitives, we build the assembly with ILLinkKeepDepAttributes=false,
+        // such that when this assembly is compiled, ToServerString will remain but the PreserveDependency attributes
+        // will be removed.  This hack will need to be revisited if anything else in the assembly starts using
+        // PreserveDependencyAttribute.
+        // https://github.com/mono/linker/issues/802
+
+        [PreserveDependency("ToServerString")]
         public Cookie()
         {
         }
 
+        [PreserveDependency("ToServerString")] // Workaround for https://github.com/dotnet/corefx/issues/13607
         public Cookie(string name, string value)
         {
             Name = name;
@@ -241,20 +231,7 @@ namespace System.Net
                 }
             }
         }
-
-        /*
-            TODO: #13607
-            VSO 449560
-            Reflecting on internal method won't work on AOT without rd.xml and DisableReflection
-            block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
-            public, this is a temporary workaround till that happens.
-        */
-#if uap
-        public
-#else
-        internal
-#endif
-        bool InternalSetName(string value)
+        internal bool InternalSetName(string value)
         {
             if (string.IsNullOrEmpty(value) || value[0] == '$' || value.IndexOfAny(ReservedToName) != -1 || value[0] == ' ' || value[value.Length - 1] == ' ')
             {
@@ -286,19 +263,7 @@ namespace System.Net
             }
         }
 
-        /*
-            TODO: #13607
-            VSO 449560
-            Reflecting on internal method won't work on AOT without rd.xml and DisableReflection
-            block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
-            public, this is a temporary workaround till that happens.
-        */
-#if uap
-        public
-#else
-        internal
-#endif
-        Cookie Clone()
+        internal Cookie Clone()
         {
             Cookie clonedCookie = new Cookie(m_name, m_value);
 
@@ -703,33 +668,11 @@ namespace System.Net
             }
         }
 
-        /*
-            TODO: #13607
-            VSO 449560
-            Reflecting on internal method won't work on AOT without rd.xml and DisableReflection
-            block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
-            public, this is a temporary workaround till that happens.
-        */
-#if uap
-        public
-#else
-        internal
-#endif
-        CookieVariant Variant
+        internal CookieVariant Variant
         {
             get
             {
                 return m_cookieVariant;
-            }
-            set
-            {
-                // Only set by HttpListenerRequest::Cookies_get()
-                if (value != CookieVariant.Rfc2965)
-                {
-                    NetEventSource.Fail(this, $"value != Rfc2965:{value}");
-                }
-
-                m_cookieVariant = value;
             }
         }
 
@@ -844,19 +787,7 @@ namespace System.Net
             }
         }
 
-        /*
-            TODO: #13607
-            VSO 449560
-            Reflecting on internal method won't work on AOT without rd.xml and DisableReflection
-            block in toolchain.Networking team will be working on exposing methods from S.Net.Primitive
-            public, this is a temporary workaround till that happens.
-        */
-#if uap
-        public
-#else
-        internal
-#endif
-        string ToServerString()
+        internal string ToServerString()
         {
             string result = Name + EqualsLiteral + Value;
             if (m_comment != null && m_comment.Length > 0)

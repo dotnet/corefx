@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Security;
 using System.Net.Test.Common;
@@ -21,25 +23,11 @@ namespace System.Net.Http.Functional.Tests
     public abstract partial class HttpClientHandler_ServerCertificates_Test : HttpClientHandlerTestBase
     {
         private static bool ClientSupportsDHECipherSuites => (!PlatformDetection.IsWindows || PlatformDetection.IsWindows10Version1607OrGreater);
-        private bool BackendSupportsCustomCertificateHandlingAndClientSupportsDHECipherSuites =>
-            (BackendSupportsCustomCertificateHandling && ClientSupportsDHECipherSuites);
 
         public HttpClientHandler_ServerCertificates_Test(ITestOutputHelper output) : base(output) { }
 
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
-        public void Ctor_ExpectedDefaultPropertyValues_UapPlatform()
-        {
-            using (HttpClientHandler handler = CreateHttpClientHandler())
-            {
-                Assert.Null(handler.ServerCertificateCustomValidationCallback);
-                Assert.True(handler.CheckCertificateRevocationList);
-            }
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-        public void Ctor_ExpectedDefaultValues_NotUapPlatform()
+        public void Ctor_ExpectedDefaultValues()
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
@@ -86,16 +74,10 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP won't send requests through a custom proxy")]
         [OuterLoop("Uses external server")]
         [Fact]
         public async Task UseCallback_HaveCredsAndUseAuthenticatedCustomProxyAndPostToSecureServer_Success()
         {
-            if (!BackendSupportsCustomCertificateHandling)
-            {
-                return;
-            }
-
             if (IsWinHttpHandler && PlatformDetection.IsWindows7)
             {
                 // Issue #27612
@@ -134,16 +116,10 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP won't send requests through a custom proxy")]
         [OuterLoop("Uses external server")]
         [Fact]
         public async Task UseCallback_HaveNoCredsAndUseAuthenticatedCustomProxyAndPostToSecureServer_ProxyAuthenticationRequiredStatusCode()
         {
-            if (!BackendSupportsCustomCertificateHandling)
-            {
-                return;
-            }
-
             var options = new LoopbackProxyServer.Options
                 { AuthenticationSchemes = AuthenticationSchemes.Basic,
                   ConnectionCloseAfter407 = true
@@ -167,12 +143,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task UseCallback_NotSecureConnection_CallbackNotCalled()
         {
-            if (!BackendSupportsCustomCertificateHandling)
-            {
-                Console.WriteLine($"Skipping {nameof(UseCallback_NotSecureConnection_CallbackNotCalled)}()");
-                return;
-            }
-
             HttpClientHandler handler = CreateHttpClientHandler();
             using (HttpClient client = CreateHttpClient(handler))
             {
@@ -217,12 +187,6 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(UseCallback_ValidCertificate_ExpectedValuesDuringCallback_Urls))]
         public async Task UseCallback_ValidCertificate_ExpectedValuesDuringCallback(Configuration.Http.RemoteServer remoteServer, Uri url, bool checkRevocation)
         {
-            if (!BackendSupportsCustomCertificateHandling)
-            {
-                Console.WriteLine($"Skipping {nameof(UseCallback_ValidCertificate_ExpectedValuesDuringCallback)}({url}, {checkRevocation})");
-                return;
-            }
-
             HttpClientHandler handler = CreateHttpClientHandler();
             using (HttpClient client = CreateHttpClientForRemoteServer(remoteServer, handler))
             {
@@ -265,12 +229,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task UseCallback_CallbackReturnsFailure_ThrowsException()
         {
-            if (!BackendSupportsCustomCertificateHandling)
-            {
-                Console.WriteLine($"Skipping {nameof(UseCallback_CallbackReturnsFailure_ThrowsException)}()");
-                return;
-            }
-
             HttpClientHandler handler = CreateHttpClientHandler();
             using (HttpClient client = CreateHttpClient(handler))
             {
@@ -283,12 +241,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task UseCallback_CallbackThrowsException_ExceptionPropagatesAsBaseException()
         {
-            if (!BackendSupportsCustomCertificateHandling)
-            {
-                Console.WriteLine($"Skipping {nameof(UseCallback_CallbackThrowsException_ExceptionPropagatesAsBaseException)}()");
-                return;
-            }
-
             HttpClientHandler handler = CreateHttpClientHandler();
             using (HttpClient client = CreateHttpClient(handler))
             {
@@ -318,15 +270,10 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(41108)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP doesn't allow revocation checking to be turned off")]
         [OuterLoop("Uses external server")]
         [ConditionalFact(nameof(ClientSupportsDHECipherSuites))]
         public async Task NoCallback_RevokedCertificate_NoRevocationChecking_Succeeds()
         {
-            // On macOS (libcurl+darwinssl) we cannot turn revocation off.
-            // But we also can't realistically say that the default value for
-            // CheckCertificateRevocationList throws in the general case.
             try
             {
                 using (HttpClient client = CreateHttpClient())
@@ -337,7 +284,7 @@ namespace System.Net.Http.Functional.Tests
             }
             catch (HttpRequestException)
             {
-                if (UseSocketsHttpHandler || !ShouldSuppressRevocationException)
+                if (UseSocketsHttpHandler)
                     throw;
             }
         }
@@ -346,12 +293,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task NoCallback_RevokedCertificate_RevocationChecking_Fails()
         {
-            if (!BackendSupportsCustomCertificateHandling)
-            {
-                Console.WriteLine($"Skipping {nameof(NoCallback_RevokedCertificate_RevocationChecking_Fails)}()");
-                return;
-            }
-
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.CheckCertificateRevocationList = true;
             using (HttpClient client = CreateHttpClient(handler))
@@ -369,12 +310,6 @@ namespace System.Net.Http.Functional.Tests
 
         private async Task UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(string url, string useSocketsHttpHandlerString, string useHttp2String, SslPolicyErrors expectedErrors)
         {
-            if (!BackendSupportsCustomCertificateHandling)
-            {
-                Console.WriteLine($"Skipping {nameof(UseCallback_BadCertificate_ExpectedPolicyErrors)}({url}, {expectedErrors})");
-                return;
-            }
-
             HttpClientHandler handler = CreateHttpClientHandler(useSocketsHttpHandlerString, useHttp2String);
             using (HttpClient client = CreateHttpClient(handler, useHttp2String))
             {
@@ -399,7 +334,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(30054, TargetFrameworkMonikers.Uap)]
         [OuterLoop("Uses external server")]
         [Theory]
         [MemberData(nameof(CertificateValidationServersAndExpectedPolicies))]
@@ -407,33 +341,14 @@ namespace System.Net.Http.Functional.Tests
         {
             const int SEC_E_BUFFER_TOO_SMALL = unchecked((int)0x80090321);
 
-            if (!BackendSupportsCustomCertificateHandlingAndClientSupportsDHECipherSuites)
+            if (!ClientSupportsDHECipherSuites)
             {
                 return;
             }
 
             try
             {
-                if (PlatformDetection.IsUap)
-                {
-                    // UAP HTTP stack caches connections per-process. This causes interference when these tests run in
-                    // the same process as the other tests. Each test needs to be isolated to its own process.
-                    // See dicussion: https://github.com/dotnet/corefx/issues/21945
-                    RemoteExecutor.Invoke((remoteUrl, remoteExpectedErrors, useSocketsHttpHandlerString, useHttp2String) =>
-                    {
-                        UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(
-                            remoteUrl,
-                            useSocketsHttpHandlerString,
-                            useHttp2String,
-                            (SslPolicyErrors)Enum.Parse(typeof(SslPolicyErrors), remoteExpectedErrors)).Wait();
-
-                        return RemoteExecutor.SuccessExitCode;
-                    }, url, expectedErrors.ToString(), UseSocketsHttpHandler.ToString(), UseHttp2.ToString()).Dispose();
-                }
-                else
-                {
-                    await UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(url, UseSocketsHttpHandler.ToString(), UseHttp2.ToString(), expectedErrors);
-                }
+                await UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(url, UseSocketsHttpHandler.ToString(), UseHttp2.ToString(), expectedErrors);
             }
             catch (HttpRequestException e) when (e.InnerException?.GetType().Name == "WinHttpException" &&
                 e.InnerException.HResult == SEC_E_BUFFER_TOO_SMALL &&
@@ -441,42 +356,6 @@ namespace System.Net.Http.Functional.Tests
             {
                 // Testing on old Windows versions can hit https://github.com/dotnet/corefx/issues/7812
                 // Ignore SEC_E_BUFFER_TOO_SMALL error on such cases.
-            }
-        }
-
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task SSLBackendNotSupported_Callback_ThrowsPlatformNotSupportedException()
-        {
-            if (BackendSupportsCustomCertificateHandling)
-            {
-                return;
-            }
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.ServerCertificateCustomValidationCallback = delegate { return true; }; // Do not use TestHelper.AllowAllCertificates / HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-            using (HttpClient client = CreateHttpClient(handler))
-            {
-                await Assert.ThrowsAsync<PlatformNotSupportedException>(() => client.GetAsync(Configuration.Http.SecureRemoteEchoServer));
-            }
-        }
-
-        [OuterLoop("Uses external server")]
-        [Fact]
-        // For macOS the "custom handling" means that revocation can't be *disabled*. So this test does not apply.
-        [PlatformSpecific(~TestPlatforms.OSX)]
-        public async Task SSLBackendNotSupported_Revocation_ThrowsPlatformNotSupportedException()
-        {
-            if (BackendSupportsCustomCertificateHandling)
-            {
-                return;
-            }
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.CheckCertificateRevocationList = true;
-            using (HttpClient client = CreateHttpClient(handler))
-            {
-                await Assert.ThrowsAsync<PlatformNotSupportedException>(() => client.GetAsync(Configuration.Http.SecureRemoteEchoServer));
             }
         }
 
@@ -494,48 +373,57 @@ namespace System.Net.Http.Functional.Tests
 
                 // Validate the ChannelBinding object exists.
                 ChannelBinding channelBinding = content.ChannelBinding;
-                if (PlatformDetection.IsUap)
-                {
-                    // UAP currently doesn't expose channel binding information.
-                    Assert.Null(channelBinding);
-                }
-                else
-                {
-                    Assert.NotNull(channelBinding);
+                Assert.NotNull(channelBinding);
 
-                    // Validate the ChannelBinding's validity.
-                    if (BackendSupportsCustomCertificateHandling)
+                // Validate the ChannelBinding's validity.
+                Assert.False(channelBinding.IsInvalid, "Expected valid binding");
+                Assert.NotEqual(IntPtr.Zero, channelBinding.DangerousGetHandle());
+
+                // Validate the ChannelBinding's description.
+                string channelBindingDescription = channelBinding.ToString();
+                Assert.NotNull(channelBindingDescription);
+                Assert.NotEmpty(channelBindingDescription);
+                Assert.True((channelBindingDescription.Length + 1) % 3 == 0, $"Unexpected length {channelBindingDescription.Length}");
+                for (int i = 0; i < channelBindingDescription.Length; i++)
+                {
+                    char c = channelBindingDescription[i];
+                    if (i % 3 == 2)
                     {
-                        Assert.False(channelBinding.IsInvalid, "Expected valid binding");
-                        Assert.NotEqual(IntPtr.Zero, channelBinding.DangerousGetHandle());
-
-                        // Validate the ChannelBinding's description.
-                        string channelBindingDescription = channelBinding.ToString();
-                        Assert.NotNull(channelBindingDescription);
-                        Assert.NotEmpty(channelBindingDescription);
-                        Assert.True((channelBindingDescription.Length + 1) % 3 == 0, $"Unexpected length {channelBindingDescription.Length}");
-                        for (int i = 0; i < channelBindingDescription.Length; i++)
-                        {
-                            char c = channelBindingDescription[i];
-                            if (i % 3 == 2)
-                            {
-                                Assert.Equal(' ', c);
-                            }
-                            else
-                            {
-                                Assert.True((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F'), $"Expected hex, got {c}");
-                            }
-                        }
+                        Assert.Equal(' ', c);
                     }
                     else
                     {
-                        // Backend doesn't support getting the details to create the CBT.
-                        Assert.True(channelBinding.IsInvalid, "Expected invalid binding");
-                        Assert.Equal(IntPtr.Zero, channelBinding.DangerousGetHandle());
-                        Assert.Null(channelBinding.ToString());
+                        Assert.True((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F'), $"Expected hex, got {c}");
                     }
                 }
             }
+        }
+
+        [Fact]
+        [PlatformSpecific(~TestPlatforms.Linux)]
+        public void HttpClientUsesSslCertEnvironmentVariables()
+        {
+            // We set SSL_CERT_DIR and SSL_CERT_FILE to empty locations.
+            // The HttpClient should fail to validate the server certificate.
+
+            var psi = new ProcessStartInfo();
+            string sslCertDir = GetTestFilePath();
+            Directory.CreateDirectory(sslCertDir);
+            psi.Environment.Add("SSL_CERT_DIR", sslCertDir);
+
+            string sslCertFile = GetTestFilePath();
+            File.WriteAllText(sslCertFile, "");
+            psi.Environment.Add("SSL_CERT_FILE", sslCertFile);
+
+            RemoteExecutor.Invoke(async (useSocketsHttpHandlerString, useHttp2String) =>
+            {
+                const string Url = "https://www.microsoft.com";
+
+                using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString, useHttp2String))
+                {
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(Url));
+                }
+            }, UseSocketsHttpHandler.ToString(), UseHttp2.ToString(), new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
     }
 }

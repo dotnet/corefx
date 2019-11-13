@@ -365,31 +365,62 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-        // NOTE: LongInputString test is constrained to run on Windows and MacOSX because it causes
-        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
-        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
-        //       time the memory is accessed which triggers the full memory allocation.
+        private const long ArrayPoolMaxSizeBeforeUsingNormalAlloc = 1024 * 1024;
         private const int MaxExpansionFactorWhileTranscoding = 3;
-        private const int MaxArrayLengthBeforeCalculatingSize = int.MaxValue / 2 / MaxExpansionFactorWhileTranscoding;
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
-        [ConditionalTheory(nameof(IsX64))]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize - 3)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize - 2)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize - 1)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize + 1)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize + 2)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize + 3)]
-        [OuterLoop]
+        private const long Threshold = ArrayPoolMaxSizeBeforeUsingNormalAlloc / MaxExpansionFactorWhileTranscoding;
+
+        [Theory]
+        [InlineData(Threshold - 3)]
+        [InlineData(Threshold - 2)]
+        [InlineData(Threshold - 1)]
+        [InlineData(Threshold)]
+        [InlineData(Threshold + 1)]
+        [InlineData(Threshold + 2)]
+        [InlineData(Threshold + 3)]
         public static void LongInputString(int length)
         {
             // Verify boundary conditions in Deserialize() that inspect the size to determine allocation strategy.
-            string repeated = new string('x', length - 2);
-            string json = $"\"{repeated}\"";
-            Assert.Equal(length, json.Length);
+            DeserializeLongJsonString(length);
+        }
+
+        private const int MaxInt = int.MaxValue / MaxExpansionFactorWhileTranscoding;
+        private const int MaximumPossibleStringLength = int.MaxValue / 2 - 32;
+
+        // NOTE: VeryLongInputString test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.
+        [ConditionalTheory(nameof(IsX64))]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
+        [InlineData(MaxInt)]
+        [InlineData(MaximumPossibleStringLength)]
+        [OuterLoop]
+        public static void VeryLongInputString(int length)
+        {
+            // Verify that deserializer does not do any multiplication or addition on the string length
+            DeserializeLongJsonString(length);
+        }
+
+        private static void DeserializeLongJsonString(int stringLength)
+        {
+            string json;
+            char fillChar = 'x';
+
+#if BUILDING_INBOX_LIBRARY
+            json = string.Create(stringLength, fillChar, (chars, fillChar) =>
+            {
+                chars.Fill(fillChar);
+                chars[0] = '"';
+                chars[chars.Length - 1] = '"';
+            });
+#else
+            string repeated = new string(fillChar, stringLength - 2);
+            json = $"\"{repeated}\"";
+#endif
+            Assert.Equal(stringLength, json.Length);
 
             string str = JsonSerializer.Deserialize<string>(json);
-            Assert.Equal(repeated, str);
+            Assert.True(json.AsSpan(1, json.Length - 2).SequenceEqual(str.AsSpan()));
         }
     }
 }

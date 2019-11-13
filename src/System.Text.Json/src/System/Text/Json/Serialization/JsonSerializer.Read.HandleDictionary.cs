@@ -17,41 +17,45 @@ namespace System.Text.Json
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
             if (jsonPropertyInfo == null)
             {
-                jsonPropertyInfo = state.Current.JsonClassInfo.CreateRootObject(options);
+                jsonPropertyInfo = state.Current.JsonClassInfo.CreateRootProperty(options);
             }
 
             Debug.Assert(jsonPropertyInfo != null);
 
-            // A nested object or dictionary so push new frame.
+            // A nested object or dictionary, so push new frame.
             if (state.Current.CollectionPropertyInitialized)
             {
                 state.Push();
                 state.Current.JsonClassInfo = jsonPropertyInfo.ElementClassInfo;
                 state.Current.InitializeJsonPropertyInfo();
-                state.Current.CollectionPropertyInitialized = true;
-
-                ClassType classType = state.Current.JsonClassInfo.ClassType;
-                if (classType == ClassType.Value &&
-                    jsonPropertyInfo.ElementClassInfo.Type != typeof(object) &&
-                    jsonPropertyInfo.ElementClassInfo.Type != typeof(JsonElement))
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type);
-                }
 
                 JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
-                if (state.Current.IsProcessingIDictionaryConstructible())
+                if (state.Current.IsProcessingDictionary())
                 {
-                    state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
+                    object dictValue = ReadStackFrame.CreateDictionaryValue(ref state);
+
+                    // If value is not null, then we don't have a converter so apply the value.
+                    if (dictValue != null)
+                    {
+                        state.Current.ReturnValue = dictValue;
+                        state.Current.DetermineIfDictionaryCanBePopulated(state.Current.ReturnValue);
+                    }
+
+                    state.Current.CollectionPropertyInitialized = true;
                 }
-                else
+                else if (state.Current.IsProcessingObject(ClassType.Object))
                 {
                     if (classInfo.CreateObject == null)
                     {
-                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type);
-                        return;
+                        ThrowHelper.ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(classInfo.Type);
                     }
+
                     state.Current.ReturnValue = classInfo.CreateObject();
+                }
+                else
+                {
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type);
                 }
 
                 return;
@@ -59,25 +63,10 @@ namespace System.Text.Json
 
             state.Current.CollectionPropertyInitialized = true;
 
-            if (state.Current.IsProcessingIDictionaryConstructible())
+            object value = ReadStackFrame.CreateDictionaryValue(ref state);
+            if (value != null)
             {
-                JsonClassInfo dictionaryClassInfo;
-                if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
-                {
-                    dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
-                }
-                else
-                {
-                    dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.DeclaredPropertyType);
-                }
-
-                state.Current.TempDictionaryValues = (IDictionary)dictionaryClassInfo.CreateConcreteDictionary();
-            }
-            else
-            {
-                // Create the dictionary.
-                JsonClassInfo dictionaryClassInfo = jsonPropertyInfo.RuntimeClassInfo;
-                IDictionary value = (IDictionary)dictionaryClassInfo.CreateObject();
+                state.Current.DetermineIfDictionaryCanBePopulated(value);
 
                 if (value != null)
                 {
@@ -86,11 +75,12 @@ namespace System.Text.Json
                         // Special case: If the dictionary is a reference and the reference does not exist, avoid setting the value directly to ReturnValue in order to not write it when JsonIgnoreNull is set.
                         // In other words; delay setting the value.
                         state.Current.DictionaryCandidate = value;
+                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
                     }
                     else
                     {
                         // A dictionary is being returned directly, or a nested dictionary.
-                        state.Current.SetReturnValue(value);
+                        state.Current.ReturnValue = value;
                     }
                 }
             }
@@ -102,26 +92,28 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingProperty(ClassType.Dictionary))
             {
-                SetDictionaryCandidateAsValue(ref state);
-                // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
-                // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
-                // encountered here is from the outer object so forward to HandleEndObject().
-                if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
+                if (state.Current.TempDictionaryValues != null)
                 {
-                    HandleEndObject(ref state);
+                    JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options));
+                    state.Current.EndProperty();
                 }
                 else
                 {
-                    // We added the items to the dictionary already.
-                    state.Current.EndProperty();
+                    SetDictionaryCandidateAsValue(ref state);
+                    // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
+                    // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
+                    // encountered here is from the outer object so forward to HandleEndObject().
+                    if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
+                    {
+                        HandleEndObject(ref state);
+                    }
+                    else
+                    {
+                        // We added the items to the dictionary already.
+                        state.Current.EndProperty();
+                    }
                 }
-            }
-            else if (state.Current.IsProcessingProperty(ClassType.IDictionaryConstructible))
-            {
-                Debug.Assert(state.Current.TempDictionaryValues != null);
-                JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
-                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options));
-                state.Current.EndProperty();
             }
             else
             {

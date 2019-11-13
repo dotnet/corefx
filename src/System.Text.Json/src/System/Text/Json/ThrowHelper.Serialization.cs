@@ -131,11 +131,6 @@ namespace System.Text.Json
             throw new InvalidOperationException(SR.Format(SR.SerializerDictionaryKeyNull, policyType));
         }
 
-        public static void ThrowJsonException_DeserializeDataRemaining(long length, long bytesRemaining)
-        {
-            throw new JsonException(SR.Format(SR.DeserializeDataRemaining, length, bytesRemaining), path: null, lineNumber: null, bytePositionInLine: null);
-        }
-
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ReThrowWithPath(in ReadStack readStack, JsonReaderException ex)
         {
@@ -179,7 +174,6 @@ namespace System.Text.Json
 
             string message = ex.Message;
 
-            // If the message is empty or contains EmbedPathInfoFlag then append the Path, LineNumber and BytePositionInLine.
             if (string.IsNullOrEmpty(message))
             {
                 // Use a default message.
@@ -213,10 +207,10 @@ namespace System.Text.Json
             string path = writeStack.PropertyPath();
             ex.Path = path;
 
-            // If the message is empty, use a default message with the Path.
             string message = ex.Message;
             if (string.IsNullOrEmpty(message))
             {
+                // Use a default message.
                 message = SR.Format(SR.SerializeUnableToSerialize);
                 ex.AppendPathInformation = true;
             }
@@ -253,15 +247,16 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(Type invalidType)
+        public static void ThrowNotSupportedException_DeserializeCreateObjectDelegateIsNull(Type invalidType)
         {
-            throw new NotSupportedException(SR.Format(SR.DeserializeMissingParameterlessConstructor, invalidType));
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowInvalidOperationException_DeserializePolymorphicInterface(Type invalidType)
-        {
-            throw new NotSupportedException(SR.Format(SR.DeserializePolymorphicInterface, invalidType));
+            if (invalidType.IsInterface)
+            {
+                throw new NotSupportedException(SR.Format(SR.DeserializePolymorphicInterface, invalidType));
+            }
+            else
+            {
+                throw new NotSupportedException(SR.Format(SR.DeserializeMissingParameterlessConstructor, invalidType));
+            }
         }
     }
 }

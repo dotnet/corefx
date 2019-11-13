@@ -56,5 +56,10 @@ namespace System.Text.Json
         {
             return state.Current.IsProcessingProperty(ClassType.Dictionary) ? state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) : state.Current.ReturnValue;
         }
+
+        public override void GetDictionaryKeyAndValueFromGenericDictionary(ref WriteStackFrame writeStackFrame, out string key, out object value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

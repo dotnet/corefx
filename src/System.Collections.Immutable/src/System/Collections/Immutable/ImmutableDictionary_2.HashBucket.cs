@@ -186,7 +186,7 @@ namespace System.Collections.Immutable
                             result = OperationResult.NoChangeRequired;
                             return this;
                         case KeyCollisionBehavior.ThrowIfValueDifferent:
-#if !NETSTANDARD10
+#if !NETSTANDARD1_0
                             ref readonly var existingEntry = ref _additionalElements.ItemRef(keyCollisionIndex);
 #else
                             var existingEntry = _additionalElements[keyCollisionIndex];
@@ -227,7 +227,7 @@ namespace System.Collections.Immutable
                     if (_additionalElements.IsEmpty)
                     {
                         result = OperationResult.SizeChanged;
-                        return new HashBucket();
+                        return default;
                     }
                     else
                     {
@@ -281,7 +281,7 @@ namespace System.Collections.Immutable
                     return false;
                 }
 
-#if !NETSTANDARD10
+#if !NETSTANDARD1_0
                 value = _additionalElements.ItemRef(index).Value;
 #else
                 value = _additionalElements[index].Value;
@@ -324,7 +324,7 @@ namespace System.Collections.Immutable
                     return false;
                 }
 
-#if !NETSTANDARD10
+#if !NETSTANDARD1_0
                 actualKey = _additionalElements.ItemRef(index).Key;
 #else
                 actualKey = _additionalElements[index].Key;
