@@ -10,421 +10,197 @@ using Xunit;
 
 namespace System.Security.Cryptography.Algorithms.Tests
 {
-    public class HKDFTests
+    public abstract class HKDFTests
     {
+        protected abstract byte[] Extract(HashAlgorithmName hash, int prkLength, byte[] ikm, byte[] salt);
+        protected abstract byte[] Expand(HashAlgorithmName hash, byte[] prk, int outputLength, byte[] info);
+        protected abstract byte[] DeriveKey(HashAlgorithmName hash, byte[] ikm, int outputLength, byte[] salt, byte[] info);
+
         [Theory]
         [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869ExtractByteArrayTests(Rfc5869TestCase test)
+        public void Rfc5869ExtractTests(Rfc5869TestCase test)
         {
-            byte[] prk = HKDF.Extract(test.Hash, test.Ikm, test.Salt);
+            byte[] prk = Extract(test.Hash, test.Prk.Length, test.Ikm, test.Salt);
             Assert.Equal(test.Prk, prk);
         }
 
         [Theory]
         [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869ExtractByteArrayTamperHashTests(Rfc5869TestCase test)
+        public void Rfc5869ExtractTamperHashTests(Rfc5869TestCase test)
         {
-            byte[] prk = HKDF.Extract(HashAlgorithmName.MD5, test.Ikm, test.Salt);
+            byte[] prk = Extract(HashAlgorithmName.MD5, 128 / 8, test.Ikm, test.Salt);
             Assert.NotEqual(test.Prk, prk);
         }
 
         [Theory]
         [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869ExtractByteArrayTamperIkmTests(Rfc5869TestCase test)
+        public void Rfc5869ExtractTamperIkmTests(Rfc5869TestCase test)
         {
-            test.Ikm[0] ^= 1;
-            byte[] prk = HKDF.Extract(test.Hash, test.Ikm, test.Salt);
+            byte[] ikm = test.Ikm.ToArray();
+            ikm[0] ^= 1;
+            byte[] prk = Extract(test.Hash, test.Prk.Length, ikm, test.Salt);
             Assert.NotEqual(test.Prk, prk);
         }
 
         [Theory]
         [MemberData(nameof(GetRfc5869TestCasesWithNonEmptySalt))]
-        public void Rfc5869ExtractByteArrayTamperSaltTests(Rfc5869TestCase test)
+        public void Rfc5869ExtractTamperSaltTests(Rfc5869TestCase test)
         {
-            test.Salt[0] ^= 1;
-            byte[] prk = HKDF.Extract(test.Hash, test.Ikm, test.Salt);
+            byte[] salt = test.Salt.ToArray();
+            salt[0] ^= 1;
+            byte[] prk = Extract(test.Hash, test.Prk.Length, test.Ikm, salt);
             Assert.NotEqual(test.Prk, prk);
         }
 
         [Fact]
-        public void Rfc5869ExtractByteArrayDefaultHash()
+        public void Rfc5869ExtractDefaultHash()
         {
             byte[] ikm = new byte[20];
             byte[] salt = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.Extract(default(HashAlgorithmName), ikm, salt));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                "hashAlgorithmName",
+                () => Extract(default(HashAlgorithmName), 20, ikm, salt));
         }
 
         [Fact]
-        public void Rfc5869ExtractByteArrayNonsensicalHash()
+        public void Rfc5869ExtractNonsensicalHash()
         {
             byte[] ikm = new byte[20];
             byte[] salt = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.Extract(new HashAlgorithmName("foo"), ikm, salt));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                "hashAlgorithmName",
+                () => Extract(new HashAlgorithmName("foo"), 20, ikm, salt));
         }
 
         [Fact]
-        public void Rfc5869ExtractByteArrayNullIkm()
-        {
-            byte[] salt = new byte[20];
-            Assert.Throws<ArgumentNullException>(() => HKDF.Extract(HashAlgorithmName.SHA1, null, salt));
-        }
-
-        [Fact]
-        public void Rfc5869ExtractByteArrayEmptyIkm()
+        public void Rfc5869ExtractEmptyIkm()
         {
             byte[] salt = new byte[20];
             byte[] ikm = Array.Empty<byte>();
 
             // Ensure does not throw
-            byte[] prk = HKDF.Extract(HashAlgorithmName.SHA1, ikm, salt);
-            Assert.Equal("FBDB1D1B18AA6C08324B7D64B71FB76370690E1D".HexToByteArray(), prk);
-        }
-
-        [Theory]
-        [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869ExtractSpanTests(Rfc5869TestCase test)
-        {
-            byte[] prk = new byte[test.Prk.Length];
-            Assert.Equal(test.Prk.Length, HKDF.Extract(test.Hash, test.Ikm, test.Salt, prk));
-            Assert.Equal(test.Prk, prk);
-        }
-
-        [Theory]
-        [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869ExtractSpanTamperIkmTests(Rfc5869TestCase test)
-        {
-            test.Ikm[0] ^= 1;
-            byte[] prk = new byte[test.Prk.Length];
-            HKDF.Extract(test.Hash, test.Ikm, test.Salt, prk);
-            Assert.NotEqual(test.Prk, prk);
-        }
-
-        [Theory]
-        [MemberData(nameof(GetRfc5869TestCasesWithNonEmptySalt))]
-        public void Rfc5869ExtractSpanTamperSaltTests(Rfc5869TestCase test)
-        {
-            test.Salt[0] ^= 1;
-            byte[] prk = new byte[test.Prk.Length];
-            HKDF.Extract(test.Hash, test.Ikm, test.Salt, prk);
-            Assert.NotEqual(test.Prk, prk);
+            byte[] prk = Extract(HashAlgorithmName.SHA1, 20, ikm, salt);
+            Assert.Equal("FBDB1D1B18AA6C08324B7D64B71FB76370690E1D", prk.ByteArrayToHex());
         }
 
         [Fact]
-        public void Rfc5869ExtractSpanDefaultHash()
+        public void Rfc5869ExtractEmptySalt()
         {
-            byte[] prk = new byte[20];
-            byte[] ikm = new byte[20];
-            byte[] salt = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.Extract(default(HashAlgorithmName), ikm, salt, prk));
-        }
-
-        [Fact]
-        public void Rfc5869ExtractSpanNonsensicalHash()
-        {
-            byte[] prk = new byte[20];
-            byte[] ikm = new byte[20];
-            byte[] salt = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.Extract(new HashAlgorithmName("foo"), ikm, salt, prk));
-        }
-
-        [Fact]
-        public void Rfc5869ExtractSpanEmptyIkm()
-        {
-            byte[] prk = new byte[20];
-            byte[] ikm = Array.Empty<byte>();
-            byte[] salt = new byte[20];
-            Assert.Equal(20, HKDF.Extract(HashAlgorithmName.SHA1, ikm, salt, prk));
-            Assert.Equal("FBDB1D1B18AA6C08324B7D64B71FB76370690E1D".HexToByteArray(), prk);
-        }
-
-        [Fact]
-        public void Rfc5869ExtractSpanEmptySalt()
-        {
-            byte[] prk = new byte[20];
             byte[] ikm = new byte[20];
             byte[] salt = Array.Empty<byte>();
-            Assert.Equal(20, HKDF.Extract(HashAlgorithmName.SHA1, ikm, salt, prk));
-            Assert.Equal("A3CBF4A40F51A53E046F07397E52DF9286AE93A2".HexToByteArray(), prk);
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(19)]
-        public void Rfc5869ExtractSpanPrkTooShort(int prkSize)
-        {
-            byte[] prk = new byte[prkSize];
-            byte[] ikm = new byte[20];
-            byte[] salt = new byte[20];
-            Assert.Throws<ArgumentException>(() => HKDF.Extract(HashAlgorithmName.SHA1, ikm, salt, prk));
-        }
-
-        [Fact]
-        public void Rfc5869ExtractSpanPrkTooLong()
-        {
-            byte[] prk = new byte[24];
-
-            for (int i = 0; i < 4; i++)
-            {
-                prk[20 + i] = (byte)(i + 5);
-            }
-
-            byte[] ikm = new byte[20];
-            byte[] salt = new byte[20];
-            Assert.Equal(20, HKDF.Extract(HashAlgorithmName.SHA1, ikm, salt, prk));
-            Assert.Equal("A3CBF4A40F51A53E046F07397E52DF9286AE93A2".HexToByteArray(), prk.Take(20).ToArray());
-
-            for (int i = 0; i < 4; i++)
-            {
-                // ensure we didn't modify anything further
-                Assert.Equal((byte)(i + 5), prk[20 + i]);
-            }
+            byte[] prk = Extract(HashAlgorithmName.SHA1, 20, ikm, salt);
+            Assert.Equal("A3CBF4A40F51A53E046F07397E52DF9286AE93A2", prk.ByteArrayToHex());
         }
 
         [Theory]
         [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869ExpandByteArrayTests(Rfc5869TestCase test)
+        public void Rfc5869ExpandTests(Rfc5869TestCase test)
         {
-            byte[] okm = HKDF.Expand(test.Hash, test.Prk, test.Okm.Length, test.Info);
+            byte[] okm = Expand(test.Hash, test.Prk, test.Okm.Length, test.Info);
             Assert.Equal(test.Okm, okm);
         }
 
         [Fact]
-        public void Rfc5869ExpandByteArrayDefaultHash()
+        public void Rfc5869ExpandDefaultHash()
         {
             byte[] prk = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.Expand(default(HashAlgorithmName), prk, 20, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                "hashAlgorithmName",
+                () => Expand(default(HashAlgorithmName), prk, 20, null));
         }
 
         [Fact]
-        public void Rfc5869ExpandByteArrayNonsensicalHash()
+        public void Rfc5869ExpandNonsensicalHash()
         {
             byte[] prk = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.Expand(new HashAlgorithmName("foo"), prk, 20, null));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                "hashAlgorithmName",
+                () => Expand(new HashAlgorithmName("foo"), prk, 20, null));
         }
 
         [Theory]
         [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869ExpandByteArrayTamperPrkTests(Rfc5869TestCase test)
+        public void Rfc5869ExpandTamperPrkTests(Rfc5869TestCase test)
         {
-            test.Prk[0] ^= 1;
-            byte[] okm = HKDF.Expand(test.Hash, test.Prk, test.Okm.Length, test.Info);
+            byte[] prk = test.Prk.ToArray();
+            prk[0] ^= 1;
+            byte[] okm = Expand(test.Hash, prk, test.Okm.Length, test.Info);
             Assert.NotEqual(test.Okm, okm);
         }
 
         [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(19)]
-        public void Rfc5869ExpandByteArrayPrkTooSmall(int prkSize)
+        [MemberData(nameof(GetPrkTooShortTestCases))]
+        public void Rfc5869ExpandPrkTooShort(HashAlgorithmName hash, int prkSize)
         {
             byte[] prk = new byte[prkSize];
-            Assert.Throws<ArgumentException>(() => HKDF.Expand(HashAlgorithmName.SHA1, prk, 17, Array.Empty<byte>()));
+            AssertExtensions.Throws<ArgumentException>(
+                "prk",
+                () => Expand(hash, prk, 17, Array.Empty<byte>()));
         }
 
         [Fact]
-        public void Rfc5869ExpandByteArrayOkmMaxSize()
+        public void Rfc5869ExpandOkmMaxSize()
         {
             byte[] prk = new byte[20];
 
             // Does not throw
-            byte[] okm = HKDF.Expand(HashAlgorithmName.SHA1, prk, 20 * 255, Array.Empty<byte>());
+            byte[] okm = Expand(HashAlgorithmName.SHA1, prk, 20 * 255, Array.Empty<byte>());
             Assert.Equal(20 * 255, okm.Length);
         }
 
-        [Fact]
-        public void Rfc5869ExpandByteArrayOkmMaxSizePlusOne()
-        {
-            byte[] prk = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.Expand(HashAlgorithmName.SHA1, prk, 20 * 255 + 1, Array.Empty<byte>()));
-        }
-
         [Theory]
         [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869ExpandSpanTests(Rfc5869TestCase test)
+        public void Rfc5869DeriveKeyTests(Rfc5869TestCase test)
         {
-            byte[] okm = new byte[test.Okm.Length];
-            HKDF.Expand(test.Hash, test.Prk, okm, test.Info);
+            byte[] okm = DeriveKey(test.Hash, test.Ikm, test.Okm.Length, test.Salt, test.Info);
             Assert.Equal(test.Okm, okm);
         }
 
         [Fact]
-        public void Rfc5869ExpandSpanDefaultHash()
+        public void Rfc5869DeriveKeyDefaultHash()
         {
-            byte[] prk = new byte[20];
-            byte[] okm = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.Expand(default(HashAlgorithmName), prk, okm, null));
+            byte[] ikm = new byte[20];
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                "hashAlgorithmName",
+                () => DeriveKey(default(HashAlgorithmName), ikm, 20, Array.Empty<byte>(), Array.Empty<byte>()));
         }
 
         [Fact]
-        public void Rfc5869ExpandSpanNonsensicalHash()
+        public void Rfc5869DeriveKeyNonSensicalHash()
         {
-            byte[] prk = new byte[20];
-            byte[] okm = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.Expand(new HashAlgorithmName("foo"), prk, okm, null));
+            byte[] ikm = new byte[20];
+            AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                "hashAlgorithmName",
+                () => DeriveKey(new HashAlgorithmName("foo"), ikm, 20, Array.Empty<byte>(), Array.Empty<byte>()));
         }
 
         [Theory]
         [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869ExpandSpanTamperPrkTests(Rfc5869TestCase test)
+        public void Rfc5869DeriveKeyTamperIkmTests(Rfc5869TestCase test)
         {
-            test.Prk[0] ^= 1;
-            byte[] okm = new byte[test.Okm.Length];
-            HKDF.Expand(test.Hash, test.Prk, okm, test.Info);
+            byte[] ikm = test.Ikm.ToArray();
+            ikm[0] ^= 1;
+            byte[] okm = DeriveKey(test.Hash, ikm, test.Okm.Length, test.Salt, test.Info);
             Assert.NotEqual(test.Okm, okm);
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(19)]
-        public void Rfc5869ExpandSpanPrkTooSmall(int prkSize)
-        {
-            byte[] prk = new byte[prkSize];
-            byte[] okm = new byte[17];
-            Assert.Throws<ArgumentException>(() => HKDF.Expand(HashAlgorithmName.SHA1, prk, okm, Array.Empty<byte>()));
-        }
-
-        [Fact]
-        public void Rfc5869ExpandSpanOkmMaxSize()
-        {
-            byte[] prk = new byte[20];
-            byte[] okm = new byte[20 * 255];
-
-            // Does not throw
-            HKDF.Expand(HashAlgorithmName.SHA1, prk, okm, Array.Empty<byte>());
-        }
-
-        [Fact]
-        public void Rfc5869ExpandSpanOkmMaxSizePlusOne()
-        {
-            byte[] prk = new byte[20];
-            byte[] okm = new byte[20 * 255 + 1];
-            // Note: We expect ArgumentOutOfRangeException for byte array version since it takes a size
-            Assert.Throws<ArgumentException>(() => HKDF.Expand(HashAlgorithmName.SHA1, prk, okm, Array.Empty<byte>()));
-        }
-
-        [Theory]
-        [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869DeriveKeyByteArrayTests(Rfc5869TestCase test)
-        {
-            byte[] okm = HKDF.DeriveKey(test.Hash, test.Ikm, test.Okm.Length, test.Salt, test.Info);
-            Assert.Equal(test.Okm, okm);
-        }
-
-        [Fact]
-        public void Rfc5869DeriveKeyByteArrayDefaultHash()
-        {
-            byte[] ikm = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.DeriveKey(default(HashAlgorithmName), ikm, 20, Array.Empty<byte>(), Array.Empty<byte>()));
-        }
-
-        [Fact]
-        public void Rfc5869DeriveKeyByteArrayNonSensicalHash()
-        {
-            byte[] ikm = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.DeriveKey(new HashAlgorithmName("foo"), ikm, 20, Array.Empty<byte>(), Array.Empty<byte>()));
-        }
-
-        [Fact]
-        public void Rfc5869DeriveKeyByteArrayNullIkm()
-        {
-            Assert.Throws<ArgumentNullException>(() => HKDF.DeriveKey(HashAlgorithmName.SHA1, null, 20, Array.Empty<byte>(), Array.Empty<byte>()));
-        }
-
-        [Theory]
-        [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869DeriveKeyByteArrayTamperIkmTests(Rfc5869TestCase test)
-        {
-            test.Ikm[0] ^= 1;
-            byte[] okm = HKDF.DeriveKey(test.Hash, test.Ikm, test.Okm.Length, test.Salt, test.Info);
-            Assert.NotEqual(test.Okm, okm);
-        }
-
-        [Fact]
-        public void Rfc5869DeriveKeyByteArrayOkmMaxSizePlusOne()
-        {
-            byte[] ikm = new byte[20];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.DeriveKey(HashAlgorithmName.SHA1, ikm, 20 * 255 + 1, Array.Empty<byte>(), Array.Empty<byte>()));
         }
 
         [Theory]
         [MemberData(nameof(GetRfc5869TestCasesWithNonEmptySalt))]
-        public void Rfc5869DeriveKeyByteArrayTamperSaltTests(Rfc5869TestCase test)
+        public void Rfc5869DeriveKeyTamperSaltTests(Rfc5869TestCase test)
         {
-            test.Salt[0] ^= 1;
-            byte[] okm = HKDF.DeriveKey(test.Hash, test.Ikm, test.Okm.Length, test.Salt, test.Info);
+            byte[] salt = test.Salt.ToArray();
+            salt[0] ^= 1;
+            byte[] okm = DeriveKey(test.Hash, test.Ikm, test.Okm.Length, salt, test.Info);
             Assert.NotEqual(test.Okm, okm);
         }
 
         [Theory]
         [MemberData(nameof(GetRfc5869TestCasesWithNonEmptyInfo))]
-        public void Rfc5869DeriveKeyByteArrayTamperInfoTests(Rfc5869TestCase test)
+        public void Rfc5869DeriveKeyTamperInfoTests(Rfc5869TestCase test)
         {
-            test.Info[0] ^= 1;
-            byte[] okm = HKDF.DeriveKey(test.Hash, test.Ikm, test.Okm.Length, test.Salt, test.Info);
-            Assert.NotEqual(test.Okm, okm);
-        }
-
-        [Theory]
-        [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869DeriveKeySpanTests(Rfc5869TestCase test)
-        {
-            byte[] okm = new byte[test.Okm.Length];
-            HKDF.DeriveKey(test.Hash, test.Ikm, okm, test.Salt, test.Info);
-            Assert.Equal(test.Okm, okm);
-        }
-
-        [Fact]
-        public void Rfc5869DeriveKeySpanDefaultHash()
-        {
-            byte[] ikm = new byte[20];
-            byte[] okm = new byte[17];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.DeriveKey(default(HashAlgorithmName), ikm, okm, Array.Empty<byte>(), Array.Empty<byte>()));
-        }
-
-        [Fact]
-        public void Rfc5869DeriveKeySpanNonSensicalHash()
-        {
-            byte[] ikm = new byte[20];
-            byte[] okm = new byte[17];
-            Assert.Throws<ArgumentOutOfRangeException>(() => HKDF.DeriveKey(new HashAlgorithmName("foo"), ikm, okm, Array.Empty<byte>(), Array.Empty<byte>()));
-        }
-
-        [Theory]
-        [MemberData(nameof(GetRfc5869TestCases))]
-        public void Rfc5869DeriveKeySpanTamperIkmTests(Rfc5869TestCase test)
-        {
-            test.Ikm[0] ^= 1;
-            byte[] okm = new byte[test.Okm.Length];
-            HKDF.DeriveKey(test.Hash, test.Ikm, okm, test.Salt, test.Info);
-            Assert.NotEqual(test.Okm, okm);
-        }
-
-        [Fact]
-        public void Rfc5869DeriveKeySpanOkmMaxSizePlusOne()
-        {
-            byte[] ikm = new byte[20];
-            byte[] okm = new byte[20 * 255 + 1];
-            Assert.Throws<ArgumentException>(() => HKDF.DeriveKey(HashAlgorithmName.SHA1, ikm, okm, Array.Empty<byte>(), Array.Empty<byte>()));
-        }
-
-        [Theory]
-        [MemberData(nameof(GetRfc5869TestCasesWithNonEmptySalt))]
-        public void Rfc5869DeriveKeySpanTamperSaltTests(Rfc5869TestCase test)
-        {
-            test.Salt[0] ^= 1;
-            byte[] okm = new byte[test.Okm.Length];
-            HKDF.DeriveKey(test.Hash, test.Ikm, okm, test.Salt, test.Info);
-            Assert.NotEqual(test.Okm, okm);
-        }
-
-        [Theory]
-        [MemberData(nameof(GetRfc5869TestCasesWithNonEmptyInfo))]
-        public void Rfc5869DeriveKeySpanTamperInfoTests(Rfc5869TestCase test)
-        {
-            test.Info[0] ^= 1;
-            byte[] okm = new byte[test.Okm.Length];
-            HKDF.DeriveKey(test.Hash, test.Ikm, okm, test.Salt, test.Info);
+            byte[] info = test.Info.ToArray();
+            info[0] ^= 1;
+            byte[] okm = DeriveKey(test.Hash, test.Ikm, test.Okm.Length, test.Salt, info);
             Assert.NotEqual(test.Okm, okm);
         }
 
@@ -458,7 +234,17 @@ namespace System.Security.Cryptography.Algorithms.Tests
             }
         }
 
-        private static Rfc5869TestCase[] Rfc5869TestCases => new Rfc5869TestCase[7]
+        public static IEnumerable<object[]> GetPrkTooShortTestCases()
+        {
+            yield return new object[] { HashAlgorithmName.SHA1, 0 };
+            yield return new object[] { HashAlgorithmName.SHA1, 1 };
+            yield return new object[] { HashAlgorithmName.SHA1, 160 / 8 - 1 };
+            yield return new object[] { HashAlgorithmName.SHA256, 256 / 8 - 1 };
+            yield return new object[] { HashAlgorithmName.SHA512, 512 / 8 - 1 };
+            yield return new object[] { HashAlgorithmName.MD5, 128 / 8 - 1 };
+        }
+
+        private static Rfc5869TestCase[] Rfc5869TestCases { get; } = new Rfc5869TestCase[7]
         {
             new Rfc5869TestCase()
             {
@@ -606,6 +392,163 @@ namespace System.Security.Cryptography.Algorithms.Tests
             public byte[] Okm { get; set; }
 
             public override string ToString() => Name;
+        }
+
+        public class HkdfByteArrayTests : HKDFTests
+        {
+            protected override byte[] Extract(HashAlgorithmName hash, int prkLength, byte[] ikm, byte[] salt)
+            {
+                return HKDF.Extract(hash, ikm, salt);
+            }
+
+            protected override byte[] Expand(HashAlgorithmName hash, byte[] prk, int outputLength, byte[] info)
+            {
+                return HKDF.Expand(hash, prk, outputLength, info);
+            }
+
+            protected override byte[] DeriveKey(HashAlgorithmName hash, byte[] ikm, int outputLength, byte[] salt, byte[] info)
+            {
+                return HKDF.DeriveKey(hash, ikm, outputLength, salt, info);
+            }
+
+            [Fact]
+            public void Rfc5869ExtractNullIkm()
+            {
+                byte[] salt = new byte[20];
+                AssertExtensions.Throws<ArgumentNullException>(
+                    "ikm",
+                    () => HKDF.Extract(HashAlgorithmName.SHA1, null, salt));
+            }
+
+            [Fact]
+            public void Rfc5869ExpandOkmMaxSizePlusOne()
+            {
+                byte[] prk = new byte[20];
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                    "outputLength",
+                    () => HKDF.Expand(HashAlgorithmName.SHA1, prk, 20 * 255 + 1, Array.Empty<byte>()));
+            }
+
+            [Fact]
+            public void Rfc5869ExpandOkmPotentiallyOverflowingValue()
+            {
+                byte[] prk = new byte[20];
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                    "outputLength",
+                    () => HKDF.Expand(HashAlgorithmName.SHA1, prk, 8421505, Array.Empty<byte>()));
+            }
+
+            [Fact]
+            public void Rfc5869DeriveKeyNullIkm()
+            {
+                AssertExtensions.Throws<ArgumentNullException>(
+                    "ikm",
+                    () => HKDF.DeriveKey(HashAlgorithmName.SHA1, null, 20, Array.Empty<byte>(), Array.Empty<byte>()));
+            }
+
+            [Fact]
+            public void Rfc5869DeriveKeyOkmMaxSizePlusOne()
+            {
+                byte[] ikm = new byte[20];
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                    "outputLength",
+                    () => HKDF.DeriveKey(HashAlgorithmName.SHA1, ikm, 20 * 255 + 1, Array.Empty<byte>(), Array.Empty<byte>()));
+            }
+
+            [Fact]
+            public void Rfc5869DeriveKeyOkmPotentiallyOverflowingValue()
+            {
+                byte[] ikm = new byte[20];
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
+                    "outputLength",
+                    () => HKDF.DeriveKey(HashAlgorithmName.SHA1, ikm, 8421505, Array.Empty<byte>(), Array.Empty<byte>()));
+            }
+        }
+
+        public class HkdfSpanTests : HKDFTests
+        {
+            protected override byte[] Extract(HashAlgorithmName hash, int prkLength, byte[] ikm, byte[] salt)
+            {
+                byte[] prk = new byte[prkLength];
+                Assert.Equal(prkLength, HKDF.Extract(hash, ikm, salt, prk));
+                return prk;
+            }
+
+            protected override byte[] Expand(HashAlgorithmName hash, byte[] prk, int outputLength, byte[] info)
+            {
+                byte[] output = new byte[outputLength];
+                HKDF.Expand(hash, prk, output, info);
+                return output;
+            }
+
+            protected override byte[] DeriveKey(HashAlgorithmName hash, byte[] ikm, int outputLength, byte[] salt, byte[] info)
+            {
+                byte[] output = new byte[outputLength];
+                HKDF.DeriveKey(hash, ikm, output, salt, info);
+                return output;
+            }
+
+            [Fact]
+            public void Rfc5869ExtractPrkTooLong()
+            {
+                byte[] prk = new byte[24];
+
+                for (int i = 0; i < 4; i++)
+                {
+                    prk[20 + i] = (byte)(i + 5);
+                }
+
+                byte[] ikm = new byte[20];
+                byte[] salt = new byte[20];
+                Assert.Equal(20, HKDF.Extract(HashAlgorithmName.SHA1, ikm, salt, prk));
+                Assert.Equal("A3CBF4A40F51A53E046F07397E52DF9286AE93A2".HexToByteArray(), prk.Take(20).ToArray());
+
+                for (int i = 0; i < 4; i++)
+                {
+                    // ensure we didn't modify anything further
+                    Assert.Equal((byte)(i + 5), prk[20 + i]);
+                }
+            }
+
+            [Fact]
+            public void Rfc5869OkmMaxSizePlusOne()
+            {
+                byte[] prk = new byte[20];
+                byte[] okm = new byte[20 * 255 + 1];
+                AssertExtensions.Throws<ArgumentException>(
+                    "output",
+                    () => HKDF.Expand(HashAlgorithmName.SHA1, prk, okm, Array.Empty<byte>()));
+            }
+
+            [Fact]
+            public void Rfc5869OkmMaxSizePotentiallyOverflowingValue()
+            {
+                byte[] prk = new byte[20];
+                byte[] okm = new byte[8421505];
+                AssertExtensions.Throws<ArgumentException>(
+                    "output",
+                    () => HKDF.Expand(HashAlgorithmName.SHA1, prk, okm, Array.Empty<byte>()));
+            }
+
+            [Fact]
+            public void Rfc5869DeriveKeySpanOkmMaxSizePlusOne()
+            {
+                byte[] ikm = new byte[20];
+                byte[] okm = new byte[20 * 255 + 1];
+                AssertExtensions.Throws<ArgumentException>(
+                    "output",
+                    () => HKDF.DeriveKey(HashAlgorithmName.SHA1, ikm, okm, Array.Empty<byte>(), Array.Empty<byte>()));
+            }
+
+            [Fact]
+            public void Rfc5869DeriveKeySpanOkmPotentiallyOverflowingValue()
+            {
+                byte[] ikm = new byte[20];
+                byte[] okm = new byte[8421505];
+                AssertExtensions.Throws<ArgumentException>(
+                    "output",
+                    () => HKDF.DeriveKey(HashAlgorithmName.SHA1, ikm, okm, Array.Empty<byte>(), Array.Empty<byte>()));
+            }
         }
     }
 }

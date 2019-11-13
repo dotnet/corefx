@@ -20,21 +20,19 @@ namespace System.Security.Cryptography
         /// Performs the HKDF-Extract function.
         /// See section 2.2 of <a href="https://tools.ietf.org/html/rfc5869#section-2.2">RFC5869</a>
         /// </summary>
-        /// <param name="hashAlgorithmName">Hash algorithm used for HMAC operations</param>
-        /// <param name="ikm">Input keying material</param>
-        /// <param name="salt">Optional salt value (a non-secret random value). If not provided it defaults to a byte array of <see cref="HashLength"/> zeros.</param>
-        /// <returns>Pseudo random key (prk)</returns>
+        /// <param name="hashAlgorithmName">The hash algorithm used for HMAC operations.</param>
+        /// <param name="ikm">The input keying material.</param>
+        /// <param name="salt">The optional salt value (a non-secret random value). If not provided it defaults to a byte array of <see cref="HashLength"/> zeros.</param>
+        /// <returns>The pseudo random key (prk).</returns>
         public static byte[] Extract(HashAlgorithmName hashAlgorithmName, byte[] ikm, byte[] salt = null)
         {
             if (ikm == null)
                 throw new ArgumentNullException(nameof(ikm));
 
             int hashLength = HashLength(hashAlgorithmName);
-            ReadOnlySpan<byte> saltSpan = salt ?? ReadOnlySpan<byte>.Empty;
-
             byte[] prk = new byte[hashLength];
 
-            Extract(hashAlgorithmName, hashLength, ikm, saltSpan, prk);
+            Extract(hashAlgorithmName, hashLength, ikm, salt, prk);
             return prk;
         }
 
@@ -42,20 +40,23 @@ namespace System.Security.Cryptography
         /// Performs the HKDF-Extract function.
         /// See section 2.2 of <a href="https://tools.ietf.org/html/rfc5869#section-2.2">RFC5869</a>
         /// </summary>
-        /// <param name="hashAlgorithmName">Hash algorithm used for HMAC operations</param>
-        /// <param name="ikm">Input keying material</param>
-        /// <param name="salt">Salt value (a non-secret random value)</param>
-        /// <param name="prk">Buffer representing output pseudo-random key (prk)</param>
-        /// <returns>Number of bytes written to <paramref name="prk"/> buffer.</returns>
+        /// <param name="hashAlgorithmName">The hash algorithm used for HMAC operations.</param>
+        /// <param name="ikm">The input keying material.</param>
+        /// <param name="salt">The salt value (a non-secret random value).</param>
+        /// <param name="prk">The destination buffer to receive the pseudo-random key (prk).</param>
+        /// <returns>The number of bytes written to the <paramref name="prk"/> buffer.</returns>
         public static int Extract(HashAlgorithmName hashAlgorithmName, ReadOnlySpan<byte> ikm, ReadOnlySpan<byte> salt, Span<byte> prk)
         {
             int hashLength = HashLength(hashAlgorithmName);
 
+            if (prk.Length < hashLength)
+            {
+                throw new ArgumentException(SR.Format(SR.Cryptography_Prk_TooSmall, hashLength), nameof(prk));
+            }
+
             if (prk.Length > hashLength)
             {
                 prk = prk.Slice(0, hashLength);
-
-                // if it's too short we will throw later
             }
 
             Extract(hashAlgorithmName, hashLength, ikm, salt, prk);
@@ -64,11 +65,6 @@ namespace System.Security.Cryptography
 
         private static void Extract(HashAlgorithmName hashAlgorithmName, int hashLength, ReadOnlySpan<byte> ikm, ReadOnlySpan<byte> salt, Span<byte> prk)
         {
-            if (prk.Length != hashLength)
-            {
-                throw new ArgumentException(nameof(prk));
-            }
-
             Debug.Assert(HashLength(hashAlgorithmName) == hashLength);
 
             using (IncrementalHash hmac = IncrementalHash.CreateHMAC(hashAlgorithmName, salt))
@@ -82,11 +78,11 @@ namespace System.Security.Cryptography
         /// Performs the HKDF-Expand function
         /// See section 2.3 of <a href="https://tools.ietf.org/html/rfc5869#section-2.3">RFC5869</a>
         /// </summary>
-        /// <param name="hashAlgorithmName">Hash algorithm used for HMAC operations</param>
-        /// <param name="prk">Pseudorandom key of at least <see cref="HashLength"/> bytes (usually the output from Expand step)</param>
-        /// <param name="outputLength">Length of the output keying material</param>
-        /// <param name="info">Optional context and application specific information</param>
-        /// <returns>Output keying material</returns>
+        /// <param name="hashAlgorithmName">The hash algorithm used for HMAC operations.</param>
+        /// <param name="prk">The pseudorandom key of at least <see cref="HashLength"/> bytes (usually the output from Expand step).</param>
+        /// <param name="outputLength">The length of the output keying material.</param>
+        /// <param name="info">The optional context and application specific information.</param>
+        /// <returns>The output keying material.</returns>
         public static byte[] Expand(HashAlgorithmName hashAlgorithmName, byte[] prk, int outputLength, byte[] info = null)
         {
             if (prk == null)
@@ -94,10 +90,11 @@ namespace System.Security.Cryptography
 
             int hashLength = HashLength(hashAlgorithmName);
 
-            if (outputLength <= 0 || outputLength > 255 * hashLength)
-                throw new ArgumentOutOfRangeException(nameof(outputLength));
+            // Constant comes from section 2.3 (the constraint on L in the Inputs section)
+            int maxOkmLength = 255 * hashLength;
+            if (outputLength <= 0 || outputLength > maxOkmLength)
+                throw new ArgumentOutOfRangeException(nameof(outputLength), SR.Format(SR.Cryptography_Okm_TooLarge, maxOkmLength));
 
-            info = info ?? Array.Empty<byte>();
             byte[] result = new byte[outputLength];
             Expand(hashAlgorithmName, hashLength, prk, result, info);
 
@@ -108,30 +105,31 @@ namespace System.Security.Cryptography
         /// Performs the HKDF-Expand function
         /// See section 2.3 of <a href="https://tools.ietf.org/html/rfc5869#section-2.3">RFC5869</a>
         /// </summary>
-        /// <param name="hashAlgorithmName">Hash algorithm used for HMAC operations</param>
-        /// <param name="prk">Pseudorandom key of at least <see cref="HashLength"/> bytes (usually the output from Expand step)</param>
-        /// <param name="output">Output buffer representing output keying material</param>
-        /// <param name="info">Context and application specific information (can be an empty span)</param>
+        /// <param name="hashAlgorithmName">The hash algorithm used for HMAC operations.</param>
+        /// <param name="prk">The pseudorandom key of at least <see cref="HashLength"/> bytes (usually the output from Expand step).</param>
+        /// <param name="output">The destination buffer to receive the output keying material.</param>
+        /// <param name="info">The context and application specific information (can be an empty span).</param>
         public static void Expand(HashAlgorithmName hashAlgorithmName, ReadOnlySpan<byte> prk, Span<byte> output, ReadOnlySpan<byte> info)
         {
             int hashLength = HashLength(hashAlgorithmName);
 
-            // We want to throw different exception type for this overload
-            if (output.Length > 255 * hashLength)
-                throw new ArgumentException(nameof(output));
+            // Constant comes from section 2.3 (the constraint on L in the Inputs section)
+            int maxOkmLength = 255 * hashLength;
+            if (output.Length > maxOkmLength)
+                throw new ArgumentException(SR.Format(SR.Cryptography_Okm_TooLarge, maxOkmLength), nameof(output));
 
             Expand(hashAlgorithmName, hashLength, prk, output, info);
         }
 
         private static void Expand(HashAlgorithmName hashAlgorithmName, int hashLength, ReadOnlySpan<byte> prk, Span<byte> output, ReadOnlySpan<byte> info)
         {
+            Debug.Assert(HashLength(hashAlgorithmName) == hashLength);
+
             if (prk.Length < hashLength)
-                throw new ArgumentException(nameof(prk));
+                throw new ArgumentException(SR.Format(SR.Cryptography_Prk_TooSmall, hashLength), nameof(prk));
 
-            if (output.Length > 255 * hashLength)
-                throw new ArgumentOutOfRangeException(nameof(output));
-
-            Span<byte> counter = stackalloc byte[1];
+            Span<byte> counterSpan = stackalloc byte[1];
+            ref byte counter = ref counterSpan[0];
             Span<byte> t = Span<byte>.Empty;
             Span<byte> remainingOutput = output;
 
@@ -141,8 +139,8 @@ namespace System.Security.Cryptography
                 {
                     hmac.AppendData(t);
                     hmac.AppendData(info);
-                    counter[0] = (byte)i;
-                    hmac.AppendData(counter);
+                    counter = (byte)i;
+                    hmac.AppendData(counterSpan);
 
                     if (remainingOutput.Length >= hashLength)
                     {
@@ -154,6 +152,7 @@ namespace System.Security.Cryptography
                     {
                         if (remainingOutput.Length > 0)
                         {
+                            Debug.Assert(hashLength <= 512 / 8, "hashLength is larger than expected, consider increasing this value or using regular allocation");
                             Span<byte> lastChunk = stackalloc byte[hashLength];
                             GetHashAndReset(hmac, lastChunk);
                             lastChunk.Slice(0, remainingOutput.Length).CopyTo(remainingOutput);
@@ -168,20 +167,26 @@ namespace System.Security.Cryptography
         /// <summary>
         /// Performs the key derivation HKDF Expand and Extract functions
         /// </summary>
-        /// <param name="hashAlgorithmName">Hash algorithm used for HMAC operations</param>
-        /// <param name="ikm">Input keying material</param>
-        /// <param name="outputLength">Length of the output keying material</param>
-        /// <param name="salt">Optional salt value (a non-secret random value). If not provided it defaults to a byte array of <see cref="HashLength"/> zeros.</param>
-        /// <param name="info">Optional context and application specific information</param>
-        /// <returns>Output keying material</returns>
+        /// <param name="hashAlgorithmName">The hash algorithm used for HMAC operations.</param>
+        /// <param name="ikm">The input keying material.</param>
+        /// <param name="outputLength">The length of the output keying material.</param>
+        /// <param name="salt">The optional salt value (a non-secret random value). If not provided it defaults to a byte array of <see cref="HashLength"/> zeros.</param>
+        /// <param name="info">The optional context and application specific information.</param>
+        /// <returns>The output keying material.</returns>
         public static byte[] DeriveKey(HashAlgorithmName hashAlgorithmName, byte[] ikm, int outputLength, byte[] salt = null, byte[] info = null)
         {
             if (ikm == null)
                 throw new ArgumentNullException(nameof(ikm));
 
             int hashLength = HashLength(hashAlgorithmName);
+            Debug.Assert(hashLength <= 512 / 8, "hashLength is larger than expected, consider increasing this value or using regular allocation");
+
+            // Constant comes from section 2.3 (the constraint on L in the Inputs section)
+            int maxOkmLength = 255 * hashLength;
+            if (outputLength > maxOkmLength)
+                throw new ArgumentOutOfRangeException(nameof(outputLength), SR.Format(SR.Cryptography_Okm_TooLarge, maxOkmLength));
+
             Span<byte> prk = stackalloc byte[hashLength];
-            ReadOnlySpan<byte> saltSpan = salt ?? ReadOnlySpan<byte>.Empty;
 
             Extract(hashAlgorithmName, hashLength, ikm, salt, prk);
 
@@ -194,19 +199,21 @@ namespace System.Security.Cryptography
         /// <summary>
         /// Performs the key derivation HKDF Expand and Extract functions
         /// </summary>
-        /// <param name="hashAlgorithmName">Hash algorithm used for HMAC operations</param>
-        /// <param name="ikm">Input keying material</param>
-        /// <param name="output">Output buffer representing output keying material</param>
-        /// <param name="salt">Salt value (a non-secret random value)</param>
-        /// <param name="info">Context and application specific information (can be an empty span)</param>
+        /// <param name="hashAlgorithmName">The hash algorithm used for HMAC operations.</param>
+        /// <param name="ikm">The input keying material.</param>
+        /// <param name="output">The output buffer representing output keying material.</param>
+        /// <param name="salt">The salt value (a non-secret random value).</param>
+        /// <param name="info">The context and application specific information (can be an empty span).</param>
         public static void DeriveKey(HashAlgorithmName hashAlgorithmName, ReadOnlySpan<byte> ikm, Span<byte> output, ReadOnlySpan<byte> salt, ReadOnlySpan<byte> info)
         {
             int hashLength = HashLength(hashAlgorithmName);
 
-            // We want to throw different exception type for this overload
-            if (output.Length > 255 * hashLength)
-                throw new ArgumentException(nameof(output));
+            // Constant comes from section 2.3 (the constraint on L in the Inputs section)
+            int maxOkmLength = 255 * hashLength;
+            if (output.Length > maxOkmLength)
+                throw new ArgumentException(SR.Format(SR.Cryptography_Okm_TooLarge, maxOkmLength), nameof(output));
 
+            Debug.Assert(hashLength <= 512 / 8, "hashLength is larger than expected, consider increasing this value or using regular allocation");
             Span<byte> prk = stackalloc byte[hashLength];
 
             Extract(hashAlgorithmName, hashLength, ikm, salt, prk);
