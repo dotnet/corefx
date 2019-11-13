@@ -8,34 +8,36 @@ namespace System.IO.Pipes.Tests
 {
     public class AnonymousPipeServerStreamAclTests : PipeServerStreamAclTestBase
     {
+        private const PipeDirection DefaultPipeDirection = PipeDirection.In;
+        private const HandleInheritability DefaultInheritability = HandleInheritability.None;
+        private const int DefaultBufferSize = 1;
+
         [Fact]
         public void Create_NullSecurity()
         {
-            CreateAndVerifyAnonymousPipe(PipeDirection.In, HandleInheritability.None, 0, null).Dispose();
+            CreateAndVerifyAnonymousPipe(expectedSecurity: null).Dispose();
+        }
+
+        [Fact]
+        public void Create_NotSupportedPipeDirection()
+        {
+            Assert.Throws<NotSupportedException>(() =>
+            {
+                CreateAndVerifyAnonymousPipe(GetBasicPipeSecurity(), PipeDirection.InOut).Dispose();
+            });
         }
 
         [Theory]
-        [InlineData(PipeDirection.InOut)]
         [InlineData((PipeDirection)(int.MinValue))]
         [InlineData((PipeDirection)0)]
         [InlineData((PipeDirection)4)]
         [InlineData((PipeDirection)(int.MaxValue))]
         public void Create_InvalidPipeDirection(PipeDirection direction)
         {
-            if (direction == PipeDirection.InOut)
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                Assert.Throws<NotSupportedException>(() =>
-                {
-                    CreateAndVerifyAnonymousPipe(direction, HandleInheritability.None, 0, GetBasicPipeSecurity()).Dispose();
-                });
-            }
-            else
-            {
-                Assert.Throws<ArgumentOutOfRangeException>(() =>
-                {
-                    CreateAndVerifyAnonymousPipe(direction, HandleInheritability.None, 0, GetBasicPipeSecurity()).Dispose();
-                });
-            }
+                CreateAndVerifyAnonymousPipe(GetBasicPipeSecurity(), direction).Dispose();
+            });
         }
 
         [Theory]
@@ -47,7 +49,7 @@ namespace System.IO.Pipes.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                CreateAndVerifyAnonymousPipe(PipeDirection.In, inheritability, 0, GetBasicPipeSecurity()).Dispose();
+                CreateAndVerifyAnonymousPipe(GetBasicPipeSecurity(), inheritability: inheritability).Dispose();
             });
         }
 
@@ -58,22 +60,21 @@ namespace System.IO.Pipes.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                CreateAndVerifyAnonymousPipe(PipeDirection.In, HandleInheritability.None, bufferSize, GetBasicPipeSecurity()).Dispose();
+                CreateAndVerifyAnonymousPipe(GetBasicPipeSecurity(), bufferSize: bufferSize).Dispose();
             });
         }
 
+        public static IEnumerable<object[]> Create_ValidParameters_MemberData() =>
+            from direction in new[] { PipeDirection.In, PipeDirection.Out }
+            from inheritability in Enum.GetValues(typeof(HandleInheritability)).Cast<HandleInheritability>()
+            from bufferSize in new[] { 0, 1 }
+            select new object[] { direction, inheritability, bufferSize };
+
         [Theory]
-        [InlineData(PipeDirection.In,  HandleInheritability.Inheritable, 0)]
-        [InlineData(PipeDirection.In,  HandleInheritability.Inheritable, 1)]
-        [InlineData(PipeDirection.In,  HandleInheritability.None, 0)]
-        [InlineData(PipeDirection.In,  HandleInheritability.None, 1)]
-        [InlineData(PipeDirection.Out, HandleInheritability.Inheritable, 0)]
-        [InlineData(PipeDirection.Out, HandleInheritability.Inheritable, 1)]
-        [InlineData(PipeDirection.Out, HandleInheritability.None, 0)]
-        [InlineData(PipeDirection.Out, HandleInheritability.None, 1)]
+        [MemberData(nameof(Create_ValidParameters_MemberData))]
         public void Create_ValidParameters(PipeDirection direction, HandleInheritability inheritability, int bufferSize)
         {
-            CreateAndVerifyAnonymousPipe(direction, inheritability, bufferSize, GetBasicPipeSecurity()).Dispose();
+            CreateAndVerifyAnonymousPipe(GetBasicPipeSecurity(), direction, inheritability, bufferSize).Dispose();
         }
 
         public static IEnumerable<object[]> Create_CombineRightsAndAccessControl_MemberData() =>
@@ -86,23 +87,28 @@ namespace System.IO.Pipes.Tests
         [MemberData(nameof(Create_CombineRightsAndAccessControl_MemberData))]
         public void Create_CombineRightsAndAccessControl(PipeAccessRights rights, AccessControlType accessControl)
         {
-            if (rights == PipeAccessRights.Synchronize && accessControl == AccessControlType.Deny)
+            // These are the two cases that create a valid pipe when using Allow
+            if ((rights == PipeAccessRights.FullControl || rights == PipeAccessRights.ReadWrite) &&
+                accessControl == AccessControlType.Allow)
+            {
+                VerifyValidSecurity(rights, accessControl);
+            }
+            // When creating the PipeAccessRule for the PipeSecurity, the PipeAccessRule constructor calls AccessMaskFromRights, which explicilty removes the Synchronize bit from rights when AccessControlType is Deny
+            // and rights is not FullControl, so using Synchronize with Deny is not allowed
+            else  if (rights == PipeAccessRights.Synchronize && accessControl == AccessControlType.Deny)
             {
                 Assert.Throws<ArgumentException>("accessMask", () =>
                 {
                     PipeSecurity security = GetPipeSecurity(WellKnownSidType.BuiltinUsersSid, PipeAccessRights.Synchronize, AccessControlType.Deny);
                 });
             }
-            else if ((rights == PipeAccessRights.FullControl || rights == PipeAccessRights.ReadWrite) && accessControl == AccessControlType.Allow)
-            {
-                VerifyValidSecurity(rights, accessControl);
-            }
+            // Any other case is not authorized
             else
             {
                 PipeSecurity security = GetPipeSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
                 Assert.Throws<UnauthorizedAccessException>(() =>
                 {
-                    AnonymousPipeServerStreamAcl.Create(PipeDirection.In, HandleInheritability.None, 0, security).Dispose();
+                    AnonymousPipeServerStreamAcl.Create(DefaultPipeDirection, DefaultInheritability, DefaultBufferSize, security).Dispose();
                 });
             }
         }
@@ -117,10 +123,14 @@ namespace System.IO.Pipes.Tests
         private void VerifyValidSecurity(PipeAccessRights rights, AccessControlType accessControl)
         {
             PipeSecurity security = GetPipeSecurity(WellKnownSidType.BuiltinUsersSid, rights, accessControl);
-            CreateAndVerifyAnonymousPipe(PipeDirection.In, HandleInheritability.None, 0, security).Dispose();
+            CreateAndVerifyAnonymousPipe(security).Dispose();
         }
 
-        private AnonymousPipeServerStream CreateAndVerifyAnonymousPipe(PipeDirection direction, HandleInheritability inheritability, int bufferSize, PipeSecurity expectedSecurity)
+        private AnonymousPipeServerStream CreateAndVerifyAnonymousPipe(
+            PipeSecurity expectedSecurity,
+            PipeDirection direction = DefaultPipeDirection,
+            HandleInheritability inheritability = DefaultInheritability,
+            int bufferSize = DefaultBufferSize)
         {
             AnonymousPipeServerStream pipe = AnonymousPipeServerStreamAcl.Create(direction, inheritability, bufferSize, expectedSecurity);
             Assert.NotNull(pipe);
