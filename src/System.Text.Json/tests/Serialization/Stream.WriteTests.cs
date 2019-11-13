@@ -2,10 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Text.Json.Serialization.Tests.Schemas.OrderPayload;
 using System.Threading.Tasks;
 using Xunit;
@@ -308,11 +306,11 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Theory]
-/*        [InlineData(1, true, true)] ActiveIssue https://github.com/dotnet/corefx/issues/41598
-        [InlineData(1, true, false)]*/
+/*      [InlineData(1, true, true)]  ActiveIssue https://github.com/dotnet/corefx/issues/41598
+        [InlineData(1, true, false)] */
         [InlineData(1, false, true)]
         [InlineData(1, false, false)]
-//        [InlineData(2, true, false)]
+//      [InlineData(2, true, false)]
         [InlineData(2, false, false)]
         [InlineData(4, false, false)]
         [InlineData(8, false, false)]
@@ -418,9 +416,8 @@ namespace System.Text.Json.Serialization.Tests
 
                 List<object> deserializedList = JsonSerializer.Deserialize<List<object>>(json, options);
                 Assert.Equal(stringOfThresholdSize, ((JsonElement)deserializedList[0]).GetString());
-                JsonElement.ObjectEnumerator obj = ((JsonElement)deserializedList[1]).EnumerateObject();
-                obj.MoveNext();               
-                Assert.Equal(stringOfThresholdSize, obj.Current.Value.GetString());
+                JsonElement obj = (JsonElement)deserializedList[1];             
+                Assert.Equal(stringOfThresholdSize, obj.GetProperty("StringProperty").GetString());
             }
         }
 
