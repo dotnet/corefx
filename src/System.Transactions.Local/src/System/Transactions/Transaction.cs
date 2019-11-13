@@ -321,7 +321,7 @@ namespace System.Transactions
         {
             // If we can't cast the object as a Transaction, it must not be equal
             // to this, which is a Transaction. Check the internal transaction object for equality.
-            return obj is Transaction transaction &&_internalTransaction.TransactionHash == transaction._internalTransaction.TransactionHash;
+            return obj is Transaction transaction && _internalTransaction.TransactionHash == transaction._internalTransaction.TransactionHash;
         }
 
         public static bool operator ==(Transaction? x, Transaction? y)
