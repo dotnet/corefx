@@ -22,7 +22,7 @@ namespace Legacy.Support
 
         public static string[] GetPorts()
         {
-            if (!PlatformDetection.IsWindows())
+            if (!PlatformDetection.IsWindows)
             {
                 return SerialPort.GetPortNames();
             }
