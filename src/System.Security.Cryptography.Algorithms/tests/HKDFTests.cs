@@ -501,7 +501,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
                 byte[] ikm = new byte[20];
                 byte[] salt = new byte[20];
                 Assert.Equal(20, HKDF.Extract(HashAlgorithmName.SHA1, ikm, salt, prk));
-                Assert.Equal("A3CBF4A40F51A53E046F07397E52DF9286AE93A2".HexToByteArray(), prk.Take(20).ToArray());
+                Assert.Equal("A3CBF4A40F51A53E046F07397E52DF9286AE93A2", prk.AsSpan(0, 20).ByteArrayToHex());
 
                 for (int i = 0; i < 4; i++)
                 {
