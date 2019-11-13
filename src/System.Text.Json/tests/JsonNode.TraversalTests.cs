@@ -126,7 +126,6 @@ namespace System.Text.Json.Tests
             Assert.ThrowsAny<JsonException>(() => JsonNode.Parse(builder.ToString()));
         }
 
-
         [Fact]
         public static void TestDeepCopyDoesNotStackOverflow()
         {
@@ -221,11 +220,16 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(DuplicatePropertyNameHandling.Replace)]
-        [InlineData(DuplicatePropertyNameHandling.Ignore)]
-        [InlineData(DuplicatePropertyNameHandling.Error)]
-        public static void TestParseWithNestedDuplicates(DuplicatePropertyNameHandling duplicatePropertyNameHandling)
+        [InlineData(DuplicatePropertyNameHandlingStrategy.Replace)]
+        [InlineData(DuplicatePropertyNameHandlingStrategy.Ignore)]
+        [InlineData(DuplicatePropertyNameHandlingStrategy.Error)]
+        public static void TestParseWithNestedDuplicates(DuplicatePropertyNameHandlingStrategy duplicatePropertyNameHandling)
         {
+            var options = new JsonNodeOptions
+            {
+                DuplicatePropertyNameHandling = duplicatePropertyNameHandling
+            };
+
             var stringWithDuplicates = @"
             {
                 ""property"": ""first value"",
@@ -240,7 +244,7 @@ namespace System.Text.Json.Tests
                 ""array"" : [ ""property"" ]
             }";
 
-            var jsonObject = (JsonObject)JsonNode.Parse(stringWithDuplicates, default, duplicatePropertyNameHandling);
+            var jsonObject = (JsonObject)JsonNode.Parse(stringWithDuplicates, options);
             Assert.Equal(3, jsonObject.GetPropertyNames().Count);
             Assert.Equal(3, jsonObject.GetPropertyValues().Count);
             Assert.Equal("first value", jsonObject["property"]);
