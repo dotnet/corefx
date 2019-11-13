@@ -70,23 +70,18 @@ namespace System.Text.Json.Tests
         {
             JsonException e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IList<object>>("[1,"));
             Assert.Contains("Path: $[1] | LineNumber: 0 | BytePositionInLine: 2.", e.Message);
-            e = null;
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IList<int>>("[1,"));
             Assert.Contains("Path: $[1] | LineNumber: 0 | BytePositionInLine: 2.", e.Message);
-            e = null;
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IList<int>>("[1"));
             Assert.Contains("Path: $[0] | LineNumber: 0 | BytePositionInLine: 2.", e.Message);
-            e = null;
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IDictionary<string, int>>("{\"key\":1,"));
             Assert.Contains("Path: $.key | LineNumber: 0 | BytePositionInLine: 8.", e.Message);
-            e = null;
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IDictionary<string, int>>("{\"key\":1"));
             Assert.Contains("Path: $.key | LineNumber: 0 | BytePositionInLine: 8.", e.Message);
-            e = null;
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IncompleteTestClass>("{\"key\":1,"));
             Assert.Contains("$ | LineNumber: 0 | BytePositionInLine: 8.", e.Message);
