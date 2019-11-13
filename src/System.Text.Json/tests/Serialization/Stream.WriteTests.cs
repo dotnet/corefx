@@ -263,11 +263,11 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Theory]
-//      [InlineData(1, true, true)]   ActiveIssue https://github.com/dotnet/corefx/issues/41598
-//      [InlineData(1, true, false)]
+        [InlineData(1, true, true)]
+        [InlineData(1, true, false)]
         [InlineData(1, false, true)]
         [InlineData(1, false, false)]
-//      [InlineData(10, true, false)]
+        [InlineData(10, true, false)]
         [InlineData(10, false, false)]
         [InlineData(100, false, false)]
         [InlineData(1000, false, false)]
@@ -306,11 +306,11 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Theory]
-/*      [InlineData(1, true, true)]  ActiveIssue https://github.com/dotnet/corefx/issues/41598
-        [InlineData(1, true, false)] */
+        [InlineData(1, true, true)]
+        [InlineData(1, true, false)]
         [InlineData(1, false, true)]
         [InlineData(1, false, false)]
-//      [InlineData(2, true, false)]
+        [InlineData(2, true, false)]
         [InlineData(2, false, false)]
         [InlineData(4, false, false)]
         [InlineData(8, false, false)]
