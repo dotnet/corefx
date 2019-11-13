@@ -3,14 +3,13 @@
     <AssemblyName>System.Data.SqlClient</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);CS1573;nullable</NoWarn>
-    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(OSGroup)' == 'AnyOS'">SR.PlatformNotSupported_DataSqlClient</GeneratePlatformNotSupportedAssemblyMessage>
-    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.2'">4.0.0.0</AssemblyVersion>
-    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.3'">4.1.0.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard2.0'">4.6.0.0</AssemblyVersion>
     <DefineConstants Condition="'$(TargetsNetCoreApp)' != 'true'">$(DefineConstants);NETSTANDARD2_0</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);FEATURE_TCPKEEPALIVE</DefineConstants>
-    <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp-Debug;netcoreapp-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.1-Debug;netcoreapp2.1-Release;netcoreapp2.1-Unix-Debug;netcoreapp2.1-Unix-Release;netcoreapp2.1-Windows_NT-Debug;netcoreapp2.1-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard2.0-Debug;netstandard2.0-Release;netstandard2.0-Unix-Debug;netstandard2.0-Unix-Release;netstandard2.0-Windows_NT-Debug;netstandard2.0-Windows_NT-Release;netstandard1.2-Debug;netstandard1.2-Release;netstandard1.3-Debug;netstandard1.3-Release</Configurations>
     <Nullable>annotations</Nullable>
+    <DefineConstants Condition="'$(TargetGroup)' != 'netcoreapp'">$(DefineConstants);INTERNAL_NULLABLE_ATTRIBUTES</DefineConstants>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.1-Debug;netcoreapp2.1-Release;netcoreapp2.1-Unix-Debug;netcoreapp2.1-Unix-Release;netcoreapp2.1-Windows_NT-Debug;netcoreapp2.1-Windows_NT-Release;netstandard2.0-Unix-Debug;netstandard2.0-Unix-Release;netstandard2.0-Windows_NT-Debug;netstandard2.0-Windows_NT-Release;</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="System.Data.SqlClient.TypeForwards.cs" />
@@ -508,6 +507,7 @@
     <Reference Condition="'$(TargetFramework)' != 'netstandard2.0'" Include="System.Data.Common" />
     <Reference Include="System.Globalization" />
     <Reference Include="System.IO" />
+    <Reference Include="System.ObjectModel" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Threading.Tasks" />
@@ -520,14 +520,12 @@
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.Primitives" />
-    <Reference Include="System.ComponentModel.TypeConverter" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.DiagnosticSource" />
     <Reference Include="System.Diagnostics.Process" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.Tracing" />
     <Reference Include="System.Linq" />
-    <Reference Include="System.ObjectModel" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation" />
@@ -551,10 +549,7 @@
   <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Reference Include="System.Transactions.Local" />
     <Reference Include="System.Collections.NonGeneric" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System.Data" />
+    <Reference Include="System.ComponentModel.TypeConverter" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\System.Data.SqlClient.SqlMetaData.xml">
