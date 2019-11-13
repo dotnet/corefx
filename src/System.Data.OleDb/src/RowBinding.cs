@@ -479,7 +479,7 @@ namespace System.Data.OleDb
             if (ODB.DB_NULL_HCHAPTER != chapter)
             {
                 int refCount;
-                _ = chapteredRowset.ReleaseChapter(chapter, out refCount);
+                chapteredRowset.ReleaseChapter(chapter, out _);
             }
         }
 
