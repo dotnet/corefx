@@ -27,16 +27,13 @@
 //    Jordi Mas i Hernandez, jordimash@gmail.com
 //
 
-using System.Runtime.InteropServices;
 using System.Collections;
-using System.Drawing.Printing;
-using System.ComponentModel;
-using System.Drawing.Imaging;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.IO;
-using System.Collections.Specialized;
 using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing.Printing
@@ -50,52 +47,32 @@ namespace System.Drawing.Printing
     {
         #region Private Fields
 
-        private static readonly Hashtable doc_info = new Hashtable();
-        private static readonly bool cups_installed = CheckCupsInstalled();
-        private static readonly Hashtable installed_printers = new Hashtable();
-        private static string default_printer = string.Empty;
-
-        private static volatile bool populatedPrinters = false;
+        private static readonly bool s_cupsInitialized = CheckCupsInstalled();
+        private static readonly Hashtable s_docInfo = Hashtable.Synchronized(new Hashtable());
+        private static Tuple<string, Dictionary<string, SysPrn.Printer>> s_printers; // cached default printer name and collection of all printers from cups
 
         #endregion
 
         #region Properties
 
-        private static Hashtable ReadPrinters()
-        {
-            var printers = new Hashtable();
-            printers = LoadPrinters(printers);
-            return printers;
-        }
-
-        /// <summary>
-        /// Returns a list of strings representing printers installed in CUPS
-        /// </summary>
         internal static PrinterSettings.StringCollection InstalledPrinters
         {
             get
             {
-                Hashtable printers = LazyInitializer.EnsureInitialized(ref installed_printers, () => ReadPrinters());
-                PrinterSettings.StringCollection list = new PrinterSettings.StringCollection(Array.Empty<string>());
+                Volatile.Write(ref s_printers, null); // clear cache to match Windows behavior
 
-                foreach (object key in printers.Keys)
+                var list = new PrinterSettings.StringCollection(Array.Empty<string>());
+
+                foreach (KeyValuePair<string, SysPrn.Printer> key in EnsurePrintersInitialized().Item2)
                 {
-                    list.Add(key.ToString());
+                    list.Add(key.Key);
                 }
 
                 return list;
             }
         }
 
-        internal static string DefaultPrinter
-        {
-            get
-            {
-                if (!populatedPrinters)
-                    Hashtable printers = LazyInitializer.EnsureInitialized(ref installed_printers, () => ReadPrinters());
-                return default_printer;
-            }
-        }
+        internal static string DefaultPrinter => EnsurePrintersInitialized().Item1;
 
         #endregion
 
@@ -184,17 +161,13 @@ namespace System.Drawing.Printing
         }
 
         /// <summary>
-        /// Checks if a printer has a valid PPD file. Caches the result unless force is true
+        /// Checks if a printer has a valid PPD file.
         /// </summary>
         /// <param name="printer">Printer name</param>
-        internal static bool IsPrinterValid(string printer)
-        {
-            if (!cups_installed || printer == null | printer == string.Empty)
-                return false;
-
-            Hashtable printers = LazyInitializer.EnsureInitialized(ref installed_printers, () => ReadPrinters());
-            return printers.Contains(printer);
-        }
+        internal static bool IsPrinterValid(string printer) =>
+            s_cupsInitialized &&
+            !string.IsNullOrEmpty(printer) &&
+            EnsurePrintersInitialized().Item2.ContainsKey(printer);
 
         /// <summary>
         /// Loads the printer settings and initializes the PrinterSettings and PageSettings fields
@@ -203,32 +176,28 @@ namespace System.Drawing.Printing
         /// <param name="settings">PrinterSettings object to initialize</param>
         internal static void LoadPrinterSettings(string printer, PrinterSettings settings)
         {
-            if (cups_installed == false || (printer == null) || (printer == string.Empty))
+            if (!s_cupsInitialized || string.IsNullOrEmpty(printer))
                 return;
 
-            if (!populatedPrinters)
-            {
-                Hashtable printers = LazyInitializer.EnsureInitialized(ref installed_printers, () => ReadPrinters());
-            }else
-            {
-                Hashtable printers = installed_printers;
-            }   
+            Dictionary<string, SysPrn.Printer> printers = EnsurePrintersInitialized().Item2;
 
-            if (((SysPrn.Printer)printers[printer]).Settings != null)
+            if (!printers.TryGetValue(printer, out SysPrn.Printer p))
+                return;
+
+            PrinterSettings currentSettings = p.Settings;
+            if (currentSettings != null)
             {
-                SysPrn.Printer p = (SysPrn.Printer)printers[printer];
-                settings.can_duplex = p.Settings.can_duplex;
-                settings.is_plotter = p.Settings.is_plotter;
-                settings.landscape_angle = p.Settings.landscape_angle;
-                settings.maximum_copies = p.Settings.maximum_copies;
-                settings.paper_sizes = p.Settings.paper_sizes;
-                settings.paper_sources = p.Settings.paper_sources;
-                settings.printer_capabilities = p.Settings.printer_capabilities;
-                settings.printer_resolutions = p.Settings.printer_resolutions;
-                settings.supports_color = p.Settings.supports_color;
+                settings.can_duplex = currentSettings.can_duplex;
+                settings.is_plotter = currentSettings.is_plotter;
+                settings.landscape_angle = currentSettings.landscape_angle;
+                settings.maximum_copies = currentSettings.maximum_copies;
+                settings.paper_sizes = currentSettings.paper_sizes;
+                settings.paper_sources = currentSettings.paper_sources;
+                settings.printer_capabilities = currentSettings.printer_capabilities;
+                settings.printer_resolutions = currentSettings.printer_resolutions;
+                settings.supports_color = currentSettings.supports_color;
                 return;
             }
-          
 
             settings.PrinterCapabilities.Clear();
 
@@ -298,7 +267,7 @@ namespace System.Drawing.Printing
 
                 ClosePrinter(ref ppd_handle);
 
-                ((SysPrn.Printer)iprinters[printer]).Settings = settings;
+                p.Settings = settings;
             }
             finally
             {
@@ -589,74 +558,64 @@ namespace System.Drawing.Printing
 
         /// <summary>
         /// </summary>
-        private static Hashtable LoadPrinters(Hashtable printers)
-        {
-            Volatile.Write(ref installed_printers, null);
-            populatedPrinters = false;
-
-            if (cups_installed == false)
-                return;
-
-            IntPtr dests = IntPtr.Zero, ptr_printers;
-            CUPS_DESTS printer;
-            int n_printers = 0;
-            int cups_dests_size = Marshal.SizeOf(typeof(CUPS_DESTS));
-            string name, first, type, status, comment;
-            first = type = status = comment = string.Empty;
-            int state = 0;
-
-            try
+        private static Tuple<string, Dictionary<string, SysPrn.Printer>> EnsurePrintersInitialized() =>
+            LazyInitializer.EnsureInitialized(ref s_printers, () =>
             {
-                n_printers = OpenDests(ref dests);
+                string defaultPrinterName = string.Empty;
+                var printers = new Dictionary<string, SysPrn.Printer>();
 
-                ptr_printers = dests;
-                for (int i = 0; i < n_printers; i++)
+                if (s_cupsInitialized)
                 {
-                    printer = (CUPS_DESTS)Marshal.PtrToStructure(ptr_printers, typeof(CUPS_DESTS));
-                    name = Marshal.PtrToStringAnsi(printer.name);
+                    IntPtr dests = IntPtr.Zero;
+                    int n_printers = 0;
 
-                    if (printer.is_default == 1)
-                        default_printer = name;
-
-                    if (first.Equals(string.Empty))
-                        first = name;
-
-                    NameValueCollection options = LoadPrinterOptions(printer.options, printer.num_options);
-
-                    if (options["printer-state"] != null)
-                        state = int.Parse(options["printer-state"]);
-
-                    if (options["printer-comment"] != null)
-                        comment = options["printer-state"];
-                    switch (state)
+                    try
                     {
-                        case 4:
-                            status = "Printing";
-                            break;
-                        case 5:
-                            status = "Stopped";
-                            break;
-                        default:
-                            status = "Ready";
-                            break;
+                        n_printers = OpenDests(ref dests);
+
+                        IntPtr ptr_printers = dests;
+                        for (int i = 0; i < n_printers; i++)
+                        {
+                            var printer = (CUPS_DESTS)Marshal.PtrToStructure(ptr_printers, typeof(CUPS_DESTS));
+                            string name = Marshal.PtrToStringAnsi(printer.name);
+
+                            if (printer.is_default == 1 ||
+                                string.IsNullOrEmpty(defaultPrinterName))
+                            {
+                                defaultPrinterName = name;
+                            }
+
+                            NameValueCollection options = LoadPrinterOptions(printer.options, printer.num_options);
+
+                            string status;
+                            int.TryParse(options["printer-state"], out int state);
+                            switch (state)
+                            {
+                                case 4:
+                                    status = "Printing";
+                                    break;
+                                case 5:
+                                    status = "Stopped";
+                                    break;
+                                default:
+                                    status = "Ready";
+                                    break;
+                            }
+
+                            string comment = options["printer-comment"] as string ?? string.Empty;
+
+                            printers.Add(name, new SysPrn.Printer(string.Empty, string.Empty, status, comment));
+                            ptr_printers = (IntPtr)((long)ptr_printers + Marshal.SizeOf(typeof(CUPS_DESTS)));
+                        }
                     }
-                    printers.Add(name, new SysPrn.Printer(string.Empty, type, status, comment));
-                    ptr_printers = (IntPtr)((long)ptr_printers + cups_dests_size);
+                    finally
+                    {
+                        CloseDests(ref dests, n_printers);
+                    }
                 }
-                populatedPrinters = true;
 
-
-            }
-            finally
-            {
-                CloseDests(ref dests, n_printers);
-            }
-
-            if (default_printer.Equals(string.Empty))
-                default_printer = first;
-
-            return printers;
-        }
+                return Tuple.Create(defaultPrinterName, printers);
+            });
 
         /// <summary>
         /// Gets a printer's settings for use in the print dialogue
@@ -674,7 +633,7 @@ namespace System.Drawing.Printing
             IntPtr dests = IntPtr.Zero, ptr_printers, ptr_printer;
             int cups_dests_size = Marshal.SizeOf(typeof(CUPS_DESTS));
 
-            if (cups_installed == false)
+            if (!s_cupsInitialized)
                 return;
 
             try
@@ -854,14 +813,14 @@ namespace System.Drawing.Printing
 
         internal static bool StartDoc(GraphicsPrinter gr, string doc_name, string output_file)
         {
-            DOCINFO doc = (DOCINFO)doc_info[gr.Hdc];
+            DOCINFO doc = (DOCINFO)s_docInfo[gr.Hdc];
             doc.title = doc_name;
             return true;
         }
 
         internal static bool EndDoc(GraphicsPrinter gr)
         {
-            DOCINFO doc = (DOCINFO)doc_info[gr.Hdc];
+            DOCINFO doc = (DOCINFO)s_docInfo[gr.Hdc];
 
             gr.Graphics.Dispose(); // Dispose object to force surface finish
 
@@ -870,7 +829,7 @@ namespace System.Drawing.Printing
 
             LibcupsNative.cupsPrintFile(doc.settings.PrinterName, doc.filename, doc.title, options_count, options);
             LibcupsNative.cupsFreeOptions(options_count, options);
-            doc_info.Remove(gr.Hdc);
+            s_docInfo.Remove(gr.Hdc);
             if (tmpfile != null)
             {
                 try
@@ -931,7 +890,7 @@ namespace System.Drawing.Printing
             doc.filename = name;
             doc.settings = settings;
             doc.default_page_settings = default_page_settings;
-            doc_info.Add(graphics, doc);
+            s_docInfo.Add(graphics, doc);
 
             return graphics;
         }
