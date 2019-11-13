@@ -110,6 +110,7 @@ namespace SslStress
             cmd.AddOption(new Option(new[] { "--min-connection-lifetime", "-l" }, "Minimum duration for a single connection, in seconds. Defaults to 5 seconds.") { Argument = new Argument<double>("minutes", 5) });
             cmd.AddOption(new Option(new[] { "--max-connection-lifetime", "-L" }, "Maximum duration for a single connection, in seconds. Defaults to 120 seconds.") { Argument = new Argument<double>("minutes", 120) });
             cmd.AddOption(new Option(new[] { "--display-interval", "-i" }, "Client stats display interval, in seconds. Defaults to 5 seconds.") { Argument = new Argument<double>("seconds", 5) });
+            cmd.AddOption(new Option(new[] { "--log-server", "-S" }, "Print server logs to stdout."));
             cmd.AddOption(new Option(new[] { "--seed", "-s" }, "Seed for generating pseudo-random parameters. Also depends on the -n argument.") { Argument = new Argument<int>("seed", (new Random().Next())) });
 
             ParseResult parseResult = cmd.Parse(args);
@@ -134,6 +135,7 @@ namespace SslStress
                 MinConnectionLifetime = TimeSpan.FromSeconds(parseResult.ValueForOption<double>("-l")),
                 MaxConnectionLifetime = TimeSpan.FromSeconds(parseResult.ValueForOption<double>("-L")),
                 DisplayInterval = TimeSpan.FromSeconds(parseResult.ValueForOption<double>("-i")),
+                LogServer = parseResult.HasOption("-S"),
                 RandomSeed = parseResult.ValueForOption<int>("-s"),
             };
 

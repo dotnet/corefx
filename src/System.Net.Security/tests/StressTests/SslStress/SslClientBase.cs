@@ -85,7 +85,7 @@ namespace SslStress
                 while (!_cts.IsCancellationRequested)
                 {
                     Thread.Sleep(_config.DisplayInterval);
-                    lock (Console.Out) { _aggregator.PrintCurrentResults(_stopwatch.Elapsed); }
+                    lock (Console.Out) { _aggregator.PrintCurrentResults(_stopwatch.Elapsed, showAggregatesOnly: false); }
                 }
             })
             { IsBackground = true }.Start();
@@ -143,7 +143,7 @@ namespace SslStress
                 Console.WriteLine("SslStress Run Final Report");
                 Console.WriteLine();
 
-                _aggregator.PrintCurrentResults(_stopwatch.Elapsed);
+                _aggregator.PrintCurrentResults(_stopwatch.Elapsed, showAggregatesOnly: true);
                 _aggregator.PrintFailureTypes();
             }
         }

@@ -107,12 +107,15 @@ namespace SslStress
                     }
                     catch (Exception e)
                     {
-                        lock (Console.Out)
+                        if (_config.LogServer)
                         {
-                            Console.ForegroundColor = ConsoleColor.DarkRed;
-                            Console.WriteLine($"Server: unhandled exception: {e}");
-                            Console.WriteLine();
-                            Console.ResetColor();
+                            lock (Console.Out)
+                            {
+                                Console.ForegroundColor = ConsoleColor.DarkRed;
+                                Console.WriteLine($"Server: unhandled exception: {e}");
+                                Console.WriteLine();
+                                Console.ResetColor();
+                            }
                         }
                     }
                 }

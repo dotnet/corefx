@@ -87,7 +87,7 @@ namespace SslStress
 
             public void PrintFailureTypes() => _errors.PrintFailureTypes();
 
-            public void PrintCurrentResults(TimeSpan elapsed)
+            public void PrintCurrentResults(TimeSpan elapsed, bool showAggregatesOnly)
             {
                 (StreamCounter total, StreamCounter current)[] counters = GetCounterView();
 
@@ -112,12 +112,24 @@ namespace SslStress
                     Console.ResetColor();
                     Console.Write(_failures[i].ToString("N0"));
 
+                    if (!showAggregatesOnly)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkBlue;
+                        Console.Write($"\tTx: ");
+                        Console.ResetColor();
+                        Console.Write(FmtBytes(counters[i].current.BytesWritten));
+                        Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                        Console.Write($"\tRx: ");
+                        Console.ResetColor();
+                        Console.Write(FmtBytes(counters[i].current.BytesRead));
+                    }
+
                     Console.ForegroundColor = ConsoleColor.DarkBlue;
-                    Console.Write($"\tTx: ");
+                    Console.Write($"\tTotal Tx: ");
                     Console.ResetColor();
                     Console.Write(FmtBytes(counters[i].total.BytesWritten));
                     Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                    Console.Write($"\tRx: ");
+                    Console.Write($"\tTotal Rx: ");
                     Console.ResetColor();
                     Console.Write(FmtBytes(counters[i].total.BytesRead));
 
@@ -136,12 +148,24 @@ namespace SslStress
                 Console.ResetColor();
                 Console.Write(_failures.Sum().ToString("N0"));
 
+                if (!showAggregatesOnly)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkBlue;
+                    Console.Write("\tTx: ");
+                    Console.ResetColor();
+                    Console.Write(FmtBytes(counters.Select(c => c.current.BytesWritten).Sum()));
+                    Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                    Console.Write($"\tRx: ");
+                    Console.ResetColor();
+                    Console.Write(FmtBytes(counters.Select(c => c.current.BytesRead).Sum()));
+                }
+
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
-                Console.Write("\tTx: ");
+                Console.Write("\tTotal Tx: ");
                 Console.ResetColor();
                 Console.Write(FmtBytes(counters.Select(c => c.total.BytesWritten).Sum()));
                 Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                Console.Write($"\tRx: ");
+                Console.Write($"\tTotal Rx: ");
                 Console.ResetColor();
                 Console.Write(FmtBytes(counters.Select(c => c.total.BytesRead).Sum()));
 

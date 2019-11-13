@@ -285,12 +285,14 @@ namespace SslStress
                 }
                 catch (DataMismatchException e)
                 {
-                    // report as warning and continue
-                    lock (Console.Out)
+                    if (_config.LogServer)
                     {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine($"Server: {e.Message}");
-                        Console.ResetColor();
+                        lock (Console.Out)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine($"Server: {e.Message}");
+                            Console.ResetColor();
+                        }
                     }
                 }
                 finally

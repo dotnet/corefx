@@ -21,5 +21,6 @@ namespace SslStress
         public TimeSpan DisplayInterval { get; set; }
         public TimeSpan MinConnectionLifetime { get; set; }
         public TimeSpan MaxConnectionLifetime { get; set; }
+        public bool LogServer { get; set; }
     }
 }
