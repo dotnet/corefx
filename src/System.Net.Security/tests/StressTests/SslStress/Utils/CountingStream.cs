@@ -11,23 +11,23 @@ namespace SslStress.Utils
 {
     public class StreamCounter
     {
-        public long bytesWritten = 0L;
-        public long bytesRead = 0L;
+        public long BytesWritten = 0L;
+        public long BytesRead = 0L;
 
         public void Reset()
         {
-            bytesWritten = 0L;
-            bytesRead = 0L;
+            BytesWritten = 0L;
+            BytesRead = 0L;
         }
 
         public StreamCounter Append(StreamCounter that)
         {
-            bytesRead += that.bytesRead;
-            bytesWritten += that.bytesWritten;
+            BytesRead += that.BytesRead;
+            BytesWritten += that.BytesWritten;
             return this;
         }
 
-        public StreamCounter Clone() => new StreamCounter() { bytesRead = bytesRead, bytesWritten = bytesWritten };
+        public StreamCounter Clone() => new StreamCounter() { BytesRead = BytesRead, BytesWritten = BytesWritten };
     }
 
     public class CountingStream : Stream
@@ -44,26 +44,26 @@ namespace SslStress.Utils
         public override void Write(byte[] buffer, int offset, int count)
         {
             _stream.Write(buffer, offset, count);
-            Interlocked.Add(ref _counter.bytesWritten, count);
+            Interlocked.Add(ref _counter.BytesWritten, count);
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
             int read = _stream.Read(buffer, offset, count);
-            Interlocked.Add(ref _counter.bytesRead, read);
+            Interlocked.Add(ref _counter.BytesRead, read);
             return read;
         }
 
         public override async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
         {
             await _stream.WriteAsync(buffer, cancellationToken);
-            Interlocked.Add(ref _counter.bytesWritten, buffer.Length);
+            Interlocked.Add(ref _counter.BytesWritten, buffer.Length);
         }
 
         public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
             int read = await _stream.ReadAsync(buffer, cancellationToken);
-            Interlocked.Add(ref _counter.bytesRead, read);
+            Interlocked.Add(ref _counter.BytesRead, read);
             return read;
         }
 

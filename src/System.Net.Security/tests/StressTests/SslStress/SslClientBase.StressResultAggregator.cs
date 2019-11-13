@@ -115,11 +115,11 @@ namespace SslStress
                     Console.ForegroundColor = ConsoleColor.DarkBlue;
                     Console.Write($"\tTx: ");
                     Console.ResetColor();
-                    Console.Write(FmtBytes(counters[i].total.bytesWritten));
+                    Console.Write(FmtBytes(counters[i].total.BytesWritten));
                     Console.ForegroundColor = ConsoleColor.DarkMagenta;
                     Console.Write($"\tRx: ");
                     Console.ResetColor();
-                    Console.Write(FmtBytes(counters[i].total.bytesRead));
+                    Console.Write(FmtBytes(counters[i].total.BytesRead));
 
                     Console.WriteLine();
                 }
@@ -139,11 +139,11 @@ namespace SslStress
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
                 Console.Write("\tTx: ");
                 Console.ResetColor();
-                Console.Write(FmtBytes(counters.Select(c => c.total.bytesWritten).Sum()));
+                Console.Write(FmtBytes(counters.Select(c => c.total.BytesWritten).Sum()));
                 Console.ForegroundColor = ConsoleColor.DarkMagenta;
                 Console.Write($"\tRx: ");
                 Console.ResetColor();
-                Console.Write(FmtBytes(counters.Select(c => c.total.bytesRead).Sum()));
+                Console.Write(FmtBytes(counters.Select(c => c.total.BytesRead).Sum()));
 
                 Console.WriteLine();
                 Console.WriteLine();
