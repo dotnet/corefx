@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.Json.Tests;
 using Xunit;
 
 namespace System.Text.Json.Linq.Tests

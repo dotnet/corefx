@@ -562,7 +562,7 @@ namespace System.Text.Json.Linq
         public IReadOnlyCollection<JNode> GetPropertyValues()
         {
             var list = new List<JNode>(_dictionary.Count);
-            foreach (KeyValuePair<string, JsonObjectProperty> item in _dictionary)
+            foreach (KeyValuePair<string, JObjectProperty> item in _dictionary)
             {
                 list.Add(item.Value.Value);
             }

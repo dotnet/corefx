@@ -125,19 +125,19 @@ namespace System.Text.Json.Linq.Tests
             string valueString = "value";
             string valueBase64String = "dmFsdWU=";
 
-            Assert.Equal(Encoding.UTF8.GetBytes(valueString), new JsonString(valueBase64String).AsJsonElement().GetBytesFromBase64());
-            Assert.Equal(Encoding.UTF8.GetBytes(SR.LoremIpsum40Words), new JsonString(SR.LoremIpsum40WordsBase64).AsJsonElement().GetBytesFromBase64());
+            Assert.Equal(Encoding.UTF8.GetBytes(valueString), new JString(valueBase64String).AsJsonElement().GetBytesFromBase64());
+            Assert.Equal(Encoding.UTF8.GetBytes(SR.LoremIpsum40Words), new JString(SR.LoremIpsum40WordsBase64).AsJsonElement().GetBytesFromBase64());
 
-            Assert.Throws<FormatException>(() => new JsonString("Not base-64").AsJsonElement().GetBytesFromBase64());
-            Assert.Throws<FormatException>(() => new JsonString("abc").AsJsonElement().GetBytesFromBase64());
-            Assert.Throws<FormatException>(() => new JsonString("").AsJsonElement().GetBytesFromBase64());
-            Assert.Throws<FormatException>(() => new JsonString().AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JString("Not base-64").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JString("abc").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JString("").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JString().AsJsonElement().GetBytesFromBase64());
 
-            Assert.Throws<InvalidOperationException>(() => new JsonBoolean().AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<InvalidOperationException>(() => new JBoolean().AsJsonElement().GetBytesFromBase64());
 
-            Assert.True(new JsonString(valueBase64String).AsJsonElement().TryGetBytesFromBase64(out byte[] buffer));
+            Assert.True(new JString(valueBase64String).AsJsonElement().TryGetBytesFromBase64(out byte[] buffer));
             Assert.Equal(Encoding.UTF8.GetBytes(valueString), buffer);
-            Assert.False(new JsonString().AsJsonElement().TryGetBytesFromBase64(out _));
+            Assert.False(new JString().AsJsonElement().TryGetBytesFromBase64(out _));
         }
 
         [Fact]
