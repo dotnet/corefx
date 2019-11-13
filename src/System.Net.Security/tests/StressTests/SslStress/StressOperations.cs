@@ -60,9 +60,9 @@ namespace SslStress
                 .ToArray();
     }
 
-    public class ChecksumMismatchException : Exception
+    public class DataMismatchException : Exception
     {
-        public ChecksumMismatchException(string message) : base(message) { }
+        public DataMismatchException(string message) : base(message) { }
     }
 
     // Serializes data segment using the following format: <length>,<checksum>,<data>
@@ -129,7 +129,7 @@ namespace SslStress
             SequencePosition? pos = buffer.PositionOf((byte)',');
             if (pos == null)
             {
-                throw new FormatException("should contain comma-separated values");
+                throw new DataMismatchException("should contain comma-separated values");
             }
 
             ReadOnlySequence<byte> lengthBytes = buffer.Slice(0, pos.Value);
@@ -141,7 +141,7 @@ namespace SslStress
             pos = buffer.PositionOf((byte)',');
             if (pos == null)
             {
-                throw new FormatException("should contain comma-separated values");
+                throw new DataMismatchException("should contain comma-separated values");
             }
 
             ReadOnlySequence<byte> checksumBytes = buffer.Slice(0, pos.Value);
@@ -152,7 +152,7 @@ namespace SslStress
             // payload
             if (length != (int)buffer.Length)
             {
-                throw new Exception("declared length does not match payload length");
+                throw new DataMismatchException("declared length does not match payload length");
             }
 
             var chunk = new DataSegment((int)buffer.Length);
@@ -161,7 +161,7 @@ namespace SslStress
             if (checksum != chunk.Checksum)
             {
                 chunk.Return();
-                throw new ChecksumMismatchException("declared checksum doesn't match payload checksum");
+                throw new DataMismatchException("declared checksum doesn't match payload checksum");
             }
 
             return chunk;
@@ -283,7 +283,7 @@ namespace SslStress
                     sslStream.WriteByte((byte)'\n');
                     await sslStream.FlushAsync(token);
                 }
-                catch (ChecksumMismatchException e)
+                catch (DataMismatchException e)
                 {
                     // report as warning and continue
                     lock (Console.Out)
