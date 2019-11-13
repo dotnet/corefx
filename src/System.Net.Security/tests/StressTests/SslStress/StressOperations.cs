@@ -68,22 +68,22 @@ namespace SslStress
         private readonly byte[] _buffer = new byte[32];
         private readonly char[] _charBuffer = new char[32];
 
-        public async Task SerializeAsync(Stream stream, DataSegment segment, Random? random = null)
+        public async Task SerializeAsync(Stream stream, DataSegment segment, Random? random = null, CancellationToken token = default)
         {
             // length
             int numsize = s_encoding.GetBytes(segment.Length.ToString(), _buffer);
-            await stream.WriteAsync(_buffer.AsMemory().Slice(0, numsize));
+            await stream.WriteAsync(_buffer.AsMemory().Slice(0, numsize), token);
             stream.WriteByte((byte)',');
             // checksum
             numsize = s_encoding.GetBytes(segment.Checksum.ToString(), _buffer);
-            await stream.WriteAsync(_buffer.AsMemory().Slice(0, numsize));
+            await stream.WriteAsync(_buffer.AsMemory().Slice(0, numsize), token);
             stream.WriteByte((byte)',');
             // payload
             Memory<byte> source = segment.AsMemory();
             // write the entire segment outright if not given random instance
             if (random == null)
             {
-                await stream.WriteAsync(source);
+                await stream.WriteAsync(source, token);
                 return;
             }
             // randomize chunking otherwise
@@ -103,7 +103,7 @@ namespace SslStress
 
                     if (random.NextBoolean(probability: 0.9))
                     {
-                        await stream.WriteAsync(chunk);
+                        await stream.WriteAsync(chunk, token);
                     }
                     else
                     {
@@ -113,7 +113,7 @@ namespace SslStress
 
                 if (random.NextBoolean(probability: 0.3))
                 {
-                    await stream.FlushAsync();
+                    await stream.FlushAsync(token);
                 }
             }
         }
@@ -178,7 +178,7 @@ namespace SslStress
 
             long messagesInFlight = 0;
 
-            await Utils.TaskExtensions.WhenAllCancelOnFirstException(cts.Token, Sender, Receiver);
+            await Utils.TaskExtensions.WhenAllThrowOnFirstException(cts.Token, Sender, Receiver);
 
             async Task Sender(CancellationToken token)
             {

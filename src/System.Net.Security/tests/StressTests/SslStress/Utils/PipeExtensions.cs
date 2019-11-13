@@ -17,75 +17,48 @@ namespace SslStress.Utils
         public static async Task ReadLinesUsingPipesAsync(this Stream stream, Func<ReadOnlySequence<byte>, Task> callback, CancellationToken token = default, char separator = '\n')
         {
             var pipe = new Pipe();
-            PipeWriter writer = pipe.Writer;
-            PipeReader reader = pipe.Reader;
 
             try
             {
-                await TaskExtensions.WhenAllCancelOnFirstException(token, FillPipeAsync, ReadPipeAsync);
+                await TaskExtensions.WhenAllThrowOnFirstException(token, FillPipeAsync, ReadPipeAsync);
             }
-            catch when (token.IsCancellationRequested)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
 
             }
 
             async Task FillPipeAsync(CancellationToken token)
             {
+                await stream.CopyToAsync(pipe.Writer, token);
+                pipe.Writer.Complete();
+            }
+
+            async Task ReadPipeAsync(CancellationToken token)
+            {
                 while (!token.IsCancellationRequested)
                 {
-                    Memory<byte> memory = writer.GetMemory(512);
-                    int bytesRead = await stream.ReadAsync(memory, token);
+                    ReadResult result = await pipe.Reader.ReadAsync(token);
+                    ReadOnlySequence<byte> buffer = result.Buffer;
+                    SequencePosition? position;
 
-                    if (bytesRead == 0)
+                    do
                     {
-                        break;
-                    }
+                        position = buffer.PositionOf((byte)separator);
 
-                    writer.Advance(bytesRead);
-                    FlushResult result = await writer.FlushAsync(token);
+                        if (position != null)
+                        {
+                            await callback(buffer.Slice(0, position.Value));
+                            buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
+                        }
+                    }
+                    while (position != null);
+
+                    pipe.Reader.AdvanceTo(buffer.Start, buffer.End);
 
                     if (result.IsCompleted)
                     {
                         break;
                     }
-                }
-
-                writer.Complete();
-            }
-
-            async Task ReadPipeAsync(CancellationToken token)
-            {
-                try
-                {
-                    while (!token.IsCancellationRequested)
-                    {
-                        ReadResult result = await reader.ReadAsync(token);
-                        ReadOnlySequence<byte> buffer = result.Buffer;
-                        SequencePosition? position;
-
-                        do
-                        {
-                            position = buffer.PositionOf((byte)separator);
-
-                            if (position != null)
-                            {
-                                await callback(buffer.Slice(0, position.Value));
-                                buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
-                            }
-                        }
-                        while (position != null);
-
-                        reader.AdvanceTo(buffer.Start, buffer.End);
-
-                        if (result.IsCompleted)
-                        {
-                            break;
-                        }
-                    }
-                }
-                finally
-                {
-                    reader.Complete();
                 }
             }
         }

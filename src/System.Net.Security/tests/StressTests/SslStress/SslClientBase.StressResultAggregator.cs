@@ -55,6 +55,7 @@ namespace SslStress
                 {
                     Console.ForegroundColor = ConsoleColor.DarkRed;
                     Console.WriteLine($"Worker #{workerId}: unhandled exception: {exn}");
+                    Console.WriteLine();
                     Console.ResetColor();
                 }
             }
@@ -151,7 +152,7 @@ namespace SslStress
                 Console.ForegroundColor = ConsoleColor.DarkMagenta;
                 Console.Write($"\tRx: ");
                 Console.ResetColor();
-                Console.Write(FmtBytes(counters.Select(c => c.total.bytesWritten).Sum()));
+                Console.Write(FmtBytes(counters.Select(c => c.total.bytesRead).Sum()));
 
                 Console.WriteLine();
                 Console.WriteLine();

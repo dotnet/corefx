@@ -101,7 +101,7 @@ namespace SslStress
             var cmd = new RootCommand();
             cmd.AddOption(new Option(new[] { "--help", "-h" }, "Display this help text."));
             cmd.AddOption(new Option(new[] { "--mode", "-m" }, "Stress suite execution mode. Defaults to 'both'.") { Argument = new Argument<RunMode>("runMode", RunMode.both) });
-            cmd.AddOption(new Option(new[] { "--num-connections", "-n" }, "Max number of connections to open concurrently.") { Argument = new Argument<int>("connections", Math.Max(Environment.ProcessorCount / 2, 2)) });
+            cmd.AddOption(new Option(new[] { "--num-connections", "-n" }, "Max number of connections to open concurrently.") { Argument = new Argument<int>("connections", Environment.ProcessorCount) });
             cmd.AddOption(new Option(new[] { "--server-endpoint", "-e" }, "Endpoint to bind to if server, endpoint to listen to if client.") { Argument = new Argument<string>("ipEndpoint", "127.0.0.1:5002") });
             cmd.AddOption(new Option(new[] { "--max-execution-time", "-t" }, "Maximum stress execution time, in minutes. Defaults to infinity.") { Argument = new Argument<double?>("minutes", null) });
             cmd.AddOption(new Option(new[] { "--max-buffer-length", "-l" }, "Maximum buffer length to write on ssl stream. Defaults to 8192.") { Argument = new Argument<int>("bytes", 8192) });

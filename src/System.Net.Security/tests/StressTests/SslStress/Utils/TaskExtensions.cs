@@ -4,6 +4,7 @@
 
 using System;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,12 +12,26 @@ namespace SslStress.Utils
 {
     public static class TaskExtensions
     {
-        // Starts and awaits a collection of tasks while ensuring cancellation has been signaled
-        // whenever one of them has raised an unhandled exception
-        public static async Task WhenAllCancelOnFirstException(CancellationToken token, params Func<CancellationToken, Task>[] tasks)
+
+        /// <summary>
+        /// Starts and awaits a collection of cancellable tasks.
+        /// Will surface the first exception that has occured (instead of AggregateException)
+        /// and trigger cancellation for all sibling tasks.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="tasks"></param>
+        /// <returns></returns>
+        public static async Task WhenAllThrowOnFirstException(CancellationToken token, params Func<CancellationToken, Task>[] tasks)
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+            Exception? firstException = null;
+
             await Task.WhenAll(tasks.Select(RunOne));
+
+            if (firstException != null)
+            {
+                ExceptionDispatchInfo.Capture(firstException).Throw();
+            }
 
             async Task RunOne(Func<CancellationToken, Task> task)
             {
@@ -24,10 +39,12 @@ namespace SslStress.Utils
                 {
                     await Task.Run(() => task(cts.Token));
                 }
-                catch
+                catch (Exception e)
                 {
-                    cts.Cancel();
-                    throw;
+                    if (Interlocked.CompareExchange(ref firstException, e, null) == null)
+                    {
+                        cts.Cancel();
+                    }
                 }
             }
         }

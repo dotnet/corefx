@@ -95,7 +95,7 @@ namespace SslStress
                         using SslStream stream = await EstablishSslStream(client.GetStream(), _cts.Token);
                         await HandleConnection(stream, client, _cts.Token);
                     }
-                    catch when (_cts.IsCancellationRequested)
+                    catch (OperationCanceledException) when (_cts.IsCancellationRequested)
                     {
 
                     }
@@ -105,6 +105,7 @@ namespace SslStress
                         {
                             Console.ForegroundColor = ConsoleColor.DarkRed;
                             Console.WriteLine($"Server: unhandled exception: {e}");
+                            Console.WriteLine();
                             Console.ResetColor();
                         }
                     }

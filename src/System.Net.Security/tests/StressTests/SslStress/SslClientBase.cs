@@ -109,7 +109,7 @@ namespace SslStress
 
                         _aggregator.RecordSuccess(workerId);
                     }
-                    catch (Exception) when (_cts.IsCancellationRequested)
+                    catch (OperationCanceledException) when (_cts.IsCancellationRequested)
                     {
                         _aggregator.RecordCancellation(workerId);
                     }
