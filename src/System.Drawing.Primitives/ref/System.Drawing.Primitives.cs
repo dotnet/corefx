@@ -7,6 +7,7 @@
 
 namespace System.Drawing
 {
+    [System.ComponentModel.TypeConverterAttribute("System.Drawing.ColorConverter, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public readonly partial struct Color : System.IEquatable<System.Drawing.Color>
     {
         private readonly object _dummy;
@@ -163,7 +164,7 @@ namespace System.Drawing
         public static System.Drawing.Color Yellow { get { throw null; } }
         public static System.Drawing.Color YellowGreen { get { throw null; } }
         public bool Equals(System.Drawing.Color other) { throw null; }
-        public override bool Equals(object obj) { throw null; }
+        public override bool Equals(object? obj) { throw null; }
         public static System.Drawing.Color FromArgb(int argb) { throw null; }
         public static System.Drawing.Color FromArgb(int alpha, System.Drawing.Color baseColor) { throw null; }
         public static System.Drawing.Color FromArgb(int red, int green, int blue) { throw null; }
@@ -366,6 +367,7 @@ namespace System.Drawing
         MenuBar = 173,
         MenuHighlight = 174,
     }
+    [System.ComponentModel.TypeConverterAttribute("System.Drawing.PointConverter, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public partial struct Point : System.IEquatable<System.Drawing.Point>
     {
         private int _dummyPrimitive;
@@ -374,14 +376,14 @@ namespace System.Drawing
         public Point(int dw) { throw null; }
         public Point(int x, int y) { throw null; }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public bool IsEmpty { get { throw null; } }
-        public int X { get { throw null; } set { } }
-        public int Y { get { throw null; } set { } }
+        public readonly bool IsEmpty { get { throw null; } }
+        public int X { readonly get { throw null; } set { } }
+        public int Y { readonly get { throw null; } set { } }
         public static System.Drawing.Point Add(System.Drawing.Point pt, System.Drawing.Size sz) { throw null; }
         public static System.Drawing.Point Ceiling(System.Drawing.PointF value) { throw null; }
-        public bool Equals(System.Drawing.Point other) { throw null; }
-        public override bool Equals(object obj) { throw null; }
-        public override int GetHashCode() { throw null; }
+        public readonly bool Equals(System.Drawing.Point other) { throw null; }
+        public override readonly bool Equals(object? obj) { throw null; }
+        public override readonly int GetHashCode() { throw null; }
         public void Offset(System.Drawing.Point p) { }
         public void Offset(int dx, int dy) { }
         public static System.Drawing.Point operator +(System.Drawing.Point pt, System.Drawing.Size sz) { throw null; }
@@ -392,7 +394,7 @@ namespace System.Drawing
         public static System.Drawing.Point operator -(System.Drawing.Point pt, System.Drawing.Size sz) { throw null; }
         public static System.Drawing.Point Round(System.Drawing.PointF value) { throw null; }
         public static System.Drawing.Point Subtract(System.Drawing.Point pt, System.Drawing.Size sz) { throw null; }
-        public override string ToString() { throw null; }
+        public override readonly string ToString() { throw null; }
         public static System.Drawing.Point Truncate(System.Drawing.PointF value) { throw null; }
     }
     public partial struct PointF : System.IEquatable<System.Drawing.PointF>
@@ -401,14 +403,14 @@ namespace System.Drawing
         public static readonly System.Drawing.PointF Empty;
         public PointF(float x, float y) { throw null; }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public bool IsEmpty { get { throw null; } }
-        public float X { get { throw null; } set { } }
-        public float Y { get { throw null; } set { } }
+        public readonly bool IsEmpty { get { throw null; } }
+        public float X { readonly get { throw null; } set { } }
+        public float Y { readonly get { throw null; } set { } }
         public static System.Drawing.PointF Add(System.Drawing.PointF pt, System.Drawing.Size sz) { throw null; }
         public static System.Drawing.PointF Add(System.Drawing.PointF pt, System.Drawing.SizeF sz) { throw null; }
-        public bool Equals(System.Drawing.PointF other) { throw null; }
-        public override bool Equals(object obj) { throw null; }
-        public override int GetHashCode() { throw null; }
+        public readonly bool Equals(System.Drawing.PointF other) { throw null; }
+        public override readonly bool Equals(object? obj) { throw null; }
+        public override readonly int GetHashCode() { throw null; }
         public static System.Drawing.PointF operator +(System.Drawing.PointF pt, System.Drawing.Size sz) { throw null; }
         public static System.Drawing.PointF operator +(System.Drawing.PointF pt, System.Drawing.SizeF sz) { throw null; }
         public static bool operator ==(System.Drawing.PointF left, System.Drawing.PointF right) { throw null; }
@@ -417,8 +419,9 @@ namespace System.Drawing
         public static System.Drawing.PointF operator -(System.Drawing.PointF pt, System.Drawing.SizeF sz) { throw null; }
         public static System.Drawing.PointF Subtract(System.Drawing.PointF pt, System.Drawing.Size sz) { throw null; }
         public static System.Drawing.PointF Subtract(System.Drawing.PointF pt, System.Drawing.SizeF sz) { throw null; }
-        public override string ToString() { throw null; }
+        public override readonly string ToString() { throw null; }
     }
+    [System.ComponentModel.TypeConverterAttribute("System.Drawing.RectangleConverter, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public partial struct Rectangle : System.IEquatable<System.Drawing.Rectangle>
     {
         private int _dummyPrimitive;
@@ -426,43 +429,43 @@ namespace System.Drawing
         public Rectangle(System.Drawing.Point location, System.Drawing.Size size) { throw null; }
         public Rectangle(int x, int y, int width, int height) { throw null; }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public int Bottom { get { throw null; } }
-        public int Height { get { throw null; } set { } }
+        public readonly int Bottom { get { throw null; } }
+        public int Height { readonly get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public bool IsEmpty { get { throw null; } }
+        public readonly bool IsEmpty { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public int Left { get { throw null; } }
+        public readonly int Left { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public System.Drawing.Point Location { get { throw null; } set { } }
+        public System.Drawing.Point Location { readonly get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public int Right { get { throw null; } }
+        public readonly int Right { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public System.Drawing.Size Size { get { throw null; } set { } }
+        public System.Drawing.Size Size { readonly get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public int Top { get { throw null; } }
-        public int Width { get { throw null; } set { } }
-        public int X { get { throw null; } set { } }
-        public int Y { get { throw null; } set { } }
+        public readonly int Top { get { throw null; } }
+        public int Width { readonly get { throw null; } set { } }
+        public int X { readonly get { throw null; } set { } }
+        public int Y { readonly get { throw null; } set { } }
         public static System.Drawing.Rectangle Ceiling(System.Drawing.RectangleF value) { throw null; }
-        public bool Contains(System.Drawing.Point pt) { throw null; }
-        public bool Contains(System.Drawing.Rectangle rect) { throw null; }
-        public bool Contains(int x, int y) { throw null; }
-        public bool Equals(System.Drawing.Rectangle other) { throw null; }
-        public override bool Equals(object obj) { throw null; }
+        public readonly bool Contains(System.Drawing.Point pt) { throw null; }
+        public readonly bool Contains(System.Drawing.Rectangle rect) { throw null; }
+        public readonly bool Contains(int x, int y) { throw null; }
+        public readonly bool Equals(System.Drawing.Rectangle other) { throw null; }
+        public override readonly bool Equals(object? obj) { throw null; }
         public static System.Drawing.Rectangle FromLTRB(int left, int top, int right, int bottom) { throw null; }
-        public override int GetHashCode() { throw null; }
+        public override readonly int GetHashCode() { throw null; }
         public static System.Drawing.Rectangle Inflate(System.Drawing.Rectangle rect, int x, int y) { throw null; }
         public void Inflate(System.Drawing.Size size) { }
         public void Inflate(int width, int height) { }
         public void Intersect(System.Drawing.Rectangle rect) { }
         public static System.Drawing.Rectangle Intersect(System.Drawing.Rectangle a, System.Drawing.Rectangle b) { throw null; }
-        public bool IntersectsWith(System.Drawing.Rectangle rect) { throw null; }
+        public readonly bool IntersectsWith(System.Drawing.Rectangle rect) { throw null; }
         public void Offset(System.Drawing.Point pos) { }
         public void Offset(int x, int y) { }
         public static bool operator ==(System.Drawing.Rectangle left, System.Drawing.Rectangle right) { throw null; }
         public static bool operator !=(System.Drawing.Rectangle left, System.Drawing.Rectangle right) { throw null; }
         public static System.Drawing.Rectangle Round(System.Drawing.RectangleF value) { throw null; }
-        public override string ToString() { throw null; }
+        public override readonly string ToString() { throw null; }
         public static System.Drawing.Rectangle Truncate(System.Drawing.RectangleF value) { throw null; }
         public static System.Drawing.Rectangle Union(System.Drawing.Rectangle a, System.Drawing.Rectangle b) { throw null; }
     }
@@ -473,59 +476,60 @@ namespace System.Drawing
         public RectangleF(System.Drawing.PointF location, System.Drawing.SizeF size) { throw null; }
         public RectangleF(float x, float y, float width, float height) { throw null; }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public float Bottom { get { throw null; } }
-        public float Height { get { throw null; } set { } }
+        public readonly float Bottom { get { throw null; } }
+        public float Height { readonly get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public bool IsEmpty { get { throw null; } }
+        public readonly bool IsEmpty { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public float Left { get { throw null; } }
+        public readonly float Left { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public System.Drawing.PointF Location { get { throw null; } set { } }
+        public System.Drawing.PointF Location { readonly get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public float Right { get { throw null; } }
+        public readonly float Right { get { throw null; } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public System.Drawing.SizeF Size { get { throw null; } set { } }
+        public System.Drawing.SizeF Size { readonly get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public float Top { get { throw null; } }
-        public float Width { get { throw null; } set { } }
-        public float X { get { throw null; } set { } }
-        public float Y { get { throw null; } set { } }
-        public bool Contains(System.Drawing.PointF pt) { throw null; }
-        public bool Contains(System.Drawing.RectangleF rect) { throw null; }
-        public bool Contains(float x, float y) { throw null; }
-        public bool Equals(System.Drawing.RectangleF other) { throw null; }
-        public override bool Equals(object obj) { throw null; }
+        public readonly float Top { get { throw null; } }
+        public float Width { readonly get { throw null; } set { } }
+        public float X { readonly get { throw null; } set { } }
+        public float Y { readonly get { throw null; } set { } }
+        public readonly bool Contains(System.Drawing.PointF pt) { throw null; }
+        public readonly bool Contains(System.Drawing.RectangleF rect) { throw null; }
+        public readonly bool Contains(float x, float y) { throw null; }
+        public readonly bool Equals(System.Drawing.RectangleF other) { throw null; }
+        public override readonly bool Equals(object? obj) { throw null; }
         public static System.Drawing.RectangleF FromLTRB(float left, float top, float right, float bottom) { throw null; }
-        public override int GetHashCode() { throw null; }
+        public override readonly int GetHashCode() { throw null; }
         public static System.Drawing.RectangleF Inflate(System.Drawing.RectangleF rect, float x, float y) { throw null; }
         public void Inflate(System.Drawing.SizeF size) { }
         public void Inflate(float x, float y) { }
         public void Intersect(System.Drawing.RectangleF rect) { }
         public static System.Drawing.RectangleF Intersect(System.Drawing.RectangleF a, System.Drawing.RectangleF b) { throw null; }
-        public bool IntersectsWith(System.Drawing.RectangleF rect) { throw null; }
+        public readonly bool IntersectsWith(System.Drawing.RectangleF rect) { throw null; }
         public void Offset(System.Drawing.PointF pos) { }
         public void Offset(float x, float y) { }
         public static bool operator ==(System.Drawing.RectangleF left, System.Drawing.RectangleF right) { throw null; }
         public static implicit operator System.Drawing.RectangleF (System.Drawing.Rectangle r) { throw null; }
         public static bool operator !=(System.Drawing.RectangleF left, System.Drawing.RectangleF right) { throw null; }
-        public override string ToString() { throw null; }
+        public override readonly string ToString() { throw null; }
         public static System.Drawing.RectangleF Union(System.Drawing.RectangleF a, System.Drawing.RectangleF b) { throw null; }
     }
+    [System.ComponentModel.TypeConverterAttribute("System.Drawing.SizeConverter, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public partial struct Size : System.IEquatable<System.Drawing.Size>
     {
         private int _dummyPrimitive;
         public static readonly System.Drawing.Size Empty;
         public Size(System.Drawing.Point pt) { throw null; }
         public Size(int width, int height) { throw null; }
-        public int Height { get { throw null; } set { } }
+        public int Height { readonly get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public bool IsEmpty { get { throw null; } }
-        public int Width { get { throw null; } set { } }
+        public readonly bool IsEmpty { get { throw null; } }
+        public int Width { readonly get { throw null; } set { } }
         public static System.Drawing.Size Add(System.Drawing.Size sz1, System.Drawing.Size sz2) { throw null; }
         public static System.Drawing.Size Ceiling(System.Drawing.SizeF value) { throw null; }
-        public bool Equals(System.Drawing.Size other) { throw null; }
-        public override bool Equals(object obj) { throw null; }
-        public override int GetHashCode() { throw null; }
+        public readonly bool Equals(System.Drawing.Size other) { throw null; }
+        public override readonly bool Equals(object? obj) { throw null; }
+        public override readonly int GetHashCode() { throw null; }
         public static System.Drawing.Size operator +(System.Drawing.Size sz1, System.Drawing.Size sz2) { throw null; }
         public static System.Drawing.Size operator /(System.Drawing.Size left, int right) { throw null; }
         public static System.Drawing.SizeF operator /(System.Drawing.Size left, float right) { throw null; }
@@ -540,9 +544,10 @@ namespace System.Drawing
         public static System.Drawing.Size operator -(System.Drawing.Size sz1, System.Drawing.Size sz2) { throw null; }
         public static System.Drawing.Size Round(System.Drawing.SizeF value) { throw null; }
         public static System.Drawing.Size Subtract(System.Drawing.Size sz1, System.Drawing.Size sz2) { throw null; }
-        public override string ToString() { throw null; }
+        public override readonly string ToString() { throw null; }
         public static System.Drawing.Size Truncate(System.Drawing.SizeF value) { throw null; }
     }
+    [System.ComponentModel.TypeConverterAttribute("System.Drawing.SizeFConverter, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public partial struct SizeF : System.IEquatable<System.Drawing.SizeF>
     {
         private int _dummyPrimitive;
@@ -550,14 +555,14 @@ namespace System.Drawing
         public SizeF(System.Drawing.PointF pt) { throw null; }
         public SizeF(System.Drawing.SizeF size) { throw null; }
         public SizeF(float width, float height) { throw null; }
-        public float Height { get { throw null; } set { } }
+        public float Height { readonly get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        public bool IsEmpty { get { throw null; } }
-        public float Width { get { throw null; } set { } }
+        public readonly bool IsEmpty { get { throw null; } }
+        public float Width { readonly get { throw null; } set { } }
         public static System.Drawing.SizeF Add(System.Drawing.SizeF sz1, System.Drawing.SizeF sz2) { throw null; }
-        public bool Equals(System.Drawing.SizeF other) { throw null; }
-        public override bool Equals(object obj) { throw null; }
-        public override int GetHashCode() { throw null; }
+        public readonly bool Equals(System.Drawing.SizeF other) { throw null; }
+        public override readonly bool Equals(object? obj) { throw null; }
+        public override readonly int GetHashCode() { throw null; }
         public static System.Drawing.SizeF operator +(System.Drawing.SizeF sz1, System.Drawing.SizeF sz2) { throw null; }
         public static System.Drawing.SizeF operator /(System.Drawing.SizeF left, float right) { throw null; }
         public static bool operator ==(System.Drawing.SizeF sz1, System.Drawing.SizeF sz2) { throw null; }
@@ -567,9 +572,9 @@ namespace System.Drawing
         public static System.Drawing.SizeF operator *(float left, System.Drawing.SizeF right) { throw null; }
         public static System.Drawing.SizeF operator -(System.Drawing.SizeF sz1, System.Drawing.SizeF sz2) { throw null; }
         public static System.Drawing.SizeF Subtract(System.Drawing.SizeF sz1, System.Drawing.SizeF sz2) { throw null; }
-        public System.Drawing.PointF ToPointF() { throw null; }
-        public System.Drawing.Size ToSize() { throw null; }
-        public override string ToString() { throw null; }
+        public readonly System.Drawing.PointF ToPointF() { throw null; }
+        public readonly System.Drawing.Size ToSize() { throw null; }
+        public override readonly string ToString() { throw null; }
     }
     public static partial class SystemColors
     {

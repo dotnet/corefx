@@ -25,8 +25,7 @@ namespace System
 
         private static string ExpandEnvironmentVariablesCore(string name)
         {
-            Span<char> initialBuffer = stackalloc char[128];
-            var result = new ValueStringBuilder(initialBuffer);
+            var result = new ValueStringBuilder(stackalloc char[128]);
 
             int lastPos = 0, pos;
             while (lastPos < name.Length && (pos = name.IndexOf('%', lastPos + 1)) >= 0)
@@ -295,7 +294,7 @@ namespace System
             }
         }
 
-        public static string NewLine => "\n";
+        internal const string NewLineConst = "\n";
 
         private static OperatingSystem GetOSVersion() => GetOperatingSystem(Interop.Sys.GetUnixRelease());
 
@@ -443,6 +442,25 @@ namespace System
                     Interop.GetIOException(errno);
             }
             return (int)result;
+        }
+
+        public static long WorkingSet
+        {
+            get
+            {
+                Type? processType = Type.GetType("System.Diagnostics.Process, System.Diagnostics.Process, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError: false);
+                if (processType?.GetMethod("GetCurrentProcess")?.Invoke(null, BindingFlags.DoNotWrapExceptions, null, null, null) is IDisposable currentProcess)
+                {
+                    using (currentProcess)
+                    {
+                        object? result = processType!.GetMethod("get_WorkingSet64")?.Invoke(currentProcess, BindingFlags.DoNotWrapExceptions, null, null, null);
+                        if (result is long) return (long)result;
+                    }
+                }
+
+                // Could not get the current working set.
+                return 0;
+            }
         }
     }
 }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Text;
 
@@ -20,11 +19,7 @@ namespace System.Net.Http
         internal const int MaxInt32Digits = 10;
 
         // iso-8859-1, Western European (ISO)
-#if uap
-        internal static readonly Encoding DefaultHttpEncoding = Encoding.GetEncoding("iso-8859-1");
-#else
         internal static readonly Encoding DefaultHttpEncoding = Encoding.GetEncoding(28591);
-#endif
 
         private static bool[] CreateTokenChars()
         {
@@ -71,7 +66,6 @@ namespace System.Net.Http
             return s_tokenChars[character];
         }
 
-        [Pure]
         internal static int GetTokenLength(string input, int startIndex)
         {
             Debug.Assert(input != null);
@@ -94,7 +88,6 @@ namespace System.Net.Http
             return input.Length - startIndex;
         }
 
-        [Pure]
         internal static bool IsToken(string input)
         {
             for (int i = 0; i < input.Length; i++)
@@ -108,7 +101,6 @@ namespace System.Net.Http
             return true;
         }
 
-        [Pure]
         internal static bool IsToken(ReadOnlySpan<byte> input)
         {
             for (int i = 0; i < input.Length; i++)

@@ -299,7 +299,7 @@ namespace System.Runtime.Loader
 
             if (PathInternal.IsPartiallyQualified(assemblyPath))
             {
-                throw new ArgumentException(SR.Argument_AbsolutePathRequired, nameof(assemblyPath));
+                throw new ArgumentException(SR.Format(SR.Argument_AbsolutePathRequired, assemblyPath), nameof(assemblyPath));
             }
 
             lock (_unloadLock)
@@ -319,12 +319,12 @@ namespace System.Runtime.Loader
 
             if (PathInternal.IsPartiallyQualified(nativeImagePath))
             {
-                throw new ArgumentException(SR.Argument_AbsolutePathRequired, nameof(nativeImagePath));
+                throw new ArgumentException(SR.Format(SR.Argument_AbsolutePathRequired, nativeImagePath), nameof(nativeImagePath));
             }
 
             if (assemblyPath != null && PathInternal.IsPartiallyQualified(assemblyPath))
             {
-                throw new ArgumentException(SR.Argument_AbsolutePathRequired, nameof(assemblyPath));
+                throw new ArgumentException(SR.Format(SR.Argument_AbsolutePathRequired, assemblyPath), nameof(assemblyPath));
             }
 
             lock (_unloadLock)
@@ -394,10 +394,10 @@ namespace System.Runtime.Loader
 
             if (PathInternal.IsPartiallyQualified(unmanagedDllPath))
             {
-                throw new ArgumentException(SR.Argument_AbsolutePathRequired, nameof(unmanagedDllPath));
+                throw new ArgumentException(SR.Format(SR.Argument_AbsolutePathRequired, unmanagedDllPath), nameof(unmanagedDllPath));
             }
 
-            return InternalLoadUnmanagedDllFromPath(unmanagedDllPath);
+            return NativeLibrary.Load(unmanagedDllPath);
         }
 
         // Custom AssemblyLoadContext implementations can override this
@@ -604,7 +604,7 @@ namespace System.Runtime.Loader
             return null;
         }
 
-        private Assembly ValidateAssemblyNameWithSimpleName(Assembly assembly, string? requestedSimpleName)
+        private static Assembly ValidateAssemblyNameWithSimpleName(Assembly assembly, string? requestedSimpleName)
         {
             // Get the name of the loaded assembly
             string? loadedSimpleName = null;
@@ -706,12 +706,12 @@ namespace System.Runtime.Loader
             // Called by native runtime when CultureName is not empty
             Debug.Assert(assemblyName.CultureName?.Length > 0);
 
-            string satelliteSuffix = ".resources";
+            const string SatelliteSuffix = ".resources";
 
-            if (assemblyName.Name == null || !assemblyName.Name.EndsWith(satelliteSuffix, StringComparison.Ordinal))
+            if (assemblyName.Name == null || !assemblyName.Name.EndsWith(SatelliteSuffix, StringComparison.Ordinal))
                 return null;
 
-            string parentAssemblyName = assemblyName.Name.Substring(0, assemblyName.Name.Length - satelliteSuffix.Length);
+            string parentAssemblyName = assemblyName.Name.Substring(0, assemblyName.Name.Length - SatelliteSuffix.Length);
 
             Assembly parentAssembly = LoadFromAssemblyName(new AssemblyName(parentAssemblyName));
 
@@ -736,6 +736,28 @@ namespace System.Runtime.Loader
             }
 
             return null;
+        }
+
+        internal IntPtr GetResolvedUnmanagedDll(Assembly assembly, string unmanagedDllName)
+        {
+            IntPtr resolvedDll = IntPtr.Zero;
+
+            Func<Assembly, string, IntPtr>? dllResolveHandler = _resolvingUnmanagedDll;
+
+            if (dllResolveHandler != null)
+            {
+                // Loop through the event subscribers and return the first non-null native library handle
+                foreach (Func<Assembly, string, IntPtr> handler in dllResolveHandler.GetInvocationList())
+                {
+                    resolvedDll = handler(assembly, unmanagedDllName);
+                    if (resolvedDll != IntPtr.Zero)
+                    {
+                        return resolvedDll;
+                    }
+                }
+            }
+
+            return IntPtr.Zero;
         }
     }
 

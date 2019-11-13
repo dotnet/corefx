@@ -32,6 +32,22 @@ namespace System.Net.Http.Functional.Tests
                 IWebProxy proxy = new WebProxy("http://localhost:3128/");
                 HttpClient.DefaultProxy = proxy;
                 Assert.True(Object.ReferenceEquals(proxy, HttpClient.DefaultProxy));
+            }).Dispose();
+        }
+
+        [Fact]
+        public void DefaultProxy_Credentials_SetGet_Roundtrips()
+        {
+            RemoteExecutor.Invoke(() =>
+            {
+                IWebProxy proxy = HttpClient.DefaultProxy;
+                ICredentials nc = proxy.Credentials;
+
+                proxy.Credentials = null;
+                Assert.Null(proxy.Credentials);
+
+                proxy.Credentials = nc;
+                Assert.Same(nc, proxy.Credentials);
 
                 return RemoteExecutor.SuccessExitCode;
             }).Dispose();
@@ -85,7 +101,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var client = new HttpClient())
             {
-                Assert.Equal(PlatformDetection.IsUap ? new Version(2, 0) : new Version(1, 1), client.DefaultRequestVersion);
+                Assert.Equal(HttpVersion.Version11, client.DefaultRequestVersion);
                 Assert.Same(client.DefaultRequestVersion, client.DefaultRequestVersion);
             }
         }

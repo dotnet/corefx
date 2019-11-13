@@ -24,7 +24,7 @@ namespace System.IO
         public static readonly TextWriter Null = new NullTextWriter();
 
         // We don't want to allocate on every TextWriter creation, so cache the char array.
-        private static readonly char[] s_coreNewLine = Environment.NewLine.ToCharArray();
+        private static readonly char[] s_coreNewLine = Environment.NewLineConst.ToCharArray();
 
         /// <summary>
         /// This is the 'NewLine' property expressed as a char[].
@@ -34,7 +34,7 @@ namespace System.IO
         /// as they are shared among many instances of TextWriter.
         /// </summary>
         protected char[] CoreNewLine = s_coreNewLine;
-        private string CoreNewLineStr = Environment.NewLine;
+        private string CoreNewLineStr = Environment.NewLineConst;
 
         // Can be null - if so, ask for the Thread's CurrentCulture every time.
         private readonly IFormatProvider? _internalFormatProvider;
@@ -126,14 +126,13 @@ namespace System.IO
             {
                 if (value == null)
                 {
-                    value = Environment.NewLine;
+                    value = Environment.NewLineConst;
                 }
 
                 CoreNewLineStr = value;
                 CoreNewLine = value.ToCharArray();
             }
         }
-
 
         // Writes a character to the text stream. This default method is empty,
         // but descendant classes can override the method to provide the
@@ -342,7 +341,6 @@ namespace System.IO
         {
             Write(string.Format(FormatProvider, format, arg));
         }
-
 
         // Writes a line terminator to the text stream. The default line terminator
         // is Environment.NewLine, but this value can be changed by setting the NewLine property.
@@ -698,11 +696,8 @@ namespace System.IO
 
         public virtual Task FlushAsync()
         {
-            return Task.Factory.StartNew(state =>
-            {
-                ((TextWriter)state!).Flush();
-            },
-            this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+            return Task.Factory.StartNew(state => ((TextWriter)state!).Flush(), this,
+                CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
         #endregion
 

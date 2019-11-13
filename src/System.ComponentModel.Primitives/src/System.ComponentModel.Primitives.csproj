@@ -2,7 +2,8 @@
   <PropertyGroup>
     <RootNamespace>System.ComponentModel.Primitives</RootNamespace>
     <AssemblyName>System.ComponentModel.Primitives</AssemblyName>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\ComponentModel\ISynchronizeInvoke.cs" />
@@ -40,6 +41,7 @@
     <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.ComponentModel" />
     <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.ObjectModel" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />

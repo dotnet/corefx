@@ -29,9 +29,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-#if ENABLE_WINRT
-using Internal.Runtime.Augments;
-#endif
 
 namespace System.Globalization
 {
@@ -331,7 +328,7 @@ namespace System.Globalization
             }
 
             // In the most common case, they've given us a specific culture, so we'll just return that.
-            if (!(culture.IsNeutralCulture))
+            if (!culture.IsNeutralCulture)
             {
                 return culture;
             }
@@ -392,22 +389,6 @@ namespace System.Globalization
         {
             get
             {
-#if ENABLE_WINRT
-                WinRTInteropCallbacks callbacks = WinRTInterop.UnsafeCallbacks;
-                if (callbacks != null && callbacks.IsAppxModel())
-                {
-                    return (CultureInfo)callbacks.GetUserDefaultCulture();
-                }
-#endif
-#if FEATURE_APPX
-                if (ApplicationModel.IsUap)
-                {
-                    CultureInfo? culture = GetCultureInfoForUserPreferredLanguageInAppX();
-                    if (culture != null)
-                        return culture;
-                }
-#endif
-
                 return s_currentThreadCulture ??
                     s_DefaultThreadCurrentCulture ??
                     s_userDefaultCulture ??
@@ -419,25 +400,6 @@ namespace System.Globalization
                 {
                     throw new ArgumentNullException(nameof(value));
                 }
-
-#if ENABLE_WINRT
-                WinRTInteropCallbacks callbacks = WinRTInterop.UnsafeCallbacks;
-                if (callbacks != null && callbacks.IsAppxModel())
-                {
-                    callbacks.SetGlobalDefaultCulture(value);
-                    return;
-                }
-#endif
-#if FEATURE_APPX
-                if (ApplicationModel.IsUap)
-                {
-                    if (SetCultureInfoForUserPreferredLanguageInAppX(value))
-                    {
-                        // successfully set the culture, otherwise fallback to legacy path
-                        return;
-                    }
-                }
-#endif
 
                 if (s_asyncLocalCurrentCulture == null)
                 {
@@ -451,22 +413,6 @@ namespace System.Globalization
         {
             get
             {
-#if ENABLE_WINRT
-                WinRTInteropCallbacks callbacks = WinRTInterop.UnsafeCallbacks;
-                if (callbacks != null && callbacks.IsAppxModel())
-                {
-                    return (CultureInfo)callbacks.GetUserDefaultCulture();
-                }
-#endif
-#if FEATURE_APPX
-                if (ApplicationModel.IsUap)
-                {
-                    CultureInfo? culture = GetCultureInfoForUserPreferredLanguageInAppX();
-                    if (culture != null)
-                        return culture;
-                }
-#endif
-
                 return s_currentThreadUICulture ??
                     s_DefaultThreadCurrentUICulture ??
                     UserDefaultUICulture;
@@ -479,25 +425,6 @@ namespace System.Globalization
                 }
 
                 CultureInfo.VerifyCultureName(value, true);
-
-#if ENABLE_WINRT
-                WinRTInteropCallbacks callbacks = WinRTInterop.UnsafeCallbacks;
-                if (callbacks != null && callbacks.IsAppxModel())
-                {
-                    callbacks.SetGlobalDefaultCulture(value);
-                    return;
-                }
-#endif
-#if FEATURE_APPX
-                if (ApplicationModel.IsUap)
-                {
-                    if (SetCultureInfoForUserPreferredLanguageInAppX(value))
-                    {
-                        // successfully set the culture, otherwise fallback to legacy path
-                        return;
-                    }
-                }
-#endif
 
                 if (s_asyncLocalCurrentUICulture == null)
                 {
@@ -609,34 +536,12 @@ namespace System.Globalization
         /// Returns the full name of the CultureInfo. The name is in format like
         /// "en-US" This version does NOT include sort information in the name.
         /// </summary>
-        public virtual string Name
-        {
-            get
-            {
-                // We return non sorting name here.
-                if (_nonSortName == null)
-                {
-                    _nonSortName = _cultureData.Name ?? string.Empty;
-                }
-                return _nonSortName;
-            }
-        }
+        public virtual string Name => _nonSortName ??= (_cultureData.Name ?? string.Empty);
 
         /// <summary>
         /// This one has the sort information (ie: de-DE_phoneb)
         /// </summary>
-        internal string SortName
-        {
-            get
-            {
-                if (_sortName == null)
-                {
-                    _sortName = _cultureData.SortName;
-                }
-
-                return _sortName;
-            }
-        }
+        internal string SortName => _sortName ??= _cultureData.SortName;
 
         public string IetfLanguageTag =>
                 // special case the compatibility cultures
@@ -694,21 +599,10 @@ namespace System.Globalization
         /// <summary>
         /// Gets the CompareInfo for this culture.
         /// </summary>
-        public virtual CompareInfo CompareInfo
-        {
-            get
-            {
-                if (_compareInfo == null)
-                {
-                    // Since CompareInfo's don't have any overrideable properties, get the CompareInfo from
-                    // the Non-Overridden CultureInfo so that we only create one CompareInfo per culture
-                    _compareInfo = UseUserOverride
-                                    ? GetCultureInfo(_name).CompareInfo
-                                    : new CompareInfo(this);
-                }
-                return _compareInfo;
-            }
-        }
+        public virtual CompareInfo CompareInfo => _compareInfo ??=
+            // Since CompareInfo's don't have any overrideable properties, get the CompareInfo from
+            // the Non-Overridden CultureInfo so that we only create one CompareInfo per culture
+            (UseUserOverride ? GetCultureInfo(_name).CompareInfo : new CompareInfo(this));
 
         /// <summary>
         /// Gets the TextInfo for this culture.
@@ -750,7 +644,6 @@ namespace System.Globalization
             return Name.GetHashCode() + CompareInfo.GetHashCode();
         }
 
-
         /// <summary>
         /// Implements object.ToString(). Returns the name of the CultureInfo,
         /// eg. "de-DE_phoneb", "en-US", or "fj-FJ".
@@ -777,26 +670,24 @@ namespace System.Globalization
         {
             get
             {
-                CultureTypes types = 0;
+                CultureTypes types = _cultureData.IsNeutralCulture ?
+                    CultureTypes.NeutralCultures :
+                    CultureTypes.SpecificCultures;
 
-                if (_cultureData.IsNeutralCulture)
+                if (_cultureData.IsWin32Installed)
                 {
-                    types |= CultureTypes.NeutralCultures;
-                }
-                else
-                {
-                    types |= CultureTypes.SpecificCultures;
+                    types |= CultureTypes.InstalledWin32Cultures;
                 }
 
-                types |= _cultureData.IsWin32Installed ? CultureTypes.InstalledWin32Cultures : 0;
+                if (_cultureData.IsSupplementalCustomCulture)
+                {
+                    types |= CultureTypes.UserCustomCulture;
+                }
 
-                // Disable  warning 618: System.Globalization.CultureTypes.FrameworkCultures' is obsolete
-#pragma warning disable 618
-                types |= _cultureData.IsFramework ? CultureTypes.FrameworkCultures : 0;
-#pragma warning restore 618
-
-                types |= _cultureData.IsSupplementalCustomCulture ? CultureTypes.UserCustomCulture : 0;
-                types |= _cultureData.IsReplacementCulture ? CultureTypes.ReplacementCultures | CultureTypes.UserCustomCulture : 0;
+                if (_cultureData.IsReplacementCulture)
+                {
+                    types |= CultureTypes.ReplacementCultures;
+                }
 
                 return types;
             }
@@ -1012,7 +903,15 @@ namespace System.Globalization
                 ci._textInfo = (TextInfo)_textInfo.Clone();
             }
 
-            if (_calendar != null)
+            if (_dateTimeInfo != null && _dateTimeInfo.Calendar == _calendar)
+            {
+                // Usually when we access CultureInfo.DateTimeFormat first time, we create the DateTimeFormatInfo object
+                // using CultureInfo.Calendar. i.e. CultureInfo.DateTimeInfo.Calendar == CultureInfo.calendar.
+                // When cloning CultureInfo, if we know it's still the case that CultureInfo.DateTimeInfo.Calendar == CultureInfo.calendar
+                // then we can keep the same behavior for the cloned object and no need to create another calendar object.
+                ci._calendar = ci.DateTimeFormat.Calendar;
+            }
+            else if (_calendar != null)
             {
                 ci._calendar = (Calendar)_calendar.Clone();
             }
@@ -1071,7 +970,6 @@ namespace System.Globalization
 
             return newInfo;
         }
-
 
         public bool IsReadOnly => _isReadOnly;
 

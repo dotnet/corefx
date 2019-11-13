@@ -96,9 +96,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [Fact]
-        public void Ctor_ExpectedDefaultPropertyValues_NotUapPlatform()
+        public void Ctor_ExpectedDefaultPropertyValues()
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
@@ -112,21 +111,6 @@ namespace System.Net.Http.Functional.Tests
                 Assert.False(handler.CheckCertificateRevocationList);
                 Assert.Equal(0, handler.MaxRequestContentBufferSize);
                 Assert.Equal(SslProtocols.None, handler.SslProtocols);
-            }
-        }
-
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsUap))]
-        public void Ctor_ExpectedDefaultPropertyValues_UapPlatform()
-        {
-            using (HttpClientHandler handler = CreateHttpClientHandler())
-            {
-                Assert.True(handler.CheckCertificateRevocationList);
-                Assert.Equal(0, handler.MaxRequestContentBufferSize);
-                Assert.Equal(-1, handler.MaxResponseHeadersLength);
-                Assert.True(handler.PreAuthenticate);
-                Assert.Equal(SslProtocols.None, handler.SslProtocols);
-                Assert.False(handler.SupportsProxy);
-                Assert.False(handler.SupportsRedirectConfiguration);
             }
         }
 
@@ -171,7 +155,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop("Uses external servers")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP will send default credentials based on other criteria.")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -236,7 +219,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(22158, TargetFrameworkMonikers.Uap)]
         [ConditionalFact]
         public async Task GetAsync_IPv6LinkLocalAddressUri_Success()
         {
@@ -317,7 +299,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Theory]
         [InlineData("[::1234]")]
         [InlineData("[::1234]:8080")]
@@ -344,7 +325,6 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Theory]
         [InlineData("1.2.3.4")]
         [InlineData("1.2.3.4:8080")]
@@ -380,7 +360,6 @@ namespace System.Net.Http.Functional.Tests
             yield return new object[] { "[::1234]" };
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Theory]
         [OuterLoop("Uses external server")]
         [MemberData(nameof(DestinationHost_MemberData))]
@@ -408,7 +387,6 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Fact]
         [OuterLoop("Uses external server")]
         public async Task ProxyTunnelRequest_PortSpecified_NotStrippedOffInUri()
@@ -437,7 +415,6 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -494,7 +471,6 @@ namespace System.Net.Http.Functional.Tests
             from useSsl in new[] { true, false }
             select new object[] { address, useSsl };
 
-        [ActiveIssue(30056, TargetFrameworkMonikers.Uap)]
         [ConditionalTheory]
         [MemberData(nameof(SecureAndNonSecure_IPBasedUri_MemberData))]
         public async Task GetAsync_SecureAndNonSecureIPBasedUri_CorrectlyFormatted(IPAddress address, bool useSsl)
@@ -530,7 +506,6 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
-        [ActiveIssue(32647, TargetFrameworkMonikers.Uap)]
         [OuterLoop("Uses external server")]
         [Theory, MemberData(nameof(RemoteServersMemberData))]
         public async Task GetAsync_ServerNeedsBasicAuthAndSetDefaultCredentials_StatusCodeUnauthorized(Configuration.Http.RemoteServer remoteServer)
@@ -565,24 +540,16 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop("Uses external server")]
         [Fact]
-        public void GetAsync_ServerNeedsAuthAndNoCredential_StatusCodeUnauthorized()
+        public async Task GetAsync_ServerNeedsAuthAndNoCredential_StatusCodeUnauthorized()
         {
-            // UAP HTTP stack caches connections per-process. This causes interference when these tests run in
-            // the same process as the other tests. Each test needs to be isolated to its own process.
-            // See dicussion: https://github.com/dotnet/corefx/issues/21945
-            RemoteExecutor.Invoke(async (useSocketsHttpHandlerString, useHttp2String) =>
+            using (HttpClient client = CreateHttpClient(UseSocketsHttpHandler.ToString(), UseHttp2.ToString()))
             {
-                using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString, useHttp2String))
+                Uri uri = Configuration.Http.RemoteHttp11Server.BasicAuthUriForCreds(userName: Username, password: Password);
+                using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
-                    Uri uri = Configuration.Http.RemoteHttp11Server.BasicAuthUriForCreds(userName: Username, password: Password);
-                    using (HttpResponseMessage response = await client.GetAsync(uri))
-                    {
-                        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-                    }
-
-                    return RemoteExecutor.SuccessExitCode;
+                    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
                 }
-            }, UseSocketsHttpHandler.ToString(), UseHttp2.ToString()).Dispose();
+            }
         }
 
         [Theory]
@@ -610,7 +577,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop("Uses external server")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         [Theory]
         [MemberData(nameof(RemoteServersAndHeaderEchoUrisMemberData))]
         public async Task GetAsync_RequestHeadersAddCustomHeaders_HeaderAndEmptyValueSent(Configuration.Http.RemoteServer remoteServer, Uri uri)
@@ -721,7 +687,6 @@ namespace System.Net.Http.Functional.Tests
 
         public static IEnumerable<object[]> RemoteServersAndHeaderEchoUrisMemberData() => RemoteServersAndHeaderEchoUris().Select(x => new object[] { x.remoteServer, x.uri });
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP ignores invalid headers")]
         [Theory]
         [InlineData(":")]
         [InlineData("\x1234: \x5678")]
@@ -730,13 +695,6 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("Content-Length      ")]
         public async Task GetAsync_InvalidHeaderNameValue_ThrowsHttpRequestException(string invalidHeader)
         {
-            if (IsCurlHandler && invalidHeader.Contains(':'))
-            {
-                // Issue #27172
-                // CurlHandler allows these headers as long as they have a colon.
-                return;
-            }
-
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -753,7 +711,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(true, true)]
         public async Task GetAsync_IncompleteData_ThrowsHttpRequestException(bool failDuringHeaders, bool getString)
         {
-            if (IsWinHttpHandler || IsUapHandler)
+            if (IsWinHttpHandler)
             {
                 // [ActiveIssue(39136)]
                 return;
@@ -884,10 +842,7 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Equal("12", requestData.GetSingleHeaderValue("Age"));
                     Assert.Equal("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", requestData.GetSingleHeaderValue("Authorization"));
                     Assert.Equal("no-cache", requestData.GetSingleHeaderValue("Cache-Control"));
-                    if (!IsNetfxHandler)
-                    {
-                        Assert.Equal("$Version=1; Skin=new", requestData.GetSingleHeaderValue("Cookie"));
-                    }
+                    Assert.Equal("$Version=1; Skin=new", requestData.GetSingleHeaderValue("Cookie"));
                     Assert.Equal("Tue, 15 Nov 1994 08:12:31 GMT", requestData.GetSingleHeaderValue("Date"));
                     Assert.Equal("100-continue", requestData.GetSingleHeaderValue("Expect"));
                     Assert.Equal("for=192.0.2.60;proto=http;by=203.0.113.43", requestData.GetSingleHeaderValue("Forwarded"));
@@ -941,10 +896,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Equal("en.wikipedia.org:8080", requestData.GetSingleHeaderValue("Host"));
                         Assert.Equal("trailers, deflate", requestData.GetSingleHeaderValue("TE"));
                         Assert.Equal("HTTPS/1.3, IRC/6.9, RTA/x11, websocket", requestData.GetSingleHeaderValue("Upgrade"));
-                        if (!IsNetfxHandler && !PlatformDetection.IsUap)
-                        {
-                            Assert.Equal("keep-alive", requestData.GetSingleHeaderValue("Proxy-Connection"));
-                        }
+                        Assert.Equal("keep-alive", requestData.GetSingleHeaderValue("Proxy-Connection"));
                     }
                 }
             });
@@ -956,17 +908,10 @@ namespace System.Net.Http.Functional.Tests
             from dribble in new[] { false, true }
             select new object[] { newline, fold, dribble };
 
-        [ActiveIssue(30060, TargetFrameworkMonikers.Uap)]
         [ConditionalTheory]
         [MemberData(nameof(GetAsync_ManyDifferentResponseHeaders_ParsedCorrectly_MemberData))]
         public async Task GetAsync_ManyDifferentResponseHeaders_ParsedCorrectly(string newline, string fold, bool dribble)
         {
-            if (IsCurlHandler && !string.IsNullOrEmpty(fold))
-            {
-                // CurlHandler doesn't currently support folded headers.
-                return;
-            }
-
             if (LoopbackServerFactory.IsHttp2)
             {
                 throw new SkipTestException("Folding is not supported on HTTP/2.");
@@ -1138,7 +1083,6 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Test hangs due to bugs in WinRT HTTP stack")]
         [Theory]
         [InlineData("")] // missing size
         [InlineData("    ")] // missing size
@@ -1148,12 +1092,6 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("7\v\f")] // unacceptable whitespace
         public async Task GetAsync_InvalidChunkSize_ThrowsHttpRequestException(string chunkSize)
         {
-            if (IsCurlHandler)
-            {
-                // libcurl allows any arbitrary characters after the hex value
-                return;
-            }
-
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -1384,23 +1322,11 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Throws<ArgumentOutOfRangeException>(() => responseStream.BeginRead(new byte[1], 0, -1, null, null));
                         Assert.ThrowsAny<ArgumentException>(() => responseStream.BeginRead(new byte[1], 0, 2, null, null));
                         Assert.Throws<ArgumentNullException>(() => responseStream.EndRead(null));
-                        if (IsNetfxHandler)
-                        {
-                            // Argument exceptions on netfx are thrown out of these asynchronously rather than synchronously
-                            await Assert.ThrowsAsync<ArgumentNullException>(() => responseStream.ReadAsync(null, 0, 100, default));
-                            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => responseStream.ReadAsync(new byte[1], -1, 1, default));
-                            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => responseStream.ReadAsync(new byte[1], 2, 1, default));
-                            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => responseStream.ReadAsync(new byte[1], 0, -1, default));
-                            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => responseStream.ReadAsync(new byte[1], 0, 2, default));
-                        }
-                        else
-                        {
-                            Assert.Throws<ArgumentNullException>(() => { responseStream.ReadAsync(null, 0, 100, default); });
-                            Assert.Throws<ArgumentOutOfRangeException>(() => { responseStream.ReadAsync(new byte[1], -1, 1, default); });
-                            Assert.ThrowsAny<ArgumentException>(() => { responseStream.ReadAsync(new byte[1], 2, 1, default); });
-                            Assert.Throws<ArgumentOutOfRangeException>(() => { responseStream.ReadAsync(new byte[1], 0, -1, default); });
-                            Assert.ThrowsAny<ArgumentException>(() => { responseStream.ReadAsync(new byte[1], 0, 2, default); });
-                        }
+                        Assert.Throws<ArgumentNullException>(() => { responseStream.ReadAsync(null, 0, 100, default); });
+                        Assert.Throws<ArgumentOutOfRangeException>(() => { responseStream.ReadAsync(new byte[1], -1, 1, default); });
+                        Assert.ThrowsAny<ArgumentException>(() => { responseStream.ReadAsync(new byte[1], 2, 1, default); });
+                        Assert.Throws<ArgumentOutOfRangeException>(() => { responseStream.ReadAsync(new byte[1], 0, -1, default); });
+                        Assert.ThrowsAny<ArgumentException>(() => { responseStream.ReadAsync(new byte[1], 0, 2, default); });
 
                         // Various forms of reading
                         var buffer = new byte[1];
@@ -1422,15 +1348,12 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Equal(1, responseStream.Read(buffer, 0, 1));
                         Assert.Equal((byte)' ', buffer[0]);
 
-                        if (!IsNetfxHandler)
-                        {
-                            // Doing any of these 0-byte reads causes the connection to fail.
-                            Assert.Equal(0, await Task.Factory.FromAsync(responseStream.BeginRead, responseStream.EndRead, Array.Empty<byte>(), 0, 0, null));
-                            Assert.Equal(0, await responseStream.ReadAsync(Memory<byte>.Empty));
-                            Assert.Equal(0, await responseStream.ReadAsync(Array.Empty<byte>(), 0, 0));
-                            Assert.Equal(0, responseStream.Read(Span<byte>.Empty));
-                            Assert.Equal(0, responseStream.Read(Array.Empty<byte>(), 0, 0));
-                        }
+                        // Doing any of these 0-byte reads causes the connection to fail.
+                        Assert.Equal(0, await Task.Factory.FromAsync(responseStream.BeginRead, responseStream.EndRead, Array.Empty<byte>(), 0, 0, null));
+                        Assert.Equal(0, await responseStream.ReadAsync(Memory<byte>.Empty));
+                        Assert.Equal(0, await responseStream.ReadAsync(Array.Empty<byte>(), 0, 0));
+                        Assert.Equal(0, responseStream.Read(Span<byte>.Empty));
+                        Assert.Equal(0, responseStream.Read(Array.Empty<byte>(), 0, 0));
 
                         // And copying
                         var ms = new MemoryStream();
@@ -1528,16 +1451,12 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Throws<ArgumentOutOfRangeException>(() => responseStream.BeginRead(new byte[1], 0, -1, null, null));
                         Assert.ThrowsAny<ArgumentException>(() => responseStream.BeginRead(new byte[1], 0, 2, null, null));
                         Assert.Throws<ArgumentNullException>(() => responseStream.EndRead(null));
-                        if (!IsNetfxHandler)
-                        {
-                            // The netfx handler doesn't validate these arguments.
-                            Assert.Throws<ArgumentNullException>(() => { responseStream.CopyTo(null); });
-                            Assert.Throws<ArgumentNullException>(() => { responseStream.CopyToAsync(null, 100, default); });
-                            Assert.Throws<ArgumentNullException>(() => { responseStream.CopyToAsync(null, 100, default); });
-                            Assert.Throws<ArgumentNullException>(() => { responseStream.Read(null, 0, 100); });
-                            Assert.Throws<ArgumentNullException>(() => { responseStream.ReadAsync(null, 0, 100, default); });
-                            Assert.Throws<ArgumentNullException>(() => { responseStream.BeginRead(null, 0, 100, null, null); });
-                        }
+                        Assert.Throws<ArgumentNullException>(() => { responseStream.CopyTo(null); });
+                        Assert.Throws<ArgumentNullException>(() => { responseStream.CopyToAsync(null, 100, default); });
+                        Assert.Throws<ArgumentNullException>(() => { responseStream.CopyToAsync(null, 100, default); });
+                        Assert.Throws<ArgumentNullException>(() => { responseStream.Read(null, 0, 100); });
+                        Assert.Throws<ArgumentNullException>(() => { responseStream.ReadAsync(null, 0, 100, default); });
+                        Assert.Throws<ArgumentNullException>(() => { responseStream.BeginRead(null, 0, 100, null, null); });
 
                         // Empty reads
                         var buffer = new byte[1];
@@ -1625,12 +1544,6 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(1000)]
         public async Task GetAsync_StatusCodeOutOfRange_ExpectedException(int statusCode)
         {
-            if (PlatformDetection.IsUap && statusCode == 99)
-            {
-                // UAP platform allows this status code due to historical reasons.
-                return;
-            }
-
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -1930,7 +1843,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
         [Fact]
         public async Task GetAsync_ExpectContinueTrue_NoContent_StillSendsHeader()
         {
@@ -1983,11 +1895,6 @@ namespace System.Net.Http.Functional.Tests
             const string SetCookieIgnored1 = "hello=world";
             const string SetCookieIgnored2 = "net=core";
 
-            // Set-Cookie header will not be ignored with CurlHandler.
-            int containerCookiesCount = IsCurlHandler ? 3 : 1;
-            string containerCookiesExpected = IsCurlHandler ?
-                SetCookieIgnored1 + "; " + SetCookieIgnored2 + "; " + SetCookieExpected : SetCookieExpected;
-
             await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
             {
                 using (var handler = CreateHttpClientHandler())
@@ -2004,8 +1911,8 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Equal(1, response.Headers.GetValues("Cookie").Count());
                     Assert.Equal(CookieHeaderExpected, response.Headers.GetValues("Cookie").First().ToString());
                     // Verify Set-Cookie header.
-                    Assert.Equal(containerCookiesCount, handler.CookieContainer.Count);
-                    Assert.Equal(containerCookiesExpected, handler.CookieContainer.GetCookieHeader(uri));
+                    Assert.Equal(1, handler.CookieContainer.Count);
+                    Assert.Equal(SetCookieExpected, handler.CookieContainer.GetCookieHeader(uri));
                     // Verify Content-type header.
                     Assert.Equal(ContentTypeHeaderExpected, response.Content.Headers.ContentType.ToString());
                     clientFinished.SetResult(true);
@@ -2121,12 +2028,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task SendAsync_No100ContinueReceived_RequestBodySentEventually()
         {
-            // CurlHandler will not send request body if it doesn't see 100-Continue.
-            // This is not correct. Per RFC 7231: A client that sends a 100-continue expectation is not required
-            // to wait for any specific length of time; such a client MAY proceed to send the message body even
-            // if it has not yet received a response.
-            if (IsCurlHandler) return;
-
             var clientFinished = new TaskCompletionSource<bool>();
             const string RequestString = "request";
             const string ResponseString = "response";
@@ -2169,7 +2070,7 @@ namespace System.Net.Http.Functional.Tests
         {
             // WinHttpHandler and CurlHandler will hang, waiting for additional response.
             // Other handlers will accept 101 as a final response.
-            if (IsWinHttpHandler || IsCurlHandler) return;
+            if (IsWinHttpHandler) return;
 
             if (LoopbackServerFactory.IsHttp2)
             {
@@ -2198,7 +2099,6 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [ActiveIssue(30061, TargetFrameworkMonikers.Uap)]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -2223,15 +2123,7 @@ namespace System.Net.Http.Functional.Tests
                         readFunc: (buffer, offset, count) => throw error,
                         readAsyncFunc: (buffer, offset, count, cancellationToken) => syncFailure ? throw error : Task.Delay(1).ContinueWith<int>(_ => throw error)));
 
-                    if (PlatformDetection.IsUap)
-                    {
-                        HttpRequestException requestException = await Assert.ThrowsAsync<HttpRequestException>(() => client.PostAsync(uri, content));
-                        Assert.Same(error, requestException.InnerException);
-                    }
-                    else
-                    {
-                        Assert.Same(error, await Assert.ThrowsAsync<FormatException>(() => client.PostAsync(uri, content)));
-                    }
+                    Assert.Same(error, await Assert.ThrowsAsync<FormatException>(() => client.PostAsync(uri, content)));
                 }
             });
         }
@@ -2257,7 +2149,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(22191, TargetFrameworkMonikers.Uap)]
         [OuterLoop("Takes several seconds")]
         [Theory, MemberData(nameof(RemoteServersMemberData))]
         public async Task PostAsync_RedirectWith307_LargePayload(Configuration.Http.RemoteServer remoteServer)
@@ -2386,18 +2277,10 @@ namespace System.Net.Http.Functional.Tests
                     new HttpMethod(method),
                     serverUri) { Version = VersionFromUseHttp2 };
 
-                if (PlatformDetection.IsUap && method == "TRACE")
+                using (HttpResponseMessage response = await client.SendAsync(request))
                 {
-                    HttpRequestException ex = await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(request));
-                    Assert.IsType<PlatformNotSupportedException>(ex.InnerException);
-                }
-                else
-                {
-                    using (HttpResponseMessage response = await client.SendAsync(request))
-                    {
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        TestHelper.VerifyRequestMethod(response, method);
-                    }
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    TestHelper.VerifyRequestMethod(response, method);
                 }
             }
         }
@@ -2431,7 +2314,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(30057, TargetFrameworkMonikers.Uap)]
         [OuterLoop("Uses external server")]
         [Theory]
         [InlineData("12345678910", 0)]
@@ -2472,14 +2354,6 @@ namespace System.Net.Http.Functional.Tests
             string method,
             Uri serverUri)
         {
-            if (PlatformDetection.IsUap && method == "TRACE")
-            {
-                // UAP platform doesn't allow a content body with this HTTP verb.
-                // It will throw an exception HttpRequestException/COMException
-                // with "The requested operation is invalid" message.
-                return;
-            }
-
             using (HttpClient client = CreateHttpClient())
             {
                 var request = new HttpRequestMessage(
@@ -2512,7 +2386,6 @@ namespace System.Net.Http.Functional.Tests
 #endregion
 
 #region Version tests
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not allow HTTP/1.0 requests.")]
         [OuterLoop("Uses external server")]
         [Fact]
         public async Task SendAsync_RequestVersion10_ServerReceivesVersion10Request()
@@ -2681,7 +2554,7 @@ namespace System.Net.Http.Functional.Tests
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public async Task GetAsync_InvalidUrl_ExpectedExceptionThrown()
         {
-            string invalidUri = $"http://_{Guid.NewGuid().ToString("N")}";
+            string invalidUri = $"http://{Configuration.Sockets.InvalidHost}";
             _output.WriteLine($"{DateTime.Now} connecting to {invalidUri}");
             using (HttpClient client = CreateHttpClient())
             {

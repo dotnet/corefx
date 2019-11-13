@@ -8,18 +8,7 @@ using System.Text;
 
 namespace System.Security
 {
-    internal interface ISecurityElementFactory
-    {
-        SecurityElement CreateSecurityElement();
-
-        object Copy();
-
-        string GetTag();
-
-        string? Attribute(string attributeName);
-    }
-
-    public sealed class SecurityElement : ISecurityElementFactory
+    public sealed class SecurityElement
     {
         internal string _tag = null!;
         internal string? _text;
@@ -171,7 +160,6 @@ namespace System.Security
         {
             get
             {
-                ConvertSecurityElementFactories();
                 return _children;
             }
 
@@ -182,18 +170,6 @@ namespace System.Security
                     throw new ArgumentException(SR.ArgumentNull_Child);
                 }
                 _children = value;
-            }
-        }
-
-        internal void ConvertSecurityElementFactories()
-        {
-            if (_children == null)
-                return;
-
-            for (int i = 0; i < _children.Count; ++i)
-            {
-                if (_children[i] is ISecurityElementFactory iseFactory && !(_children[i] is SecurityElement))
-                    _children[i] = iseFactory.CreateSecurityElement();
             }
         }
 
@@ -301,9 +277,6 @@ namespace System.Security
                 // Maybe we can get away by only checking the number of children
                 if (_children.Count != other._children.Count)
                     return false;
-
-                ConvertSecurityElementFactories();
-                other.ConvertSecurityElementFactories();
 
                 IEnumerator lhs = _children.GetEnumerator();
                 IEnumerator rhs = other._children.GetEnumerator();
@@ -452,7 +425,7 @@ namespace System.Security
             int index; // Pointer into the string that indicates the location of the current '&' character
             int newIndex = 0; // Pointer into the string that indicates the start index of the "remainging" string (that still needs to be processed).
 
-            do
+            while (true)
             {
                 index = str.IndexOf('&', newIndex);
 
@@ -472,10 +445,8 @@ namespace System.Security
 
                     sb.Append(str, newIndex, index - newIndex);
                     sb.Append(GetUnescapeSequence(str, index, out newIndex)); // updates the newIndex too
-
                 }
             }
-            while (true);
         }
 
         public override string ToString()
@@ -512,7 +483,7 @@ namespace System.Security
 
                     if (i != _attributes.Count - 2)
                     {
-                        write(obj, Environment.NewLine);
+                        write(obj, Environment.NewLineConst);
                     }
                 }
             }
@@ -521,7 +492,7 @@ namespace System.Security
             {
                 // If we are a single tag with no children, just add the end of tag text.
                 write(obj, "/>");
-                write(obj, Environment.NewLine);
+                write(obj, Environment.NewLineConst);
             }
             else
             {
@@ -534,9 +505,7 @@ namespace System.Security
                 // Output any children.
                 if (_children != null)
                 {
-                    ConvertSecurityElementFactories();
-
-                    write(obj, Environment.NewLine);
+                    write(obj, Environment.NewLineConst);
 
                     for (int i = 0; i < _children.Count; ++i)
                     {
@@ -548,7 +517,7 @@ namespace System.Security
                 write(obj, "</");
                 write(obj, _tag);
                 write(obj, ">");
-                write(obj, Environment.NewLine);
+                write(obj, Environment.NewLineConst);
             }
         }
 
@@ -632,28 +601,6 @@ namespace System.Security
                 throw new ArgumentNullException(nameof(xml));
 
             return default;
-        }
-
-        //--------------- ISecurityElementFactory implementation -----------------
-
-        SecurityElement ISecurityElementFactory.CreateSecurityElement()
-        {
-            return this;
-        }
-
-        string ISecurityElementFactory.GetTag()
-        {
-            return ((SecurityElement)this).Tag;
-        }
-
-        object ISecurityElementFactory.Copy()
-        {
-            return ((SecurityElement)this).Copy();
-        }
-
-        string? ISecurityElementFactory.Attribute(string attributeName)
-        {
-            return ((SecurityElement)this).Attribute(attributeName);
         }
     }
 }

@@ -20,7 +20,6 @@ namespace System
         public const ushort MaxValue = (ushort)0xFFFF;
         public const ushort MinValue = 0;
 
-
         // Compares this object to another object, returning an integer that
         // indicates the relationship.
         // Returns a value less than zero if this  object
@@ -35,14 +34,14 @@ namespace System
             }
             if (value is ushort)
             {
-                return ((int)m_value - (int)(((ushort)value).m_value));
+                return (int)m_value - (int)(((ushort)value).m_value);
             }
             throw new ArgumentException(SR.Arg_MustBeUInt16);
         }
 
         public int CompareTo(ushort value)
         {
-            return ((int)m_value - (int)value);
+            return (int)m_value - (int)value;
         }
 
         public override bool Equals(object? obj)
@@ -69,14 +68,13 @@ namespace System
         // Converts the current value to a String in base-10 with no extra padding.
         public override string ToString()
         {
-            return Number.FormatUInt32(m_value, null, null);
+            return Number.UInt32ToDecStr(m_value, -1);
         }
 
         public string ToString(IFormatProvider? provider)
         {
             return Number.FormatUInt32(m_value, null, provider);
         }
-
 
         public string ToString(string? format)
         {
@@ -107,7 +105,6 @@ namespace System
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Parse((ReadOnlySpan<char>)s, style, NumberFormatInfo.CurrentInfo);
         }
-
 
         [CLSCompliant(false)]
         public static ushort Parse(string s, IFormatProvider? provider)

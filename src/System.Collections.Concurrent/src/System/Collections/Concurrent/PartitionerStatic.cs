@@ -68,6 +68,11 @@ namespace System.Collections.Concurrent
     /// </remarks>
     public static class Partitioner
     {
+        // How many chunks do we want to divide the range into?  If this is 1, then the
+        // answer is "one chunk per core".  Generally, though, you'll achieve better
+        // load balancing on a busy system if you make it higher than 1.
+        private const int CoreOversubscriptionRate = 3;
+
         /// <summary>
         /// Creates an orderable partitioner from an <see cref="System.Collections.Generic.IList{T}"/>
         /// instance.
@@ -181,16 +186,12 @@ namespace System.Collections.Concurrent
         /// <returns>A partitioner.</returns>
         /// <exception cref="System.ArgumentOutOfRangeException"> The <paramref name="toExclusive"/> argument is
         /// less than or equal to the <paramref name="fromInclusive"/> argument.</exception>
+        /// <remarks>if ProccessorCount == 1, for correct rangeSize calculation the const CoreOversubscriptionRate must be > 1 (avoid division by 1)</remarks>
         public static OrderablePartitioner<Tuple<long, long>> Create(long fromInclusive, long toExclusive)
         {
-            // How many chunks do we want to divide the range into?  If this is 1, then the
-            // answer is "one chunk per core".  Generally, though, you'll achieve better
-            // load balancing on a busy system if you make it higher than 1.
-            int coreOversubscriptionRate = 3;
-
             if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException(nameof(toExclusive));
-            long rangeSize = (toExclusive - fromInclusive) /
-                (PlatformHelper.ProcessorCount * coreOversubscriptionRate);
+            decimal range = (decimal)toExclusive - fromInclusive;
+            long rangeSize = (long)(range / (Environment.ProcessorCount * CoreOversubscriptionRate));
             if (rangeSize == 0) rangeSize = 1;
             return Partitioner.Create(CreateRanges(fromInclusive, toExclusive, rangeSize), EnumerablePartitionerOptions.NoBuffering); // chunk one range at a time
         }
@@ -238,16 +239,13 @@ namespace System.Collections.Concurrent
         /// <returns>A partitioner.</returns>
         /// <exception cref="System.ArgumentOutOfRangeException"> The <paramref name="toExclusive"/> argument is
         /// less than or equal to the <paramref name="fromInclusive"/> argument.</exception>
+        /// <remarks>if ProccessorCount == 1, for correct rangeSize calculation the const CoreOversubscriptionRate must be > 1 (avoid division by 1),
+        /// and the same issue could occur with rangeSize == -1 when fromInclusive = int.MinValue and toExclusive = int.MaxValue.</remarks>
         public static OrderablePartitioner<Tuple<int, int>> Create(int fromInclusive, int toExclusive)
         {
-            // How many chunks do we want to divide the range into?  If this is 1, then the
-            // answer is "one chunk per core".  Generally, though, you'll achieve better
-            // load balancing on a busy system if you make it higher than 1.
-            int coreOversubscriptionRate = 3;
-
             if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException(nameof(toExclusive));
-            int rangeSize = (toExclusive - fromInclusive) /
-                (PlatformHelper.ProcessorCount * coreOversubscriptionRate);
+            long range = (long)toExclusive - fromInclusive;
+            int rangeSize = (int)(range / (Environment.ProcessorCount * CoreOversubscriptionRate));
             if (rangeSize == 0) rangeSize = 1;
             return Partitioner.Create(CreateRanges(fromInclusive, toExclusive, rangeSize), EnumerablePartitionerOptions.NoBuffering); // chunk one range at a time
         }
@@ -591,7 +589,7 @@ namespace System.Collections.Concurrent
                     {
                         // Time to allocate the fill buffer which is used to reduce the contention on the shared lock.
                         // First pick the buffer size multiplier. We use 4 for when there are more than 4 cores, and just 1 for below. This is based on empirical evidence.
-                        int fillBufferMultiplier = (PlatformHelper.ProcessorCount > 4) ? 4 : 1;
+                        int fillBufferMultiplier = (Environment.ProcessorCount > 4) ? 4 : 1;
 
                         // and allocate the fill buffer using these two numbers
                         _fillBuffer = new KeyValuePair<long, TSource>[fillBufferMultiplier * Partitioner.GetDefaultChunkSize<TSource>()];
@@ -793,7 +791,7 @@ namespace System.Collections.Concurrent
                             // we need to make sure all array copiers are finished
                             if (_activeCopiers > 0)
                             {
-                                SpinWait sw = new SpinWait();
+                                SpinWait sw = default;
                                 while (_activeCopiers > 0) sw.SpinOnce();
                             }
 

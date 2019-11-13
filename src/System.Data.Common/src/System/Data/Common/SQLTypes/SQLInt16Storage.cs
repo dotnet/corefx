@@ -202,14 +202,14 @@ namespace System.Data.Common
             SqlInt16[] newValues = new SqlInt16[capacity];
             if (null != _values)
             {
-                Array.Copy(_values, 0, newValues, 0, Math.Min(capacity, _values.Length));
+                Array.Copy(_values, newValues, Math.Min(capacity, _values.Length));
             }
             _values = newValues;
         }
 
         public override object ConvertXmlToObject(string s)
         {
-            SqlInt16 newValue = new SqlInt16();
+            SqlInt16 newValue = default;
             string tempStr = string.Concat("<col>", s, "</col>"); // this is done since you can give fragmet to reader
             StringReader strReader = new StringReader(tempStr);
 

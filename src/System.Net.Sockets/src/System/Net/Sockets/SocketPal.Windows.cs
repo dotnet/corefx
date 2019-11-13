@@ -41,7 +41,11 @@ namespace System.Net.Sockets
 
         public static SocketError CreateSocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType, out SafeSocketHandle socket)
         {
-            socket = SafeSocketHandle.CreateWSASocket(addressFamily, socketType, protocolType);
+            IntPtr handle = Interop.Winsock.WSASocketW(addressFamily, socketType, protocolType, IntPtr.Zero, 0, Interop.Winsock.SocketConstructorFlags.WSA_FLAG_OVERLAPPED | Interop.Winsock.SocketConstructorFlags.WSA_FLAG_NO_HANDLE_INHERIT);;
+
+            socket = new SafeSocketHandle(handle, ownsHandle: true);
+            if (NetEventSource.IsEnabled) NetEventSource.Info(null, socket);
+
             return socket.IsInvalid ? GetLastSocketError() : SocketError.Success;
         }
 
@@ -99,9 +103,13 @@ namespace System.Net.Sockets
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
-        public static SocketError Accept(SafeSocketHandle handle, byte[] buffer, ref int nameLen, out SafeSocketHandle socket)
+        public static SocketError Accept(SafeSocketHandle listenSocket, byte[] socketAddress, ref int socketAddressSize, out SafeSocketHandle socket)
         {
-            socket = SafeSocketHandle.Accept(handle, buffer, ref nameLen);
+            IntPtr handle = Interop.Winsock.accept(listenSocket, socketAddress, ref socketAddressSize);
+
+            socket = new SafeSocketHandle(handle, ownsHandle: true);
+            if (NetEventSource.IsEnabled) NetEventSource.Info(null, socket);
+
             return socket.IsInvalid ? GetLastSocketError() : SocketError.Success;
         }
 
@@ -215,7 +223,7 @@ namespace System.Net.Sockets
             fixed (byte* postPinnedBuffer = postBuffer)
             {
                 bool success = TransmitFileHelper(handle, fileHandle, null, preBuffer, postBuffer, flags);
-                return (success ? SocketError.Success : SocketPal.GetLastSocketError());
+                return (success ? SocketError.Success : GetLastSocketError());
             }
         }
 
@@ -537,7 +545,7 @@ namespace System.Net.Sockets
 
         public static SocketError SetMulticastOption(SafeSocketHandle handle, SocketOptionName optionName, MulticastOption optionValue)
         {
-            Interop.Winsock.IPMulticastRequest ipmr = new Interop.Winsock.IPMulticastRequest();
+            Interop.Winsock.IPMulticastRequest ipmr = default;
 
 #pragma warning disable CS0618 // Address is marked obsolete
             ipmr.MulticastAddress = unchecked((int)optionValue.Group.Address);
@@ -582,7 +590,7 @@ namespace System.Net.Sockets
 
         public static SocketError SetIPv6MulticastOption(SafeSocketHandle handle, SocketOptionName optionName, IPv6MulticastOption optionValue)
         {
-            Interop.Winsock.IPv6MulticastRequest ipmr = new Interop.Winsock.IPv6MulticastRequest();
+            Interop.Winsock.IPv6MulticastRequest ipmr = default;
 
             ipmr.MulticastAddress = optionValue.Group.GetAddressBytes();
             ipmr.InterfaceIndex = unchecked((int)optionValue.InterfaceIndex);
@@ -599,7 +607,7 @@ namespace System.Net.Sockets
 
         public static SocketError SetLingerOption(SafeSocketHandle handle, LingerOption optionValue)
         {
-            Interop.Winsock.Linger lngopt = new Interop.Winsock.Linger();
+            Interop.Winsock.Linger lngopt = default;
             lngopt.OnOff = optionValue.Enabled ? (ushort)1 : (ushort)0;
             lngopt.Time = (ushort)optionValue.LingerTime;
 
@@ -658,7 +666,7 @@ namespace System.Net.Sockets
 
         public static SocketError GetMulticastOption(SafeSocketHandle handle, SocketOptionName optionName, out MulticastOption optionValue)
         {
-            Interop.Winsock.IPMulticastRequest ipmr = new Interop.Winsock.IPMulticastRequest();
+            Interop.Winsock.IPMulticastRequest ipmr = default;
             int optlen = Interop.Winsock.IPMulticastRequest.Size;
 
             // This can throw ObjectDisposedException.
@@ -695,7 +703,7 @@ namespace System.Net.Sockets
 
         public static SocketError GetIPv6MulticastOption(SafeSocketHandle handle, SocketOptionName optionName, out IPv6MulticastOption optionValue)
         {
-            Interop.Winsock.IPv6MulticastRequest ipmr = new Interop.Winsock.IPv6MulticastRequest();
+            Interop.Winsock.IPv6MulticastRequest ipmr = default;
 
             int optlen = Interop.Winsock.IPv6MulticastRequest.Size;
 
@@ -719,7 +727,7 @@ namespace System.Net.Sockets
 
         public static SocketError GetLingerOption(SafeSocketHandle handle, out LingerOption optionValue)
         {
-            Interop.Winsock.Linger lngopt = new Interop.Winsock.Linger();
+            Interop.Winsock.Linger lngopt = default;
             int optlen = 4;
 
             // This can throw ObjectDisposedException.
@@ -749,7 +757,7 @@ namespace System.Net.Sockets
 
                 IntPtr rawHandle = handle.DangerousGetHandle();
                 IntPtr* fileDescriptorSet = stackalloc IntPtr[2] { (IntPtr)1, rawHandle };
-                Interop.Winsock.TimeValue IOwait = new Interop.Winsock.TimeValue();
+                Interop.Winsock.TimeValue IOwait = default;
 
                 // A negative timeout value implies an indefinite wait.
                 int socketCount;
@@ -814,14 +822,17 @@ namespace System.Net.Sockets
             }
 
             IntPtr[] leaseRead = null, leaseWrite = null, leaseError = null;
+            int refsAdded = 0;
             try
             {
+                // In case we can't increase the reference count for each Socket,
+                // we'll unref refAdded Sockets in the finally block ordered: [checkRead, checkWrite, checkError].
                 Span<IntPtr> readfileDescriptorSet = ShouldStackAlloc(checkRead, ref leaseRead, out var tmp) ? stackalloc IntPtr[StackThreshold] : tmp;
-                Socket.SocketListToFileDescriptorSet(checkRead, readfileDescriptorSet);
+                Socket.SocketListToFileDescriptorSet(checkRead, readfileDescriptorSet, ref refsAdded);
                 Span<IntPtr> writefileDescriptorSet = ShouldStackAlloc(checkWrite, ref leaseWrite, out tmp) ? stackalloc IntPtr[StackThreshold] : tmp;
-                Socket.SocketListToFileDescriptorSet(checkWrite, writefileDescriptorSet);
+                Socket.SocketListToFileDescriptorSet(checkWrite, writefileDescriptorSet, ref refsAdded);
                 Span<IntPtr> errfileDescriptorSet = ShouldStackAlloc(checkError, ref leaseError, out tmp) ? stackalloc IntPtr[StackThreshold] : tmp;
-                Socket.SocketListToFileDescriptorSet(checkError, errfileDescriptorSet);
+                Socket.SocketListToFileDescriptorSet(checkError, errfileDescriptorSet, ref refsAdded);
 
                 // This code used to erroneously pass a non-null timeval structure containing zeroes
                 // to select() when the caller specified (-1) for the microseconds parameter.  That
@@ -842,7 +853,7 @@ namespace System.Net.Sockets
                 {
                     if (microseconds != -1)
                     {
-                        Interop.Winsock.TimeValue IOwait = new Interop.Winsock.TimeValue();
+                        Interop.Winsock.TimeValue IOwait = default;
                         MicrosecondsToTimeValue((long)(uint)microseconds, ref IOwait);
 
                         socketCount =
@@ -872,9 +883,10 @@ namespace System.Net.Sockets
                     return GetLastSocketError();
                 }
 
-                Socket.SelectFileDescriptor(checkRead, readfileDescriptorSet);
-                Socket.SelectFileDescriptor(checkWrite, writefileDescriptorSet);
-                Socket.SelectFileDescriptor(checkError, errfileDescriptorSet);
+                // Remove from the lists any entries which weren't set
+                Socket.SelectFileDescriptor(checkRead, readfileDescriptorSet, ref refsAdded);
+                Socket.SelectFileDescriptor(checkWrite, writefileDescriptorSet, ref refsAdded);
+                Socket.SelectFileDescriptor(checkError, errfileDescriptorSet, ref refsAdded);
 
                 return SocketError.Success;
             }
@@ -883,6 +895,13 @@ namespace System.Net.Sockets
                 if (leaseRead != null) ArrayPool<IntPtr>.Shared.Return(leaseRead);
                 if (leaseWrite != null) ArrayPool<IntPtr>.Shared.Return(leaseWrite);
                 if (leaseError != null) ArrayPool<IntPtr>.Shared.Return(leaseError);
+
+                // This order matches with the AddToPollArray calls
+                // to release only the handles that were ref'd.
+                Socket.SocketListDangerousReleaseRefs(checkRead, ref refsAdded);
+                Socket.SocketListDangerousReleaseRefs(checkWrite, ref refsAdded);
+                Socket.SocketListDangerousReleaseRefs(checkError, ref refsAdded);
+                Debug.Assert(refsAdded == 0);
             }
         }
 
@@ -891,6 +910,7 @@ namespace System.Net.Sockets
             SocketError err = Interop.Winsock.shutdown(handle, (int)how);
             if (err != SocketError.SocketError)
             {
+                handle.TrackShutdown(how);
                 return SocketError.Success;
             }
 

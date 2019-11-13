@@ -4,6 +4,8 @@
 
 using System.Buffers;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Security.Cryptography
 {
@@ -11,7 +13,7 @@ namespace System.Security.Cryptography
     {
         private bool _disposed;
         protected int HashSizeValue;
-        protected internal byte[] HashValue;
+        protected internal byte[]? HashValue;
         protected int State = 0;
 
         protected HashAlgorithm() { }
@@ -19,12 +21,12 @@ namespace System.Security.Cryptography
         public static HashAlgorithm Create() =>
             CryptoConfigForwarder.CreateDefaultHashAlgorithm();
 
-        public static HashAlgorithm Create(string hashName) =>
-            (HashAlgorithm)CryptoConfigForwarder.CreateFromName(hashName);
+        public static HashAlgorithm? Create(string hashName) =>
+            (HashAlgorithm?)CryptoConfigForwarder.CreateFromName(hashName);
 
         public virtual int HashSize => HashSizeValue;
 
-        public virtual byte[] Hash
+        public virtual byte[]? Hash
         {
             get
             {
@@ -33,7 +35,7 @@ namespace System.Security.Cryptography
                 if (State != 0)
                     throw new CryptographicUnexpectedOperationException(SR.Cryptography_HashNotYetFinalized);
 
-                return (byte[])HashValue?.Clone();
+                return (byte[]?)HashValue?.Clone();
             }
         }
 
@@ -101,12 +103,57 @@ namespace System.Security.Cryptography
             byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
 
             int bytesRead;
+            int clearLimit = 0;
+
             while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
             {
+                if (bytesRead > clearLimit)
+                {
+                    clearLimit = bytesRead;
+                }
+
                 HashCore(buffer, 0, bytesRead);
             }
 
-            ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+            CryptographicOperations.ZeroMemory(buffer.AsSpan(0, clearLimit));
+            ArrayPool<byte>.Shared.Return(buffer, clearArray: false);
+            return CaptureHashCodeAndReinitialize();
+        }
+
+        public Task<byte[]> ComputeHashAsync(
+            Stream inputStream,
+            CancellationToken cancellationToken = default)
+        {
+            if (inputStream == null)
+                throw new ArgumentNullException(nameof(inputStream));
+            if (_disposed)
+                throw new ObjectDisposedException(null);
+
+            return ComputeHashAsyncCore(inputStream, cancellationToken);
+        }
+
+        private async Task<byte[]> ComputeHashAsyncCore(
+            Stream inputStream,
+            CancellationToken cancellationToken)
+        {
+            // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
+            byte[] rented = ArrayPool<byte>.Shared.Rent(4096);
+            Memory<byte> buffer = rented;
+            int clearLimit = 0;
+            int bytesRead;
+
+            while ((bytesRead = await inputStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
+            {
+                if (bytesRead > clearLimit)
+                {
+                    clearLimit = bytesRead;
+                }
+
+                HashCore(rented, 0, bytesRead);
+            }
+
+            CryptographicOperations.ZeroMemory(rented.AsSpan(0, clearLimit));
+            ArrayPool<byte>.Shared.Return(rented, clearArray: false);
             return CaptureHashCodeAndReinitialize();
         }
 
@@ -152,7 +199,7 @@ namespace System.Security.Cryptography
         public virtual bool CanTransformMultipleBlocks => true;
         public virtual bool CanReuseTransform => true;
 
-        public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
+        public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[]? outputBuffer, int outputOffset)
         {
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
 

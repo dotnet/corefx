@@ -7,7 +7,7 @@
 
 namespace System.Text.Json
 {
-    public enum DuplicatePropertyNameHandling
+    public enum DuplicatePropertyNameHandlingStrategy
     {
         Replace = 0,
         Ignore = 1,
@@ -56,6 +56,7 @@ namespace System.Text.Json
     public partial struct JsonArrayEnumerator : System.Collections.Generic.IEnumerator<System.Text.Json.JsonNode>, System.Collections.IEnumerator, System.IDisposable
     {
         private object _dummy;
+        private int _dummyPrimitive;
         public JsonArrayEnumerator(System.Text.Json.JsonArray jsonArray) { throw null; }
         public System.Text.Json.JsonNode Current { get { throw null; } }
         object System.Collections.IEnumerator.Current { get { throw null; } }
@@ -198,6 +199,7 @@ namespace System.Text.Json
     public readonly partial struct JsonEncodedText : System.IEquatable<System.Text.Json.JsonEncodedText>
     {
         private readonly object _dummy;
+        private readonly int _dummyPrimitive;
         public System.ReadOnlySpan<byte> EncodedUtf8Bytes { get { throw null; } }
         public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<byte> utf8Value, System.Text.Encodings.Web.JavaScriptEncoder encoder = null) { throw null; }
         public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<char> value, System.Text.Encodings.Web.JavaScriptEncoder encoder = null) { throw null; }
@@ -255,10 +257,18 @@ namespace System.Text.Json
         public static implicit operator System.Text.Json.JsonNode (uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static implicit operator System.Text.Json.JsonNode (ulong value) { throw null; }
-        public static System.Text.Json.JsonNode Parse(string json, System.Text.Json.JsonDocumentOptions options = default(System.Text.Json.JsonDocumentOptions), System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { throw null; }
+        public static System.Text.Json.JsonNode Parse(string json, System.Text.Json.JsonNodeOptions options = default(System.Text.Json.JsonNodeOptions)) { throw null; }
         public string ToJsonString() { throw null; }
         public static bool TryGetNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.JsonNode jsonNode) { throw null; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
+    }
+    public partial struct JsonNodeOptions
+    {
+        private int _dummyPrimitive;
+        public bool AllowTrailingCommas { readonly get { throw null; } set { } }
+        public System.Text.Json.JsonCommentHandling CommentHandling { readonly get { throw null; } set { } }
+        public System.Text.Json.DuplicatePropertyNameHandlingStrategy DuplicatePropertyNameHandling { readonly get { throw null; } set { } }
+        public int MaxDepth { readonly get { throw null; } set { } }
     }
     public sealed partial class JsonNull : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonNull>
     {
@@ -381,6 +391,7 @@ namespace System.Text.Json
     public partial struct JsonObjectEnumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>>, System.Collections.IEnumerator, System.IDisposable
     {
         private object _dummy;
+        private int _dummyPrimitive;
         public JsonObjectEnumerator(System.Text.Json.JsonObject jsonObject) { throw null; }
         public System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode> Current { get { throw null; } }
         object System.Collections.IEnumerator.Current { get { throw null; } }
@@ -391,6 +402,7 @@ namespace System.Text.Json
     public readonly partial struct JsonProperty
     {
         private readonly object _dummy;
+        private readonly int _dummyPrimitive;
         public string Name { get { throw null; } }
         public System.Text.Json.JsonElement Value { get { throw null; } }
         public bool NameEquals(System.ReadOnlySpan<byte> utf8Text) { throw null; }

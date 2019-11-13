@@ -18,12 +18,9 @@ namespace System.IO
 #if MS_IO_REDIST
         internal static string EnsureTrailingSeparator(string path)
             => EndsInDirectorySeparator(path) ? path : path + DirectorySeparatorCharAsString;
-
-        internal static bool EndsInDirectorySeparator(string path)
-            => !string.IsNullOrEmpty(path) && IsDirectorySeparator(path[path.Length - 1]);
 #else
         internal static string EnsureTrailingSeparator(string path)
-            => Path.EndsInDirectorySeparator(path.AsSpan()) ? path : path + DirectorySeparatorCharAsString;
+            => EndsInDirectorySeparator(path.AsSpan()) ? path : path + DirectorySeparatorCharAsString;
 #endif
 
         internal static bool IsRoot(ReadOnlySpan<char> path)
@@ -73,7 +70,7 @@ namespace System.IO
                 char* rightEnd = r + second.Length;
 
                 while (l != leftEnd && r != rightEnd
-                    && (*l == *r || (ignoreCase && char.ToUpperInvariant((*l)) == char.ToUpperInvariant((*r)))))
+                    && (*l == *r || (ignoreCase && char.ToUpperInvariant(*l) == char.ToUpperInvariant(*r))))
                 {
                     commonChars++;
                     l++;
@@ -109,8 +106,7 @@ namespace System.IO
         /// <param name="rootLength">The length of the root of the given path</param>
         internal static string RemoveRelativeSegments(string path, int rootLength)
         {
-            Span<char> initialBuffer = stackalloc char[260 /* PathInternal.MaxShortPath */];
-            ValueStringBuilder sb = new ValueStringBuilder(initialBuffer);
+            var sb = new ValueStringBuilder(stackalloc char[260 /* PathInternal.MaxShortPath */]);
 
             if (RemoveRelativeSegments(path.AsSpan(), rootLength, ref sb))
             {
@@ -220,5 +216,33 @@ namespace System.IO
 
             return true;
         }
+
+        /// <summary>
+        /// Trims one trailing directory separator beyond the root of the path.
+        /// </summary>
+        internal static string TrimEndingDirectorySeparator(string path) =>
+            EndsInDirectorySeparator(path) && !IsRoot(path.AsSpan()) ?
+                path.Substring(0, path.Length - 1) :
+                path;
+
+        /// <summary>
+        /// Returns true if the path ends in a directory separator.
+        /// </summary>
+        internal static bool EndsInDirectorySeparator(string path)
+              => !string.IsNullOrEmpty(path) && IsDirectorySeparator(path[path.Length - 1]);
+
+        /// <summary>
+        /// Trims one trailing directory separator beyond the root of the path.
+        /// </summary>
+        internal static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) =>
+            EndsInDirectorySeparator(path) && !IsRoot(path) ?
+                path.Slice(0, path.Length - 1) :
+                path;
+
+        /// <summary>
+        /// Returns true if the path ends in a directory separator.
+        /// </summary>
+        internal static bool EndsInDirectorySeparator(ReadOnlySpan<char> path)
+            => path.Length > 0 && IsDirectorySeparator(path[path.Length - 1]);
     }
 }

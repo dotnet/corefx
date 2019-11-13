@@ -38,6 +38,7 @@ using System.Text;
 using System.Diagnostics;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using System.Tests;
 
 namespace System.Data.Tests
 {
@@ -45,7 +46,7 @@ namespace System.Data.Tests
     {
         public DataSetTest()
         {
-            MyDataSet.count = 0;
+            MyDataSet.Count = 0;
         }
 
         [Fact]
@@ -509,10 +510,8 @@ namespace System.Data.Tests
         [Fact]
         public void WriteXmlSchema()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("fi-FI"))
             {
-                CultureInfo.CurrentCulture = new CultureInfo("fi-FI");
-
                 var ds = new DataSet();
                 ds.ReadXml(new StringReader(DataProvider.region));
                 TextWriter writer = new StringWriter();
@@ -593,10 +592,7 @@ namespace System.Data.Tests
                 Assert.Equal("  </xs:element>", substring);
 
                 Assert.Equal("</xs:schema>", TextString);
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
-
+            }
         }
 
         [Fact]
@@ -787,24 +783,24 @@ namespace System.Data.Tests
 
             DataColumn col = new DataColumn();
             col.ColumnName = "Id";
-            col.DataType = Type.GetType("System.Int32");
+            col.DataType = typeof(int);
             table.Columns.Add(col);
             UniqueConstraint uc = new UniqueConstraint("UK1", table.Columns[0]);
             table.Constraints.Add(uc);
 
             col = new DataColumn();
             col.ColumnName = "Name";
-            col.DataType = Type.GetType("System.String");
+            col.DataType = typeof(string);
             table.Columns.Add(col);
 
             col = new DataColumn();
             col.ColumnName = "Id";
-            col.DataType = Type.GetType("System.Int32");
+            col.DataType = typeof(int);
             table1.Columns.Add(col);
 
             col = new DataColumn();
             col.ColumnName = "Name";
-            col.DataType = Type.GetType("System.String");
+            col.DataType = typeof(string);
             table1.Columns.Add(col);
             ForeignKeyConstraint fc = new ForeignKeyConstraint("FK1", table.Columns[0], table1.Columns[0]);
             table1.Constraints.Add(fc);
@@ -1566,19 +1562,20 @@ namespace System.Data.Tests
         [Fact]
         public void WriteXmlModeSchema1()
         {
-            RemoteExecutor.Invoke(() =>
+            // Keeping the brackets as the test otherwise starts to fail.
             {
-                CultureInfo.CurrentCulture = new CultureInfo("fi-FI");
-                string SerializedDataTable =
-@"<rdData>
+                using (new ThreadCultureChange("fi-FI"))
+                {
+                    string SerializedDataTable =
+        @"<rdData>
   <MyDataTable CustomerID='VINET' CompanyName='Vins et alcools Chevalier' ContactName='Paul Henriot' />
 </rdData>";
-                string expected =
-    @"<rdData>
+                    string expected =
+        @"<rdData>
   <xs:schema id=""rdData"" xmlns="""" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata"">
     <xs:element name=""rdData"" msdata:IsDataSet=""true"" " +
-                  @"msdata:Locale=""en-US"">" +
-    @"
+                      @"msdata:Locale=""en-US"">" +
+        @"
       <xs:complexType>
         <xs:choice minOccurs=""0"" maxOccurs=""unbounded"">
           <xs:element name=""MyDataTable"">
@@ -1594,17 +1591,16 @@ namespace System.Data.Tests
   </xs:schema>
   <MyDataTable CustomerID=""VINET"" CompanyName=""Vins et alcools Chevalier"" ContactName=""Paul Henriot"" />
 </rdData>";
-                DataSet set;
-                set = new DataSet();
-                set.ReadXml(new StringReader(SerializedDataTable));
+                    DataSet set;
+                    set = new DataSet();
+                    set.ReadXml(new StringReader(SerializedDataTable));
 
-                StringWriter w = new StringWriter();
-                set.WriteXml(w, XmlWriteMode.WriteSchema);
-                string result = w.ToString();
-                Assert.Equal(expected.Replace("\r", ""), result.Replace("\r", ""));
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+                    StringWriter w = new StringWriter();
+                    set.WriteXml(w, XmlWriteMode.WriteSchema);
+                    string result = w.ToString();
+                    Assert.Equal(expected.Replace("\r", ""), result.Replace("\r", ""));
+                }
+            }
         }
 
         [Fact]
@@ -1699,14 +1695,7 @@ namespace System.Data.Tests
             child.Rows.Add(dr);
             dr.AcceptChanges();
 
-            try
-            {
-                ds.Clear(); // this should clear all the rows in parent & child tables
-            }
-            catch (Exception e)
-            {
-                throw (new Exception("Exception should not have been thrown at Clear method" + e.ToString()));
-            }
+            ds.Clear(); // this should clear all the rows in parent & child tables
             Assert.Equal(0, parent.Rows.Count);
             Assert.Equal(0, child.Rows.Count);
         }
@@ -1716,7 +1705,7 @@ namespace System.Data.Tests
         {
             MyDataSet ds1 = new MyDataSet();
             MyDataSet ds = (MyDataSet)(ds1.Clone());
-            Assert.Equal(2, MyDataSet.count);
+            Assert.Equal(2, MyDataSet.Count);
         }
 
         #region DataSet.GetChanges Tests
@@ -1960,27 +1949,27 @@ namespace System.Data.Tests
            });
         }
 
-        internal struct fillErrorStruct
+        internal struct FillErrorStruct
         {
-            internal string error;
-            internal string tableName;
-            internal int rowKey;
-            internal bool contFlag;
+            internal string _error;
+            internal string _tableName;
+            internal int _rowKey;
+            internal bool _contFlag;
             internal void init(string tbl, int row, bool cont, string err)
             {
-                tableName = tbl;
-                rowKey = row;
-                contFlag = cont;
-                error = err;
+                _tableName = tbl;
+                _rowKey = row;
+                _contFlag = cont;
+                _error = err;
             }
         }
-        private fillErrorStruct[] _fillErr = new fillErrorStruct[3];
+        private readonly FillErrorStruct[] _fillErr = new FillErrorStruct[3];
         private int _fillErrCounter;
-        private void fillErrorHandler(object sender, FillErrorEventArgs e)
+        private void FillErrorHandler(object sender, FillErrorEventArgs e)
         {
-            e.Continue = _fillErr[_fillErrCounter].contFlag;
-            Assert.Equal(_fillErr[_fillErrCounter].tableName, e.DataTable.TableName);
-            Assert.Equal(_fillErr[_fillErrCounter].contFlag, e.Continue);
+            e.Continue = _fillErr[_fillErrCounter]._contFlag;
+            Assert.Equal(_fillErr[_fillErrCounter]._tableName, e.DataTable.TableName);
+            Assert.Equal(_fillErr[_fillErrCounter]._contFlag, e.Continue);
             _fillErrCounter++;
         }
 
@@ -2033,27 +2022,27 @@ namespace System.Data.Tests
             dsLoad.Tables.Add(table2);
             DataTableReader dtr = _ds.CreateDataReader();
             dsLoad.Load(dtr, LoadOption.PreserveChanges,
-                     fillErrorHandler, table1, table2);
+                     FillErrorHandler, table1, table2);
         }
         [Fact]
         public void Load_TableConflictF()
         {
             AssertExtensions.Throws<ArgumentException>(null, () =>
-           {
-               _fillErrCounter = 0;
-               _fillErr[0].init("Table1", 1, false,
-                   "Input string was not in a correct format.Couldn't store <mono 1> in name1 Column.  Expected type is Double.");
-               localSetup();
-               DataSet dsLoad = new DataSet("LoadTableConflict");
-               DataTable table1 = new DataTable();
-               table1.Columns.Add("name1", typeof(double));
-               dsLoad.Tables.Add(table1);
-               DataTable table2 = new DataTable();
-               dsLoad.Tables.Add(table2);
-               DataTableReader dtr = _ds.CreateDataReader();
-               dsLoad.Load(dtr, LoadOption.Upsert,
-                        fillErrorHandler, table1, table2);
-           });
+            {
+                _fillErrCounter = 0;
+                _fillErr[0].init("Table1", 1, false,
+                    "Input string was not in a correct format.Couldn't store <mono 1> in name1 Column.  Expected type is Double.");
+                localSetup();
+                DataSet dsLoad = new DataSet("LoadTableConflict");
+                DataTable table1 = new DataTable();
+                table1.Columns.Add("name1", typeof(double));
+                dsLoad.Tables.Add(table1);
+                DataTable table2 = new DataTable();
+                dsLoad.Tables.Add(table2);
+                DataTableReader dtr = _ds.CreateDataReader();
+                dsLoad.Load(dtr, LoadOption.Upsert,
+                        FillErrorHandler, table1, table2);
+            });
         }
 
         [Fact]
@@ -2194,11 +2183,11 @@ namespace System.Data.Tests
 
     public class MyDataSet : DataSet
     {
-        public static int count;
+        public static int Count;
 
         public MyDataSet()
         {
-            count++;
+            Count++;
         }
     }
 }

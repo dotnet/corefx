@@ -3,7 +3,8 @@
     <AssemblyName>System.Runtime.Serialization.Formatters</AssemblyName>
     <RootNamespace>System.Runtime.Serialization.Formatters</RootNamespace>
     <NoWarn>$(NoWarn);CS1573</NoWarn>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Runtime.Serialization.Formatters.TypeForwards.cs" />
@@ -54,7 +55,7 @@
     <Compile Include="System\Runtime\Serialization\Formatters\Binary\BinaryObjectWriter.cs" />
     <Compile Include="System\Runtime\Serialization\Formatters\Binary\BinaryParser.cs" />
     <Compile Include="System\Runtime\Serialization\Formatters\Binary\BinaryUtilClasses.cs" />
-    <Compile Include="$(CommonPath)\CoreLib\System\Collections\HashHelpers.cs">
+    <Compile Include="$(CoreLibDir)System\Collections\HashHelpers.cs">
       <Link>Common\System\Collections\HashHelpers.cs</Link>
     </Compile>
   </ItemGroup>

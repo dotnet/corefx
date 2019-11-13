@@ -13,8 +13,7 @@ using System.Threading;
 namespace System.Text.Json
 {
     /// <summary>
-    ///   Provides a mechanism for examining the structural content of a JSON value without
-    ///   automatically instantiating data values.
+    ///   Represents the structure of a JSON value in a lightweight, read-only form.
     /// </summary>
     /// <remarks>
     ///   This class utilizes resources from pooled memory to minimize the garbage collector (GC)
@@ -657,7 +656,7 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(segment.Length))
+            if (!JsonHelpers.IsValidDateTimeOffsetParseLength(segment.Length))
             {
                 value = default;
                 return false;
@@ -671,8 +670,7 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
-            if (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
-                && JsonHelpers.TryParseAsISO(segment, out DateTime tmp))
+            if (JsonHelpers.TryParseAsISO(segment, out DateTime tmp))
             {
                 value = tmp;
                 return true;
@@ -693,7 +691,7 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(segment.Length))
+            if (!JsonHelpers.IsValidDateTimeOffsetParseLength(segment.Length))
             {
                 value = default;
                 return false;
@@ -707,8 +705,7 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
-            if (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
-                && JsonHelpers.TryParseAsISO(segment, out DateTimeOffset tmp))
+            if (JsonHelpers.TryParseAsISO(segment, out DateTimeOffset tmp))
             {
                 value = tmp;
                 return true;

@@ -20,17 +20,18 @@ namespace System.ComponentModel
     /// provided "site".
     /// Provides functionality required by all components.
     /// </summary>
+    [TypeConverter("System.ComponentModel.ComponentConverter, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public interface IComponent : IDisposable
     {
         /// <summary>
         /// When implemented by a class, gets or sets the <see cref='System.ComponentModel.ISite'/>
         /// associated with the <see cref='System.ComponentModel.IComponent'/>.
         /// </summary>
-        ISite Site { get; set; }
+        ISite? Site { get; set; }
 
         /// <summary>
         /// Adds an event handler to listen to the Disposed event on the component.
         /// </summary>
-        event EventHandler Disposed;
+        event EventHandler? Disposed;
     }
 }

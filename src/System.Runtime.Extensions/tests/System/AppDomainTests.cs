@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -9,12 +10,15 @@ using System.Net.Http;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.ExceptionServices;
+using System.Runtime.Remoting;
+using System.Security;
+using System.Security.Permissions;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Tests
 {
-    public partial class AppDomainTests : FileCleanupTestBase
+    public class AppDomainTests : FileCleanupTestBase
     {
         [Fact]
         public void CurrentDomain_Not_Null()
@@ -41,17 +45,20 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Corefx has limitations to build a UWP executable that can be launched directly using Process.Start")]
         public void TargetFrameworkTest()
         {
-            string targetFrameworkName = ".NETCoreApp,Version=v2.1";
-            if (PlatformDetection.IsInAppContainer)
-            {
-                targetFrameworkName = ".NETCore,Version=v5.0";
-            }
+            const int ExpectedExitCode = 0;
+            const string AppName = "TargetFrameworkNameTestApp.dll";
+            var psi = new ProcessStartInfo();
+            psi.FileName = RemoteExecutor.HostRunner;
+            psi.Arguments = $"{AppName} {ExpectedExitCode}";
 
-            RemoteExecutor.Invoke((_targetFrameworkName) => {
-                Assert.Contains(_targetFrameworkName, AppContext.TargetFrameworkName);
-            }, targetFrameworkName).Dispose();
+            using (Process p = Process.Start(psi))
+            {
+                p.WaitForExit();
+                Assert.Equal(ExpectedExitCode, p.ExitCode);
+            }
         }
 
         [Fact]
@@ -60,7 +67,6 @@ namespace System.Tests
             RemoteExecutor.Invoke(() => {
                 AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
                 AppDomain.CurrentDomain.UnhandledException -= new UnhandledExceptionEventHandler(MyHandler);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -77,7 +83,6 @@ namespace System.Tests
                 {
                 }
                 AppDomain.CurrentDomain.UnhandledException -= new UnhandledExceptionEventHandler(NotExpectedToBeCalledHandler);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -94,7 +99,7 @@ namespace System.Tests
                 AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
                 throw new Exception("****This Unhandled Exception is Expected****");
 #pragma warning disable 0162
-                    return RemoteExecutor.SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
 #pragma warning restore 0162
             }, options).Dispose();
 
@@ -137,7 +142,6 @@ namespace System.Tests
             // if running directly on some platforms Xunit may be Id = 1
             RemoteExecutor.Invoke(() => {
                 Assert.Equal(1, AppDomain.CurrentDomain.Id);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -157,12 +161,9 @@ namespace System.Tests
         public void FirstChanceException_Add_Remove()
         {
             RemoteExecutor.Invoke(() => {
-                EventHandler<FirstChanceExceptionEventArgs> handler = (sender, e) =>
-                {
-                };
+                EventHandler<FirstChanceExceptionEventArgs> handler = (sender, e) => { };
                 AppDomain.CurrentDomain.FirstChanceException += handler;
                 AppDomain.CurrentDomain.FirstChanceException -= handler;
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -189,7 +190,6 @@ namespace System.Tests
                 }
                 AppDomain.CurrentDomain.FirstChanceException -= handler;
                 Assert.True(flag, "FirstChanceHandler not called");
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -203,17 +203,13 @@ namespace System.Tests
         public void ProcessExit_Add_Remove()
         {
             RemoteExecutor.Invoke(() => {
-                EventHandler handler = (sender, e) =>
-                {
-                };
+                EventHandler handler = (sender, e) => { };
                 AppDomain.CurrentDomain.ProcessExit += handler;
                 AppDomain.CurrentDomain.ProcessExit -= handler;
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/21410", TargetFrameworkMonikers.Uap)]
         public void ProcessExit_Called()
         {
             string path = GetTestFilePath();
@@ -226,7 +222,6 @@ namespace System.Tests
                 };
 
                 AppDomain.CurrentDomain.ProcessExit += handler;
-                return RemoteExecutor.SuccessExitCode;
             }, path).Dispose();
 
             Assert.True(File.Exists(path));
@@ -260,12 +255,10 @@ namespace System.Tests
                 AssemblyName assemblyName = assembly.GetName();
                 assemblyName.CodeBase = null;
                 Assert.Equal(105, AppDomain.CurrentDomain.ExecuteAssemblyByName(assemblyName, new string[3] { "50", "25", "25" }));
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/18718", TargetFrameworkMonikers.Uap)] // Need to copy files out of execution directory
         public void ExecuteAssembly()
         {
             CopyTestAssemblies();
@@ -290,7 +283,6 @@ namespace System.Tests
                 Assert.Null(AppDomain.CurrentDomain.GetData(""));
                 AppDomain.CurrentDomain.SetData("randomkey", 4);
                 Assert.Equal(4, AppDomain.CurrentDomain.GetData("randomkey"));
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -305,7 +297,6 @@ namespace System.Tests
                     Assert.Equal(i.ToString(), AppDomain.CurrentDomain.GetData(key));
                 }
                 AppDomain.CurrentDomain.SetData(key, null);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -324,7 +315,6 @@ namespace System.Tests
             RemoteExecutor.Invoke(() =>
             {
                 Assert.True(AppDomain.CurrentDomain.IsDefaultAppDomain());
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -356,7 +346,6 @@ namespace System.Tests
             RemoteExecutor.Invoke(() => {
                 AssertExtensions.Throws<ArgumentNullException>("domain", () => { AppDomain.Unload(null); });
                 Assert.Throws<CannotUnloadAppDomainException>(() => { AppDomain.Unload(AppDomain.CurrentDomain); });
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -370,7 +359,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.Load(byte[])")]
         public void LoadBytes()
         {
             Assembly assembly = typeof(AppDomainTests).Assembly;
@@ -427,7 +415,6 @@ namespace System.Tests
         {
             RemoteExecutor.Invoke(() => {
                 AppDomain.CurrentDomain.AppendPrivatePath("test");
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -436,7 +423,6 @@ namespace System.Tests
         {
             RemoteExecutor.Invoke(() => {
                 AppDomain.CurrentDomain.ClearPrivatePath();
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -445,7 +431,6 @@ namespace System.Tests
         {
             RemoteExecutor.Invoke(() => {
                 AppDomain.CurrentDomain.ClearShadowCopyPath();
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -454,7 +439,6 @@ namespace System.Tests
         {
             RemoteExecutor.Invoke(() => {
                 AppDomain.CurrentDomain.SetCachePath("test");
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -463,7 +447,6 @@ namespace System.Tests
         {
             RemoteExecutor.Invoke(() => {
                 AppDomain.CurrentDomain.SetShadowCopyFiles();
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -472,13 +455,11 @@ namespace System.Tests
         {
             RemoteExecutor.Invoke(() => {
                 AppDomain.CurrentDomain.SetShadowCopyPath("test");
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
 #pragma warning restore 618
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.LoadFile")]
         public void GetAssemblies()
         {
             RemoteExecutor.Invoke(() => {
@@ -512,12 +493,10 @@ namespace System.Tests
                     }
                 }
                 Assert.True(ctr > 0, "Assembly.LoadFile should cause file to be loaded again");
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.LoadFile")]
         public void AssemblyLoad()
         {
             RemoteExecutor.Invoke(() => {
@@ -545,7 +524,6 @@ namespace System.Tests
                     AppDomain.CurrentDomain.AssemblyLoad -= handler;
                 }
                 Assert.True(AssemblyLoadFlag);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -569,12 +547,10 @@ namespace System.Tests
                 Type t = Type.GetType("AssemblyResolveTestApp.Class1, InvalidAssemblyName", throwOnError : false);
                 Assert.Null(t);
                 Assert.True(AssemblyResolveFlag);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.LoadFile")]
         public void AssemblyResolve()
         {
             CopyTestAssemblies();
@@ -597,12 +573,10 @@ namespace System.Tests
                 Assert.NotNull(t);
                 // https://github.com/dotnet/corefx/issues/38361
                 // Assert.True(AssemblyResolveFlag);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.LoadFile")]
         public void AssemblyResolve_RequestingAssembly()
         {
             CopyTestAssemblies();
@@ -629,7 +603,6 @@ namespace System.Tests
                 Assert.NotNull(ret);
                 // https://github.com/dotnet/corefx/issues/38361
                 // Assert.True(AssemblyResolveFlag);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -662,8 +635,6 @@ namespace System.Tests
                 {
                     CultureInfo.CurrentUICulture = previousUICulture;
                 }
-
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -694,12 +665,10 @@ namespace System.Tests
                     AppDomain.CurrentDomain.TypeResolve -= handler;
                 }
                 Assert.NotNull(t);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "In UWP the resources always exist in the resources.pri file even if the assembly is not loaded")]
         public void ResourceResolve()
         {
             RemoteExecutor.Invoke(() => {
@@ -727,7 +696,6 @@ namespace System.Tests
                     AppDomain.CurrentDomain.ResourceResolve -= handler;
                 }
                 Assert.Equal("Happy Halloween", s);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -739,7 +707,6 @@ namespace System.Tests
                 var identity = new System.Security.Principal.GenericIdentity("NewUser");
                 var principal = new System.Security.Principal.GenericPrincipal(identity, null);
                 AppDomain.CurrentDomain.SetThreadPrincipal(principal);
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -759,6 +726,230 @@ namespace System.Tests
                 File.Copy("TestAppOutsideOfTPA.exe", destTestAssemblyPath, false);
             }
         }
+
+        [Fact]
+        public void GetSetupInformation()
+        {
+            RemoteExecutor.Invoke(() => {
+                Assert.Equal(AppContext.BaseDirectory, AppDomain.CurrentDomain.SetupInformation.ApplicationBase);
+                Assert.Equal(AppContext.TargetFrameworkName, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName);
+            }).Dispose();
+        }
+
+        [Fact]
+        public static void GetPermissionSet()
+        {
+            RemoteExecutor.Invoke(() => {
+                Assert.Equal(new PermissionSet(PermissionState.Unrestricted), AppDomain.CurrentDomain.PermissionSet);
+            }).Dispose();
+        }
+
+        [Theory]
+        [MemberData(nameof(TestingCreateInstanceFromObjectHandleData))]
+        public static void TestingCreateInstanceFromObjectHandle(string physicalFileName, string assemblyFile, string type, string returnedFullNameType, Type exceptionType)
+        {
+            ObjectHandle oh = null;
+            object obj = null;
+
+            if (exceptionType != null)
+            {
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type));
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type));
+            }
+            else
+            {
+                oh = AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type);
+                CheckValidity(oh, returnedFullNameType);
+
+                obj = AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type);
+                CheckValidity(obj, returnedFullNameType);
+            }
+
+            if (exceptionType != null)
+            {
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, null));
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type, null));
+            }
+            else
+            {
+                oh = AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, null);
+                CheckValidity(oh, returnedFullNameType);
+
+                obj = AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type, null);
+                CheckValidity(obj, returnedFullNameType);
+            }
+            Assert.True(File.Exists(physicalFileName));
+        }
+
+        public static TheoryData<string, string, string, string, Type> TestingCreateInstanceFromObjectHandleData => new TheoryData<string, string, string, string, Type>
+        {
+            // string physicalFileName, string assemblyFile, string typeName, returnedFullNameType, expectedException
+            { "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.PublicClassSample", "AssemblyResolveTestApp.PublicClassSample", null },
+            { "AssemblyResolveTestApp.dll", "assemblyresolvetestapp.dll", "assemblyresolvetestapp.publicclasssample", "AssemblyResolveTestApp.PublicClassSample", typeof(TypeLoadException) },
+
+            { "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.PrivateClassSample", "AssemblyResolveTestApp.PrivateClassSample", null },
+            { "AssemblyResolveTestApp.dll", "assemblyresolvetestapp.dll", "assemblyresolvetestapp.privateclasssample", "AssemblyResolveTestApp.PrivateClassSample", typeof(TypeLoadException) },
+
+            { "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.PublicClassNoDefaultConstructorSample", "AssemblyResolveTestApp.PublicClassNoDefaultConstructorSample", typeof(MissingMethodException) },
+            { "AssemblyResolveTestApp.dll", "assemblyresolvetestapp.dll", "assemblyresolvetestapp.publicclassnodefaultconstructorsample", "AssemblyResolveTestApp.PublicClassNoDefaultConstructorSample", typeof(TypeLoadException) }
+        };
+
+        [Theory]
+        [MemberData(nameof(TestingCreateInstanceObjectHandleData))]
+        public static void TestingCreateInstanceObjectHandle(string assemblyName, string type, string returnedFullNameType, Type exceptionType)
+        {
+            ObjectHandle oh = null;
+            object obj = null;
+
+            if (exceptionType != null)
+            {
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type));
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type));
+            }
+            else
+            {
+                oh = AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type);
+                CheckValidity(oh, returnedFullNameType);
+
+                obj = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type);
+                CheckValidity(obj, returnedFullNameType);
+            }
+
+            if (exceptionType != null)
+            {
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type, null));
+                Assert.Throws(exceptionType, () => AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type, null));
+            }
+            else
+            {
+                oh = AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type, null);
+                CheckValidity(oh, returnedFullNameType);
+
+                obj = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type, null);
+                CheckValidity(obj, returnedFullNameType);
+            }
+        }
+
+        public static TheoryData<string, string, string, Type> TestingCreateInstanceObjectHandleData => new TheoryData<string, string, string, Type>()
+        {
+            // string assemblyName, string typeName, returnedFullNameType, expectedException
+            { "AssemblyResolveTestApp", "AssemblyResolveTestApp.PublicClassSample", "AssemblyResolveTestApp.PublicClassSample", null },
+            { "assemblyresolvetestapp", "assemblyresolvetestapp.publicclasssample", "AssemblyResolveTestApp.PublicClassSample", typeof(TypeLoadException) },
+
+            { "AssemblyResolveTestApp", "AssemblyResolveTestApp.PrivateClassSample", "AssemblyResolveTestApp.PrivateClassSample", null },
+            { "assemblyresolvetestapp", "assemblyresolvetestapp.privateclasssample", "AssemblyResolveTestApp.PrivateClassSample", typeof(TypeLoadException) },
+
+            { "AssemblyResolveTestApp", "AssemblyResolveTestApp.PublicClassNoDefaultConstructorSample", "AssemblyResolveTestApp.PublicClassNoDefaultConstructorSample", typeof(MissingMethodException) },
+            { "assemblyresolvetestapp", "assemblyresolvetestapp.publicclassnodefaultconstructorsample", "AssemblyResolveTestApp.PublicClassNoDefaultConstructorSample", typeof(TypeLoadException) }
+        };
+
+        [Theory]
+        [MemberData(nameof(TestingCreateInstanceFromObjectHandleFullSignatureData))]
+        public static void TestingCreateInstanceFromObjectHandleFullSignature(string physicalFileName, string assemblyFile, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
+        {
+            ObjectHandle oh = AppDomain.CurrentDomain.CreateInstanceFrom(assemblyFile: assemblyFile, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
+            CheckValidity(oh, returnedFullNameType);
+
+            object obj = AppDomain.CurrentDomain.CreateInstanceFromAndUnwrap(assemblyFile: assemblyFile, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
+            CheckValidity(obj, returnedFullNameType);
+
+            Assert.True(File.Exists(physicalFileName));
+        }
+
+        public static IEnumerable<object[]> TestingCreateInstanceFromObjectHandleFullSignatureData()
+        {
+            // string physicalFileName, string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, returnedFullNameType
+            yield return new object[] { "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.PublicClassSample", false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PublicClassSample" };
+            yield return new object[] { "AssemblyResolveTestApp.dll", "assemblyresolvetestapp.dll", "assemblyresolvetestapp.publicclasssample", true, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PublicClassSample" };
+            yield return new object[] { "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.PublicClassSample", false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PublicClassSample" };
+            yield return new object[] { "AssemblyResolveTestApp.dll", "assemblyresolvetestapp.dll", "assemblyresolvetestapp.publicclasssample", true, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PublicClassSample" };
+
+            yield return new object[] { "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.PrivateClassSample", false, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
+            yield return new object[] { "AssemblyResolveTestApp.dll", "assemblyresolvetestapp.dll", "assemblyresolvetestapp.privateclasssample", true, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
+            yield return new object[] { "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.dll", "AssemblyResolveTestApp.PrivateClassSample", false, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
+            yield return new object[] { "AssemblyResolveTestApp.dll", "assemblyresolvetestapp.dll", "assemblyresolvetestapp.privateclasssample", true, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
+        }
+
+        [Theory]
+        [MemberData(nameof(TestingCreateInstanceObjectHandleFullSignatureData))]
+        public static void TestingCreateInstanceObjectHandleFullSignature(string assemblyName, string type, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, string returnedFullNameType)
+        {
+            ObjectHandle oh = AppDomain.CurrentDomain.CreateInstance(assemblyName: assemblyName, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
+            CheckValidity(oh, returnedFullNameType);
+
+            object obj = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(assemblyName: assemblyName, typeName: type, ignoreCase: ignoreCase, bindingAttr: bindingAttr, binder: binder, args: args, culture: culture, activationAttributes: activationAttributes);
+            CheckValidity(obj, returnedFullNameType);
+        }
+
+        private static void CheckValidity(object instance, string expected)
+        {
+            Assert.NotNull(instance);
+            Assert.Equal(expected, instance.GetType().FullName);
+        }
+
+        private static void CheckValidity(ObjectHandle instance, string expected)
+        {
+            Assert.NotNull(instance);
+            Assert.Equal(expected, instance.Unwrap().GetType().FullName);
+        }
+
+        public static IEnumerable<object[]> TestingCreateInstanceObjectHandleFullSignatureData()
+        {
+            // string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, returnedFullNameType
+            yield return new object[] { "AssemblyResolveTestApp", "AssemblyResolveTestApp.PublicClassSample", false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PublicClassSample" };
+            yield return new object[] { "assemblyresolvetestapp", "assemblyresolvetestapp.publicclasssample", true, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PublicClassSample" };
+            yield return new object[] { "AssemblyResolveTestApp", "AssemblyResolveTestApp.PublicClassSample", false, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PublicClassSample" };
+            yield return new object[] { "assemblyresolvetestapp", "assemblyresolvetestapp.publicclasssample", true, BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PublicClassSample" };
+
+            yield return new object[] { "AssemblyResolveTestApp", "AssemblyResolveTestApp.PrivateClassSample", false, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
+            yield return new object[] { "assemblyresolvetestapp", "assemblyresolvetestapp.privateclasssample", true, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
+            yield return new object[] { "AssemblyResolveTestApp", "AssemblyResolveTestApp.PrivateClassSample", false, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
+            yield return new object[] { "assemblyresolvetestapp", "assemblyresolvetestapp.privateclasssample", true, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
+        }
+
+        [Fact]
+        public void AssemblyResolve_FirstChanceException()
+        {
+            RemoteExecutor.Invoke(() => {
+                Assembly assembly = typeof(AppDomainTests).Assembly;
+
+                Exception firstChanceExceptionThrown = null;
+
+                EventHandler<System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs> firstChanceHandler = (source, args) =>
+                {
+                    firstChanceExceptionThrown = args.Exception;
+                };
+
+                AppDomain.CurrentDomain.FirstChanceException += firstChanceHandler;
+
+                ResolveEventHandler assemblyResolveHandler = (sender, e) =>
+                {
+                    Assert.Equal(assembly, e.RequestingAssembly);
+                    Assert.Null(firstChanceExceptionThrown);
+                    return null;
+                };
+
+                AppDomain.CurrentDomain.AssemblyResolve += assemblyResolveHandler;
+
+                Func<System.Runtime.Loader.AssemblyLoadContext, AssemblyName, Assembly> resolvingHandler = (context, name) =>
+                {
+                    return null;
+                };
+
+                // The issue resolved by coreclr#24450, was only reproduced when there was a Resolving handler present
+                System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += resolvingHandler;
+
+                assembly.GetType("System.Tests.AGenericClass`1[[Bogus, BogusAssembly]]", false);
+                Assert.Null(firstChanceExceptionThrown);
+
+                Exception thrown = Assert.Throws<FileNotFoundException>(() => assembly.GetType("System.Tests.AGenericClass`1[[Bogus, AnotherBogusAssembly]]", true));
+                Assert.Same(firstChanceExceptionThrown, thrown);
+            }).Dispose();
+        }
+    }
+
+    class AGenericClass<T>
+    {
     }
 }
 

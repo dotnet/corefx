@@ -14,7 +14,7 @@ namespace System.Drawing
     /// <summary>
     /// Defines a particular format for text, including font face, size, and style attributes.
     /// </summary>
-#if netcoreapp || netcoreapp30
+#if NETCOREAPP
     [TypeConverter("System.Drawing.FontConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #endif
     [Serializable]
@@ -77,18 +77,11 @@ namespace System.Drawing
         /// Gets the face name of this <see cref='Font'/> .
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-#if !NETCORE
-        [Editor ("System.Drawing.Design.FontNameEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
-        [TypeConverter (typeof (FontConverter.FontNameConverter))]
-#endif
         public string Name => FontFamily.Name;
 
         /// <summary>
         /// Gets the unit of measure for this <see cref='Font'/>.
         /// </summary>
-#if !NETCORE
-        [TypeConverter (typeof (FontConverter.FontUnitConverter))]
-#endif
         public GraphicsUnit Unit => _fontUnit;
 
         /// <summary>
@@ -287,7 +280,7 @@ namespace System.Drawing
             }
 
             Type type = logFont.GetType();
-            int nativeSize = sizeof(SafeNativeMethods.LOGFONT);
+            int nativeSize = sizeof(Interop.User32.LOGFONT);
             if (Marshal.SizeOf(type) != nativeSize)
             {
                 // If we don't actually have an object that is LOGFONT in size, trying to pass
@@ -295,7 +288,7 @@ namespace System.Drawing
                 throw new ArgumentException();
             }
 
-            SafeNativeMethods.LOGFONT nativeLogFont = ToLogFontInternal(graphics);
+            Interop.User32.LOGFONT nativeLogFont = ToLogFontInternal(graphics);
 
             // PtrToStructure requires that the passed in object not be a value type.
             if (!type.IsValueType)
@@ -310,14 +303,14 @@ namespace System.Drawing
             }
         }
 
-        private unsafe SafeNativeMethods.LOGFONT ToLogFontInternal(Graphics graphics)
+        private unsafe Interop.User32.LOGFONT ToLogFontInternal(Graphics graphics)
         {
             if (graphics == null)
             {
                 throw new ArgumentNullException(nameof(graphics));
             }
 
-            SafeNativeMethods.LOGFONT logFont = new SafeNativeMethods.LOGFONT();
+            Interop.User32.LOGFONT logFont = default;
             Gdip.CheckStatus(Gdip.GdipGetLogFontW(
                 new HandleRef(this, NativeFont), new HandleRef(graphics, graphics.NativeGraphics), ref logFont));
 

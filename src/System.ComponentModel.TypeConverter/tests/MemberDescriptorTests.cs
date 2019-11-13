@@ -10,6 +10,11 @@ using Xunit;
 
 namespace System.ComponentModel.Tests
 {
+    [CollectionDefinition("NoParallelTests", DisableParallelization = true)]
+    public partial class NoParallelTests { }
+
+    // Mutable static comparision in the implementation
+    [Collection("NoParallelTests")]
     public class MemberDescriptorTests
     {
         [Theory]

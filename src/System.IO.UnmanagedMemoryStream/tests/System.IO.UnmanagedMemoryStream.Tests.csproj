@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
     <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
@@ -14,9 +14,8 @@
     <Compile Include="UmaTests.cs" />
     <Compile Include="UmsCtorTests.cs" />
     <Compile Include="HGlobalSafeBuffer.cs" />
-    <Compile Include="UmsDisposeAsync.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
+    <Compile Include="UmsDisposeAsync.cs" />
     <Compile Include="UmsReadWrite.cs" />
-    <Compile Include="UmsReadWrite.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Compile Include="UmsSafeBuffer.cs" />
     <Compile Include="UmaCtorTests.cs" />
     <Compile Include="UmsFlush.cs" />

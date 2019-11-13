@@ -41,14 +41,11 @@ namespace System.Text.Json
                     return true;
                 }
 
-                if (enumerable is IDictionary dictionary)
-                {
-                    state.Current.CollectionEnumerator = dictionary.GetEnumerator();
-                }
-                else
-                {
-                    state.Current.CollectionEnumerator = enumerable.GetEnumerator();
-                }
+                // Let the dictionary return the default IEnumerator from its IEnumerable.GetEnumerator().
+                // For IDictionary-derived classes this is normally be IDictionaryEnumerator.
+                // For IDictionary<TKey, TVale>-derived classes this is normally IDictionaryEnumerator as well
+                // but may be IEnumerable<KeyValuePair<TKey, TValue>> if the dictionary only supports generics.
+                state.Current.CollectionEnumerator = enumerable.GetEnumerator();
 
                 if (state.Current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing)
                 {
@@ -58,28 +55,35 @@ namespace System.Text.Json
 
             if (state.Current.CollectionEnumerator.MoveNext())
             {
+                // A dictionary should not have a null KeyValuePair.
+                Debug.Assert(state.Current.CollectionEnumerator.Current != null);
+
+                bool obtainedValues = false;
+                string key = default;
+                object value = default;
+
                 // Check for polymorphism.
                 if (elementClassInfo.ClassType == ClassType.Unknown)
                 {
-                    object currentValue = ((IDictionaryEnumerator)state.Current.CollectionEnumerator).Entry.Value;
-                    GetRuntimeClassInfo(currentValue, ref elementClassInfo, options);
+                    jsonPropertyInfo.GetDictionaryKeyAndValue(ref state.Current, out key, out value);
+                    GetRuntimeClassInfo(value, ref elementClassInfo, options);
+                    obtainedValues = true;
                 }
 
                 if (elementClassInfo.ClassType == ClassType.Value)
                 {
                     elementClassInfo.PolicyProperty.WriteDictionary(ref state, writer);
                 }
-                else if (state.Current.CollectionEnumerator.Current == null)
-                {
-                    writer.WriteNull(jsonPropertyInfo.Name);
-                }
                 else
                 {
+                    if (!obtainedValues)
+                    {
+                        jsonPropertyInfo.GetDictionaryKeyAndValue(ref state.Current, out key, out value);
+                    }
+
                     // An object or another enumerator requires a new stack frame.
-                    var enumerator = (IDictionaryEnumerator)state.Current.CollectionEnumerator;
-                    object value = enumerator.Value;
                     state.Push(elementClassInfo, value);
-                    state.Current.KeyName = (string)enumerator.Key;
+                    state.Current.KeyName = key;
                 }
 
                 return false;
@@ -113,35 +117,46 @@ namespace System.Text.Json
             ref WriteStackFrame current,
             Utf8JsonWriter writer)
         {
-            if (converter == null)
-            {
-                return;
-            }
-
-            Debug.Assert(current.CollectionEnumerator != null);
+            Debug.Assert(converter != null && current.CollectionEnumerator != null);
 
             string key;
             TProperty value;
             if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, TProperty>> enumerator)
             {
-                // Avoid boxing for strongly-typed enumerators such as returned from IDictionary<string, TRuntimeProperty>
-                value = enumerator.Current.Value;
                 key = enumerator.Current.Key;
+                value = enumerator.Current.Value;
             }
             else if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, object>> polymorphicEnumerator)
             {
-                value = (TProperty)polymorphicEnumerator.Current.Value;
                 key = polymorphicEnumerator.Current.Key;
+                value = (TProperty)polymorphicEnumerator.Current.Value;
             }
-            else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty)
+            else if (current.CollectionEnumerator is IDictionaryEnumerator iDictionaryEnumerator &&
+                iDictionaryEnumerator.Key is string keyAsString)
             {
-                value = (TProperty)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
-                key = (string)((DictionaryEntry)current.CollectionEnumerator.Current).Key;
+                key = keyAsString;
+                value = (TProperty)iDictionaryEnumerator.Value;
             }
             else
             {
-                // Todo: support non-generic Dictionary here (IDictionaryEnumerator)
-                throw new NotSupportedException();
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    current.JsonPropertyInfo.DeclaredPropertyType,
+                    current.JsonPropertyInfo.ParentClassType,
+                    current.JsonPropertyInfo.PropertyInfo);
+            }
+
+            Debug.Assert(key != null);
+
+            if (options.DictionaryKeyPolicy != null &&
+                // We do not convert extension data.
+                current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing)
+            {
+                key = options.DictionaryKeyPolicy.ConvertName(key);
+
+                if (key == null)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_SerializerDictionaryKeyNull(options.DictionaryKeyPolicy.GetType());
+                }
             }
 
             if (value == null)
@@ -150,19 +165,7 @@ namespace System.Text.Json
             }
             else
             {
-                if (options.DictionaryKeyPolicy != null &&
-                    current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing) // We do not convert extension data.
-                {
-                    key = options.DictionaryKeyPolicy.ConvertName(key);
-
-                    if (key == null)
-                    {
-                        ThrowHelper.ThrowInvalidOperationException_SerializerDictionaryKeyNull(options.DictionaryKeyPolicy.GetType());
-                    }
-                }
-
-                JsonEncodedText escapedKey = JsonEncodedText.Encode(key, options.Encoder);
-                writer.WritePropertyName(escapedKey);
+                writer.WritePropertyName(key);
                 converter.Write(writer, value, options);
             }
         }

@@ -29,7 +29,7 @@ namespace System.Drawing.Printing
             if (!document.PrinterSettings.IsValid)
                 throw new InvalidPrinterException(document.PrinterSettings);
 
-            _dc = document.PrinterSettings.CreateDeviceContext(modeHandle);
+            _dc = document.PrinterSettings.CreateDeviceContext(_modeHandle);
             SafeNativeMethods.DOCINFO info = new SafeNativeMethods.DOCINFO();
             info.lpszDocName = document.DocumentName;
             if (document.PrinterSettings.PrintToFile)
@@ -62,8 +62,8 @@ namespace System.Drawing.Printing
             Debug.Assert(_dc != null && _graphics == null, "PrintController methods called in the wrong order?");
 
             base.OnStartPage(document, e);
-            e.PageSettings.CopyToHdevmode(modeHandle);
-            IntPtr modePointer = SafeNativeMethods.GlobalLock(new HandleRef(this, modeHandle));
+            e.PageSettings.CopyToHdevmode(_modeHandle);
+            IntPtr modePointer = Interop.Kernel32.GlobalLock(new HandleRef(this, _modeHandle));
             try
             {
                 IntPtr result = SafeNativeMethods.ResetDC(new HandleRef(_dc, _dc.Hdc), new HandleRef(null, modePointer));
@@ -71,11 +71,8 @@ namespace System.Drawing.Printing
             }
             finally
             {
-                SafeNativeMethods.GlobalUnlock(new HandleRef(this, modeHandle));
+                Interop.Kernel32.GlobalUnlock(new HandleRef(this, _modeHandle));
             }
-
-            // int horizontalResolution = Windows.GetDeviceCaps(dc.Hdc, SafeNativeMethods.HORZRES);
-            // int verticalResolution = Windows.GetDeviceCaps(dc.Hdc, SafeNativeMethods.VERTRES);
 
             _graphics = Graphics.FromHdcInternal(_dc.Hdc);
 
@@ -84,10 +81,10 @@ namespace System.Drawing.Printing
                 // Adjust the origin of the graphics object to be at the
                 // user-specified margin location
                 //
-                int dpiX = UnsafeNativeMethods.GetDeviceCaps(new HandleRef(_dc, _dc.Hdc), SafeNativeMethods.LOGPIXELSX);
-                int dpiY = UnsafeNativeMethods.GetDeviceCaps(new HandleRef(_dc, _dc.Hdc), SafeNativeMethods.LOGPIXELSY);
-                int hardMarginX_DU = UnsafeNativeMethods.GetDeviceCaps(new HandleRef(_dc, _dc.Hdc), SafeNativeMethods.PHYSICALOFFSETX);
-                int hardMarginY_DU = UnsafeNativeMethods.GetDeviceCaps(new HandleRef(_dc, _dc.Hdc), SafeNativeMethods.PHYSICALOFFSETY);
+                int dpiX = Interop.Gdi32.GetDeviceCaps(new HandleRef(_dc, _dc.Hdc), Interop.Gdi32.DeviceCapability.LOGPIXELSX);
+                int dpiY = Interop.Gdi32.GetDeviceCaps(new HandleRef(_dc, _dc.Hdc), Interop.Gdi32.DeviceCapability.LOGPIXELSY);
+                int hardMarginX_DU = Interop.Gdi32.GetDeviceCaps(new HandleRef(_dc, _dc.Hdc), Interop.Gdi32.DeviceCapability.PHYSICALOFFSETX);
+                int hardMarginY_DU = Interop.Gdi32.GetDeviceCaps(new HandleRef(_dc, _dc.Hdc), Interop.Gdi32.DeviceCapability.PHYSICALOFFSETY);
                 float hardMarginX = hardMarginX_DU * 100 / dpiX;
                 float hardMarginY = hardMarginY_DU * 100 / dpiY;
 

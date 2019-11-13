@@ -2,9 +2,8 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ForceManagedImplementation>false</ForceManagedImplementation>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the options -->
   <ItemGroup>
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Collections" />
@@ -101,8 +100,11 @@
       <Link>Common\System\Net\WebSockets\WebSocketValidate.cs</Link>
     </Compile>
     <Compile Include="System\Net\Windows\CookieExtensions.cs" />
+    <Compile Include="$(CoreLibDir)System\Runtime\CompilerServices\PreserveDependencyAttribute.cs">
+      <Link>Common\System\Runtime\CompilerServices\PreserveDependencyAttribute.cs</Link>
+    </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(ForceManagedImplementation)' != 'true' AND '$(TargetGroup)' != 'uap'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(ForceManagedImplementation)' != 'true'">
     <Compile Include="System\Net\Windows\HttpListener.Windows.cs" />
     <Compile Include="System\Net\Windows\HttpListenerContext.Windows.cs" />
     <Compile Include="System\Net\Windows\HttpListenerRequest.Windows.cs" />
@@ -138,8 +140,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.SecPkgContext_ApplicationProtocol.cs">
       <Link>Common\Interop\Windows\SChannel\Interop.SecPkgContext_ApplicationProtocol.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOL.cs">
-      <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
+    <Compile Include="$(CoreLibDir)Interop\Windows\Interop.BOOL.cs">
+      <Link>Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\WebSocket\Interop.Structs.cs">
       <Link>Common\Interop\Windows\WebSocket\Interop.Structs.cs</Link>
@@ -186,7 +188,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.SetFileCompletionNotificationModes.cs">
       <Link>Interop\Windows\Kernel32\Interop.SetFileCompletionNotificationModes.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CancelIoEx.cs">
+    <Compile Include="$(CoreLibDir)Interop\Windows\Kernel32\Interop.CancelIoEx.cs">
       <Link>Common\Interop\Windows\mincore\Interop.CancelIoEx.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
@@ -195,8 +197,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs">
       <Link>Common\Interop\Windows\mincore\Interop.LoadLibraryEx.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.SECURITY_ATTRIBUTES.cs">
-      <Link>Common\CoreLib\Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs</Link>
+    <Compile Include="$(CoreLibDir)Interop\Windows\Kernel32\Interop.SECURITY_ATTRIBUTES.cs">
+      <Link>Interop\Windows\mincore\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalAlloc.cs">
       <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.cs</Link>
@@ -207,8 +209,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalAlloc.Constants.cs">
       <Link>Common\Interop\Windows\mincore_obsolete\Interop.LocalAlloc.Constants.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
-      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
+    <Compile Include="$(CoreLibDir)Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
+      <Link>Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLocalAllocHandle.cs</Link>
@@ -281,8 +283,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.SECURITY_STATUS.cs">
       <Link>Common\Interop\Windows\SChannel\Interop.SECURITY_STATUS.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
-      <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs</Link>
+    <Compile Include="$(CoreLibDir)Interop\Windows\Kernel32\Interop.CloseHandle.cs">
+      <Link>Interop\Windows\Kernel32\Interop.CloseHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SecPkgContext_StreamSizes.cs">
       <Link>Common\Interop\Windows\SspiCli\SecPkgContext_StreamSizes.cs</Link>
@@ -333,7 +335,7 @@
       <Link>Common\Interop\Windows\SspiCli\SSPIWrapper.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsUnix)' == 'true' OR '$(ForceManagedImplementation)' == 'true' OR ('$(TargetsWindows)' == 'true' AND '$(TargetGroup)' == 'uap')">
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true' or '$(ForceManagedImplementation)' == 'true'">
     <Compile Include="System\Net\Managed\HttpEndPointListener.cs" />
     <Compile Include="System\Net\Managed\HttpEndPointManager.cs" />
     <Compile Include="System\Net\Managed\HttpConnection.cs" />
@@ -352,8 +354,8 @@
     <Compile Include="System\Net\Managed\ChunkStream.cs" />
     <Compile Include="System\Net\Managed\HttpResponseStream.Managed.cs" />
     <Compile Include="System\Net\Managed\WebSockets\HttpWebSocket.Managed.cs" />
-    <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
-      <Link>Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
+    <Compile Include="$(CoreLibDir)System\Threading\Tasks\TaskToApm.cs">
+      <Link>System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
     <Reference Include="System.Buffers" />
     <Reference Include="System.Net.Sockets" />

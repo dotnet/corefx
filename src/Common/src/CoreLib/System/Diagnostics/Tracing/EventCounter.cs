@@ -56,7 +56,13 @@ namespace System.Diagnostics.Tracing
             Enqueue(value);
         }
 
-        public override string ToString() => $"EventCounter '{Name}' Count {_count} Mean {(_sum / _count).ToString("n3")}";
+        public override string ToString()
+        {
+            int count = Volatile.Read(ref _count);
+            return count == 0 ?
+                $"EventCounter '{Name}' Count 0" :
+                $"EventCounter '{Name}' Count {count} Mean {(_sum / count).ToString("n3")}";
+        }
 
         #region Statistics Calculation
 
@@ -193,5 +199,4 @@ namespace System.Diagnostics.Tracing
         public CounterPayloadType(CounterPayload payload) { Payload = payload; }
         public CounterPayload Payload { get; set; }
     }
-
 }
