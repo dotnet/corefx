@@ -8,6 +8,7 @@ parameters:
     enable: false
     continueOnError: false
     params: ''
+    artifactNames: ''
 
   # These parameters let the user customize the call to sdk-task.ps1 for publishing
   # symbols & general artifacts as well as for signing validation
@@ -78,8 +79,12 @@ stages:
             arguments: -task SigningValidation -restore -msbuildEngine dotnet
               /p:PackageBasePath='$(Build.ArtifactStagingDirectory)/PackageArtifacts'
               /p:SignCheckExclusionsFile='$(Build.SourcesDirectory)/eng/SignCheckExclusionsFile.txt'
-              /p:Configuration=Release 
               ${{ parameters.signingValidationAdditionalParameters }}
+
+        - template: ../steps/publish-logs.yml
+          parameters:
+            StageLabel: 'Validation'
+            JobLabel: 'Signing'
 
   - ${{ if eq(parameters.enableSourceLinkValidation, 'true') }}:
     - job:
@@ -111,6 +116,7 @@ stages:
       parameters:
         additionalParameters: ${{ parameters.SDLValidationParameters.params }}
         continueOnError: ${{ parameters.SDLValidationParameters.continueOnError }}
+        artifactNames: ${{ parameters.SDLValidationParameters.artifactNames }}
 
 - template: \eng\common\templates\post-build\channels\netcore-dev-5.yml
   parameters:

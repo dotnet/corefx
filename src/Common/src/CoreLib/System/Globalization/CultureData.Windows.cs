@@ -256,7 +256,7 @@ namespace System.Globalization
             Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert(regionName != null);
 
-            EnumLocaleData context = new EnumLocaleData();
+            EnumLocaleData context;
             context.cultureName = null;
             context.regionName = regionName;
 
@@ -292,7 +292,7 @@ namespace System.Globalization
             }
         }
 
-        private string GetRegionDisplayName(string isoCountryCode)
+        private string GetRegionDisplayName()
         {
             // If the current UI culture matching the OS UI language, we'll get the display name from the OS.
             // otherwise, we use the native name as we don't carry resources for the region display names anyway.
@@ -541,7 +541,7 @@ namespace System.Globalization
 
         private static unsafe string[]? nativeEnumTimeFormats(string localeName, uint dwFlags, bool useUserOverride)
         {
-            EnumData data = new EnumData();
+            EnumData data = default;
             data.strings = new List<string>();
 
             // Now call the enumeration API. Work is done by our callback function
@@ -669,7 +669,7 @@ namespace System.Globalization
                 flags |= Interop.Kernel32.LOCALE_SUPPLEMENTAL;
             }
 
-            EnumData context = new EnumData();
+            EnumData context = default;
             context.strings = new List<string>();
 
             unsafe
@@ -697,7 +697,7 @@ namespace System.Globalization
         {
             get
             {
-                EnumData context = new EnumData();
+                EnumData context = default;
                 context.strings = new List<string>();
 
                 unsafe
