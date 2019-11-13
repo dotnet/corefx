@@ -14,10 +14,10 @@ stages:
   jobs:
   - template: ../setup-maestro-vars.yml
 
-  - job:
+  - job: publish_symbols
     displayName: Symbol Publishing
     dependsOn: setupMaestroVars
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_31_Blazor_Features))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_31_Blazor_Features_Channel_Id))
     variables:
       - group: DotNet-Symbol-Server-Pats
     pool:
@@ -60,6 +60,11 @@ stages:
             /p:Configuration=Release
             ${{ parameters.symbolPublishingAdditionalParameters }}
 
+      - template: ../../steps/publish-logs.yml
+        parameters:
+          StageLabel: 'Channel_Net_Core_31_Blazor_Features'
+          JobLabel: 'SymbolPublishing'
+
   - job: publish_assets
     displayName: Publish Assets
     dependsOn: setupMaestroVars
@@ -68,7 +73,7 @@ stages:
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.BARBuildId'] ]
       - name: IsStableBuild
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.IsStableBuild'] ]
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_31_Blazor_Features))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_31_Blazor_Features_Channel_Id))
     pool:
       vmImage: 'windows-2019'
     steps:
@@ -138,6 +143,11 @@ stages:
             /p:AzureDevOpsStaticSymbolsFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
             ${{ parameters.artifactsPublishingAdditionalParameters }}
 
+      - template: ../../steps/publish-logs.yml
+        parameters:
+          StageLabel: 'Channel_Net_Core_31_Blazor_Features'
+          JobLabel: 'AssetPublishing'
+
       - template: ../../steps/promote-build.yml
         parameters:
-          ChannelId: ${{ variables.NetCore_31_Blazor_Features }}
+          ChannelId: ${{ variables.NetCore_31_Blazor_Features_Channel_Id }}
