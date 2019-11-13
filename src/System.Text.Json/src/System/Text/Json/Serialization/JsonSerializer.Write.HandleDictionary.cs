@@ -5,7 +5,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Text.Json.Serialization;
 
 namespace System.Text.Json
@@ -82,14 +81,13 @@ namespace System.Text.Json
                         jsonPropertyInfo.GetDictionaryKeyAndValue(ref state.Current, out key, out value);
                     }
 
-                    // An object or another enumerator requires a new stack frame.
-                    state.Push(elementClassInfo, value);
-                    var extensionDataAttribute = jsonPropertyInfo.PropertyInfo?.GetCustomAttribute(typeof(JsonExtensionDataAttribute));
-                    if (options.DictionaryKeyPolicy != null && extensionDataAttribute == null 
-                                                             && state.Current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing)
+                    if (options.DictionaryKeyPolicy != null && state.Current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing)
                     {
                         key = options.DictionaryKeyPolicy.ConvertName(key);
                     }
+
+                    // An object or another enumerator requires a new stack frame.
+                    state.Push(elementClassInfo, value);
 
                     state.Current.KeyName = key;
                 }
