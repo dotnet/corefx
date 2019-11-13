@@ -30,6 +30,8 @@ namespace Internal.Cryptography.Pal
             OidCollection certificatePolicy,
             X509RevocationMode revocationMode,
             X509RevocationFlag revocationFlag,
+            X509Certificate2Collection customTrustStore,
+            X509ChainTrustMode trustMode,
             DateTime verificationTime,
             TimeSpan timeout)
         {
@@ -57,6 +59,8 @@ namespace Internal.Cryptography.Pal
 
             OpenSslX509ChainProcessor chainPal = OpenSslX509ChainProcessor.InitiateChain(
                 ((OpenSslX509CertificateReader)cert).SafeHandle,
+                customTrustStore,
+                trustMode,
                 verificationTime,
                 remainingDownloadTime);
 
@@ -81,19 +85,16 @@ namespace Internal.Cryptography.Pal
                 }
             }
 
-            if (revocationMode == X509RevocationMode.Online &&
-                status != Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
-            {
-                revocationMode = X509RevocationMode.Offline;
-            }
-
             // In NoCheck+OK then we don't need to build the chain any more, we already
             // know it's error-free.  So skip straight to finish.
             if (status != Interop.Crypto.X509VerifyStatusCode.X509_V_OK ||
                 revocationMode != X509RevocationMode.NoCheck)
             {
-                chainPal.CommitToChain();
-                chainPal.ProcessRevocation(revocationMode, revocationFlag);
+                if (OpenSslX509ChainProcessor.IsCompleteChain(status))
+                {
+                    chainPal.CommitToChain();
+                    chainPal.ProcessRevocation(revocationMode, revocationFlag);
+                }
             }
 
             chainPal.Finish(applicationPolicy, certificatePolicy);

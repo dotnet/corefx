@@ -144,7 +144,7 @@ namespace System.Diagnostics
             // So we will try to get the privilege here.
             // We could fail if the user account doesn't have right to do this, but that's fair.
 
-            Interop.Advapi32.LUID luid = new Interop.Advapi32.LUID();
+            Interop.Advapi32.LUID luid = default;
             if (!Interop.Advapi32.LookupPrivilegeValue(null, Interop.Advapi32.SeDebugPrivilege, out luid))
             {
                 return;
@@ -292,7 +292,7 @@ namespace System.Diagnostics
                 break;
             }
             int[] ids = new int[size / 4];
-            Array.Copy(processIds, 0, ids, 0, ids.Length);
+            Array.Copy(processIds, ids, ids.Length);
             return ids;
         }
 

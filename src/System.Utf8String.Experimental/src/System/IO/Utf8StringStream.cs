@@ -90,7 +90,7 @@ namespace System.IO
             }
 
             _position++;
-            return _content[position];
+            return _content.AsBytes()[position];
         }
 
         public override long Seek(long offset, SeekOrigin origin)

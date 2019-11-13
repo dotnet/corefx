@@ -6,22 +6,22 @@ using System.Diagnostics;
 
 namespace System.IO.Compression
 {
-    internal sealed partial class WrappedStream : Stream
+    internal sealed class WrappedStream : Stream
     {
         private readonly Stream _baseStream;
         private readonly bool _closeBaseStream;
 
         // Delegate that will be invoked on stream disposing
-        private readonly Action<ZipArchiveEntry> _onClosed;
+        private readonly Action<ZipArchiveEntry?>? _onClosed;
 
         // Instance that will be passed to _onClose delegate
-        private readonly ZipArchiveEntry _zipArchiveEntry;
+        private readonly ZipArchiveEntry? _zipArchiveEntry;
         private bool _isDisposed;
 
         internal WrappedStream(Stream baseStream, bool closeBaseStream)
             : this(baseStream, closeBaseStream, null, null) { }
 
-        private WrappedStream(Stream baseStream, bool closeBaseStream, ZipArchiveEntry entry, Action<ZipArchiveEntry> onClosed)
+        private WrappedStream(Stream baseStream, bool closeBaseStream, ZipArchiveEntry? entry, Action<ZipArchiveEntry?>? onClosed)
         {
             _baseStream = baseStream;
             _closeBaseStream = closeBaseStream;
@@ -30,7 +30,7 @@ namespace System.IO.Compression
             _isDisposed = false;
         }
 
-        internal WrappedStream(Stream baseStream, ZipArchiveEntry entry, Action<ZipArchiveEntry> onClosed)
+        internal WrappedStream(Stream baseStream, ZipArchiveEntry entry, Action<ZipArchiveEntry?>? onClosed)
             : this(baseStream, false, entry, onClosed) { }
 
         public override long Length
@@ -121,6 +121,14 @@ namespace System.IO.Compression
             _baseStream.Write(buffer, offset, count);
         }
 
+        public override void Write(ReadOnlySpan<byte> source)
+        {
+            ThrowIfDisposed();
+            ThrowIfCantWrite();
+
+            _baseStream.Write(source);
+        }
+
         public override void Flush()
         {
             ThrowIfDisposed();
@@ -144,7 +152,7 @@ namespace System.IO.Compression
         }
     }
 
-    internal sealed partial class SubReadStream : Stream
+    internal sealed class SubReadStream : Stream
     {
         private readonly long _startInSuperStream;
         private long _positionInSuperStream;
@@ -229,6 +237,29 @@ namespace System.IO.Compression
             return ret;
         }
 
+        public override int Read(Span<byte> destination)
+        {
+            // parameter validation sent to _superStream.Read
+            int origCount = destination.Length;
+            int count = destination.Length;
+
+            ThrowIfDisposed();
+            ThrowIfCantRead();
+
+            if (_superStream.Position != _positionInSuperStream)
+                _superStream.Seek(_positionInSuperStream, SeekOrigin.Begin);
+            if (_positionInSuperStream + count > _endInSuperStream)
+                count = (int)(_endInSuperStream - _positionInSuperStream);
+
+            Debug.Assert(count >= 0);
+            Debug.Assert(count <= origCount);
+
+            int ret = _superStream.Read(destination.Slice(0, count));
+
+            _positionInSuperStream += ret;
+            return ret;
+        }
+
         public override long Seek(long offset, SeekOrigin origin)
         {
             ThrowIfDisposed();
@@ -266,7 +297,7 @@ namespace System.IO.Compression
         }
     }
 
-    internal sealed partial class CheckSumAndSizeWriteStream : Stream
+    internal sealed class CheckSumAndSizeWriteStream : Stream
     {
         private readonly Stream _baseStream;
         private readonly Stream _baseBaseStream;
@@ -282,10 +313,10 @@ namespace System.IO.Compression
         // this is the position in BaseBaseStream
         private long _initialPosition;
         private readonly ZipArchiveEntry _zipArchiveEntry;
-        private readonly EventHandler _onClose;
+        private readonly EventHandler? _onClose;
         // Called when the stream is closed.
         // parameters are initialPosition, currentPosition, checkSum, baseBaseStream, zipArchiveEntry and onClose handler
-        private readonly Action<long, long, uint, Stream, ZipArchiveEntry, EventHandler> _saveCrcAndSizes;
+        private readonly Action<long, long, uint, Stream, ZipArchiveEntry, EventHandler?> _saveCrcAndSizes;
 
         // parameters to saveCrcAndSizes are
         // initialPosition (initialPosition in baseBaseStream),
@@ -295,8 +326,8 @@ namespace System.IO.Compression
         // zipArchiveEntry passed here so as to avoid closure allocation,
         // onClose handler passed here so as to avoid closure allocation
         public CheckSumAndSizeWriteStream(Stream baseStream, Stream baseBaseStream, bool leaveOpenOnClose,
-            ZipArchiveEntry entry, EventHandler onClose,
-            Action<long, long, uint, Stream, ZipArchiveEntry, EventHandler> saveCrcAndSizes)
+            ZipArchiveEntry entry, EventHandler? onClose,
+            Action<long, long, uint, Stream, ZipArchiveEntry, EventHandler?> saveCrcAndSizes)
         {
             _baseStream = baseStream;
             _baseBaseStream = baseBaseStream;
@@ -392,6 +423,26 @@ namespace System.IO.Compression
             _checksum = Crc32Helper.UpdateCrc32(_checksum, buffer, offset, count);
             _baseStream.Write(buffer, offset, count);
             _position += count;
+        }
+
+        public override void Write(ReadOnlySpan<byte> source)
+        {
+            // if we're not actually writing anything, we don't want to trigger as if we did write something
+            ThrowIfDisposed();
+            Debug.Assert(CanWrite);
+
+            if (source.Length == 0)
+                return;
+
+            if (!_everWritten)
+            {
+                _initialPosition = _baseBaseStream.Position;
+                _everWritten = true;
+            }
+
+            _checksum = Crc32Helper.UpdateCrc32(_checksum, source);
+            _baseStream.Write(source);
+            _position += source.Length;
         }
 
         public override void Flush()

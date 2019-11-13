@@ -36,8 +36,7 @@ namespace System.IO
 
         private void Init(string originalPath, string fullPath = null, string fileName = null, bool isNormalized = false)
         {
-            // Want to throw the original argument name
-            OriginalPath = originalPath ?? throw new ArgumentNullException("path");
+            OriginalPath = originalPath ?? throw new ArgumentNullException(nameof(originalPath));
 
             fullPath = fullPath ?? originalPath;
             fullPath = isNormalized ? fullPath : Path.GetFullPath(fullPath);
@@ -92,7 +91,11 @@ namespace System.IO
             throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
         }
 
-        public void Create() => FileSystem.CreateDirectory(FullPath);
+        public void Create()
+        {
+            FileSystem.CreateDirectory(FullPath);
+            Invalidate();
+        }
 
         // Returns an array of Files in the DirectoryInfo specified by path
         public FileInfo[] GetFiles() => GetFiles("*", enumerationOptions: EnumerationOptions.Compatible);

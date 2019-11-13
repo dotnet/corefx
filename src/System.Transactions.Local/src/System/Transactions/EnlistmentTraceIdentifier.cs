@@ -11,7 +11,7 @@ namespace System.Transactions
     /// </summary>
     internal readonly struct EnlistmentTraceIdentifier : IEquatable<EnlistmentTraceIdentifier>
     {
-        public static readonly EnlistmentTraceIdentifier Empty = new EnlistmentTraceIdentifier();
+        public static readonly EnlistmentTraceIdentifier Empty = default;
 
         public EnlistmentTraceIdentifier(
             Guid resourceManagerIdentifier,
@@ -47,7 +47,7 @@ namespace System.Transactions
 
         public override int GetHashCode() => base.GetHashCode();  // Don't have anything better to do.
 
-        public override bool Equals(object obj) => obj is EnlistmentTraceIdentifier && Equals((EnlistmentTraceIdentifier)obj);
+        public override bool Equals(object? obj) => obj is EnlistmentTraceIdentifier enlistmentTraceId && Equals(enlistmentTraceId);
 
         public bool Equals(EnlistmentTraceIdentifier other) =>
             _enlistmentIdentifier == other._enlistmentIdentifier &&

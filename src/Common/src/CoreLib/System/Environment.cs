@@ -11,6 +11,16 @@ namespace System
 {
     public static partial class Environment
     {
+        public static int ProcessorCount { get; } = GetProcessorCount();
+
+        /// <summary>
+        /// Gets whether the current machine has only a single processor.
+        /// </summary>
+        internal static bool IsSingleProcessor => ProcessorCount == 1;
+
+        // Unconditionally return false since .NET Core does not support object finalization during shutdown.
+        public static bool HasShutdownStarted => false;
+
         public static string? GetEnvironmentVariable(string variable)
         {
             if (variable == null)
@@ -112,6 +122,8 @@ namespace System
 
         public static bool Is64BitOperatingSystem => Is64BitProcess || Is64BitOperatingSystemWhen32BitProcess;
 
+        public static string NewLine => NewLineConst;
+
         private static OperatingSystem? s_osVersion;
 
         public static OperatingSystem OSVersion
@@ -133,13 +145,9 @@ namespace System
             get
             {
                 // FX_PRODUCT_VERSION is expected to be set by the host
-                string? versionString = (string?)AppContext.GetData("FX_PRODUCT_VERSION");
-
-                if (versionString == null)
-                {
-                    // Use AssemblyInformationalVersionAttribute as fallback if the exact product version is not specified by the host
-                    versionString = typeof(object).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-                }
+                // Use AssemblyInformationalVersionAttribute as fallback if the exact product version is not specified by the host
+                string? versionString = (string?)AppContext.GetData("FX_PRODUCT_VERSION") ??
+                    typeof(object).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
                 ReadOnlySpan<char> versionSpan = versionString.AsSpan();
 

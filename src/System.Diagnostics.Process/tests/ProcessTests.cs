@@ -6,12 +6,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.DirectoryServices.ActiveDirectory;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.DotNet.RemoteExecutor;
 using Microsoft.Win32.SafeHandles;
 using Xunit;
@@ -60,8 +62,19 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        private void AssertNonZeroAllZeroDarwin(long value)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Assert.Equal(0, value);
+            }
+            else
+            {
+                Assert.NotEqual(0, value);
+            }
+        }
+
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior varies on Windows and Unix
         public void TestBasePriorityOnWindows()
         {
@@ -89,7 +102,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Theory]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         [InlineData(true)]
         [InlineData(false)]
         [InlineData(null)]
@@ -141,7 +153,6 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // UWP overrides WorkingDirectory (https://github.com/dotnet/corefx/pull/25266#issuecomment-347719832).
         public void TestStartWithBadWorkingDirectory()
         {
             string program;
@@ -176,7 +187,6 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
         [OuterLoop("Launches File Explorer")]
         public void ProcessStart_UseShellExecute_OnWindows_OpenMissingFile_Throws()
         {
@@ -187,7 +197,6 @@ namespace System.Diagnostics.Tests
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
         [InlineData(true)]
         [InlineData(false)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
         [OuterLoop("Launches File Explorer")]
         public void ProcessStart_UseShellExecute_OnWindows_DoesNotThrow(bool isFolder)
         {
@@ -223,7 +232,6 @@ namespace System.Diagnostics.Tests
 
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsServerCore),
             nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
         [InlineData(true), InlineData(false)]
         public void ProcessStart_UseShellExecute_Executes(bool filenameAsUrl)
         {
@@ -243,7 +251,6 @@ namespace System.Diagnostics.Tests
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsServerCore),
             nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
         public void ProcessStart_UseShellExecute_ExecuteOrder()
         {
             // Create a directory that we will use as PATH
@@ -287,7 +294,6 @@ namespace System.Diagnostics.Tests
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsServerCore),
             nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
         public void ProcessStart_UseShellExecute_WorkingDirectory()
         {
             // Create a directory that will ProcessStartInfo.WorkingDirectory
@@ -308,7 +314,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestExitCode()
         {
             {
@@ -326,7 +331,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestExitTime()
         {
             // Try twice, since it's possible that the system clock could be adjusted backwards between when we snapshot it
@@ -360,7 +364,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestId()
         {
             CreateDefaultProcess();
@@ -377,7 +380,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestHasExited()
         {
             {
@@ -419,7 +421,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestMachineName()
         {
             CreateDefaultProcess();
@@ -441,7 +442,7 @@ namespace System.Diagnostics.Tests
             Process p = Process.GetCurrentProcess();
 
             // On UAP casing may not match - we use Path.GetFileName(exePath) instead of kernel32!GetModuleFileNameEx which is not available on UAP
-            Func<string, string> normalize = PlatformDetection.IsUap ?
+            Func<string, string> normalize = PlatformDetection.IsInAppContainer ?
                 (Func<string, string>)((s) => s.ToLowerInvariant()) :
                 (s) => s;
 
@@ -452,7 +453,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestMaxWorkingSet()
         {
             CreateDefaultProcess();
@@ -508,7 +508,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestMinWorkingSet()
         {
             CreateDefaultProcess();
@@ -581,7 +580,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestNonpagedSystemMemorySize64()
         {
             CreateDefaultProcess();
@@ -597,7 +595,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPagedMemorySize64()
         {
             CreateDefaultProcess();
@@ -613,7 +610,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPagedSystemMemorySize64()
         {
             CreateDefaultProcess();
@@ -629,7 +625,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPeakPagedMemorySize64()
         {
             CreateDefaultProcess();
@@ -645,12 +640,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPeakVirtualMemorySize64()
         {
             CreateDefaultProcess();
 
-            AssertNonZeroWindowsZeroUnix(_process.PeakVirtualMemorySize64);
+            AssertNonZeroAllZeroDarwin(_process.PeakVirtualMemorySize64);
         }
 
         [Fact]
@@ -661,12 +655,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPeakWorkingSet64()
         {
             CreateDefaultProcess();
 
-            AssertNonZeroWindowsZeroUnix(_process.PeakWorkingSet64);
+            AssertNonZeroAllZeroDarwin(_process.PeakWorkingSet64);
         }
 
         [Fact]
@@ -677,12 +670,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPrivateMemorySize64()
         {
             CreateDefaultProcess();
 
-            AssertNonZeroWindowsZeroUnix(_process.PrivateMemorySize64);
+            AssertNonZeroAllZeroDarwin(_process.PrivateMemorySize64);
         }
 
         [Fact]
@@ -693,7 +685,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestVirtualMemorySize64()
         {
             CreateDefaultProcess();
@@ -709,7 +700,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestWorkingSet64()
         {
             CreateDefaultProcess();
@@ -732,7 +722,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestProcessorTime()
         {
             CreateDefaultProcess();
@@ -755,7 +744,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TotalProcessorTime_PerformLoop_TotalProcessorTimeValid()
         {
             CreateDefaultProcess();
@@ -836,7 +824,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void ProcessStartTime_Deterministic_Across_Instances()
         {
             CreateDefaultProcess();
@@ -858,7 +845,6 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(~(TestPlatforms.OSX | TestPlatforms.FreeBSD))] // getting/setting affinity not supported on OSX and BSD
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestProcessorAffinity()
         {
             CreateDefaultProcess();
@@ -877,7 +863,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestPriorityBoostEnabled()
         {
             CreateDefaultProcess();
@@ -907,7 +892,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact, PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior varies on Windows and Unix
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestPriorityClassWindows()
         {
             CreateDefaultProcess();
@@ -944,7 +928,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestProcessName()
         {
             CreateDefaultProcess();
@@ -962,7 +945,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestSafeHandle()
         {
             CreateDefaultProcess();
@@ -996,7 +978,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestSessionId()
         {
             CreateDefaultProcess();
@@ -1035,7 +1016,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestGetProcessById()
         {
             CreateDefaultProcess();
@@ -1046,7 +1026,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestGetProcesses()
         {
             Process currentProcess = Process.GetCurrentProcess();
@@ -1112,7 +1091,6 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: https://github.com/dotnet/corefx/issues/32780
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void GetProcessesByName_ProcessName_ReturnsExpected()
         {
             // Get the current process using its name
@@ -1171,7 +1149,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         [MemberData(nameof(MachineName_TestData))]
         public void GetProcessesByName_ProcessNameMachineName_ReturnsExpected(string machineName)
         {
@@ -1183,7 +1160,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         [MemberData(nameof(MachineName_Remote_TestData))]
         [PlatformSpecific(TestPlatforms.Windows)] // Accessing processes on remote machines is only supported on Windows.
         public void GetProcessesByName_RemoteMachineNameWindows_ReturnsExpected(string machineName)
@@ -1200,7 +1176,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void GetProcessesByName_NoSuchProcess_ReturnsEmpty()
         {
             string processName = Guid.NewGuid().ToString("N");
@@ -1208,7 +1183,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void GetProcessesByName_NullMachineName_ThrowsArgumentNullException()
         {
             Process currentProcess = Process.GetCurrentProcess();
@@ -1216,7 +1190,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void GetProcessesByName_EmptyMachineName_ThrowsArgumentException()
         {
             Process currentProcess = Process.GetCurrentProcess();
@@ -1225,7 +1198,6 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Behavior differs on Windows and Unix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestProcessOnRemoteMachineWindows()
         {
             Process currentProccess = Process.GetCurrentProcess();
@@ -1253,7 +1225,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void StartInfo_GetFileName_ReturnsExpected()
         {
             Process process = CreateProcessLong();
@@ -1266,7 +1237,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void StartInfo_SetOnRunningProcess_ThrowsInvalidOperationException()
         {
             Process process = CreateProcessLong();
@@ -1451,7 +1421,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.Windows)]  // Expected process HandleCounts differs on OSX
         public void TestHandleCount()
         {
@@ -1474,7 +1443,6 @@ namespace System.Diagnostics.Tests
         [OuterLoop]
         [Fact]
         [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.Windows)]  // Expected process HandleCounts differs on OSX
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void HandleCountChanges()
         {
             RemoteExecutor.Invoke(() =>
@@ -1526,7 +1494,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         [PlatformSpecific(TestPlatforms.Windows)] // MainWindowHandle is not supported on Unix.
         public void MainWindowHandle_NoWindow_ReturnsEmptyHandle()
         {
@@ -1538,7 +1505,6 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void MainWindowHandle_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
@@ -1546,7 +1512,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void MainWindowTitle_NoWindow_ReturnsEmpty()
         {
             CreateDefaultProcess();
@@ -1557,7 +1522,6 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // MainWindowTitle is a no-op and always returns string.Empty on Unix.
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void MainWindowTitle_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
@@ -1565,7 +1529,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void CloseMainWindow_NoWindow_ReturnsFalse()
         {
             CreateDefaultProcess();
@@ -1575,18 +1538,17 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-        public void CloseMainWindow_NotStarted_ThrowsInvalidOperationException_WindowsNonUap()
+        public void CloseMainWindow_NotStarted_ThrowsInvalidOperationException_Windows()
         {
             var process = new Process();
             Assert.Throws<InvalidOperationException>(() => process.CloseMainWindow());
         }
 
         [Fact]
-        // CloseMainWindow is a no-op and always returns false on Unix or Uap.
-        public void CloseMainWindow_NotStarted_ReturnsFalse_UapOrNonWindows()
+        // CloseMainWindow is a no-op and always returns false on Unix or UWP.
+        public void CloseMainWindow_NotStarted_ReturnsFalse_UWPNonWindows()
         {
-            if (PlatformDetection.IsWindows && !PlatformDetection.IsUap)
+            if (PlatformDetection.IsWindows && !PlatformDetection.IsInAppContainer)
                 return;
 
             var process = new Process();
@@ -1605,7 +1567,6 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // Responding always returns true on Unix.
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HWND not available")]
         public void Responding_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
@@ -1613,7 +1574,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestNonpagedSystemMemorySize()
         {
             CreateDefaultProcess();
@@ -1633,7 +1593,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPagedMemorySize()
         {
             CreateDefaultProcess();
@@ -1653,7 +1612,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPagedSystemMemorySize()
         {
             CreateDefaultProcess();
@@ -1673,7 +1631,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPeakPagedMemorySize()
         {
             CreateDefaultProcess();
@@ -1693,13 +1650,12 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPeakVirtualMemorySize()
         {
             CreateDefaultProcess();
 
 #pragma warning disable 0618
-            AssertNonZeroWindowsZeroUnix(_process.PeakVirtualMemorySize);
+            AssertNonZeroAllZeroDarwin(_process.PeakVirtualMemorySize);
 #pragma warning restore 0618
         }
 
@@ -1713,13 +1669,12 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPeakWorkingSet()
         {
             CreateDefaultProcess();
 
 #pragma warning disable 0618
-            AssertNonZeroWindowsZeroUnix(_process.PeakWorkingSet);
+            AssertNonZeroAllZeroDarwin(_process.PeakWorkingSet);
 #pragma warning restore 0618
         }
 
@@ -1733,13 +1688,12 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPrivateMemorySize()
         {
             CreateDefaultProcess();
 
 #pragma warning disable 0618
-            AssertNonZeroWindowsZeroUnix(_process.PrivateMemorySize);
+            AssertNonZeroAllZeroDarwin(_process.PrivateMemorySize);
 #pragma warning restore 0618
         }
 
@@ -1753,7 +1707,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestVirtualMemorySize()
         {
             CreateDefaultProcess();
@@ -1773,7 +1726,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestWorkingSet()
         {
             CreateDefaultProcess();
@@ -1812,7 +1764,6 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Starting process with authentication not supported on Unix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void Process_StartWithInvalidUserNamePassword()
         {
             SecureString password = AsSecureString("Value");
@@ -1822,7 +1773,6 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Starting process with authentication not supported on Unix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void Process_StartTest()
         {
             string name = "xcopy.exe";
@@ -1844,7 +1794,6 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Starting process with authentication not supported on Unix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void Process_StartWithArgumentsTest()
         {
             string currentProcessName = GetCurrentProcessName();
@@ -1883,7 +1832,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestLongProcessIsWorking()
         {
             // Sanity check for CreateProcessLong
@@ -1930,6 +1878,354 @@ namespace System.Diagnostics.Tests
                 {
                     px.Kill();
                     px.WaitForExit();
+                }
+            }
+        }
+
+        [Fact]
+        public void Start_HasStandardInputEncodingNonRedirected_ThrowsInvalidOperationException()
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "FileName",
+                    RedirectStandardInput = false,
+                    StandardInputEncoding = Encoding.UTF8
+                }
+            };
+
+            Assert.Throws<InvalidOperationException>(() => process.Start());
+        }
+
+        [Fact]
+        public void Start_StandardInputEncodingPropagatesToStreamWriter()
+        {
+            var process = CreateProcessPortable(RemotelyInvokable.Dummy);
+            process.StartInfo.RedirectStandardInput = true;
+            var encoding = new UTF32Encoding(bigEndian: false, byteOrderMark: true);
+            process.StartInfo.StandardInputEncoding = encoding;
+            process.Start();
+
+            Assert.Same(encoding, process.StandardInput.Encoding);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void StartProcessWithArgumentList()
+        {
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName());
+            psi.ArgumentList.Add("arg1");
+            psi.ArgumentList.Add("arg2");
+
+            Process testProcess = CreateProcess();
+            testProcess.StartInfo = psi;
+
+            try
+            {
+                testProcess.Start();
+                Assert.Equal(string.Empty, testProcess.StartInfo.Arguments);
+            }
+            finally
+            {
+                testProcess.Kill();
+
+                Assert.True(testProcess.WaitForExit(WaitInMS));
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void StartProcessWithSameArgumentList()
+        {
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName());
+            psi.ArgumentList.Add("arg1");
+            psi.ArgumentList.Add("arg2");
+
+            Process testProcess = CreateProcess();
+            Process secondTestProcess = CreateProcess();
+            testProcess.StartInfo = psi;
+            try
+            {
+                testProcess.Start();
+                Assert.Equal(string.Empty, testProcess.StartInfo.Arguments);
+                secondTestProcess.StartInfo = psi;
+                secondTestProcess.Start();
+                Assert.Equal(string.Empty, secondTestProcess.StartInfo.Arguments);
+            }
+            finally
+            {
+                testProcess.Kill();
+
+                Assert.True(testProcess.WaitForExit(WaitInMS));
+
+                secondTestProcess.Kill();
+
+                Assert.True(testProcess.WaitForExit(WaitInMS));
+            }
+        }
+
+        [Fact]
+        public void BothArgumentCtorAndArgumentListSet()
+        {
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName(), "arg3");
+            psi.ArgumentList.Add("arg1");
+            psi.ArgumentList.Add("arg2");
+
+            Process testProcess = CreateProcess();
+            testProcess.StartInfo = psi;
+            Assert.Throws<InvalidOperationException>(() => testProcess.Start());
+        }
+
+        [Fact]
+        public void BothArgumentSetAndArgumentListSet()
+        {
+            ProcessStartInfo psi = new ProcessStartInfo(GetCurrentProcessName());
+            psi.Arguments = "arg3";
+            psi.ArgumentList.Add("arg1");
+            psi.ArgumentList.Add("arg2");
+
+            Process testProcess = CreateProcess();
+            testProcess.StartInfo = psi;
+            Assert.Throws<InvalidOperationException>(() => testProcess.Start());
+        }
+
+        [Fact]
+        public void Kill_EntireProcessTree_True_ProcessNotStarted_ThrowsInvalidOperationException()
+        {
+            var process = new Process();
+            Assert.Throws<InvalidOperationException>(() => process.Kill(entireProcessTree: true));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Currently, remote processes are only supported on Windows. If that changes, adjust accordingly.
+        public void Kill_EntireProcessTree_True_CalledByNonLocalProcess_ThrowsInvalidOperationException()
+        {
+            Process currentProcess = Process.GetCurrentProcess();
+            Process process;
+
+            try
+            {
+                process = Process.GetProcessById(currentProcess.Id, "127.0.0.1");
+            }
+            catch (InvalidOperationException)
+            {
+                // As we can't detect reliably if performance counters are enabled,
+                // we silently abort on InvalidOperationExceptions since this test
+                // can only run if the attempt to get the process succeeded.
+                return;
+            }
+
+            Assert.Throws<NotSupportedException>(() => process.Kill(entireProcessTree: true));
+        }
+
+        [Fact]
+        public void Kill_EntireProcessTree_True_CalledOnCallingProcess_ThrowsInvalidOperationException()
+        {
+            var process = Process.GetCurrentProcess();
+            Assert.Throws<InvalidOperationException>(() => process.Kill(entireProcessTree: true));
+        }
+
+        [Fact]
+        public void Kill_EntireProcessTree_True_CalledOnTreeContainingCallingProcess_ThrowsInvalidOperationException()
+        {
+            Process containingProcess = CreateProcess(() =>
+            {
+                Process parentProcess = CreateProcess(() => RunProcessAttemptingToKillEntireTreeOnParent());
+
+                parentProcess.Start();
+                parentProcess.WaitForExit();
+
+                return parentProcess.ExitCode;
+
+            });
+
+            containingProcess.Start();
+            containingProcess.WaitForExit();
+
+            if (containingProcess.ExitCode != 10)
+                Assert.True(false, "attempt to terminate a process tree containing the calling process did not throw the expected exception");
+
+            int RunProcessAttemptingToKillEntireTreeOnParent()
+            {
+                Process process = CreateProcess(parentProcessIdString =>
+                {
+                    Process parentProcess = Process.GetProcessById(int.Parse(parentProcessIdString));
+
+                    bool caught = false;
+                    try
+                    {
+                        parentProcess.Kill(entireProcessTree: true);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        caught = true;
+                    }
+                    return caught ? 10 : 20;
+                }, Process.GetCurrentProcess().Id.ToString());
+
+                process.Start();
+                process.WaitForExit();
+                return process.ExitCode;
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Kill_ExitedChildProcess_DoesNotThrow(bool killTree)
+        {
+            Process process = CreateProcess();
+            process.Start();
+
+            process.WaitForExit();
+
+            process.Kill(killTree);
+        }
+
+        [Fact]
+        public async Task Kill_EntireProcessTree_False_OnlyRootProcessTerminated()
+        {
+            IReadOnlyList<Process> tree = CreateProcessTree();
+
+            try
+            {
+                Process parentProcess = tree.First();
+
+                parentProcess.Kill(entireProcessTree: false);
+
+                await Helpers.RetryWithBackoff(() =>
+                {
+                    var actual = tree.Select(p => p.HasExited).ToList();
+                    Assert.Equal(new[] { true, false, false }, actual);
+                });
+            }
+            finally
+            {
+                foreach (Process process in tree)
+                {
+                    try
+                    {
+                        process.Kill();
+                    }
+                    catch
+                    {
+                        // Test cleanup code, so ignore any exceptions.
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public async Task Kill_EntireProcessTree_True_EntireTreeTerminated()
+        {
+            IReadOnlyList<Process> tree = CreateProcessTree();
+
+            try
+            {
+                Process parentProcess = tree.First();
+
+                parentProcess.Kill(entireProcessTree: true);
+
+                await Helpers.RetryWithBackoff(() =>
+                {
+                    var actual = tree.Select(p => p.HasExited).ToList();
+                    Assert.Equal(new[] { true, true, true }, actual);
+                });
+            }
+            finally
+            {
+                foreach (Process process in tree)
+                {
+                    try
+                    {
+                        process.Kill();
+                    }
+                    catch
+                    {
+                        // Test cleanup code, so ignore any exceptions.
+                    }
+                }
+            }
+        }
+
+        private IReadOnlyList<Process> CreateProcessTree()
+        {
+            (Process Value, string Message) rootResult = ListenForAnonymousPipeMessage(rootPipeHandleString =>
+            {
+                Process root = CreateProcess(rhs =>
+                {
+                    (Process Value, string Message) child1Result = ListenForAnonymousPipeMessage(child1PipeHandleString =>
+                    {
+                        Process child1 = CreateProcess(c1hs =>
+                        {
+                            Process child2 = CreateProcess(() => WaitForever());
+                            child2.Start();
+
+                            SendMessage(child2.Id.ToString(), c1hs);
+
+                            return WaitForever();
+                        }, child1PipeHandleString, autoDispose: false);
+
+                        child1.Start();
+
+                        return child1;
+                    });
+
+                    var child1ProcessId = child1Result.Value.Id;
+                    var child2ProcessId = child1Result.Message;
+                    SendMessage($"{child1ProcessId};{child2ProcessId}", rhs);
+
+                    return WaitForever();
+                }, rootPipeHandleString, autoDispose: false);
+
+                root.Start();
+
+                return root;
+            });
+
+            IEnumerable<Process> childProcesses = rootResult.Message
+                .Split(';')
+                .Select(x => int.Parse(x))
+                .Select(pid => Process.GetProcessById(pid));
+
+            return new[] { rootResult.Value }
+                .Concat(childProcesses)
+                .ToList();
+
+            int WaitForever()
+            {
+                Thread.Sleep(Timeout.Infinite);
+
+                // never reaches here -- but necessary to satisfy method's signature
+                return RemoteExecutor.SuccessExitCode;
+            }
+
+            void SendMessage(string message, string handleAsString)
+            {
+                using (var client = new AnonymousPipeClientStream(PipeDirection.Out, handleAsString))
+                {
+                    using (var sw = new StreamWriter(client))
+                    {
+                        sw.WriteLine(message);
+                    }
+                }
+            }
+
+            (T Value, string Message) ListenForAnonymousPipeMessage<T>(Func<string, T> action)
+            {
+                using (var pipeServer = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
+                {
+                    string handleAsString = pipeServer.GetClientHandleAsString();
+
+                    T result = action(handleAsString);
+
+                    pipeServer.DisposeLocalCopyOfClientHandle();
+
+                    using (var sr = new StreamReader(pipeServer))
+                    {
+                        return (result, sr.ReadLine());
+                    }
                 }
             }
         }

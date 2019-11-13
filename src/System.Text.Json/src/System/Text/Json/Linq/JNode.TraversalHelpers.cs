@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace System.Text.Json.Linq
 {
@@ -19,11 +18,9 @@ namespace System.Text.Json.Linq
             ref JNode toReturn,
             DuplicatePropertyNameHandlingStrategy duplicatePropertyNameHandling = DuplicatePropertyNameHandlingStrategy.Replace)
         {
-            if (currentNodes.Any())
+            if (currentNodes.TryPeek(out KeyValuePair<string, JNode> parentPair))
             {
-                KeyValuePair<string, JNode> parentPair = currentNodes.Peek();
-
-                // Parent needs to be JsonObject or JsonArray
+                // Parent needs to be JObject or JArray
                 Debug.Assert(parentPair.Value is JObject || parentPair.Value is JArray);
 
                 if (parentPair.Value is JObject jsonObject)

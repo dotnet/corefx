@@ -8,7 +8,7 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        private static bool HandleNull(ref Utf8JsonReader reader, ref ReadStack state)
+        private static bool HandleNull(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
             if (state.Current.SkipProperty)
             {
@@ -30,13 +30,13 @@ namespace System.Text.Json
 
             Debug.Assert(jsonPropertyInfo != null);
 
-            if (state.Current.IsCollectionForClass)
+            if (state.Current.IsProcessingCollectionObject())
             {
                 AddNullToCollection(jsonPropertyInfo, ref reader, ref state);
                 return false;
             }
 
-            if (state.Current.IsCollectionForProperty)
+            if (state.Current.IsProcessingCollectionProperty())
             {
                 if (state.Current.CollectionPropertyInitialized)
                 {
@@ -46,7 +46,7 @@ namespace System.Text.Json
                 else
                 {
                     // Set the property to null.
-                    ApplyObjectToEnumerable(null, ref state, ref reader, setPropertyDirectly: true);
+                    ApplyObjectToEnumerable(null, ref state, setPropertyDirectly: true);
 
                     // Reset so that `Is*Property` no longer returns true
                     state.Current.EndProperty();
@@ -82,7 +82,6 @@ namespace System.Text.Json
             JsonPropertyInfo elementPropertyInfo = jsonPropertyInfo.ElementClassInfo.PolicyProperty;
 
             // if elementPropertyInfo == null then this element doesn't need a converter (an object).
-
             if (elementPropertyInfo?.CanBeNull == false)
             {
                 // Allow a value type converter to return a null value representation.
@@ -92,7 +91,7 @@ namespace System.Text.Json
             else
             {
                 // Assume collection types are reference types and can have null assigned.
-                ApplyObjectToEnumerable(null, ref state, ref reader);
+                ApplyObjectToEnumerable(null, ref state);
             }
         }
     }

@@ -62,7 +62,7 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-        public static void SetStateMachine(IAsyncStateMachine stateMachine, Task task)
+        public static void SetStateMachine(IAsyncStateMachine stateMachine, Task? task)
         {
             if (stateMachine == null)
             {
@@ -103,7 +103,7 @@ namespace System.Runtime.CompilerServices
             sb.AppendLine(stateMachineType.FullName);
             foreach (FieldInfo fi in fields)
             {
-                sb.AppendLine($"    {fi.Name}: {fi.GetValue(stateMachine)}");
+                sb.Append("    ").Append(fi.Name).Append(": ").Append(fi.GetValue(stateMachine)).AppendLine();
             }
             return sb.ToString();
         }
@@ -123,7 +123,9 @@ namespace System.Runtime.CompilerServices
         }
 
         internal static Task? TryGetContinuationTask(Action continuation) =>
-            (continuation?.Target as ContinuationWrapper)?._innerTask;
+            (continuation.Target is ContinuationWrapper wrapper) ?
+                wrapper._innerTask :           // A wrapped continuation, created by an awaiter
+                continuation.Target as Task;   // The continuation targets a task directly, such as with AsyncStateMachineBox
 
         /// <summary>
         /// Logically we pass just an Action (delegate) to a task for its action to 'ContinueWith' when it completes.

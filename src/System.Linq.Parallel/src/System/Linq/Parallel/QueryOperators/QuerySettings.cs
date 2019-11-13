@@ -25,7 +25,7 @@ namespace System.Linq.Parallel
     /// </summary>
     internal struct QuerySettings
     {
-        private TaskScheduler _taskScheduler;
+        private TaskScheduler? _taskScheduler;
         private int? _degreeOfParallelism;
         private CancellationState _cancellationState;
         private ParallelExecutionMode? _executionMode;
@@ -43,7 +43,7 @@ namespace System.Linq.Parallel
         }
 
         // The task manager on which to execute the query.
-        internal TaskScheduler TaskScheduler
+        internal TaskScheduler? TaskScheduler
         {
             get { return _taskScheduler; }
             set { _taskScheduler = value; }
@@ -80,7 +80,7 @@ namespace System.Linq.Parallel
         //-----------------------------------------------------------------------------------
         // Constructs a new settings structure.
         //
-        internal QuerySettings(TaskScheduler taskScheduler, int? degreeOfParallelism,
+        internal QuerySettings(TaskScheduler? taskScheduler, int? degreeOfParallelism,
             CancellationToken externalCancellationToken, ParallelExecutionMode? executionMode,
             ParallelMergeOptions? mergeOptions)
         {
@@ -124,7 +124,7 @@ namespace System.Linq.Parallel
                 throw new InvalidOperationException(SR.ParallelQuery_DuplicateMergeOptions);
             }
 
-            TaskScheduler tm = (this.TaskScheduler == null) ? settings2.TaskScheduler : this.TaskScheduler;
+            TaskScheduler? tm = (this.TaskScheduler == null) ? settings2.TaskScheduler : this.TaskScheduler;
             int? dop = this.DegreeOfParallelism.HasValue ? this.DegreeOfParallelism : settings2.DegreeOfParallelism;
             CancellationToken externalCancellationToken = (this.CancellationState.ExternalCancellationToken.CanBeCanceled) ? this.CancellationState.ExternalCancellationToken : settings2.CancellationState.ExternalCancellationToken;
             ParallelExecutionMode? executionMode = this.ExecutionMode.HasValue ? this.ExecutionMode : settings2.ExecutionMode;
@@ -212,7 +212,7 @@ namespace System.Linq.Parallel
         // Returns the default settings
         internal static QuerySettings Empty
         {
-            get { return new QuerySettings(null, null, new CancellationToken(), null, null); }
+            get { return new QuerySettings(null, null, CancellationToken.None, null, null); }
         }
 
         // Cleanup internal state once the entire query is complete.
@@ -220,6 +220,7 @@ namespace System.Linq.Parallel
         // uninterrupted for the duration of the full query.)
         public void CleanStateAtQueryEnd()
         {
+            Debug.Assert(_cancellationState.MergedCancellationTokenSource != null);
             _cancellationState.MergedCancellationTokenSource.Dispose();
         }
     }

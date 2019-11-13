@@ -72,7 +72,7 @@ namespace System.Media
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("LoadTimeout", value, SR.SoundAPILoadTimeout);
+                    throw new ArgumentOutOfRangeException(nameof(LoadTimeout), value, SR.SoundAPILoadTimeout);
                 }
 
                 _loadTimeout = value;
@@ -498,7 +498,7 @@ namespace System.Media
                     if (_streamData.Length < _currentPos + BlockSize)
                     {
                         byte[] newData = new byte[_streamData.Length * 2];
-                        Array.Copy(_streamData, 0, newData, 0, _streamData.Length);
+                        Array.Copy(_streamData, newData, _streamData.Length);
                         _streamData = newData;
                     }
                     readBytes = await _stream.ReadAsync(_streamData, _currentPos, BlockSize, cancellationToken).ConfigureAwait(false);

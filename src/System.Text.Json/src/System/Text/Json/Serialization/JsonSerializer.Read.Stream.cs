@@ -183,7 +183,7 @@ namespace System.Text.Json
                     else if (bytesInBuffer != 0)
                     {
                         // Shift the processed bytes to the beginning of buffer to make more room.
-                        Buffer.BlockCopy(buffer, bytesConsumed, buffer, 0, bytesInBuffer);
+                        Buffer.BlockCopy(buffer, bytesConsumed + start, buffer, 0, bytesInBuffer);
                     }
                 }
             }
@@ -194,10 +194,8 @@ namespace System.Text.Json
                 ArrayPool<byte>.Shared.Return(buffer);
             }
 
-            if (bytesInBuffer != 0)
-            {
-                ThrowHelper.ThrowJsonException_DeserializeDataRemaining(totalBytesRead, bytesInBuffer);
-            }
+            // The reader should have thrown if we have remaining bytes.
+            Debug.Assert(bytesInBuffer == 0);
 
             return (TValue)readStack.Current.ReturnValue;
         }

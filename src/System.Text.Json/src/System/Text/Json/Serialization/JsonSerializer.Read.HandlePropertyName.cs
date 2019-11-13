@@ -23,27 +23,24 @@ namespace System.Text.Json
                 return;
             }
 
-            Debug.Assert(state.Current.ReturnValue != default || state.Current.TempDictionaryValues != default);
-            Debug.Assert(state.Current.JsonClassInfo != default);
+            Debug.Assert(state.Current.ReturnValue != null || state.Current.TempDictionaryValues != null);
+            Debug.Assert(state.Current.JsonClassInfo != null);
 
-            if ((state.Current.IsProcessingDictionary || state.Current.IsProcessingIDictionaryConstructible) &&
+            bool isProcessingDictObject = state.Current.IsProcessingObject(ClassType.Dictionary);
+            if ((isProcessingDictObject || state.Current.IsProcessingProperty(ClassType.Dictionary)) &&
                 state.Current.JsonClassInfo.DataExtensionProperty != state.Current.JsonPropertyInfo)
             {
-                if (state.Current.IsDictionary || state.Current.IsIDictionaryConstructible)
+                if (isProcessingDictObject)
                 {
                     state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.PolicyProperty;
                 }
-
-                Debug.Assert(
-                    state.Current.IsDictionary ||
-                    (state.Current.IsDictionaryProperty && state.Current.JsonPropertyInfo != null) ||
-                    state.Current.IsIDictionaryConstructible ||
-                    (state.Current.IsIDictionaryConstructibleProperty && state.Current.JsonPropertyInfo != null));
 
                 state.Current.KeyName = reader.GetString();
             }
             else
             {
+                Debug.Assert(state.Current.JsonClassInfo.ClassType == ClassType.Object);
+
                 state.Current.EndProperty();
 
                 ReadOnlySpan<byte> propertyName = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;

@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-#if !netstandard
+#if !NETSTANDARD2_0
 using Internal.Runtime.CompilerServices;
 #endif
 
@@ -97,7 +97,7 @@ namespace System
 
                 while (length > 0)
                 {
-                    length -= 1;
+                    length--;
 
                     if (value.Equals(Unsafe.Add(ref searchSpace, index)))
                         goto Found;

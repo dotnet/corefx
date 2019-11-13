@@ -129,6 +129,7 @@ namespace System.Text.Json
     public readonly partial struct JsonEncodedText : System.IEquatable<System.Text.Json.JsonEncodedText>
     {
         private readonly object _dummy;
+        private readonly int _dummyPrimitive;
         public System.ReadOnlySpan<byte> EncodedUtf8Bytes { get { throw null; } }
         public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<byte> utf8Value, System.Text.Encodings.Web.JavaScriptEncoder encoder = null) { throw null; }
         public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<char> value, System.Text.Encodings.Web.JavaScriptEncoder encoder = null) { throw null; }
@@ -161,6 +162,7 @@ namespace System.Text.Json
     public readonly partial struct JsonProperty
     {
         private readonly object _dummy;
+        private readonly int _dummyPrimitive;
         public string Name { get { throw null; } }
         public System.Text.Json.JsonElement Value { get { throw null; } }
         public bool NameEquals(System.ReadOnlySpan<byte> utf8Text) { throw null; }

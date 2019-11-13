@@ -89,7 +89,6 @@ namespace System
             }
 #endregion
 
-
             // Find the method that matches...
             int CurIdx = 0;
             bool defaultValueBinding = ((bindingAttr & BindingFlags.OptionalParamBinding) != 0);
@@ -305,7 +304,7 @@ namespace System
                     {
                         object[] objs = new object[parms.Length];
                         int lastPos = parms.Length - 1;
-                        Array.Copy(args, 0, objs, 0, lastPos);
+                        Array.Copy(args, objs, lastPos);
                         objs[lastPos] = Array.CreateInstance(paramArrayTypes[0], 1);
                         ((Array)objs[lastPos]).SetValue(args[lastPos], 0);
                         args = objs;
@@ -335,7 +334,7 @@ namespace System
                     {
                         object[] objs = new object[parms.Length];
                         int paramArrayPos = parms.Length - 1;
-                        Array.Copy(args, 0, objs, 0, paramArrayPos);
+                        Array.Copy(args, objs, paramArrayPos);
                         objs[paramArrayPos] = Array.CreateInstance(paramArrayTypes[0], args.Length - paramArrayPos);
                         Array.Copy(args, paramArrayPos, (System.Array)objs[paramArrayPos], 0, args.Length - paramArrayPos);
                         args = objs;
@@ -385,7 +384,7 @@ namespace System
                 {
                     object[] objs = new object[parameters.Length];
                     int lastPos = parameters.Length - 1;
-                    Array.Copy(args, 0, objs, 0, lastPos);
+                    Array.Copy(args, objs, lastPos);
                     objs[lastPos] = Array.CreateInstance(paramArrayTypes[currentMin], 1);
                     ((Array)objs[lastPos]).SetValue(args[lastPos], 0);
                     args = objs;
@@ -418,7 +417,7 @@ namespace System
                 {
                     object[] objs = new object[parameters.Length];
                     int paramArrayPos = parameters.Length - 1;
-                    Array.Copy(args, 0, objs, 0, paramArrayPos);
+                    Array.Copy(args, objs, paramArrayPos);
                     objs[paramArrayPos] = Array.CreateInstance(paramArrayTypes[currentMin], args.Length - paramArrayPos);
                     Array.Copy(args, paramArrayPos, (System.Array)objs[paramArrayPos], 0, args.Length - paramArrayPos);
                     args = objs;
@@ -427,7 +426,6 @@ namespace System
 
             return candidates[currentMin]!;
         }
-
 
         // Given a set of fields that match the base criteria, select a field.
         // if value is null then we have no way to select a field
@@ -569,7 +567,7 @@ namespace System
 
                     if (pCls.IsPrimitive)
                     {
-                        if (!(type.UnderlyingSystemType.IsRuntimeImplemented()) ||
+                        if (!type.UnderlyingSystemType.IsRuntimeImplemented() ||
                             !CanChangePrimitive(type.UnderlyingSystemType, pCls.UnderlyingSystemType))
                             break;
                     }
@@ -657,7 +655,7 @@ namespace System
 
                         if (pCls.IsPrimitive)
                         {
-                            if (!(indexes[j].UnderlyingSystemType.IsRuntimeImplemented()) ||
+                            if (!indexes[j].UnderlyingSystemType.IsRuntimeImplemented() ||
                                 !CanChangePrimitive(indexes[j].UnderlyingSystemType, pCls.UnderlyingSystemType))
                                 break;
                         }
@@ -675,7 +673,7 @@ namespace System
                     {
                         if (candidates[i].PropertyType.IsPrimitive)
                         {
-                            if (!(returnType.UnderlyingSystemType.IsRuntimeImplemented()) ||
+                            if (!returnType.UnderlyingSystemType.IsRuntimeImplemented() ||
                                 !CanChangePrimitive(returnType.UnderlyingSystemType, candidates[i].PropertyType.UnderlyingSystemType))
                                 continue;
                         }
@@ -752,7 +750,7 @@ namespace System
                 {
                     // must be args.Length < state.originalSize
                     object[] newArgs = new object[args.Length];
-                    Array.Copy(args, 0, newArgs, 0, paramArrayPos);
+                    Array.Copy(args, newArgs, paramArrayPos);
                     for (int i = paramArrayPos, j = 0; i < newArgs.Length; i++, j++)
                     {
                         newArgs[i] = ((object[])args[paramArrayPos]!)[j];
@@ -765,7 +763,7 @@ namespace System
                 if (args.Length > binderState._originalSize)
                 {
                     object[] newArgs = new object[binderState._originalSize];
-                    Array.Copy(args, 0, newArgs, 0, binderState._originalSize);
+                    Array.Copy(args, newArgs, binderState._originalSize);
                     args = newArgs;
                 }
             }
@@ -921,7 +919,7 @@ namespace System
             }
             else
             {
-                return (p1Less == true) ? 1 : 2;
+                return p1Less ? 1 : 2;
             }
         }
 
@@ -973,7 +971,6 @@ namespace System
                     c2 = c2.GetElementType()!;
                 }
             }
-
 
             if (c1.IsPrimitive && c2.IsPrimitive)
             {

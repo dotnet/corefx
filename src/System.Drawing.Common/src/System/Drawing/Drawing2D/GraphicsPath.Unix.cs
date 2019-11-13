@@ -78,7 +78,7 @@ namespace System.Drawing.Drawing2D
             if (pts == null)
                 throw new ArgumentNullException(nameof(pts));
             if (pts.Length != types.Length)
-                throw new ArgumentException("Invalid parameter passed. Number of points and types must be same.");
+                throw new ArgumentException(SR.NumberOfPointsAndTypesMustBeSame);
 
             int status = Gdip.GdipCreatePath2I(pts, types, pts.Length, fillMode, out _nativePath);
             Gdip.CheckStatus(status);
@@ -89,7 +89,7 @@ namespace System.Drawing.Drawing2D
             if (pts == null)
                 throw new ArgumentNullException(nameof(pts));
             if (pts.Length != types.Length)
-                throw new ArgumentException("Invalid parameter passed. Number of points and types must be same.");
+                throw new ArgumentException(SR.NumberOfPointsAndTypesMustBeSame);
 
             int status = Gdip.GdipCreatePath2(pts, types, pts.Length, fillMode, out _nativePath);
             Gdip.CheckStatus(status);
@@ -141,7 +141,7 @@ namespace System.Drawing.Drawing2D
             set
             {
                 if ((value < FillMode.Alternate) || (value > FillMode.Winding))
-                    throw new InvalidEnumArgumentException("FillMode", (int)value, typeof(FillMode));
+                    throw new InvalidEnumArgumentException(nameof(FillMode), (int)value, typeof(FillMode));
 
                 int status = Gdip.GdipSetPathFillMode(_nativePath, value);
                 Gdip.CheckStatus(status);
@@ -625,7 +625,7 @@ namespace System.Drawing.Drawing2D
 
         public void AddString(string s, FontFamily family, int style, float emSize, Point origin, StringFormat format)
         {
-            Rectangle layout = new Rectangle();
+            Rectangle layout = default;
             layout.X = origin.X;
             layout.Y = origin.Y;
             AddString(s, family, style, emSize, layout, format);
@@ -633,7 +633,7 @@ namespace System.Drawing.Drawing2D
 
         public void AddString(string s, FontFamily family, int style, float emSize, PointF origin, StringFormat format)
         {
-            RectangleF layout = new RectangleF();
+            RectangleF layout = default;
             layout.X = origin.X;
             layout.Y = origin.Y;
             AddString(s, family, style, emSize, layout, format);

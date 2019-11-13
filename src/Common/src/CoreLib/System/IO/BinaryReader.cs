@@ -17,7 +17,6 @@
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.IO
@@ -193,7 +192,7 @@ namespace System.IO
 
                     if (_stream.CanSeek)
                     {
-                        _stream.Seek((posSav - _stream.Position), SeekOrigin.Current);
+                        _stream.Seek(posSav - _stream.Position, SeekOrigin.Current);
                     }
                     // else - we can't do much here
 
@@ -307,11 +306,7 @@ namespace System.IO
                     return new string(_charBuffer, 0, charsRead);
                 }
 
-                if (sb == null)
-                {
-                    sb = StringBuilderCache.Acquire(stringLength); // Actual string length in chars may be smaller.
-                }
-
+                sb ??= StringBuilderCache.Acquire(stringLength); // Actual string length in chars may be smaller.
                 sb.Append(_charBuffer, 0, charsRead);
                 currPos += n;
             } while (currPos < stringLength);
@@ -378,7 +373,7 @@ namespace System.IO
                     // For custom decoders, assume that the decoder has pending state.
                     if (decoder == null || decoder.HasState)
                     {
-                        numBytes -= 1;
+                        numBytes--;
 
                         // The worst case is charsRemaining = 2 and UTF32Decoder holding onto 3 pending bytes. We need to read just
                         // one byte in this case.

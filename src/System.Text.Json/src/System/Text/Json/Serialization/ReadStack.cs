@@ -75,20 +75,19 @@ namespace System.Text.Json
 
             if (frame.JsonClassInfo != null)
             {
-                if (frame.IsProcessingDictionary)
+                if (frame.IsProcessingDictionary())
                 {
                     // For dictionaries add the key.
                     AppendPropertyName(sb, frame.KeyName);
                 }
-                else if (frame.IsProcessingEnumerable)
+                else if (frame.IsProcessingEnumerable())
                 {
-                    // For enumerables add the index.
                     IList list = frame.TempEnumerableValues;
                     if (list == null && frame.ReturnValue != null)
                     {
+
                         list = (IList)frame.JsonPropertyInfo?.GetValueAsObject(frame.ReturnValue);
                     }
-
                     if (list != null)
                     {
                         sb.Append(@"[");

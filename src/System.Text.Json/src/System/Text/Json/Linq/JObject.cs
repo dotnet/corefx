@@ -4,7 +4,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace System.Text.Json.Linq
 {
@@ -560,7 +559,15 @@ namespace System.Text.Json.Linq
         /// <summary>
         ///  A collection containing the property values of JSON object.
         /// </summary>
-        public IReadOnlyCollection<JNode> GetPropertyValues() => _dictionary.Values.Select(jsonObjectProperty => jsonObjectProperty.Value).ToList();
+        public IReadOnlyCollection<JNode> GetPropertyValues()
+        {
+            var list = new List<JNode>(_dictionary.Count);
+            foreach (KeyValuePair<string, JsonObjectProperty> item in _dictionary)
+            {
+                list.Add(item.Value.Value);
+            }
+            return list;
+        }
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.

@@ -357,7 +357,7 @@ namespace System.Globalization
 
             Debug.Assert(source.Length != 0);
             Debug.Assert(target.Length != 0);
-            Debug.Assert((options == CompareOptions.None || options == CompareOptions.IgnoreCase));
+            Debug.Assert(options == CompareOptions.None || options == CompareOptions.IgnoreCase);
 
             uint positionFlag = fromBeginning ? (uint)FIND_FROMSTART : FIND_FROMEND;
             return FindString(positionFlag | (uint)GetNativeCompareFlags(options), source, target, matchLengthPtr);
@@ -594,7 +594,7 @@ namespace System.Globalization
         {
             Debug.Assert(!GlobalizationMode.Invariant);
 
-            Interop.Kernel32.NlsVersionInfoEx nlsVersion = new Interop.Kernel32.NlsVersionInfoEx();
+            Interop.Kernel32.NlsVersionInfoEx nlsVersion = default;
             nlsVersion.dwNLSVersionInfoSize = sizeof(Interop.Kernel32.NlsVersionInfoEx);
             Interop.Kernel32.GetNLSVersionEx(Interop.Kernel32.COMPARE_STRING, _sortName, &nlsVersion);
             return new SortVersion(

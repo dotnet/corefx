@@ -198,6 +198,10 @@ namespace System.Runtime.InteropServices
         public CoClassAttribute(System.Type coClass) { }
         public System.Type CoClass { get { throw null; } }
     }
+    public static partial class CollectionsMarshal
+    {
+        public static System.Span<T> AsSpan<T>(System.Collections.Generic.List<T>? list) { throw null; }
+    }
     [System.AttributeUsageAttribute(System.AttributeTargets.Field | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.ReturnValue, Inherited=false)]
     public sealed partial class ComAliasNameAttribute : System.Attribute
     {
@@ -637,15 +641,10 @@ namespace System.Runtime.InteropServices
         public static System.IntPtr ReAllocHGlobal(System.IntPtr pv, System.IntPtr cb) { throw null; }
         public static int Release(System.IntPtr pUnk) { throw null; }
         public static int ReleaseComObject(object o) { throw null; }
-        [System.CLSCompliantAttribute(false)]
         public static System.IntPtr SecureStringToBSTR(System.Security.SecureString s) { throw null; }
-        [System.CLSCompliantAttribute(false)]
         public static System.IntPtr SecureStringToCoTaskMemAnsi(System.Security.SecureString s) { throw null; }
-        [System.CLSCompliantAttribute(false)]
         public static System.IntPtr SecureStringToCoTaskMemUnicode(System.Security.SecureString s) { throw null; }
-        [System.CLSCompliantAttribute(false)]
         public static System.IntPtr SecureStringToGlobalAllocAnsi(System.Security.SecureString s) { throw null; }
-        [System.CLSCompliantAttribute(false)]
         public static System.IntPtr SecureStringToGlobalAllocUnicode(System.Security.SecureString s) { throw null; }
         public static bool SetComObjectData(object obj, object key, object? data) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]

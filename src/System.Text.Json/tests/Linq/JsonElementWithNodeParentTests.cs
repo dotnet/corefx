@@ -85,6 +85,8 @@ namespace System.Text.Json.Linq.Tests
 
             JsonElement.ObjectEnumerator objectEnumerator = jsonObjectElement.EnumerateObject();
 
+            Assert.Equal(default, objectEnumerator.Current);
+
             for (int i = 1; i <= 3; i++)
             {
                 Assert.True(objectEnumerator.MoveNext());
@@ -115,6 +117,27 @@ namespace System.Text.Json.Linq.Tests
         {
             Assert.Equal("value", new JString("value").AsJsonElement().GetString());
             Assert.Throws<InvalidOperationException>(() => new JBoolean().AsJsonElement().GetString());
+        }
+
+        [Fact]
+        public static void TestBytesFromBase64()
+        {
+            string valueString = "value";
+            string valueBase64String = "dmFsdWU=";
+
+            Assert.Equal(Encoding.UTF8.GetBytes(valueString), new JsonString(valueBase64String).AsJsonElement().GetBytesFromBase64());
+            Assert.Equal(Encoding.UTF8.GetBytes(SR.LoremIpsum40Words), new JsonString(SR.LoremIpsum40WordsBase64).AsJsonElement().GetBytesFromBase64());
+
+            Assert.Throws<FormatException>(() => new JsonString("Not base-64").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JsonString("abc").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JsonString("").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JsonString().AsJsonElement().GetBytesFromBase64());
+
+            Assert.Throws<InvalidOperationException>(() => new JsonBoolean().AsJsonElement().GetBytesFromBase64());
+
+            Assert.True(new JsonString(valueBase64String).AsJsonElement().TryGetBytesFromBase64(out byte[] buffer));
+            Assert.Equal(Encoding.UTF8.GetBytes(valueString), buffer);
+            Assert.False(new JsonString().AsJsonElement().TryGetBytesFromBase64(out _));
         }
 
         [Fact]
@@ -282,6 +305,7 @@ namespace System.Text.Json.Linq.Tests
             Assert.True(arrayEnumerator.MoveNext());
             Assert.Equal(2, arrayEnumerator.Current.GetInt32());
             Assert.False(arrayEnumerator.MoveNext());
+            Assert.Equal(default, arrayEnumerator.Current);
 
             var jsonObjectFromCopy = (JObject)JNode.GetOriginatingNode(jsonElementCopy);
             

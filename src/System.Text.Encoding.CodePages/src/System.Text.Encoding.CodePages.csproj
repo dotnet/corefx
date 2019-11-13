@@ -1,12 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <RootNamespace>System.Text.Encoding.CodePages</RootNamespace>
-    <AssemblyName>System.Text.Encoding.CodePages</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
     <!-- copy the Windows-specific implementation to net461 folder so that restore without a RID works -->
-    <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard' AND '$(TargetsWindows)' == 'true'">netstandard2.0;net461</PackageTargetFramework>
-    <Configurations>netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.0-Windows_NT-Debug;netcoreapp2.0-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <PackageTargetFramework Condition="'$(TargetsNetStandard)' == 'true' and '$(TargetsWindows)' == 'true'">netstandard2.0;net461</PackageTargetFramework>
+    <Configurations>netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.0-Windows_NT-Debug;netcoreapp2.0-Windows_NT-Release;netstandard2.0-Debug;netstandard2.0-Release;netstandard2.0-Windows_NT-Debug;netstandard2.0-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Microsoft\Win32\SafeHandles\SafeAllocHHandle.cs" />
@@ -35,20 +33,20 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOL.cs">
-      <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
+    <Compile Include="$(CoreLibDir)Interop\Windows\Interop.BOOL.cs">
+      <Link>Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetCPInfoEx.cs">
       <Link>Common\Interop\Windows\Interop.GetCPInfoEx.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.MAX_PATH.cs">
-      <Link>Common\CoreLib\Interop\Windows\Interop.MAX_PATH.cs</Link>
+    <Compile Include="$(CoreLibDir)Interop\Windows\Kernel32\Interop.MAX_PATH.cs">
+      <Link>Interop\Windows\Interop.MAX_PATH.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.WideCharToMultiByte.cs">
-      <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.WideCharToMultiByte.cs</Link>
+    <Compile Include="$(CoreLibDir)Interop\Windows\Kernel32\Interop.WideCharToMultiByte.cs">
+      <Link>Interop\Windows\Kernel32\Interop.WideCharToMultiByte.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' AND '$(TargetsWindows)' != 'true' ">
+  <ItemGroup Condition="'$(TargetsNetStandard)' == 'true' and '$(TargetsWindows)' != 'true' ">
     <Compile Include="System\Text\CodePagesEncodingProvider.Default.cs" />
   </ItemGroup>
   <ItemGroup>

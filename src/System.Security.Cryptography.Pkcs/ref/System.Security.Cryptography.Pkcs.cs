@@ -326,7 +326,8 @@ namespace System.Security.Cryptography.Xml
     public partial struct X509IssuerSerial
     {
         private object _dummy;
-        public string IssuerName { get { throw null; } set { } }
-        public string SerialNumber { get { throw null; } set { } }
+        private int _dummyPrimitive;
+        public string IssuerName { readonly get { throw null; } set { } }
+        public string SerialNumber { readonly get { throw null; } set { } }
     }
 }

@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 
 namespace System.Net.NetworkInformation
@@ -14,17 +13,20 @@ namespace System.Net.NetworkInformation
         private UnicastIPAddressInformationCollection _unicastAddresses;
         private MulticastIPAddressInformationCollection _multicastAddreses;
         private readonly UnixNetworkInterface _uni;
-        private readonly string _dnsSuffix;
-        private readonly IPAddressCollection _dnsAddresses;
+        internal string _dnsSuffix;
+        internal IPAddressCollection _dnsAddresses;
 
-        public UnixIPInterfaceProperties(UnixNetworkInterface uni)
+        public UnixIPInterfaceProperties(UnixNetworkInterface uni, bool globalConfig = false)
         {
             _uni = uni;
-            _dnsSuffix = GetDnsSuffix();
-            _dnsAddresses = GetDnsAddresses();
+            if (!globalConfig)
+            {
+                _dnsSuffix = GetDnsSuffix();
+                _dnsAddresses = GetDnsAddresses();
+            }
         }
 
-        public sealed override UnicastIPAddressInformationCollection UnicastAddresses
+        public override UnicastIPAddressInformationCollection UnicastAddresses
         {
             get
             {
@@ -82,12 +84,9 @@ namespace System.Net.NetworkInformation
         private static UnicastIPAddressInformationCollection GetUnicastAddresses(UnixNetworkInterface uni)
         {
             var collection = new UnicastIPAddressInformationCollection();
-            foreach (IPAddress address in uni.Addresses.Where((addr) => !IPAddressUtil.IsMulticast(addr)))
+            foreach (UnixUnicastIPAddressInformation address in uni.UnicastAddress)
             {
-                IPAddress netMask = (address.AddressFamily == AddressFamily.InterNetwork)
-                                    ? uni.GetNetMaskForIPv4Address(address)
-                                    : IPAddress.Any; // Windows compatibility
-                collection.InternalAdd(new UnixUnicastIPAddressInformation(address, netMask));
+                collection.InternalAdd(address);
             }
 
             return collection;
@@ -96,9 +95,13 @@ namespace System.Net.NetworkInformation
         private static MulticastIPAddressInformationCollection GetMulticastAddresses(UnixNetworkInterface uni)
         {
             var collection = new MulticastIPAddressInformationCollection();
-            foreach (IPAddress address in uni.Addresses.Where(IPAddressUtil.IsMulticast))
+
+            if (uni.MulticastAddresess != null)
             {
-                collection.InternalAdd(new UnixMulticastIPAddressInformation(address));
+                foreach (IPAddress address in uni.MulticastAddresess)
+                {
+                    collection.InternalAdd(new UnixMulticastIPAddressInformation(address));
+                }
             }
 
             return collection;
@@ -108,7 +111,7 @@ namespace System.Net.NetworkInformation
         {
             try
             {
-                return StringParsingHelpers.ParseDnsSuffixFromResolvConfFile(NetworkFiles.EtcResolvConfFile);
+                return StringParsingHelpers.ParseDnsSuffixFromResolvConfFile(File.ReadAllText(NetworkFiles.EtcResolvConfFile));
             }
             catch (FileNotFoundException)
             {
@@ -120,7 +123,7 @@ namespace System.Net.NetworkInformation
         {
             try
             {
-                List<IPAddress> internalAddresses = StringParsingHelpers.ParseDnsAddressesFromResolvConfFile(NetworkFiles.EtcResolvConfFile);
+                List<IPAddress> internalAddresses = StringParsingHelpers.ParseDnsAddressesFromResolvConfFile(File.ReadAllText(NetworkFiles.EtcResolvConfFile));
                 return new InternalIPAddressCollection(internalAddresses);
             }
             catch (FileNotFoundException)

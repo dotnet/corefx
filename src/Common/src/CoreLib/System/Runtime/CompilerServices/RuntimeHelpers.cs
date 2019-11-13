@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.Serialization;
+using System.Reflection;
 using Internal.Runtime.CompilerServices;
 
 namespace System.Runtime.CompilerServices
@@ -65,6 +66,26 @@ namespace System.Runtime.CompilerServices
             return GetUninitializedObjectInternal(type);
         }
 
+        public static void ExecuteCodeWithGuaranteedCleanup(TryCode code, CleanupCode backoutCode, object? userData)
+        {
+            if (code == null)
+                throw new ArgumentNullException(nameof(code));
+            if (backoutCode == null)
+                throw new ArgumentNullException(nameof(backoutCode));
+
+            bool exceptionThrown = true;
+
+            try
+            {
+                code(userData);
+                exceptionThrown = false;
+            }
+            finally
+            {
+                backoutCode(userData, exceptionThrown);
+            }
+        }
+
         public static void PrepareContractedDelegate(Delegate d)
         {
         }
@@ -80,5 +101,9 @@ namespace System.Runtime.CompilerServices
         public static void PrepareConstrainedRegionsNoOP()
         {
         }
+
+        internal static bool IsPrimitiveType(this CorElementType et)
+            // COR_ELEMENT_TYPE_I1,I2,I4,I8,U1,U2,U4,U8,R4,R8,I,U,CHAR,BOOLEAN
+            => ((1 << (int)et) & 0b_0011_0000_0000_0011_1111_1111_1100) != 0;
     }
 }
