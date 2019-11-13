@@ -10,11 +10,11 @@ namespace System.Text.Json
 {
     /// <summary>
     ///   Represents a specific JSON value within a <see cref="JsonDocument"/>. JsonElement is a read-only, union type of all possible JSON values.
-    ///   For creating modifiable JSON values, use <see cref="JNode"/> and its derived types (such as <see cref="JObject"/> and <see cref="JArray"/>).
+    ///   For creating modifiable JSON values, use <see cref="JTreeNode"/> and its derived types (such as <see cref="JTreeObject"/> and <see cref="JTreeArray"/>).
     /// </summary>
-    /// <seealso cref="JNode"/>
-    /// <seealso cref="JObject"/>
-    /// <seealso cref="JArray"/>
+    /// <seealso cref="JTreeNode"/>
+    /// <seealso cref="JTreeObject"/>
+    /// <seealso cref="JTreeArray"/>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public readonly partial struct JsonElement
     {
@@ -32,7 +32,7 @@ namespace System.Text.Json
             _idx = idx;
         }
 
-        internal JsonElement(JNode parent)
+        internal JsonElement(JTreeNode parent)
         {
             _parent = parent;
             _idx = -1;
@@ -67,7 +67,7 @@ namespace System.Text.Json
                     return TokenType.ToValueKind();
                 }
 
-                var jsonNode = (JNode)_parent;
+                var jsonNode = (JTreeNode)_parent;
 
                 return jsonNode.ValueKind;
             }
@@ -97,9 +97,9 @@ namespace System.Text.Json
                     return document.GetArrayIndexElement(_idx, index);
                 }
 
-                var jsonNode = (JNode)_parent;
+                var jsonNode = (JTreeNode)_parent;
 
-                if (jsonNode is JArray jsonArray)
+                if (jsonNode is JTreeArray jsonArray)
                 {
                     return jsonArray[index].AsJsonElement();
                 }
@@ -127,9 +127,9 @@ namespace System.Text.Json
                 return document.GetArrayLength(_idx);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JArray jsonArray)
+            if (jsonNode is JTreeArray jsonArray)
             {
                 return jsonArray.Count;
             }
@@ -329,11 +329,11 @@ namespace System.Text.Json
                 return document.TryGetNamedPropertyValue(_idx, propertyName, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JObject jsonObject)
+            if (jsonNode is JTreeObject jsonObject)
             {
-                if (jsonObject.TryGetPropertyValue(propertyName.ToString(), out JNode nodeValue))
+                if (jsonObject.TryGetPropertyValue(propertyName.ToString(), out JTreeNode nodeValue))
                 {
                     value = nodeValue.AsJsonElement();
                     return true;
@@ -384,11 +384,11 @@ namespace System.Text.Json
                 return document.TryGetNamedPropertyValue(_idx, utf8PropertyName, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JObject jsonObject)
+            if (jsonNode is JTreeObject jsonObject)
             {
-                if (jsonObject.TryGetPropertyValue(JsonHelpers.Utf8GetString(utf8PropertyName), out JNode nodeValue))
+                if (jsonObject.TryGetPropertyValue(JsonHelpers.Utf8GetString(utf8PropertyName), out JTreeNode nodeValue))
                 {
                     value = nodeValue.AsJsonElement();
                     return true;
@@ -429,9 +429,9 @@ namespace System.Text.Json
                     throw ThrowHelper.GetJsonElementWrongTypeException(nameof(Boolean), type);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (_parent is JBoolean jsonBoolean)
+            if (_parent is JTreeBoolean jsonBoolean)
             {
                 return jsonBoolean.Value;
             }
@@ -462,9 +462,9 @@ namespace System.Text.Json
                 return document.GetString(_idx, JsonTokenType.String);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JString jsonString)
+            if (jsonNode is JTreeString jsonString)
             {
                 return jsonString.Value;
             }
@@ -498,9 +498,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JString jsonString)
+            if (jsonNode is JTreeString jsonString)
             {
                 return jsonString.TryGetBytesFromBase64(out value);
             }
@@ -562,9 +562,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JNumber jsonNumber)
+            if (jsonNode is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetSByte(out value);
             }
@@ -622,9 +622,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JNumber jsonNumber)
+            if (jsonNode is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetByte(out value);
             }
@@ -684,9 +684,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (_parent is JNumber jsonNumber)
+            if (_parent is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetInt16(out value);
             }
@@ -744,9 +744,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (_parent is JNumber jsonNumber)
+            if (_parent is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetUInt16(out value);
             }
@@ -807,9 +807,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JNumber jsonNumber)
+            if (jsonNode is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetInt32(out value);
             }
@@ -867,9 +867,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JNumber jsonNumber)
+            if (jsonNode is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetUInt32(out value);
             }
@@ -930,9 +930,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JNumber jsonNumber)
+            if (jsonNode is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetInt64(out value);
             }
@@ -993,9 +993,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JNumber jsonNumber)
+            if (jsonNode is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetUInt64(out value);
             }
@@ -1065,9 +1065,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (_parent is JNumber jsonNumber)
+            if (_parent is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetDouble(out value);
             }
@@ -1144,9 +1144,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JNumber jsonNumber)
+            if (jsonNode is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetSingle(out value);
             }
@@ -1215,9 +1215,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JNumber jsonNumber)
+            if (jsonNode is JTreeNumber jsonNumber)
             {
                 return jsonNumber.TryGetDecimal(out value);
             }
@@ -1278,9 +1278,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JString jsonString)
+            if (jsonNode is JTreeString jsonString)
             {
                 return jsonString.TryGetDateTime(out value);
             }
@@ -1341,9 +1341,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JString jsonString)
+            if (jsonNode is JTreeString jsonString)
             {
                 return jsonString.TryGetDateTimeOffset(out value);
             }
@@ -1404,9 +1404,9 @@ namespace System.Text.Json
                 return document.TryGetValue(_idx, out value);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
 
-            if (jsonNode is JString jsonString)
+            if (jsonNode is JTreeString jsonString)
             {
                 return jsonString.TryGetGuid(out value);
             }
@@ -1456,7 +1456,7 @@ namespace System.Text.Json
         ///   The original input data backing this value, returning it as a <see cref="string"/>.
         /// </returns>
         /// <remarks>
-        ///   For JsonElement built from <see cref="JNode"/>, the value of <see cref="JNode.ToJsonString"/> is returned.
+        ///   For JsonElement built from <see cref="JTreeNode"/>, the value of <see cref="JTreeNode.ToJsonString"/> is returned.
         /// </remarks>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -1470,7 +1470,7 @@ namespace System.Text.Json
                 return document.GetRawValueAsString(_idx);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
             return jsonNode.ToJsonString();
         }
 
@@ -1610,7 +1610,7 @@ namespace System.Text.Json
                 return;
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
             jsonNode.WriteTo(writer);
         }
 
@@ -1639,7 +1639,7 @@ namespace System.Text.Json
                     throw ThrowHelper.GetJsonElementWrongTypeException(JsonTokenType.StartArray, tokenType);
                 }
             }
-            else if (_parent is JNode node)
+            else if (_parent is JTreeNode node)
             {
                 if (node.ValueKind != JsonValueKind.Array)
                 {
@@ -1675,7 +1675,7 @@ namespace System.Text.Json
                     throw ThrowHelper.GetJsonElementWrongTypeException(JsonTokenType.StartObject, tokenType);
                 }
             }
-            else if (_parent is JNode node)
+            else if (_parent is JTreeNode node)
             {
                 if (node.ValueKind != JsonValueKind.Object)
                 {
@@ -1712,7 +1712,7 @@ namespace System.Text.Json
         ///   </para>
         /// </remarks>
         /// <remarks>
-        ///   For JsonElement built from <see cref="JNode"/>, the value of <see cref="JNode.ToJsonString"/> is returned.
+        ///   For JsonElement built from <see cref="JTreeNode"/>, the value of <see cref="JTreeNode.ToJsonString"/> is returned.
         /// </remarks>
         /// <returns>
         ///   A string representation for the current value appropriate to the value type.
@@ -1722,7 +1722,7 @@ namespace System.Text.Json
         /// </exception>
         public override string ToString()
         {
-            if (_parent is JNode jsonNode)
+            if (_parent is JTreeNode jsonNode)
             {
                 return jsonNode.ToJsonString();
             }
@@ -1769,7 +1769,7 @@ namespace System.Text.Json
         ///   call to Clone, this method results in no additional memory allocation.
         /// </remarks>
         /// <remarks>
-        ///   For <see cref="JsonElement"/> built from <see cref="JNode"/> performs <see cref="JNode.Clone"/>.
+        ///   For <see cref="JsonElement"/> built from <see cref="JTreeNode"/> performs <see cref="JTreeNode.Clone"/>.
         /// </remarks>
         public JsonElement Clone()
         {
@@ -1785,18 +1785,18 @@ namespace System.Text.Json
                 return document.CloneElement(_idx);
             }
 
-            var jsonNode = (JNode)_parent;
+            var jsonNode = (JTreeNode)_parent;
             return jsonNode.Clone().AsJsonElement();
         }
 
         /// <summary>
         ///   Performs a deep copy operation on the current instance of JsonElement, returning a corresponding modifiable tree structure of JSON nodes.
-        ///   Operations performed on the returned <see cref="JNode"/> do not modify this instance of JsonElement.
+        ///   Operations performed on the returned <see cref="JTreeNode"/> do not modify this instance of JsonElement.
         /// </summary>
-        /// <returns><see cref="JNode"/> representing a modifiable copy of this JsonElement.</returns>
-        public JNode ToJNode()
+        /// <returns><see cref="JTreeNode"/> representing a modifiable copy of this JsonElement.</returns>
+        public JTreeNode ToJTreeNode()
         {
-            return JNode.DeepCopy(this);
+            return JTreeNode.DeepCopy(this);
         }
 
         private void CheckValidInstance()
@@ -1806,7 +1806,7 @@ namespace System.Text.Json
                 throw new InvalidOperationException();
             }
 
-            Debug.Assert(_parent is JsonDocument || _parent is JNode);
+            Debug.Assert(_parent is JsonDocument || _parent is JTreeNode);
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]

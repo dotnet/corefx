@@ -12,26 +12,26 @@ namespace System.Text.Json.Linq.Tests
     internal static class EmployeesDatabase
     {
         private static int s_id = 0;
-        public static KeyValuePair<string, JNode> GetNextEmployee()
+        public static KeyValuePair<string, JTreeNode> GetNextEmployee()
         {
-            var employee = new JObject()
+            var employee = new JTreeObject()
             {
                 { "name", "John" } ,
                 { "surname", "Smith"},
                 { "age", 45 }
             };
 
-            return new KeyValuePair<string, JNode>("employee" + s_id++, employee);
+            return new KeyValuePair<string, JTreeNode>("employee" + s_id++, employee);
         }
 
-        public static IEnumerable<KeyValuePair<string, JNode>> GetTenBestEmployees()
+        public static IEnumerable<KeyValuePair<string, JTreeNode>> GetTenBestEmployees()
         {
             for (int i = 0; i < 10; i++)
                 yield return GetNextEmployee();
         }
 
         /// <summary>
-        /// Returns following JObject:
+        /// Returns following JTreeObject:
         /// {
         ///     { "name" : "John" }
         ///     { "phone numbers" : { "work" :  "425-555-0123", "home": "425-555-0134"  } }
@@ -40,21 +40,21 @@ namespace System.Text.Json.Linq.Tests
         ///         {
         ///             "software developers" :
         ///             {
-        ///                 "full time employees" : /JObject of 3 employees from database/ 
-        ///                 "intern employees" : /JObject of 2 employees from database/ 
+        ///                 "full time employees" : /JTreeObject of 3 employees from database/ 
+        ///                 "intern employees" : /JTreeObject of 2 employees from database/ 
         ///             },
-        ///             "HR" : /JObject of 10 employees fromk database/ 
+        ///             "HR" : /JTreeObject of 10 employees fromk database/ 
         ///         }
         /// </summary>
         /// <returns></returns>
-        public static JObject GetManager()
+        public static JTreeObject GetManager()
         {
-            var manager = GetNextEmployee().Value as JObject;
+            var manager = GetNextEmployee().Value as JTreeObject;
 
             manager.Add
             (
                 "phone numbers",
-                new JObject()
+                new JTreeObject()
                 {
                     { "work", "425-555-0123" }, { "home", "425-555-0134" }
                 }
@@ -62,13 +62,13 @@ namespace System.Text.Json.Linq.Tests
 
             manager.Add
             (
-                "reporting employees", new JObject()
+                "reporting employees", new JTreeObject()
                 {
                     {
-                        "software developers", new JObject()
+                        "software developers", new JTreeObject()
                         {
                             {
-                                "full time employees", new JObject()
+                                "full time employees", new JTreeObject()
                                 {
                                     EmployeesDatabase.GetNextEmployee(),
                                     EmployeesDatabase.GetNextEmployee(),
@@ -76,7 +76,7 @@ namespace System.Text.Json.Linq.Tests
                                 }
                             },
                             {
-                                "intern employees", new JObject()
+                                "intern employees", new JTreeObject()
                                 {
                                     EmployeesDatabase.GetNextEmployee(),
                                     EmployeesDatabase.GetNextEmployee(),
@@ -85,10 +85,10 @@ namespace System.Text.Json.Linq.Tests
                         }
                     },
                     {
-                        "HR", new JObject()
+                        "HR", new JTreeObject()
                         {
                             {
-                                "full time employees", new JObject(EmployeesDatabase.GetTenBestEmployees())
+                                "full time employees", new JTreeObject(EmployeesDatabase.GetTenBestEmployees())
                             }
                         }
                     }

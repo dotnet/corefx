@@ -7,18 +7,18 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static partial class JNodeTests
+    public static partial class JTreeNodeTests
     {
         [Fact]
         public static void TestAsJsonElement()
         {
-            var jsonObject = new JObject
+            var jsonObject = new JTreeObject
             {
                 { "text", "property value" },
                 { "boolean", true },
                 { "number", 15 },
-                { "null node", (JNode) null },
-                { "array", new JArray { "value1", "value2"} }
+                { "null node", (JTreeNode) null },
+                { "array", new JTreeArray { "value1", "value2"} }
             };
 
             JsonElement jsonElement = jsonObject.AsJsonElement();
@@ -65,16 +65,16 @@ namespace System.Text.Json.Linq.Tests
             Assert.False(enumerator.MoveNext());
             enumerator.Dispose();
 
-            // Modifying JObject will change JsonElement:
+            // Modifying JTreeObject will change JsonElement:
 
-            jsonObject["text"] = new JNumber("123");
+            jsonObject["text"] = new JTreeNumber("123");
             Assert.Equal(123, jsonElement.GetProperty("text").GetInt32());
         }
 
         [Fact]
         public static void TestArrayIterator()
         {
-            JArray array = new JArray { 1, 2, 3 };
+            JTreeArray array = new JTreeArray { 1, 2, 3 };
             JsonElement jsonNodeElement = array.AsJsonElement();
             IEnumerator enumerator = jsonNodeElement.EnumerateArray();
             array.Add(4);
@@ -84,35 +84,35 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestGetOriginatingNode()
         {
-            var jsonObject = new JObject
+            var jsonObject = new JTreeObject
             {
                 { "text", "property value" },
                 { "boolean", true },
                 { "number", 15 },
-                { "null node", (JNode) null },
-                { "array", new JArray { "value1", "value2"} }
+                { "null node", (JTreeNode) null },
+                { "array", new JTreeArray { "value1", "value2"} }
             };
 
             JsonElement jsonElement = jsonObject.AsJsonElement();
-            JObject jsonObjectFromElementGetNode = (JObject)JNode.GetOriginatingNode(jsonElement);
+            JTreeObject jsonObjectFromElementGetNode = (JTreeObject)JTreeNode.GetOriginatingNode(jsonElement);
 
-            Assert.True(JNode.TryGetOriginatingNode(jsonElement, out JNode jsonNodeFromElementTryGetNode));
-            var jsonObjectFromElementTryGetNode = (JObject)jsonNodeFromElementTryGetNode;
+            Assert.True(JTreeNode.TryGetOriginatingNode(jsonElement, out JTreeNode jsonNodeFromElementTryGetNode));
+            var jsonObjectFromElementTryGetNode = (JTreeObject)jsonNodeFromElementTryGetNode;
 
             Assert.Equal("property value", jsonObjectFromElementGetNode["text"]);
             Assert.Equal("property value", jsonObjectFromElementTryGetNode["text"]);
 
-            // Modifying JObject will change jsonObjectFromElementGetNode and jsonObjectFromElementTryGetNode:
+            // Modifying JTreeObject will change jsonObjectFromElementGetNode and jsonObjectFromElementTryGetNode:
 
-            jsonObject["text"] = new JString("something different");
+            jsonObject["text"] = new JTreeString("something different");
             Assert.Equal("something different", jsonObjectFromElementGetNode["text"]);
             Assert.Equal("something different", jsonObjectFromElementTryGetNode["text"]);
 
-            // Modifying JObjectFromElementGetNode will change JObject and jsonObjectFromElementTryGetNode:
+            // Modifying JTreeObjectFromElementGetNode will change JTreeObject and jsonObjectFromElementTryGetNode:
 
-            ((JBoolean)jsonObjectFromElementGetNode["boolean"]).Value = false;
-            Assert.False(((JBoolean)jsonObject["boolean"]).Value);
-            Assert.False(((JBoolean)jsonObjectFromElementTryGetNode["boolean"]).Value);
+            ((JTreeBoolean)jsonObjectFromElementGetNode["boolean"]).Value = false;
+            Assert.False(((JTreeBoolean)jsonObject["boolean"]).Value);
+            Assert.False(((JTreeBoolean)jsonObjectFromElementTryGetNode["boolean"]).Value);
         }
 
         [Fact]
@@ -120,12 +120,12 @@ namespace System.Text.Json.Linq.Tests
         {
             JsonDocument jsonDocument = JsonDocument.Parse("{}");
             JsonElement jsonElement = jsonDocument.RootElement;
-            Assert.False(JNode.TryGetOriginatingNode(jsonElement, out JNode _));
-            Assert.Throws<ArgumentException>(() => JNode.GetOriginatingNode(jsonElement));
+            Assert.False(JTreeNode.TryGetOriginatingNode(jsonElement, out JTreeNode _));
+            Assert.Throws<ArgumentException>(() => JTreeNode.GetOriginatingNode(jsonElement));
 
             jsonElement = default;
-            Assert.False(JNode.TryGetOriginatingNode(jsonElement, out JNode _));
-            Assert.Throws<ArgumentException>(() => JNode.GetOriginatingNode(jsonElement));
+            Assert.False(JTreeNode.TryGetOriginatingNode(jsonElement, out JTreeNode _));
+            Assert.Throws<ArgumentException>(() => JTreeNode.GetOriginatingNode(jsonElement));
         }
     }
 }

@@ -8,20 +8,20 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static class JNumberTests
+    public static class JTreeNumberTests
     {
-        private delegate bool TryGetValue<T>(JNumber number, out T result);
+        private delegate bool TryGetValue<T>(JTreeNumber number, out T result);
 
         private static void TestInitialization<T>(
                 T value,
-                Func<T, JNumber> ctor,
-                Action<JNumber, T> setter,
-                Func<JNumber, T> getter,
+                Func<T, JTreeNumber> ctor,
+                Action<JTreeNumber, T> setter,
+                Func<JTreeNumber, T> getter,
                 TryGetValue<T> tryGetter,
-                Func<T, JNode> implicitCaster)
+                Func<T, JTreeNode> implicitCaster)
         {
             // Default constructor:
-            JNumber number = new JNumber();
+            JTreeNumber number = new JTreeNumber();
             setter(number, value);
             AssertValue(value, number, getter, tryGetter);
 
@@ -33,22 +33,22 @@ namespace System.Text.Json.Linq.Tests
             number = value switch
             {
                 // Adding CultureInfo.InvariantCulture to support tests on platforms where `,` is a  default decimal separator instead of `.`
-                double doubleValue => new JNumber(doubleValue.ToString(CultureInfo.InvariantCulture)),
-                float floatValue => new JNumber(floatValue.ToString(CultureInfo.InvariantCulture)),
-                decimal decimalValue => new JNumber(decimalValue.ToString(CultureInfo.InvariantCulture)),
-                _ => new JNumber(value.ToString()),
+                double doubleValue => new JTreeNumber(doubleValue.ToString(CultureInfo.InvariantCulture)),
+                float floatValue => new JTreeNumber(floatValue.ToString(CultureInfo.InvariantCulture)),
+                decimal decimalValue => new JTreeNumber(decimalValue.ToString(CultureInfo.InvariantCulture)),
+                _ => new JTreeNumber(value.ToString()),
             };
             AssertValue(value, number, getter, tryGetter);
             
             // Implicit cast:
-            number = (JNumber)implicitCaster(value);
+            number = (JTreeNumber)implicitCaster(value);
             AssertValue(value, number, getter, tryGetter);
         }
 
         private static void AssertValue<T>(
                 T value,
-                JNumber number,
-                Func<JNumber, T> getter,
+                JTreeNumber number,
+                Func<JTreeNumber, T> getter,
                 TryGetValue<T> tryGetter)
         {
                 Assert.Equal(value, getter(number));
@@ -59,7 +59,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestDefaultCtor()
         {
-            var jsonNumber = new JNumber();
+            var jsonNumber = new JTreeNumber();
             Assert.Equal(0, jsonNumber.GetByte());
             Assert.Equal(0, jsonNumber.GetInt16());
             Assert.Equal(0, jsonNumber.GetInt32());
@@ -81,10 +81,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetByte(v),
                 number => number.GetByte(),
-                (JNumber number, out byte v) => number.TryGetByte(out v),
+                (JTreeNumber number, out byte v) => number.TryGetByte(out v),
                 v => v);
         }
 
@@ -100,10 +100,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetInt16(v),
                 number => number.GetInt16(),
-                (JNumber number, out short v) => number.TryGetInt16(out v),
+                (JTreeNumber number, out short v) => number.TryGetInt16(out v),
                 v => v);
         }
 
@@ -121,10 +121,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetInt32(v),
                 number => number.GetInt32(),
-                (JNumber number, out int v) => number.TryGetInt32(out v),
+                (JTreeNumber number, out int v) => number.TryGetInt32(out v),
                 v => v);
         }
 
@@ -140,10 +140,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetInt64(v),
                 number => number.GetInt64(),
-                (JNumber number, out long v) => number.TryGetInt64(out v),
+                (JTreeNumber number, out long v) => number.TryGetInt64(out v),
                 v => v);
         }
 
@@ -162,10 +162,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetSingle(v),
                 number => number.GetSingle(),
-                (JNumber number, out float v) => number.TryGetSingle(out v),
+                (JTreeNumber number, out float v) => number.TryGetSingle(out v),
                 v => v);
         }
 
@@ -188,10 +188,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetDouble(v),
                 number => number.GetDouble(),
-                (JNumber number, out double v) => number.TryGetDouble(out v),
+                (JTreeNumber number, out double v) => number.TryGetDouble(out v),
                 v => v);
         }
 
@@ -205,10 +205,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetSByte(v),
                 number => number.GetSByte(),
-                (JNumber number, out sbyte v) => number.TryGetSByte(out v),
+                (JTreeNumber number, out sbyte v) => number.TryGetSByte(out v),
                 v => v);
         }
 
@@ -221,10 +221,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetUInt16(v),
                 number => number.GetUInt16(),
-                (JNumber number, out ushort v) => number.TryGetUInt16(out v),
+                (JTreeNumber number, out ushort v) => number.TryGetUInt16(out v),
                 v => v);
         }
 
@@ -237,10 +237,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetUInt32(v),
                 number => number.GetUInt32(),
-                (JNumber number, out uint v) => number.TryGetUInt32(out v),
+                (JTreeNumber number, out uint v) => number.TryGetUInt32(out v),
                 v => v);
         }
 
@@ -253,10 +253,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetUInt64(v),
                 number => number.GetUInt64(),
-                (JNumber number, out ulong v) => number.TryGetUInt64(out v),
+                (JTreeNumber number, out ulong v) => number.TryGetUInt64(out v),
                 v => v);
         }
 
@@ -281,10 +281,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JNumber(v),
+                v => new JTreeNumber(v),
                 (number, v) => number.SetDecimal(v),
                 number => number.GetDecimal(),
-                (JNumber number, out decimal v) => number.TryGetDecimal(out v),
+                (JTreeNumber number, out decimal v) => number.TryGetDecimal(out v),
                 v => v);
         }
 
@@ -302,10 +302,10 @@ namespace System.Text.Json.Linq.Tests
         [InlineData("184467440737095516150184467440737095516150")]
         public static void TestString(string value)
         {
-            var jsonNumber = new JNumber(value);
+            var jsonNumber = new JTreeNumber(value);
             Assert.Equal(value, jsonNumber.ToString());
 
-            jsonNumber = new JNumber();
+            jsonNumber = new JTreeNumber();
             jsonNumber.SetFormattedValue(value);
             Assert.Equal(value, jsonNumber.ToString());
         }
@@ -337,13 +337,13 @@ namespace System.Text.Json.Linq.Tests
         [InlineData("0b_0110_1010")]
         public static void TestInvalidString(string value)
         {
-            Assert.Throws<ArgumentException>(() => new JNumber(value));
+            Assert.Throws<ArgumentException>(() => new JTreeNumber(value));
         }
 
         [Fact]
         public static void TestNullString()
         {
-            Assert.Throws<ArgumentNullException>(() => new JNumber(null));
+            Assert.Throws<ArgumentNullException>(() => new JTreeNumber(null));
         }
 
         [Theory]
@@ -360,7 +360,7 @@ namespace System.Text.Json.Linq.Tests
         [InlineData("184467440737095516150.184467440737095516150")]
         public static void TestToString(string value)
         {
-            var jsonNumber = new JNumber();
+            var jsonNumber = new JTreeNumber();
             jsonNumber.SetFormattedValue(value);
             Assert.Equal(value, jsonNumber.ToString());
         }
@@ -369,7 +369,7 @@ namespace System.Text.Json.Linq.Tests
         public static void TestUpcasts()
         {
             byte value = 17;
-            var jsonNumber = new JNumber(value);
+            var jsonNumber = new JTreeNumber(value);
 
             // Getting other types should also succeed:
             Assert.Equal(value, jsonNumber.GetInt16());
@@ -416,7 +416,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestIntegerGetMismatches()
         {
-            var jsonNumber = new JNumber(long.MaxValue);
+            var jsonNumber = new JTreeNumber(long.MaxValue);
 
             // Getting smaller types should fail:
             Assert.False(jsonNumber.TryGetByte(out byte byteResult));
@@ -441,7 +441,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestUnsignedGetMismatches()
         {
-            var jsonNumber = new JNumber("-1");
+            var jsonNumber = new JTreeNumber("-1");
 
             // Getting unsigned types should fail:
             Assert.False(jsonNumber.TryGetByte(out byte byteResult));
@@ -460,7 +460,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestRationalGetMismatches()
         {
-            var jsonNumber = new JNumber("3.14");
+            var jsonNumber = new JTreeNumber("3.14");
 
             // Getting integer types should fail:
             Assert.False(jsonNumber.TryGetByte(out byte byteResult));
@@ -487,7 +487,7 @@ namespace System.Text.Json.Linq.Tests
             Assert.False(jsonNumber.TryGetUInt64(out ulong ulongResult));
             Assert.Throws<FormatException>(() => jsonNumber.GetUInt64());
 
-            jsonNumber = new JNumber(double.MaxValue);
+            jsonNumber = new JTreeNumber(double.MaxValue);
 
             if (PlatformDetection.IsFullFramework)
             {
@@ -503,7 +503,7 @@ namespace System.Text.Json.Linq.Tests
             }         
             Assert.Throws<OverflowException>(() => jsonNumber.GetDecimal());
 
-            jsonNumber = new JNumber("5e500");
+            jsonNumber = new JTreeNumber("5e500");
 
             if (PlatformDetection.IsFullFramework)
             {
@@ -524,8 +524,8 @@ namespace System.Text.Json.Linq.Tests
         [Theory]
         public static void TestFloatInfinities(float value)
         {
-            Assert.Throws<ArgumentException>(() => new JNumber(value));
-            Assert.Equal(value.ToString(), (JNode)value);
+            Assert.Throws<ArgumentException>(() => new JTreeNumber(value));
+            Assert.Equal(value.ToString(), (JTreeNode)value);
         }
 
         [InlineData(double.PositiveInfinity)]
@@ -533,26 +533,26 @@ namespace System.Text.Json.Linq.Tests
         [Theory]
         public static void TestDoubleIninities(double value)
         {
-            Assert.Throws<ArgumentException> (() => new JNumber(value));
-            Assert.Equal(value.ToString(), (JNode)value);
+            Assert.Throws<ArgumentException> (() => new JTreeNumber(value));
+            Assert.Equal(value.ToString(), (JTreeNode)value);
         }
 
         [Fact]
         public static void TestScientificNotation()
         {
-            var jsonNumber = new JNumber("5e6");
+            var jsonNumber = new JTreeNumber("5e6");
             Assert.Equal(5000000f, jsonNumber.GetSingle());
             Assert.Equal(5000000, jsonNumber.GetDouble());
 
-            jsonNumber = new JNumber("3.14e0");
+            jsonNumber = new JTreeNumber("3.14e0");
             Assert.Equal(3.14f, jsonNumber.GetSingle());
             Assert.Equal(3.14, jsonNumber.GetDouble());
 
-            jsonNumber = new JNumber("7e-3");
+            jsonNumber = new JTreeNumber("7e-3");
             Assert.Equal(0.007f, jsonNumber.GetSingle());
             Assert.Equal(0.007, jsonNumber.GetDouble());
 
-            jsonNumber = new JNumber("-7e-3");
+            jsonNumber = new JTreeNumber("-7e-3");
             Assert.Equal(-0.007f, jsonNumber.GetSingle());
             Assert.Equal(-0.007, jsonNumber.GetDouble());
         }
@@ -561,7 +561,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestChangingTypes()
         {
-            var jsonNumber = new JNumber(5);
+            var jsonNumber = new JTreeNumber(5);
             Assert.Equal(5, jsonNumber.GetInt32());
 
             jsonNumber.SetDouble(3.14);
@@ -598,92 +598,92 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestEquals()
         {
-            var jsonNumber = new JNumber(123);
+            var jsonNumber = new JTreeNumber(123);
 
-            Assert.True(jsonNumber.Equals(new JNumber(123)));
-            Assert.True(new JNumber(123).Equals(jsonNumber));
+            Assert.True(jsonNumber.Equals(new JTreeNumber(123)));
+            Assert.True(new JTreeNumber(123).Equals(jsonNumber));
 
-            Assert.True(jsonNumber.Equals(new JNumber((ushort)123)));
-            Assert.True(new JNumber((ushort)123).Equals(jsonNumber));
+            Assert.True(jsonNumber.Equals(new JTreeNumber((ushort)123)));
+            Assert.True(new JTreeNumber((ushort)123).Equals(jsonNumber));
             
-            Assert.True(jsonNumber.Equals(new JNumber("123")));
-            Assert.True(new JNumber("123").Equals(jsonNumber));
+            Assert.True(jsonNumber.Equals(new JTreeNumber("123")));
+            Assert.True(new JTreeNumber("123").Equals(jsonNumber));
             
-            Assert.False(jsonNumber.Equals(new JNumber("123e0")));
-            Assert.False(new JNumber("123e0").Equals(jsonNumber));
+            Assert.False(jsonNumber.Equals(new JTreeNumber("123e0")));
+            Assert.False(new JTreeNumber("123e0").Equals(jsonNumber));
             
-            Assert.False(jsonNumber.Equals(new JNumber("123e1")));
-            Assert.False(new JNumber("123e1").Equals(jsonNumber));
+            Assert.False(jsonNumber.Equals(new JTreeNumber("123e1")));
+            Assert.False(new JTreeNumber("123e1").Equals(jsonNumber));
 
-            Assert.False(jsonNumber.Equals(new JNumber(17)));
-            Assert.False(new JNumber(17).Equals(jsonNumber));
+            Assert.False(jsonNumber.Equals(new JTreeNumber(17)));
+            Assert.False(new JTreeNumber(17).Equals(jsonNumber));
 
-            Assert.True(jsonNumber == new JNumber(123));
-            Assert.True(jsonNumber != new JNumber(17));
+            Assert.True(jsonNumber == new JTreeNumber(123));
+            Assert.True(jsonNumber != new JTreeNumber(17));
 
-            JNode jsonNode = new JNumber(123);
+            JTreeNode jsonNode = new JTreeNumber(123);
             Assert.True(jsonNumber.Equals(jsonNode));
 
-            IEquatable<JNumber> jsonNumberIEquatable = jsonNumber;
+            IEquatable<JTreeNumber> jsonNumberIEquatable = jsonNumber;
             Assert.True(jsonNumberIEquatable.Equals(jsonNumber));
             Assert.True(jsonNumber.Equals(jsonNumberIEquatable));
 
             Assert.False(jsonNumber.Equals(null));
 
             object jsonNumberCopy = jsonNumber;
-            object jsonNumberObject = new JNumber(123);
+            object jsonNumberObject = new JTreeNumber(123);
             Assert.True(jsonNumber.Equals(jsonNumberObject));
             Assert.True(jsonNumberCopy.Equals(jsonNumberObject));
             Assert.True(jsonNumberObject.Equals(jsonNumber));
 
-            jsonNumber = new JNumber();
-            Assert.True(jsonNumber.Equals(new JNumber()));
-            Assert.False(jsonNumber.Equals(new JNumber(5)));
+            jsonNumber = new JTreeNumber();
+            Assert.True(jsonNumber.Equals(new JTreeNumber()));
+            Assert.False(jsonNumber.Equals(new JTreeNumber(5)));
 
             Assert.False(jsonNumber.Equals(new Exception()));
 
-            JNumber jsonNumberNull = null;
+            JTreeNumber jsonNumberNull = null;
             Assert.False(jsonNumber == jsonNumberNull);
             Assert.False(jsonNumberNull == jsonNumber);
 
             Assert.True(jsonNumber != jsonNumberNull);
             Assert.True(jsonNumberNull != jsonNumber);
 
-            JNumber otherJNumberNull = null;
-            Assert.True(jsonNumberNull == otherJNumberNull);
+            JTreeNumber otherJTreeNumberNull = null;
+            Assert.True(jsonNumberNull == otherJTreeNumberNull);
         }
 
         [Fact]
         public static void TestGetHashCode()
         {
-            var jsonNumber = new JNumber(123);
+            var jsonNumber = new JTreeNumber(123);
 
-            Assert.Equal(jsonNumber.GetHashCode(), new JNumber(123).GetHashCode());
-            Assert.Equal(jsonNumber.GetHashCode(), new JNumber((ushort)123).GetHashCode());
-            Assert.Equal(jsonNumber.GetHashCode(), new JNumber("123").GetHashCode());
-            Assert.NotEqual(jsonNumber.GetHashCode(), new JNumber("123e0").GetHashCode());
-            Assert.NotEqual(jsonNumber.GetHashCode(), new JNumber("123e1").GetHashCode());
-            Assert.NotEqual(jsonNumber.GetHashCode(), new JNumber(17).GetHashCode());
+            Assert.Equal(jsonNumber.GetHashCode(), new JTreeNumber(123).GetHashCode());
+            Assert.Equal(jsonNumber.GetHashCode(), new JTreeNumber((ushort)123).GetHashCode());
+            Assert.Equal(jsonNumber.GetHashCode(), new JTreeNumber("123").GetHashCode());
+            Assert.NotEqual(jsonNumber.GetHashCode(), new JTreeNumber("123e0").GetHashCode());
+            Assert.NotEqual(jsonNumber.GetHashCode(), new JTreeNumber("123e1").GetHashCode());
+            Assert.NotEqual(jsonNumber.GetHashCode(), new JTreeNumber(17).GetHashCode());
 
-            JNode jsonNode = new JNumber(123);
+            JTreeNode jsonNode = new JTreeNumber(123);
             Assert.Equal(jsonNumber.GetHashCode(), jsonNode.GetHashCode());
 
-            IEquatable<JNumber> jsonNumberIEquatable = jsonNumber;
+            IEquatable<JTreeNumber> jsonNumberIEquatable = jsonNumber;
             Assert.Equal(jsonNumber.GetHashCode(), jsonNumberIEquatable.GetHashCode());
 
             object jsonNumberCopy = jsonNumber;
-            object jsonNumberObject = new JNumber(17);
+            object jsonNumberObject = new JTreeNumber(17);
 
             Assert.Equal(jsonNumber.GetHashCode(), jsonNumberCopy.GetHashCode());
             Assert.NotEqual(jsonNumber.GetHashCode(), jsonNumberObject.GetHashCode());
 
-            Assert.Equal(new JNumber().GetHashCode(), new JNumber().GetHashCode());
+            Assert.Equal(new JTreeNumber().GetHashCode(), new JTreeNumber().GetHashCode());
         }
 
         [Fact]
         public static void TestValueKind()
         {
-            Assert.Equal(JsonValueKind.Number, new JNumber().ValueKind);
+            Assert.Equal(JsonValueKind.Number, new JTreeNumber().ValueKind);
         }
     }
 }

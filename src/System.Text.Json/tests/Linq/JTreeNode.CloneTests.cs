@@ -6,74 +6,74 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static partial class JNodeTests
+    public static partial class JTreeNodeTests
     { 
         [Fact]
-        public static void TestCloneJArray()
+        public static void TestCloneJTreeArray()
         {
-            var jsonArray = new JArray { "value1", "value2" };
-            var jsonArrayCopy = jsonArray.Clone() as JArray;
+            var jsonArray = new JTreeArray { "value1", "value2" };
+            var jsonArrayCopy = jsonArray.Clone() as JTreeArray;
             Assert.Equal(2, jsonArrayCopy.Count);
             jsonArray.Add("value3");
             Assert.Equal(2, jsonArrayCopy.Count);
         }
 
         [Fact]
-        public static void TestDeepCloneJArray()
+        public static void TestDeepCloneJTreeArray()
         {
-            JArray inner = new JArray { 1, 2, 3 };
-            JArray outer = new JArray { inner };
-            JArray outerClone = (JArray)outer.Clone();
-            ((JArray) outerClone[0]).Add(4);
+            JTreeArray inner = new JTreeArray { 1, 2, 3 };
+            JTreeArray outer = new JTreeArray { inner };
+            JTreeArray outerClone = (JTreeArray)outer.Clone();
+            ((JTreeArray) outerClone[0]).Add(4);
 
             Assert.Equal(3, inner.Count);
         }
 
         [Fact]
-        public static void TestCloneJNode()
+        public static void TestCloneJTreeNode()
         {
-            var jsonObject = new JObject
+            var jsonObject = new JTreeObject
             {
                 { "text", "property value" },
                 { "boolean", true },
                 { "number", 15 },
-                { "array", new JArray { "value1", "value2"} },
+                { "array", new JTreeArray { "value1", "value2"} },
                 { "null", null }
             };
 
-            var jsonObjectCopy = (JObject)jsonObject.Clone();
+            var jsonObjectCopy = (JTreeObject)jsonObject.Clone();
             Assert.Equal(5, jsonObjectCopy.GetPropertyNames().Count);
             Assert.Equal(5, jsonObjectCopy.GetPropertyValues().Count);
 
             jsonObject["text"] = "something different";
             Assert.Equal("property value", jsonObjectCopy["text"]);
 
-            ((JBoolean)jsonObject["boolean"]).Value = false;
-            Assert.True(((JBoolean)jsonObjectCopy["boolean"]).Value);
+            ((JTreeBoolean)jsonObject["boolean"]).Value = false;
+            Assert.True(((JTreeBoolean)jsonObjectCopy["boolean"]).Value);
 
             Assert.Equal(2, jsonObjectCopy.GetJsonArrayPropertyValue("array").Count);
             jsonObject.GetJsonArrayPropertyValue("array").Add("value3");
             Assert.Equal(2, jsonObjectCopy.GetJsonArrayPropertyValue("array").Count);
 
-            Assert.IsType<JNull>(jsonObjectCopy["null"]);
+            Assert.IsType<JTreeNull>(jsonObjectCopy["null"]);
 
             jsonObject.Add("new one", 123);
             Assert.Equal(5, jsonObjectCopy.GetPropertyNames().Count);
         }
 
         [Fact]
-        public static void TestCloneJNodeInJsonElement()
+        public static void TestCloneJTreeNodeInJsonElement()
         {
-            var jsonObject = new JObject
+            var jsonObject = new JTreeObject
             {
                 { "text", "value" },
                 { "boolean", true },
-                { "array", new JArray { "value1", "value2"} }
+                { "array", new JTreeArray { "value1", "value2"} }
             };
 
             JsonElement jsonElement = jsonObject.AsJsonElement();
 
-            var jsonObjectCloneFromElement = (JObject)JNode.DeepCopy(jsonElement);
+            var jsonObjectCloneFromElement = (JTreeObject)JTreeNode.DeepCopy(jsonElement);
 
             Assert.Equal(3, jsonObjectCloneFromElement.GetPropertyNames().Count);
             Assert.Equal(3, jsonObjectCloneFromElement.GetPropertyValues().Count);

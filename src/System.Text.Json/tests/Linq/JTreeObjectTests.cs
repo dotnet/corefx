@@ -10,12 +10,12 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static class JObjectTests
+    public static class JTreeObjectTests
     {
         [Fact]
         public static void TestDefaultConstructor()
         {
-            var jsonObject = new JObject();
+            var jsonObject = new JTreeObject();
             Assert.Equal(0, jsonObject.GetPropertyNames().Count);
             Assert.Equal(0, jsonObject.GetPropertyValues().Count);
         }
@@ -23,16 +23,16 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestIEnumerableKVPConstructor()
         {
-            var jsonProperties = new List<KeyValuePair<string, JNode>>();
-            jsonProperties.Add(new KeyValuePair<string, JNode>("number", new JNumber(17)));
-            jsonProperties.Add(new KeyValuePair<string, JNode>("string", new JString("property value")));
-            jsonProperties.Add(new KeyValuePair<string, JNode>("boolean", new JBoolean(true)));
+            var jsonProperties = new List<KeyValuePair<string, JTreeNode>>();
+            jsonProperties.Add(new KeyValuePair<string, JTreeNode>("number", new JTreeNumber(17)));
+            jsonProperties.Add(new KeyValuePair<string, JTreeNode>("string", new JTreeString("property value")));
+            jsonProperties.Add(new KeyValuePair<string, JTreeNode>("boolean", new JTreeBoolean(true)));
 
-            var jsonObject = new JObject(jsonProperties);
+            var jsonObject = new JTreeObject(jsonProperties);
 
-            Assert.Equal(17, ((JNumber)jsonObject["number"]).GetInt32());
-            Assert.Equal("property value", ((JString)jsonObject["string"]).Value);
-            Assert.True(((JBoolean)jsonObject["boolean"]).Value);
+            Assert.Equal(17, ((JTreeNumber)jsonObject["number"]).GetInt32());
+            Assert.Equal("property value", ((JTreeString)jsonObject["string"]).Value);
+            Assert.True(((JTreeBoolean)jsonObject["boolean"]).Value);
         }
 
         [Fact]
@@ -40,12 +40,12 @@ namespace System.Text.Json.Linq.Tests
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                JObject jsonObject = new JObject();
+                JTreeObject jsonObject = new JTreeObject();
                 jsonObject.Add("property", "value1");
                 jsonObject.Add("property", "value2");
             });
 
-            JObject jsonObject = new JObject() { { "property", "value" } };
+            JTreeObject jsonObject = new JTreeObject() { { "property", "value" } };
             Assert.Equal("value", jsonObject["property"]);
 
             jsonObject["property"] = "indexer value";
@@ -55,40 +55,40 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestNumerics()
         {
-            var jsonObject = new JObject();
+            var jsonObject = new JTreeObject();
 
             jsonObject.Add("byte", byte.MaxValue);
-            Assert.Equal(byte.MaxValue, ((JNumber)jsonObject["byte"]).GetByte());
+            Assert.Equal(byte.MaxValue, ((JTreeNumber)jsonObject["byte"]).GetByte());
 
             jsonObject.Add("short", short.MaxValue);
-            Assert.Equal(short.MaxValue, ((JNumber)jsonObject["short"]).GetInt16());
+            Assert.Equal(short.MaxValue, ((JTreeNumber)jsonObject["short"]).GetInt16());
 
             jsonObject.Add("int", int.MaxValue);
-            Assert.Equal(int.MaxValue, ((JNumber)jsonObject["int"]).GetInt32());
+            Assert.Equal(int.MaxValue, ((JTreeNumber)jsonObject["int"]).GetInt32());
 
             jsonObject.Add("long", long.MaxValue);
-            Assert.Equal(long.MaxValue, ((JNumber)jsonObject["long"]).GetInt64());
+            Assert.Equal(long.MaxValue, ((JTreeNumber)jsonObject["long"]).GetInt64());
 
             jsonObject.Add("float", 3.14f);
-            Assert.Equal(3.14f, ((JNumber)jsonObject["float"]).GetSingle());
+            Assert.Equal(3.14f, ((JTreeNumber)jsonObject["float"]).GetSingle());
 
             jsonObject.Add("double", 3.14);
-            Assert.Equal(3.14, ((JNumber)jsonObject["double"]).GetDouble());
+            Assert.Equal(3.14, ((JTreeNumber)jsonObject["double"]).GetDouble());
 
             jsonObject.Add("sbyte", sbyte.MaxValue);
-            Assert.Equal(sbyte.MaxValue, ((JNumber)jsonObject["sbyte"]).GetSByte());
+            Assert.Equal(sbyte.MaxValue, ((JTreeNumber)jsonObject["sbyte"]).GetSByte());
 
             jsonObject.Add("ushort", ushort.MaxValue);
-            Assert.Equal(ushort.MaxValue, ((JNumber)jsonObject["ushort"]).GetUInt16());
+            Assert.Equal(ushort.MaxValue, ((JTreeNumber)jsonObject["ushort"]).GetUInt16());
 
             jsonObject.Add("uint", uint.MaxValue);
-            Assert.Equal(uint.MaxValue, ((JNumber)jsonObject["uint"]).GetUInt32());
+            Assert.Equal(uint.MaxValue, ((JTreeNumber)jsonObject["uint"]).GetUInt32());
 
             jsonObject.Add("ulong", ulong.MaxValue);
-            Assert.Equal(ulong.MaxValue, ((JNumber)jsonObject["ulong"]).GetUInt64());
+            Assert.Equal(ulong.MaxValue, ((JTreeNumber)jsonObject["ulong"]).GetUInt64());
 
             jsonObject.Add("decimal", decimal.One);
-            Assert.Equal(decimal.One, ((JNumber)jsonObject["decimal"]).GetDecimal());
+            Assert.Equal(decimal.One, ((JTreeNumber)jsonObject["decimal"]).GetDecimal());
         }
 
         [Fact]
@@ -96,8 +96,8 @@ namespace System.Text.Json.Linq.Tests
         {
             var guidString = "ca761232-ed42-11ce-bacd-00aa0057b223";
             Guid guid = new Guid(guidString);
-            var jsonObject = new JObject { { "guid", guid } };
-            Assert.Equal(guidString, ((JString)jsonObject["guid"]).Value);
+            var jsonObject = new JTreeObject { { "guid", guid } };
+            Assert.Equal(guidString, ((JTreeString)jsonObject["guid"]).Value);
         }
 
         [Theory]
@@ -107,9 +107,9 @@ namespace System.Text.Json.Linq.Tests
         {
             var dateTime = DateTime.ParseExact(testStr, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
-            var jsonObject = new JObject { { "dateTime", dateTime } };
+            var jsonObject = new JTreeObject { { "dateTime", dateTime } };
 
-            Assert.Equal(expectedStr, ((JString)jsonObject["dateTime"]).Value);
+            Assert.Equal(expectedStr, ((JTreeString)jsonObject["dateTime"]).Value);
         }
 
         [Theory]
@@ -118,51 +118,51 @@ namespace System.Text.Json.Linq.Tests
         {
             var dateTimeOffset = DateTimeOffset.ParseExact(testStr, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
-            var jsonObject = new JObject { { "dateTimeOffset", dateTimeOffset } };
+            var jsonObject = new JTreeObject { { "dateTimeOffset", dateTimeOffset } };
 
-            Assert.Equal(expectedStr, ((JString)jsonObject["dateTimeOffset"]).Value);
+            Assert.Equal(expectedStr, ((JTreeString)jsonObject["dateTimeOffset"]).Value);
         }
 
         [Fact]
-        public static void TestCreatingJObject()
+        public static void TestCreatingJTreeObject()
         {
-            var developer = new JObject
+            var developer = new JTreeObject
             {
                 { "name", "Kasia" },
                 { "n\\u0061me", "Kasia" }, // different property name than above one
                 { "age", 22 },
                 { "is developer", true },
-                { "null property", (JNode) null }
+                { "null property", (JTreeNode) null }
             };
 
-            Assert.Equal("Kasia", ((JString)developer["name"]).Value);
-            Assert.Equal("Kasia", ((JString)developer["n\\u0061me"]).Value);
-            Assert.Equal(22, ((JNumber)developer["age"]).GetInt32());
-            Assert.True(((JBoolean)developer["is developer"]).Value);
-            Assert.IsType<JNull>(developer["null property"]);
+            Assert.Equal("Kasia", ((JTreeString)developer["name"]).Value);
+            Assert.Equal("Kasia", ((JTreeString)developer["n\\u0061me"]).Value);
+            Assert.Equal(22, ((JTreeNumber)developer["age"]).GetInt32());
+            Assert.True(((JTreeBoolean)developer["is developer"]).Value);
+            Assert.IsType<JTreeNull>(developer["null property"]);
         }
 
         [Fact]
-        public static void TestCreatingJObjectNewMethods()
+        public static void TestCreatingJTreeObjectNewMethods()
         {
-            var developer = new JObject
+            var developer = new JTreeObject
             {
-                { "name", new JString("Kasia") },
-                { "age", new JNumber(22) },
-                { "is developer", new JBoolean(true) },
-                { "null property", new JNull() }
+                { "name", new JTreeString("Kasia") },
+                { "age", new JTreeNumber(22) },
+                { "is developer", new JTreeBoolean(true) },
+                { "null property", new JTreeNull() }
             };
 
-            Assert.Equal("Kasia", ((JString)developer["name"]).Value);
-            Assert.Equal(22, ((JNumber)developer["age"]).GetInt32());
-            Assert.True(((JBoolean)developer["is developer"]).Value);
-            Assert.IsType<JNull>(developer["null property"]);
+            Assert.Equal("Kasia", ((JTreeString)developer["name"]).Value);
+            Assert.Equal(22, ((JTreeNumber)developer["age"]).GetInt32());
+            Assert.True(((JTreeBoolean)developer["is developer"]).Value);
+            Assert.IsType<JTreeNull>(developer["null property"]);
         }
 
         [Fact]
-        public static void TestCreatingJObjectDictionaryInitializerSyntax()
+        public static void TestCreatingJTreeObjectDictionaryInitializerSyntax()
         {
-            var developer = new JObject
+            var developer = new JTreeObject
             {
                 ["name"] = "Kasia",
                 ["age"] = 22,
@@ -170,31 +170,31 @@ namespace System.Text.Json.Linq.Tests
                 ["null property"] = null
             };
 
-            Assert.Equal("Kasia", ((JString)developer["name"]).Value);
-            Assert.Equal(22, ((JNumber)developer["age"]).GetInt32());
-            Assert.True(((JBoolean)developer["is developer"]).Value);
-            Assert.IsType<JNull>(developer["null property"]);
+            Assert.Equal("Kasia", ((JTreeString)developer["name"]).Value);
+            Assert.Equal(22, ((JTreeNumber)developer["age"]).GetInt32());
+            Assert.True(((JTreeBoolean)developer["is developer"]).Value);
+            Assert.IsType<JTreeNull>(developer["null property"]);
         }
 
         [Fact]
-        public static void TestCreatingNestedJObject()
+        public static void TestCreatingNestedJTreeObject()
         {
-            var person = new JObject
+            var person = new JTreeObject
             {
                 { "name", "John" },
                 { "surname", "Smith" },
                 {
-                    "phone numbers", new JObject()
+                    "phone numbers", new JTreeObject()
                     {
                         { "work", "123-456-7890" },
                         { "home", "123-456-7890" }
                     }
                 },
                 {
-                    "addresses", new JObject()
+                    "addresses", new JTreeObject()
                     {
                         {
-                            "office", new JObject()
+                            "office", new JTreeObject()
                             {
                                 {  "address line 1", "One Microsoft Way" },
                                 {  "city" , "Redmond" } ,
@@ -203,7 +203,7 @@ namespace System.Text.Json.Linq.Tests
                             }
                         },
                         {
-                            "home", new JObject()
+                            "home", new JTreeObject()
                             {
                                 {  "address line 1", "Pear Ave" },
                                 {  "address line 2", "1288" },
@@ -216,40 +216,40 @@ namespace System.Text.Json.Linq.Tests
                 }
             };
 
-            Assert.IsType<JObject>(person["phone numbers"]);
-            var phoneNumbers = person["phone numbers"] as JObject;
-            Assert.IsType<JString>(phoneNumbers["work"]);
-            Assert.IsType<JString>(phoneNumbers["home"]);
+            Assert.IsType<JTreeObject>(person["phone numbers"]);
+            var phoneNumbers = person["phone numbers"] as JTreeObject;
+            Assert.IsType<JTreeString>(phoneNumbers["work"]);
+            Assert.IsType<JTreeString>(phoneNumbers["home"]);
 
-            Assert.IsType<JObject>(person["addresses"]);
-            var addresses = person["addresses"] as JObject;
-            Assert.IsType<JObject>(addresses["office"]);
-            Assert.IsType<JObject>(addresses["home"]);
+            Assert.IsType<JTreeObject>(person["addresses"]);
+            var addresses = person["addresses"] as JTreeObject;
+            Assert.IsType<JTreeObject>(addresses["office"]);
+            Assert.IsType<JTreeObject>(addresses["home"]);
         }
 
         [Fact]
         public static void TestAssignmentDefinition()
         {
-            JNode employee = EmployeesDatabase.GetNextEmployee().Value;
-            Assert.IsType<JObject>(employee);
+            JTreeNode employee = EmployeesDatabase.GetNextEmployee().Value;
+            Assert.IsType<JTreeObject>(employee);
         }
 
-        private static void CheckEmployeesAreDifferent(JObject employees)
+        private static void CheckEmployeesAreDifferent(JTreeObject employees)
         {
             string prevId = "";
-            foreach (KeyValuePair<string, JNode> employee in employees)
+            foreach (KeyValuePair<string, JTreeNode> employee in employees)
             {
                 Assert.NotEqual(prevId, employee.Key);
                 prevId = employee.Key;
 
-                Assert.IsType<JObject>(employee.Value);
+                Assert.IsType<JTreeObject>(employee.Value);
             }
         }
 
         [Fact]
         public static void TestAddingKeyValuePair()
         {
-            var employees = new JObject
+            var employees = new JTreeObject
             {
                 EmployeesDatabase.GetNextEmployee(),
                 EmployeesDatabase.GetNextEmployee(),
@@ -263,8 +263,8 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestAddingKeyValuePairAfterInitialization()
         {
-            var employees = new JObject();
-            foreach (KeyValuePair<string, JNode> employee in EmployeesDatabase.GetTenBestEmployees())
+            var employees = new JTreeObject();
+            foreach (KeyValuePair<string, JTreeNode> employee in EmployeesDatabase.GetTenBestEmployees())
             {
                 employees.Add(employee);
             }
@@ -275,7 +275,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestAddingKeyValuePairsCollection()
         {
-            var employees = new JObject(EmployeesDatabase.GetTenBestEmployees());
+            var employees = new JTreeObject(EmployeesDatabase.GetTenBestEmployees());
 
             CheckEmployeesAreDifferent(employees);
         }
@@ -283,40 +283,40 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestAddingKeyValuePairsCollectionAfterInitialization()
         {
-            var employees = new JObject();
+            var employees = new JTreeObject();
             employees.AddRange(EmployeesDatabase.GetTenBestEmployees());
 
             CheckEmployeesAreDifferent(employees);
         }
 
         [Fact]
-        public static void TestAddingJArray()
+        public static void TestAddingJTreeArray()
         {
-            var preferences = new JObject()
+            var preferences = new JTreeObject()
             {
-                { "prime numbers", new JArray { 19, 37 } }
+                { "prime numbers", new JTreeArray { 19, 37 } }
             };
 
-            var primeNumbers = (JArray)preferences["prime numbers"];
+            var primeNumbers = (JTreeArray)preferences["prime numbers"];
             Assert.Equal(2, primeNumbers.Count);
 
             int[] expected = { 19, 37 };
 
             for (int i = 0; i < primeNumbers.Count; i++)
             {
-                Assert.Equal(expected[i], ((JNumber)primeNumbers[i]).GetInt32());
+                Assert.Equal(expected[i], ((JTreeNumber)primeNumbers[i]).GetInt32());
             }
         }
 
         [Fact]
         public static void TestGetJsonArrayPropertyValue()
         {
-            var jsonObject = new JObject()
+            var jsonObject = new JTreeObject()
             {
-                { "array", new JArray() { 1, 2 } }
+                { "array", new JTreeArray() { 1, 2 } }
             };
 
-            JArray jsonArray = jsonObject.GetJsonArrayPropertyValue("array");
+            JTreeArray jsonArray = jsonObject.GetJsonArrayPropertyValue("array");
             Assert.Equal(2, jsonArray.Count);
             Assert.Equal(1, jsonArray[0]);
             Assert.Equal(2, jsonArray[1]);
@@ -325,58 +325,58 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestAddingNull()
         {
-            var jsonObject = new JObject
+            var jsonObject = new JTreeObject
             {
                 { "null1", null },
-                { "null2", (JNode)null },
-                { "null3", (JNull)null },
-                { "null4", new JNull() },
+                { "null2", (JTreeNode)null },
+                { "null3", (JTreeNull)null },
+                { "null4", new JTreeNull() },
                 { "null5", (string)null },
             };
 
-            Assert.IsType<JNull>(jsonObject["null1"]);
-            Assert.IsType<JNull>(jsonObject["null2"]);
-            Assert.IsType<JNull>(jsonObject["null3"]);
-            Assert.IsType<JNull>(jsonObject["null4"]);
-            Assert.IsType<JNull>(jsonObject["null5"]);
+            Assert.IsType<JTreeNull>(jsonObject["null1"]);
+            Assert.IsType<JTreeNull>(jsonObject["null2"]);
+            Assert.IsType<JTreeNull>(jsonObject["null3"]);
+            Assert.IsType<JTreeNull>(jsonObject["null4"]);
+            Assert.IsType<JTreeNull>(jsonObject["null5"]);
 
             jsonObject["null1"] = null;
-            Assert.IsType<JNull>(jsonObject["null1"]);
+            Assert.IsType<JTreeNull>(jsonObject["null1"]);
         }
 
         [Fact]
         public static void TestContains()
         {
-            var person = new JObject
+            var person = new JTreeObject
             {
                 { "name", "John" },
                 { "ssn", "123456789" },
             };
 
             Assert.True(person.ContainsProperty("ssn"));
-            Assert.Equal("123456789", ((JString)person["ssn"]).Value);
+            Assert.Equal("123456789", ((JTreeString)person["ssn"]).Value);
             Assert.False(person.ContainsProperty("surname"));
         }
 
         [Fact]
         public static void TestAquiringAllValues()
         {
-            var employees = new JObject(EmployeesDatabase.GetTenBestEmployees());
-            IReadOnlyCollection<JNode> employeesWithoutId = employees.GetPropertyValues();
+            var employees = new JTreeObject(EmployeesDatabase.GetTenBestEmployees());
+            IReadOnlyCollection<JTreeNode> employeesWithoutId = employees.GetPropertyValues();
 
             Assert.Equal(10, employees.GetPropertyNames().Count);
             Assert.Equal(10, employees.GetPropertyValues().Count);
 
-            foreach (JNode employee in employeesWithoutId)
+            foreach (JTreeNode employee in employeesWithoutId)
             {
-                Assert.IsType<JObject>(employee);
+                Assert.IsType<JTreeObject>(employee);
             }
         }
 
         [Fact]
         public static void TestReplacingsonObjectPrimaryTypes()
         {
-            var person1 = new JObject
+            var person1 = new JTreeObject
             {
                 { "name", "John" },
                 { "age", 45 },
@@ -384,40 +384,40 @@ namespace System.Text.Json.Linq.Tests
             };
 
 
-            person1["name"] = new JString("Bob");
-            Assert.Equal("Bob", ((JString)person1["name"]).Value);
+            person1["name"] = new JTreeString("Bob");
+            Assert.Equal("Bob", ((JTreeString)person1["name"]).Value);
 
-            person1["age"] = new JNumber(55);
-            Assert.Equal(55, ((JNumber)person1["age"]).GetInt32());
+            person1["age"] = new JTreeNumber(55);
+            Assert.Equal(55, ((JTreeNumber)person1["age"]).GetInt32());
 
-            person1["is_married"] = new JBoolean(false);
-            Assert.False(((JBoolean)person1["is_married"]).Value);
+            person1["is_married"] = new JTreeBoolean(false);
+            Assert.False(((JTreeBoolean)person1["is_married"]).Value);
 
-            var person2 = new JObject
+            var person2 = new JTreeObject
             {
                 { "name", "Bob" },
                 { "age", 33 },
                 { "is_married", true }
             };
 
-            // Copy property from another JObject
+            // Copy property from another JTreeObject
             person1["age"] = person2["age"];
 
-            Assert.Equal(33, ((JNumber)person1["age"]).GetInt32());
+            Assert.Equal(33, ((JTreeNumber)person1["age"]).GetInt32());
 
             // Copy property of different typoe
             person1["name"] = person2["name"];
         }
 
         [Fact]
-        public static void TestModifyingJObjectKeyRemoveAdd()
+        public static void TestModifyingJTreeObjectKeyRemoveAdd()
         {
-            JObject manager = EmployeesDatabase.GetManager();
-            JObject reportingEmployees = manager.GetJsonObjectPropertyValue("reporting employees");
+            JTreeObject manager = EmployeesDatabase.GetManager();
+            JTreeObject reportingEmployees = manager.GetJsonObjectPropertyValue("reporting employees");
 
-            static void ModifyProperty(JObject jsonObject, string previousName, string newName)
+            static void ModifyProperty(JTreeObject jsonObject, string previousName, string newName)
             {
-                JNode previousValue = jsonObject[previousName];
+                JTreeNode previousValue = jsonObject[previousName];
                 jsonObject.Remove(previousName);
                 jsonObject.Add(newName, previousValue);
             }
@@ -426,7 +426,7 @@ namespace System.Text.Json.Linq.Tests
             string newName = "software engineers";
 
             Assert.True(reportingEmployees.ContainsProperty(previousName));
-            JNode previousValue = reportingEmployees[previousName];
+            JTreeNode previousValue = reportingEmployees[previousName];
 
             ModifyProperty(reportingEmployees, previousName, newName);
 
@@ -436,35 +436,35 @@ namespace System.Text.Json.Linq.Tests
         }
 
         [Fact]
-        public static void TestAccessingNestedJObjectCastWithAs()
+        public static void TestAccessingNestedJTreeObjectCastWithAs()
         {
-            JObject manager = EmployeesDatabase.GetManager();
+            JTreeObject manager = EmployeesDatabase.GetManager();
 
-            var reportingEmployees = manager["reporting employees"] as JObject;
+            var reportingEmployees = manager["reporting employees"] as JTreeObject;
             Assert.NotNull(reportingEmployees);
 
-            var softwareDevelopers = reportingEmployees["software developers"] as JObject;
+            var softwareDevelopers = reportingEmployees["software developers"] as JTreeObject;
             Assert.NotNull(softwareDevelopers);
 
-            var internDevelopers = softwareDevelopers["intern employees"] as JObject;
+            var internDevelopers = softwareDevelopers["intern employees"] as JTreeObject;
             Assert.NotNull(internDevelopers);
 
             internDevelopers.Add(EmployeesDatabase.GetNextEmployee());
         }
 
         [Fact]
-        public static void TestAccessingNestedJObjectCastWithIs()
+        public static void TestAccessingNestedJTreeObjectCastWithIs()
         {
-            JObject manager = EmployeesDatabase.GetManager();
+            JTreeObject manager = EmployeesDatabase.GetManager();
 
-            static bool AddEmployee(JObject manager)
+            static bool AddEmployee(JTreeObject manager)
             {
 
-                if (manager["reporting employees"] is JObject reportingEmployees)
+                if (manager["reporting employees"] is JTreeObject reportingEmployees)
                 {
-                    if (reportingEmployees["software developers"] is JObject softwareDevelopers)
+                    if (reportingEmployees["software developers"] is JTreeObject softwareDevelopers)
                     {
-                        if (softwareDevelopers["full time employees"] is JObject fullTimeEmployees)
+                        if (softwareDevelopers["full time employees"] is JTreeObject fullTimeEmployees)
                         {
                             fullTimeEmployees.Add(EmployeesDatabase.GetNextEmployee());
                             return true;
@@ -479,39 +479,39 @@ namespace System.Text.Json.Linq.Tests
         }
 
         [Fact]
-        public static void TestAccessingNestedJObjectExplicitCast()
+        public static void TestAccessingNestedJTreeObjectExplicitCast()
         {
-            JObject manager = EmployeesDatabase.GetManager();
+            JTreeObject manager = EmployeesDatabase.GetManager();
 
             // Should not throw any exceptions:
-            ((JObject)((JObject)manager["reporting employees"])["HR"]).Add(EmployeesDatabase.GetNextEmployee());
+            ((JTreeObject)((JTreeObject)manager["reporting employees"])["HR"]).Add(EmployeesDatabase.GetNextEmployee());
         }
 
         [Fact]
-        public static void TestAccessingNestedJObjectGetPropertyMethod()
+        public static void TestAccessingNestedJTreeObjectGetPropertyMethod()
         {
-            JObject manager = EmployeesDatabase.GetManager();
+            JTreeObject manager = EmployeesDatabase.GetManager();
 
             // Should not throw any exceptions:
 
-            JObject internDevelopers = manager.GetJsonObjectPropertyValue("reporting employees")
+            JTreeObject internDevelopers = manager.GetJsonObjectPropertyValue("reporting employees")
                                           .GetJsonObjectPropertyValue("software developers")
                                           .GetJsonObjectPropertyValue("intern employees");
             internDevelopers.Add(EmployeesDatabase.GetNextEmployee());
         }
 
         [Fact]
-        public static void TestAccessingNestedJObjectTryGetPropertyMethod()
+        public static void TestAccessingNestedJTreeObjectTryGetPropertyMethod()
         {
-            JObject manager = EmployeesDatabase.GetManager();
+            JTreeObject manager = EmployeesDatabase.GetManager();
 
-            static bool AddEmployee(JObject manager)
+            static bool AddEmployee(JTreeObject manager)
             {
-                if (manager.TryGetJsonObjectPropertyValue("reporting employees", out JObject reportingEmployees))
+                if (manager.TryGetJsonObjectPropertyValue("reporting employees", out JTreeObject reportingEmployees))
                 {
-                    if (reportingEmployees.TryGetJsonObjectPropertyValue("software developers", out JObject softwareDevelopers))
+                    if (reportingEmployees.TryGetJsonObjectPropertyValue("software developers", out JTreeObject softwareDevelopers))
                     {
-                        if (softwareDevelopers.TryGetJsonObjectPropertyValue("full time employees", out JObject fullTimeEmployees))
+                        if (softwareDevelopers.TryGetJsonObjectPropertyValue("full time employees", out JTreeObject fullTimeEmployees))
                         {
                             fullTimeEmployees.Add(EmployeesDatabase.GetNextEmployee());
                             return true;
@@ -531,7 +531,7 @@ namespace System.Text.Json.Linq.Tests
         {
             Assert.Throws<KeyNotFoundException>(() =>
             {
-                var jsonObject = new JObject()
+                var jsonObject = new JTreeObject()
                 {
                     { "name", "value" }
                 };
@@ -543,23 +543,23 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestTryGetProperty()
         {
-            var jsonObject = new JObject()
+            var jsonObject = new JTreeObject()
             {
                 { "name", "value" }
             };
 
-            Assert.True(jsonObject.TryGetPropertyValue("name", out JNode property));
-            Assert.Equal("value", ((JString)property).Value);
+            Assert.True(jsonObject.TryGetPropertyValue("name", out JTreeNode property));
+            Assert.Equal("value", ((JTreeString)property).Value);
             Assert.False(jsonObject.TryGetPropertyValue("other", out property));
             Assert.Null(property);
         }
 
         [Fact]
-        public static void TestGetJObjectPropertyThrows()
+        public static void TestGetJTreeObjectPropertyThrows()
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                var jsonObject = new JObject()
+                var jsonObject = new JTreeObject()
                 {
                     { "name", "value" }
                 };
@@ -571,12 +571,12 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestTryGetObjectPropertyFails()
         {
-            var jsonObject = new JObject()
+            var jsonObject = new JTreeObject()
             {
                 { "name", "value" }
             };
 
-            Assert.False(jsonObject.TryGetJsonObjectPropertyValue("name", out JObject property));
+            Assert.False(jsonObject.TryGetJsonObjectPropertyValue("name", out JTreeObject property));
             Assert.Null(property);
 
             Assert.False(jsonObject.TryGetJsonObjectPropertyValue("other", out property));
@@ -584,11 +584,11 @@ namespace System.Text.Json.Linq.Tests
         }
 
         [Fact]
-        public static void TestGetJArrayPropertyThrows()
+        public static void TestGetJTreeArrayPropertyThrows()
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                var jsonObject = new JObject()
+                var jsonObject = new JTreeObject()
                 {
                     { "name", "value" }
                 };
@@ -600,12 +600,12 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestTryGetArrayPropertyFails()
         {
-            var jsonObject = new JObject()
+            var jsonObject = new JTreeObject()
             {
                 { "name", "value" }
             };
 
-            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("name", out JArray property));
+            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("name", out JTreeArray property));
             Assert.Null(property);
 
             Assert.False(jsonObject.TryGetJsonArrayPropertyValue("other", out property));
@@ -615,47 +615,47 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestArgumentNullValidation()
         {
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, ""));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, new JObject()));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, (byte)17));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, (short)17));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, 17));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, (long)17));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, 3.14f));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, 3.14));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, decimal.One));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, (sbyte)17));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, (ushort)17));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, (uint)17));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(null, (ulong)17));
-            Assert.Throws<ArgumentNullException>(() => new JObject().Add(new KeyValuePair<string, JNode>(null, new JObject())));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, ""));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, new JTreeObject()));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, (byte)17));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, (short)17));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, 17));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, (long)17));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, 3.14f));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, 3.14));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, decimal.One));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, (sbyte)17));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, (ushort)17));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, (uint)17));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(null, (ulong)17));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Add(new KeyValuePair<string, JTreeNode>(null, new JTreeObject())));
             Assert.Throws<ArgumentNullException>(() =>
             {
-                var property = new KeyValuePair<string, JNode>(null, new JObject());
-                new JObject().AddRange(new List<KeyValuePair<string, JNode>>() { property });
+                var property = new KeyValuePair<string, JTreeNode>(null, new JTreeObject());
+                new JTreeObject().AddRange(new List<KeyValuePair<string, JTreeNode>>() { property });
             });
             Assert.Throws<ArgumentNullException>(() =>
             {
-                var property1 = new KeyValuePair<string, JNode>("regular property", new JObject());
-                var property2 = new KeyValuePair<string, JNode>("regular property2", new JObject());
-                var nullProperty = new KeyValuePair<string, JNode>(null, new JObject());
-                var propertyList = new List<KeyValuePair<string, JNode>>() { property1, nullProperty, property2 };
-                var jsonObject = new JObject(propertyList);
+                var property1 = new KeyValuePair<string, JTreeNode>("regular property", new JTreeObject());
+                var property2 = new KeyValuePair<string, JTreeNode>("regular property2", new JTreeObject());
+                var nullProperty = new KeyValuePair<string, JTreeNode>(null, new JTreeObject());
+                var propertyList = new List<KeyValuePair<string, JTreeNode>>() { property1, nullProperty, property2 };
+                var jsonObject = new JTreeObject(propertyList);
             });
-            Assert.Throws<ArgumentNullException>(() => new JObject()[null] = new JString());
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject()[null] = new JTreeString());
             Assert.Throws<ArgumentNullException>(() =>
             {
-                var jsonObject = new JObject();
-                JNode x = jsonObject[null];
+                var jsonObject = new JTreeObject();
+                JTreeNode x = jsonObject[null];
             });
-            Assert.Throws<ArgumentNullException>(() => new JObject().Remove(null));
-            Assert.Throws<ArgumentNullException>(() => new JObject().ContainsProperty(null));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().Remove(null));
+            Assert.Throws<ArgumentNullException>(() => new JTreeObject().ContainsProperty(null));
         }
 
         [Fact]
         public static void TestStringComparisonEnum()
         {
-            var jsonObject = new JObject()
+            var jsonObject = new JTreeObject()
             {
                 { "not encyclopaedia", "value1" },
                 { "Encyclopaedia", "value2" },
@@ -666,7 +666,7 @@ namespace System.Text.Json.Linq.Tests
             Assert.Equal(4, jsonObject.Count());
 
             Assert.False(jsonObject.ContainsProperty("ENCYCLOPAEDIA"));
-            Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", out JNode jsonNode));
+            Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", out JTreeNode jsonNode));
             Assert.Null(jsonNode);
             Assert.Throws<KeyNotFoundException>(() => jsonObject.GetPropertyValue("ENCYCLOPAEDIA"));
             jsonObject.Remove("ENCYCLOPAEDIA");
@@ -686,30 +686,30 @@ namespace System.Text.Json.Linq.Tests
             jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase);
             Assert.Equal(3, jsonObject.Count());
 
-            IReadOnlyCollection<JNode> values = jsonObject.GetPropertyValues();
+            IReadOnlyCollection<JTreeNode> values = jsonObject.GetPropertyValues();
             Assert.False(values.Contains("value2"));
             Assert.True(values.Contains("value1"));
             Assert.True(values.Contains("value3"));
             Assert.True(values.Contains("value4"));
 
-            jsonObject = new JObject()
+            jsonObject = new JTreeObject()
             {
-                { "object first", new JObject() },
-                { "object FIRST", new JArray() },
-                { "array first", new JArray() },
-                { "array FIRST", new JObject() }
+                { "object first", new JTreeObject() },
+                { "object FIRST", new JTreeArray() },
+                { "array first", new JTreeArray() },
+                { "array FIRST", new JTreeObject() }
             };
 
             Assert.Equal(0, jsonObject.GetJsonObjectPropertyValue("OBJECT first",
                 StringComparison.InvariantCultureIgnoreCase).GetPropertyNames().Count);
             Assert.True(jsonObject.TryGetJsonObjectPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase,
-                out JObject objectProperty));
+                out JTreeObject objectProperty));
             Assert.Equal(0, objectProperty.GetPropertyNames().Count);
 
             Assert.Throws<ArgumentException>(() =>
                 jsonObject.GetJsonArrayPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase));
             Assert.False(jsonObject.TryGetJsonArrayPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase,
-                out JArray arrayProperty));
+                out JTreeArray arrayProperty));
             Assert.False(jsonObject.TryGetJsonArrayPropertyValue("something different", StringComparison.InvariantCultureIgnoreCase,
                 out arrayProperty));
 
@@ -733,13 +733,13 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestValueKind()
         {
-            Assert.Equal(JsonValueKind.Object, new JObject().ValueKind);
+            Assert.Equal(JsonValueKind.Object, new JTreeObject().ValueKind);
         }
 
         [Fact]
         public static void TestRemoveLastProperty()
         {
-            var jsonObject = new JObject()
+            var jsonObject = new JTreeObject()
             {
                 { "first", "value1" },
                 { "middle", "value2" },
@@ -754,16 +754,16 @@ namespace System.Text.Json.Linq.Tests
         }
 
         [Fact]
-        public static void TestJObjectIEnumerator()
+        public static void TestJTreeObjectIEnumerator()
         {
-            var jsonObject = new JObject()
+            var jsonObject = new JTreeObject()
             {
                 ["first"] = 17,
                 ["second"] = "value"
             };
 
             // Test generic IEnumerator:
-            IEnumerator<KeyValuePair<string, JNode>> jsonObjectEnumerator = new JObject.Enumerator(jsonObject);
+            IEnumerator<KeyValuePair<string, JTreeNode>> jsonObjectEnumerator = new JTreeObject.Enumerator(jsonObject);
 
             Assert.Null(jsonObjectEnumerator.Current.Key);
             Assert.Null(jsonObjectEnumerator.Current.Value);
@@ -786,10 +786,10 @@ namespace System.Text.Json.Linq.Tests
         }
 
         [Fact]
-        public static void TestJObjectEmptyObjectEnumerator()
+        public static void TestJTreeObjectEmptyObjectEnumerator()
         {
-            var jsonObject = new JObject();
-            var jsonObjectEnumerator = new JObject.Enumerator(jsonObject);
+            var jsonObject = new JTreeObject();
+            var jsonObjectEnumerator = new JTreeObject.Enumerator(jsonObject);
 
             Assert.Null(jsonObjectEnumerator.Current.Key);
             Assert.Null(jsonObjectEnumerator.Current.Value);

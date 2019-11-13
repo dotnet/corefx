@@ -12,15 +12,15 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   The base class that represents a single node within a mutable JSON document.
     /// </summary>
-    public abstract partial class JNode
+    public abstract partial class JTreeNode
     {
         /// <summary>
         ///   Performs a deep copy operation on <paramref name="jsonElement"/> returning corresponding modifiable tree structure of JSON nodes.
-        ///   Operations performed on returned <see cref="JNode"/> does not modify <paramref name="jsonElement"/>.
+        ///   Operations performed on returned <see cref="JTreeNode"/> does not modify <paramref name="jsonElement"/>.
         /// </summary>
         /// <param name="jsonElement"><see cref="JsonElement"/> to copy.</param>
-        /// <returns><see cref="JNode"/>  representing <paramref name="jsonElement"/>.</returns>
-        public static JNode DeepCopy(JsonElement jsonElement)
+        /// <returns><see cref="JTreeNode"/>  representing <paramref name="jsonElement"/>.</returns>
+        public static JTreeNode DeepCopy(JsonElement jsonElement)
         {
             if (!jsonElement.IsImmutable)
             {
@@ -29,9 +29,9 @@ namespace System.Text.Json.Linq
 
             // Iterative DFS:
 
-            var currentNodes = new Stack<KeyValuePair<string, JNode>>(); // objects/arrays currently being created
+            var currentNodes = new Stack<KeyValuePair<string, JTreeNode>>(); // objects/arrays currently being created
             var recursionStack = new Stack<KeyValuePair<string, JsonElement?>>(); // null JsonElement represents end of current object/array
-            JNode toReturn = null;
+            JTreeNode toReturn = null;
 
             recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, jsonElement));
 
@@ -43,9 +43,9 @@ namespace System.Text.Json.Linq
                 {
                     // Current object/array is finished and can be added to its parent:
 
-                    KeyValuePair<string, JNode> nodePair = currentNodes.Pop();
+                    KeyValuePair<string, JTreeNode> nodePair = currentNodes.Pop();
 
-                    Debug.Assert(nodePair.Value is JArray || nodePair.Value is JObject);
+                    Debug.Assert(nodePair.Value is JTreeArray || nodePair.Value is JTreeObject);
 
                     AddToParent(nodePair, ref currentNodes, ref toReturn);
 
@@ -55,10 +55,10 @@ namespace System.Text.Json.Linq
                 switch (currentJsonElement.Value.ValueKind)
                 {
                     case JsonValueKind.Object:
-                        var jsonObject = new JObject();
+                        var jsonObject = new JTreeObject();
 
                         // Add jsonObject to current nodes:
-                        currentNodes.Push(new KeyValuePair<string, JNode>(currentPair.Key, jsonObject));
+                        currentNodes.Push(new KeyValuePair<string, JTreeNode>(currentPair.Key, jsonObject));
 
                         // Add end of object marker:
                         recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, null));
@@ -70,10 +70,10 @@ namespace System.Text.Json.Linq
                         }
                         break;
                     case JsonValueKind.Array:
-                        var jsonArray = new JArray();
+                        var jsonArray = new JTreeArray();
 
                         // Add jsonArray to current nodes:
-                        currentNodes.Push(new KeyValuePair<string, JNode>(currentPair.Key, jsonArray));
+                        currentNodes.Push(new KeyValuePair<string, JTreeNode>(currentPair.Key, jsonArray));
 
                         // Add end of array marker:
                         recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, null));
@@ -85,24 +85,24 @@ namespace System.Text.Json.Linq
                         }
                         break;
                     case JsonValueKind.Number:
-                        var jsonNumber = new JNumber(currentJsonElement.Value.GetRawText());
-                        AddToParent(new KeyValuePair<string, JNode>(currentPair.Key, jsonNumber), ref currentNodes, ref toReturn);
+                        var jsonNumber = new JTreeNumber(currentJsonElement.Value.GetRawText());
+                        AddToParent(new KeyValuePair<string, JTreeNode>(currentPair.Key, jsonNumber), ref currentNodes, ref toReturn);
                         break;
                     case JsonValueKind.String:
-                        var jsonString = new JString(currentJsonElement.Value.GetString());
-                        AddToParent(new KeyValuePair<string, JNode>(currentPair.Key, jsonString), ref currentNodes, ref toReturn);
+                        var jsonString = new JTreeString(currentJsonElement.Value.GetString());
+                        AddToParent(new KeyValuePair<string, JTreeNode>(currentPair.Key, jsonString), ref currentNodes, ref toReturn);
                         break;
                     case JsonValueKind.True:
-                        var jsonBooleanTrue = new JBoolean(true);
-                        AddToParent(new KeyValuePair<string, JNode>(currentPair.Key, jsonBooleanTrue), ref currentNodes, ref toReturn);
+                        var jsonBooleanTrue = new JTreeBoolean(true);
+                        AddToParent(new KeyValuePair<string, JTreeNode>(currentPair.Key, jsonBooleanTrue), ref currentNodes, ref toReturn);
                         break;
                     case JsonValueKind.False:
-                        var jsonBooleanFalse = new JBoolean(false);
-                        AddToParent(new KeyValuePair<string, JNode>(currentPair.Key, jsonBooleanFalse), ref currentNodes, ref toReturn);
+                        var jsonBooleanFalse = new JTreeBoolean(false);
+                        AddToParent(new KeyValuePair<string, JTreeNode>(currentPair.Key, jsonBooleanFalse), ref currentNodes, ref toReturn);
                         break;
                     case JsonValueKind.Null:
-                        var jsonNull = new JNull();
-                        AddToParent(new KeyValuePair<string, JNode>(currentPair.Key, jsonNull), ref currentNodes, ref toReturn);
+                        var jsonNull = new JTreeNull();
+                        AddToParent(new KeyValuePair<string, JTreeNode>(currentPair.Key, jsonNull), ref currentNodes, ref toReturn);
                         break;
                     default:
                         Debug.Assert(jsonElement.ValueKind == JsonValueKind.Undefined, "No handler for JsonValueKind.{jsonElement.ValueKind}");
@@ -116,48 +116,48 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Parses a string representing JSON document into <see cref="JNode"/>.
+        ///   Parses a string representing JSON document into <see cref="JTreeNode"/>.
         /// </summary>
         /// <param name="json">JSON to parse.</param>
         /// <param name="options">Options to control the parsing behavior.</param>
-        /// <returns><see cref="JNode"/> representation of <paramref name="json"/>.</returns>
-        public static JNode Parse(string json, JNodeOptions options = default)
+        /// <returns><see cref="JTreeNode"/> representation of <paramref name="json"/>.</returns>
+        public static JTreeNode Parse(string json, JTreeNodeOptions options = default)
         {
             Utf8JsonReader reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json), options.GetReaderOptions());
 
-            var currentNodes = new Stack<KeyValuePair<string, JNode>>(); // nodes currently being created
-            JNode toReturn = null;
+            var currentNodes = new Stack<KeyValuePair<string, JTreeNode>>(); // nodes currently being created
+            JTreeNode toReturn = null;
 
             while (reader.Read())
             {
                 JsonTokenType tokenType = reader.TokenType;
-                currentNodes.TryPeek(out KeyValuePair<string, JNode> currentPair);
+                currentNodes.TryPeek(out KeyValuePair<string, JTreeNode> currentPair);
 
-                void AddNewPair(JNode jsonNode, bool keepInCurrentNodes = false)
+                void AddNewPair(JTreeNode jsonNode, bool keepInCurrentNodes = false)
                 {
-                    KeyValuePair<string, JNode> newProperty;
+                    KeyValuePair<string, JTreeNode> newProperty;
 
                     if (currentPair.Value == null)
                     {
                         // If previous token was property name,
                         // it was added to stack with not null name and null value,
-                        // otherwise, this is first JNode added
+                        // otherwise, this is first JTreeNode added
                         if (currentPair.Key != null)
                         {
-                            // Create as property, keep name, replace null with new JNode:
+                            // Create as property, keep name, replace null with new JTreeNode:
                             currentNodes.Pop();
-                            newProperty = new KeyValuePair<string, JNode>(currentPair.Key, jsonNode);
+                            newProperty = new KeyValuePair<string, JTreeNode>(currentPair.Key, jsonNode);
                         }
                         else
                         {
-                            // Add first JNode:
-                            newProperty = new KeyValuePair<string, JNode>(null, jsonNode);
+                            // Add first JTreeNode:
+                            newProperty = new KeyValuePair<string, JTreeNode>(null, jsonNode);
                         }
                     }
                     else
                     {
                         // Create as value:
-                        newProperty = new KeyValuePair<string, JNode>(null, jsonNode);
+                        newProperty = new KeyValuePair<string, JTreeNode>(null, jsonNode);
                     }
 
                     if (keepInCurrentNodes)
@@ -176,40 +176,40 @@ namespace System.Text.Json.Linq
                 switch (tokenType)
                 {
                     case JsonTokenType.StartObject:
-                        AddNewPair(new JObject(), true);
+                        AddNewPair(new JTreeObject(), true);
                         break;
                     case JsonTokenType.EndObject:
-                        Debug.Assert(currentPair.Value is JObject);
+                        Debug.Assert(currentPair.Value is JTreeObject);
 
                         currentNodes.Pop();
                         AddToParent(currentPair, ref currentNodes, ref toReturn, options.DuplicatePropertyNameHandling);
                         break;
                     case JsonTokenType.StartArray:
-                        AddNewPair(new JArray(), true);
+                        AddNewPair(new JTreeArray(), true);
                         break;
                     case JsonTokenType.EndArray:
-                        Debug.Assert(currentPair.Value is JArray);
+                        Debug.Assert(currentPair.Value is JTreeArray);
 
                         currentNodes.Pop();
                         AddToParent(currentPair, ref currentNodes, ref toReturn, options.DuplicatePropertyNameHandling);
                         break;
                     case JsonTokenType.PropertyName:
-                        currentNodes.Push(new KeyValuePair<string, JNode>(reader.GetString(), null));
+                        currentNodes.Push(new KeyValuePair<string, JTreeNode>(reader.GetString(), null));
                         break;
                     case JsonTokenType.Number:
-                        AddNewPair(new JNumber(JsonHelpers.Utf8GetString(reader.ValueSpan)));
+                        AddNewPair(new JTreeNumber(JsonHelpers.Utf8GetString(reader.ValueSpan)));
                         break;
                     case JsonTokenType.String:
-                        AddNewPair(new JString(reader.GetString()));
+                        AddNewPair(new JTreeString(reader.GetString()));
                         break;
                     case JsonTokenType.True:
-                        AddNewPair(new JBoolean(true));
+                        AddNewPair(new JTreeBoolean(true));
                         break;
                     case JsonTokenType.False:
-                        AddNewPair(new JBoolean(false));
+                        AddNewPair(new JTreeBoolean(false));
                         break;
                     case JsonTokenType.Null:
-                        AddNewPair(new JNull());
+                        AddNewPair(new JTreeNull());
                         break;
                 }
             }
@@ -255,19 +255,19 @@ namespace System.Text.Json.Linq
 
                 switch (currentFrame.PropertyValue)
                 {
-                    case JObject jsonObject:
+                    case JTreeObject jsonObject:
                         writer.WriteStartObject();
 
                         // Add end of object marker:
                         recursionStack.Push(new RecursionStackFrame(null, null, JsonValueKind.Object));
 
                         // Add properties to recursion stack. Reverse enumerate to keep properties order:
-                        foreach (KeyValuePair<string, JNode> jsonProperty in jsonObject.Reverse())
+                        foreach (KeyValuePair<string, JTreeNode> jsonProperty in jsonObject.Reverse())
                         {
                             recursionStack.Push(new RecursionStackFrame(jsonProperty.Key, jsonProperty.Value));
                         }
                         break;
-                    case JArray jsonArray:
+                    case JTreeArray jsonArray:
                         writer.WriteStartArray();
 
                         // Add end of array marker:
@@ -279,16 +279,16 @@ namespace System.Text.Json.Linq
                             recursionStack.Push(new RecursionStackFrame(null, jsonArray[i]));
                         }
                         break;
-                    case JString jsonString:
+                    case JTreeString jsonString:
                         writer.WriteStringValue(jsonString.Value);
                         break;
-                    case JNumber jsonNumber:
+                    case JTreeNumber jsonNumber:
                         writer.WriteNumberValue(Encoding.UTF8.GetBytes(jsonNumber.ToString()));
                         break;
-                    case JBoolean jsonBoolean:
+                    case JTreeBoolean jsonBoolean:
                         writer.WriteBooleanValue(jsonBoolean.Value);
                         break;
-                    case JNull _:
+                    case JTreeNull _:
                         writer.WriteNullValue();
                         break;
                 }

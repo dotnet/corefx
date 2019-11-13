@@ -4,14 +4,14 @@
 
 namespace System.Text.Json.Linq
 {
-    internal class JObjectProperty
+    internal class JTreeObjectProperty
     {
         internal string Name { get; }
-        internal JNode Value { get; set;  }
-        internal JObjectProperty Prev { get; set; }
-        internal JObjectProperty Next { get; set; }
+        internal JTreeNode Value { get; set;  }
+        internal JTreeObjectProperty Prev { get; set; }
+        internal JTreeObjectProperty Next { get; set; }
 
-        public JObjectProperty(string name, JNode value, JObjectProperty prev, JObjectProperty next)
+        public JTreeObjectProperty(string name, JTreeNode value, JTreeObjectProperty prev, JTreeObjectProperty next)
         {
             Name = name;
             Value = value;

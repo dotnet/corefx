@@ -6,29 +6,29 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static class JNullTests
+    public static class JTreeNullTests
     {
         [Fact]
         public static void TestToString()
         {
-            Assert.Equal("null", new JNull().ToString());
+            Assert.Equal("null", new JTreeNull().ToString());
         }
 
         [Fact]
         public static void TestEquals()
         {
-            var jsonNull1 = new JNull();
-            var jsonNull2 = new JNull();
+            var jsonNull1 = new JTreeNull();
+            var jsonNull2 = new JTreeNull();
 
             Assert.True(jsonNull1.Equals(jsonNull2));
             Assert.True(jsonNull1 == jsonNull2);
             Assert.False(jsonNull1 != jsonNull2);
 
-            JNode jsonNodeJNull = new JNull();
-            Assert.True(jsonNull1.Equals(jsonNodeJNull));
-            Assert.True(jsonNodeJNull.Equals(jsonNull1));
+            JTreeNode jsonNodeJTreeNull = new JTreeNull();
+            Assert.True(jsonNull1.Equals(jsonNodeJTreeNull));
+            Assert.True(jsonNodeJTreeNull.Equals(jsonNull1));
 
-            IEquatable<JNull> jsonNullIEquatable = jsonNull2;
+            IEquatable<JTreeNull> jsonNullIEquatable = jsonNull2;
             Assert.True(jsonNullIEquatable.Equals(jsonNull1));
             Assert.True(jsonNull1.Equals(jsonNullIEquatable));
 
@@ -37,53 +37,53 @@ namespace System.Text.Json.Linq.Tests
             Assert.True(jsonNullCopy.Equals(jsonNull1));
             Assert.True(jsonNull1.Equals(jsonNullCopy));
 
-            object jsonNullObject = new JNull();
+            object jsonNullObject = new JTreeNull();
 
             Assert.True(jsonNullObject.Equals(jsonNull1));
             Assert.True(jsonNull1.Equals(jsonNullObject));
 
-            Assert.False(jsonNull1.Equals(new JString("null")));
+            Assert.False(jsonNull1.Equals(new JTreeString("null")));
             Assert.False(jsonNull1.Equals(new Exception()));
 
-            // Null comparisons behave this way because of implicit conversion from null to JNull:
+            // Null comparisons behave this way because of implicit conversion from null to JTreeNull:
            
             Assert.True(jsonNull1.Equals(null));
             Assert.True(jsonNull1 == null);
             Assert.False(jsonNull1 != null);
 
-            JNull jsonNullNull = null;
+            JTreeNull jsonNullNull = null;
 
             Assert.True(jsonNull1.Equals(jsonNullNull));
             Assert.True(jsonNull1 == jsonNullNull);
             Assert.False(jsonNull1 != jsonNullNull);
 
-            JNull otherJNullNull = null;
-            Assert.True(jsonNullNull == otherJNullNull);
+            JTreeNull otherJTreeNullNull = null;
+            Assert.True(jsonNullNull == otherJTreeNullNull);
 
-            // Only for null JNode / different derived type this will return false:
+            // Only for null JTreeNode / different derived type this will return false:
 
-            JNode jsonNodeNull = null;
+            JTreeNode jsonNodeNull = null;
             Assert.False(jsonNull1.Equals(jsonNodeNull));
           
-            JArray jsonArrayNull = null;
+            JTreeArray jsonArrayNull = null;
             Assert.False(jsonNull1.Equals(jsonArrayNull));
         }
 
         [Fact]
         public static void TestGetHashCode()
         {
-            var jsonNull = new JNull();
+            var jsonNull = new JTreeNull();
 
-            Assert.Equal(jsonNull.GetHashCode(), new JNull().GetHashCode());
+            Assert.Equal(jsonNull.GetHashCode(), new JTreeNull().GetHashCode());
             
-            JNode jsonNodeNull = new JNull();
+            JTreeNode jsonNodeNull = new JTreeNull();
             Assert.Equal(jsonNull.GetHashCode(), jsonNodeNull.GetHashCode());
             
-            IEquatable<JNull> jsonNullIEquatable = new JNull();
+            IEquatable<JTreeNull> jsonNullIEquatable = new JTreeNull();
             Assert.Equal(jsonNull.GetHashCode(), jsonNullIEquatable.GetHashCode());
 
             object jsonNullCopy= jsonNull;
-            object jsonNullObject = new JNull();
+            object jsonNullObject = new JTreeNull();
             Assert.Equal(jsonNull.GetHashCode(), jsonNullCopy.GetHashCode());
             Assert.Equal(jsonNull.GetHashCode(), jsonNullObject.GetHashCode());
 
@@ -93,7 +93,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestValueKind()
         {
-            Assert.Equal(JsonValueKind.Null, new JNull().ValueKind);
+            Assert.Equal(JsonValueKind.Null, new JTreeNull().ValueKind);
         }
     }
 }

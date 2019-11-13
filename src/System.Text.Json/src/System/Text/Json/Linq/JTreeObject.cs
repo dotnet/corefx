@@ -10,47 +10,47 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///  Represents a mutable JSON object.
     /// </summary>
-    public sealed partial class JObject : JNode, IEnumerable<KeyValuePair<string, JNode>>
+    public sealed partial class JTreeObject : JTreeNode, IEnumerable<KeyValuePair<string, JTreeNode>>
     {
-        internal readonly Dictionary<string, JObjectProperty> _dictionary;
-        internal JObjectProperty _first;
-        internal JObjectProperty _last;
+        internal readonly Dictionary<string, JTreeObjectProperty> _dictionary;
+        internal JTreeObjectProperty _first;
+        internal JTreeObjectProperty _last;
         internal int _version;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JObject"/> class representing the empty object.
+        ///   Initializes a new instance of the <see cref="JTreeObject"/> class representing the empty object.
         /// </summary>
-        public JObject()
+        public JTreeObject()
         {
-            _dictionary = new Dictionary<string, JObjectProperty>();
+            _dictionary = new Dictionary<string, JTreeObjectProperty>();
             _version = 0;
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JObject"/> class representing provided set of JSON properties.
+        ///   Initializes a new instance of the <see cref="JTreeObject"/> class representing provided set of JSON properties.
         /// </summary>
         /// <param name="jsonProperties">>Properties to represent as a JSON object.</param>
-        public JObject(IEnumerable<KeyValuePair<string, JNode>> jsonProperties)
+        public JTreeObject(IEnumerable<KeyValuePair<string, JTreeNode>> jsonProperties)
             : this()
             => AddRange(jsonProperties);
 
         /// <summary>
-        ///   Parses a string representing JSON document into a <see cref="JObject"/>.
+        ///   Parses a string representing JSON document into a <see cref="JTreeObject"/>.
         /// </summary>
         /// <param name="json">JSON to parse.</param>
         /// <param name="options">Options to control the parsing behavior.</param>
-        /// <returns><see cref="JObject"/> representation of <paramref name="json"/>.</returns>
+        /// <returns><see cref="JTreeObject"/> representation of <paramref name="json"/>.</returns>
         /// <exception cref="InvalidOperationException">
         ///   Provided json text is not a JSON object.
         /// </exception>
-        public static new JObject Parse(string json, JNodeOptions options = default)
+        public static new JTreeObject Parse(string json, JTreeNodeOptions options = default)
         {
-            JNode node = JNode.Parse(json, options);
-            if (node is JObject jObject)
+            JTreeNode node = JTreeNode.Parse(json, options);
+            if (node is JTreeObject JTreeObject)
             {
-                return jObject;
+                return JTreeObject;
             }
-            throw new InvalidOperationException(SR.Format(SR.JsonTypeMismatch, typeof(JObject), node.GetType()));
+            throw new InvalidOperationException(SR.Format(SR.JsonTypeMismatch, typeof(JTreeObject), node.GetType()));
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentNullException">
         ///   Provided property name is null.
         /// </exception>
-        public JNode this[string propertyName]
+        public JTreeNode this[string propertyName]
         {
             get => propertyName != null ? GetPropertyValue(propertyName) : throw new ArgumentNullException(nameof(propertyName));
             set
@@ -72,7 +72,7 @@ namespace System.Text.Json.Linq
 
                 if (_dictionary.ContainsKey(propertyName))
                 {
-                    _dictionary[propertyName].Value = value ?? new JNull();
+                    _dictionary[propertyName].Value = value ?? new JTreeNull();
                 }
                 else
                 {
@@ -90,10 +90,10 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property name to add already exists.
         /// </exception>
-        public void Add(KeyValuePair<string, JNode> jsonProperty) => Add(jsonProperty.Key, jsonProperty.Value);
+        public void Add(KeyValuePair<string, JTreeNode> jsonProperty) => Add(jsonProperty.Key, jsonProperty.Value);
 
         /// <summary>
-        ///   Adds the specified <see cref="JNode"/> property to the JSON object.
+        ///   Adds the specified <see cref="JTreeNode"/> property to the JSON object.
         /// </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue">Value of the property to add.</param>
@@ -103,8 +103,8 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property name to add already exists.
         /// </exception>
-        /// <remarks>Null value is allowed and will be converted to the <see cref="JNull"/> instance.</remarks>
-        public void Add(string propertyName, JNode propertyValue)
+        /// <remarks>Null value is allowed and will be converted to the <see cref="JTreeNull"/> instance.</remarks>
+        public void Add(string propertyName, JTreeNode propertyValue)
         {
             if (propertyName == null)
             {
@@ -119,12 +119,12 @@ namespace System.Text.Json.Linq
             // Add property to linked list:
             if (_last == null)
             {
-                _last = new JObjectProperty(propertyName, propertyValue ?? new JNull(), null, null);
+                _last = new JTreeObjectProperty(propertyName, propertyValue ?? new JTreeNull(), null, null);
                 _first = _last;
             }
             else
             {
-                var newJsonObjectProperty = new JObjectProperty(propertyName, propertyValue ?? new JNull(), _last, null);
+                var newJsonObjectProperty = new JTreeObjectProperty(propertyName, propertyValue ?? new JTreeNull(), _last, null);
                 _last.Next = newJsonObjectProperty;
                 _last = newJsonObjectProperty;
             }
@@ -145,9 +145,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentNullException">
         ///   Some of property names are null.
         /// </exception>
-        public void AddRange(IEnumerable<KeyValuePair<string, JNode>> jsonProperties)
+        public void AddRange(IEnumerable<KeyValuePair<string, JTreeNode>> jsonProperties)
         {
-            foreach (KeyValuePair<string, JNode> property in jsonProperties)
+            foreach (KeyValuePair<string, JTreeNode> property in jsonProperties)
             {
                 Add(property);
             }
@@ -172,7 +172,7 @@ namespace System.Text.Json.Linq
             }
 
 #if BUILDING_INBOX_LIBRARY
-            if (_dictionary.Remove(propertyName, out JObjectProperty value))
+            if (_dictionary.Remove(propertyName, out JTreeObjectProperty value))
             {
                 AdjustLinkedListPointers(value);
                 _version++;
@@ -180,7 +180,7 @@ namespace System.Text.Json.Linq
                 return true;
             }
 #else
-            if (_dictionary.TryGetValue(propertyName, out JObjectProperty value))
+            if (_dictionary.TryGetValue(propertyName, out JTreeObjectProperty value))
             {
                 AdjustLinkedListPointers(value);
                 _dictionary.Remove(propertyName);
@@ -212,7 +212,7 @@ namespace System.Text.Json.Linq
                 throw new ArgumentNullException(nameof(propertyName));
             }
 
-            JObjectProperty _current = _first;
+            JTreeObjectProperty _current = _first;
 
             while (_current != null && !string.Equals(_current.Name, propertyName, stringComparison))
             {
@@ -229,7 +229,7 @@ namespace System.Text.Json.Linq
             return false;
         }
 
-        private void AdjustLinkedListPointers(JObjectProperty propertyToRemove)
+        private void AdjustLinkedListPointers(JTreeObjectProperty propertyToRemove)
         {
             // Adjust linked list pointers:
 
@@ -279,7 +279,7 @@ namespace System.Text.Json.Linq
         /// </exception>
         public bool ContainsProperty(string propertyName, StringComparison stringComparison)
         {
-            foreach (KeyValuePair<string, JNode> property in this)
+            foreach (KeyValuePair<string, JTreeNode> property in this)
             {
                 if (string.Equals(property.Key, propertyName, stringComparison))
                 {
@@ -298,9 +298,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="KeyNotFoundException">
         ///   Property with specified name is not found in JSON object.
         /// </exception>
-        public JNode GetPropertyValue(string propertyName)
+        public JTreeNode GetPropertyValue(string propertyName)
         {
-            if (!TryGetPropertyValue(propertyName, out JNode jsonNode))
+            if (!TryGetPropertyValue(propertyName, out JTreeNode jsonNode))
             {
                 throw new KeyNotFoundException(SR.Format(SR.PropertyNotFound, propertyName));
             }
@@ -317,9 +317,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="KeyNotFoundException">
         ///   Property with specified name is not found in JSON object.
         /// </exception>
-        public JNode GetPropertyValue(string propertyName, StringComparison stringComparison)
+        public JTreeNode GetPropertyValue(string propertyName, StringComparison stringComparison)
         {
-            if (!TryGetPropertyValue(propertyName, stringComparison, out JNode jsonNode))
+            if (!TryGetPropertyValue(propertyName, stringComparison, out JTreeNode jsonNode))
             {
                 throw new KeyNotFoundException(SR.Format(SR.PropertyNotFound, propertyName));
             }
@@ -339,9 +339,9 @@ namespace System.Text.Json.Linq
         /// <remarks>
         ///   When returns <see langword="false"/>, the value of <paramref name="jsonNode"/> is meaningless.
         /// </remarks>
-        public bool TryGetPropertyValue(string propertyName, out JNode jsonNode)
+        public bool TryGetPropertyValue(string propertyName, out JTreeNode jsonNode)
         {
-            if (_dictionary.TryGetValue(propertyName, out JObjectProperty jsonObjectProperty))
+            if (_dictionary.TryGetValue(propertyName, out JTreeObjectProperty jsonObjectProperty))
             {
                 jsonNode = jsonObjectProperty.Value;
                 return true;
@@ -364,9 +364,9 @@ namespace System.Text.Json.Linq
         /// <remarks>
         ///   When returns <see langword="false"/>, the value of <paramref name="jsonNode"/> is meaningless.
         /// </remarks>
-        public bool TryGetPropertyValue(string propertyName, StringComparison stringComparison, out JNode jsonNode)
+        public bool TryGetPropertyValue(string propertyName, StringComparison stringComparison, out JTreeNode jsonNode)
         {
-            foreach (KeyValuePair<string, JNode> property in this)
+            foreach (KeyValuePair<string, JTreeNode> property in this)
             {
                 if (string.Equals(property.Key, propertyName, stringComparison))
                 {
@@ -390,9 +390,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property with specified name is not a JSON object.
         /// </exception>
-        public JObject GetJsonObjectPropertyValue(string propertyName)
+        public JTreeObject GetJsonObjectPropertyValue(string propertyName)
         {
-            if (GetPropertyValue(propertyName) is JObject jsonObject)
+            if (GetPropertyValue(propertyName) is JTreeObject jsonObject)
             {
                 return jsonObject;
             }
@@ -412,9 +412,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property with specified name is not a JSON object.
         /// </exception>
-        public JObject GetJsonObjectPropertyValue(string propertyName, StringComparison stringComparison)
+        public JTreeObject GetJsonObjectPropertyValue(string propertyName, StringComparison stringComparison)
         {
-            if (GetPropertyValue(propertyName, stringComparison) is JObject jsonObject)
+            if (GetPropertyValue(propertyName, stringComparison) is JTreeObject jsonObject)
             {
                 return jsonObject;
             }
@@ -431,11 +431,11 @@ namespace System.Text.Json.Linq
         ///  <see langword="true"/> if JSON object property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetJsonObjectPropertyValue(string propertyName, out JObject jsonObject)
+        public bool TryGetJsonObjectPropertyValue(string propertyName, out JTreeObject jsonObject)
         {
-            if (TryGetPropertyValue(propertyName, out JNode jsonNode))
+            if (TryGetPropertyValue(propertyName, out JTreeNode jsonNode))
             {
-                jsonObject = jsonNode as JObject;
+                jsonObject = jsonNode as JTreeObject;
                 return jsonObject != null;
             }
 
@@ -453,11 +453,11 @@ namespace System.Text.Json.Linq
         ///  <see langword="true"/> if JSON object property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetJsonObjectPropertyValue(string propertyName, StringComparison stringComparison, out JObject jsonObject)
+        public bool TryGetJsonObjectPropertyValue(string propertyName, StringComparison stringComparison, out JTreeObject jsonObject)
         {
-            if (TryGetPropertyValue(propertyName, stringComparison, out JNode jsonNode))
+            if (TryGetPropertyValue(propertyName, stringComparison, out JTreeNode jsonNode))
             {
-                jsonObject = jsonNode as JObject;
+                jsonObject = jsonNode as JTreeObject;
                 return jsonObject != null;
             }
 
@@ -476,9 +476,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property with specified name is not a JSON array.
         /// </exception>
-        public JArray GetJsonArrayPropertyValue(string propertyName)
+        public JTreeArray GetJsonArrayPropertyValue(string propertyName)
         {
-            if (GetPropertyValue(propertyName) is JArray jsonArray)
+            if (GetPropertyValue(propertyName) is JTreeArray jsonArray)
             {
                 return jsonArray;
             }
@@ -498,9 +498,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property with specified name is not a JSON array.
         /// </exception>
-        public JArray GetJsonArrayPropertyValue(string propertyName, StringComparison stringComparison)
+        public JTreeArray GetJsonArrayPropertyValue(string propertyName, StringComparison stringComparison)
         {
-            if (GetPropertyValue(propertyName, stringComparison) is JArray jsonArray)
+            if (GetPropertyValue(propertyName, stringComparison) is JTreeArray jsonArray)
             {
                 return jsonArray;
             }
@@ -517,11 +517,11 @@ namespace System.Text.Json.Linq
         ///  <see langword="true"/> if JSON array property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetJsonArrayPropertyValue(string propertyName, out JArray jsonArray)
+        public bool TryGetJsonArrayPropertyValue(string propertyName, out JTreeArray jsonArray)
         {
-            if (TryGetPropertyValue(propertyName, out JNode jsonNode))
+            if (TryGetPropertyValue(propertyName, out JTreeNode jsonNode))
             {
-                jsonArray = jsonNode as JArray;
+                jsonArray = jsonNode as JTreeArray;
                 return jsonArray != null;
             }
 
@@ -539,11 +539,11 @@ namespace System.Text.Json.Linq
         ///  <see langword="true"/> if JSON array property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetJsonArrayPropertyValue(string propertyName, StringComparison stringComparison, out JArray jsonArray)
+        public bool TryGetJsonArrayPropertyValue(string propertyName, StringComparison stringComparison, out JTreeArray jsonArray)
         {
-            if (TryGetPropertyValue(propertyName, stringComparison, out JNode jsonNode))
+            if (TryGetPropertyValue(propertyName, stringComparison, out JTreeNode jsonNode))
             {
-                jsonArray = jsonNode as JArray;
+                jsonArray = jsonNode as JTreeArray;
                 return jsonArray != null;
             }
 
@@ -559,10 +559,10 @@ namespace System.Text.Json.Linq
         /// <summary>
         ///  A collection containing the property values of JSON object.
         /// </summary>
-        public IReadOnlyCollection<JNode> GetPropertyValues()
+        public IReadOnlyCollection<JTreeNode> GetPropertyValues()
         {
-            var list = new List<JNode>(_dictionary.Count);
-            foreach (KeyValuePair<string, JObjectProperty> item in _dictionary)
+            var list = new List<JTreeNode>(_dictionary.Count);
+            foreach (KeyValuePair<string, JTreeObjectProperty> item in _dictionary)
             {
                 list.Add(item.Value.Value);
             }
@@ -572,14 +572,14 @@ namespace System.Text.Json.Linq
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
-        /// <returns>An enumerator structure for the <see cref="JObject"/>.</returns>
+        /// <returns>An enumerator structure for the <see cref="JTreeObject"/>.</returns>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the JSON object.</returns>
-        IEnumerator<KeyValuePair<string, JNode>> IEnumerable<KeyValuePair<string, JNode>>.GetEnumerator() => new Enumerator(this);
+        IEnumerator<KeyValuePair<string, JTreeNode>> IEnumerable<KeyValuePair<string, JTreeNode>>.GetEnumerator() => new Enumerator(this);
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
@@ -591,11 +591,11 @@ namespace System.Text.Json.Linq
         ///   Creates a new JSON object that is a copy of the current instance.
         /// </summary>
         /// <returns>A new JSON object that is a copy of this instance.</returns>
-        public override JNode Clone()
+        public override JTreeNode Clone()
         {
-            var jsonObject = new JObject();
+            var jsonObject = new JTreeObject();
 
-            foreach (KeyValuePair<string, JNode> property in this)
+            foreach (KeyValuePair<string, JTreeNode> property in this)
             {
                 jsonObject.Add(property.Key, property.Value.Clone());
             }

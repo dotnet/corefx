@@ -15,11 +15,11 @@ namespace System.Text.Json
 {
     /// <summary>
     ///   Represents the structure of a JSON value in a lightweight, read-only form.
-    ///   For creating a modifiable DOM, use <see cref="JNode"/> and its derived types (such as <see cref="JObject"/> and <see cref="JArray"/>).
+    ///   For creating a modifiable DOM, use <see cref="JTreeNode"/> and its derived types (such as <see cref="JTreeObject"/> and <see cref="JTreeArray"/>).
     /// </summary>
-    /// <seealso cref="JNode"/>
-    /// <seealso cref="JObject"/>
-    /// <seealso cref="JArray"/>
+    /// <seealso cref="JTreeNode"/>
+    /// <seealso cref="JTreeObject"/>
+    /// <seealso cref="JTreeArray"/>
     /// <remarks>
     ///   This class utilizes resources from pooled memory to minimize the garbage collector (GC)
     ///   impact in high-usage scenarios. Failure to properly Dispose this object will result in

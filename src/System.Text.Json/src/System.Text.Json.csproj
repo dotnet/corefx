@@ -207,18 +207,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Text\Json\Linq\DuplicatePropertyNameHandlingStrategy.cs" />
-    <Compile Include="System\Text\Json\Linq\JArray.cs" />
-    <Compile Include="System\Text\Json\Linq\JArray.Enumerator.cs" />
-    <Compile Include="System\Text\Json\Linq\JBoolean.cs" />
-    <Compile Include="System\Text\Json\Linq\JNode.cs" /> 
-    <Compile Include="System\Text\Json\Linq\JNode.Traversal.cs" /> 
-    <Compile Include="System\Text\Json\Linq\JNode.TraversalHelpers.cs" /> 
-    <Compile Include="System\Text\Json\Linq\JNodeOptions.cs" />
-    <Compile Include="System\Text\Json\Linq\JNull.cs" />
-    <Compile Include="System\Text\Json\Linq\JNumber.cs" />
-    <Compile Include="System\Text\Json\Linq\JObject.cs" />
-    <Compile Include="System\Text\Json\Linq\JObject.Enumerator.cs" />
-    <Compile Include="System\Text\Json\Linq\JObjectProperty.cs" />
-    <Compile Include="System\Text\Json\Linq\JString.cs" />
+    <Compile Include="System\Text\Json\Linq\JTreeArray.cs" />
+    <Compile Include="System\Text\Json\Linq\JTreeArray.Enumerator.cs" />
+    <Compile Include="System\Text\Json\Linq\JTreeBoolean.cs" />
+    <Compile Include="System\Text\Json\Linq\JTreeNode.cs" /> 
+    <Compile Include="System\Text\Json\Linq\JTreeNode.Traversal.cs" /> 
+    <Compile Include="System\Text\Json\Linq\JTreeNode.TraversalHelpers.cs" /> 
+    <Compile Include="System\Text\Json\Linq\JTreeNodeOptions.cs" />
+    <Compile Include="System\Text\Json\Linq\JTreeNull.cs" />
+    <Compile Include="System\Text\Json\Linq\JTreeNumber.cs" />
+    <Compile Include="System\Text\Json\Linq\JTreeObject.cs" />
+    <Compile Include="System\Text\Json\Linq\JTreeObject.Enumerator.cs" />
+    <Compile Include="System\Text\Json\Linq\JTreeObjectProperty.cs" />
+    <Compile Include="System\Text\Json\Linq\JTreeString.cs" />
   </ItemGroup>
 </Project>

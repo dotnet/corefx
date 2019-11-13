@@ -5,19 +5,19 @@
 namespace System.Text.Json.Linq
 {
     /// <summary>
-    ///   The base class that represents a single node within a mutable JSON document. See also <see cref="JObject"/> and <see cref="JArray"/> which derive from <see cref="JNode"/>.
+    ///   The base class that represents a single node within a mutable JSON document. See also <see cref="JTreeObject"/> and <see cref="JTreeArray"/> which derive from <see cref="JTreeNode"/>.
     /// </summary>
-    /// <seealso cref="JObject"/>
-    /// <seealso cref="JArray"/>
-    public abstract partial class JNode
+    /// <seealso cref="JTreeObject"/>
+    /// <seealso cref="JTreeArray"/>
+    public abstract partial class JTreeNode
     {
-        private protected JNode() { }
+        private protected JTreeNode() { }
 
         /// <summary>
         ///   Transforms this instance into <see cref="JsonElement"/> representation.
         ///   Operations performed on this instance will modify the returned <see cref="JsonElement"/>.
         /// </summary>
-        /// <returns>Mutable <see cref="JsonElement"/> with <see cref="JNode"/> underneath.</returns>
+        /// <returns>Mutable <see cref="JsonElement"/> with <see cref="JTreeNode"/> underneath.</returns>
         public JsonElement AsJsonElement() => new JsonElement(this);
 
         /// <summary>
@@ -26,32 +26,32 @@ namespace System.Text.Json.Linq
         public abstract JsonValueKind ValueKind { get; }
 
         /// <summary>
-        ///   Gets the <see cref="JNode"/> represented by <paramref name="jsonElement"/> if it was already backed by one.
-        ///   Operations performed on the returned <see cref="JNode"/> will modify the <paramref name="jsonElement"/>.
+        ///   Gets the <see cref="JTreeNode"/> represented by <paramref name="jsonElement"/> if it was already backed by one.
+        ///   Operations performed on the returned <see cref="JTreeNode"/> will modify the <paramref name="jsonElement"/>.
         /// </summary>
-        /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JNode"/> from.</param>
-        /// <returns><see cref="JNode"/> represented by <paramref name="jsonElement"/>.</returns>
+        /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JTreeNode"/> from.</param>
+        /// <returns><see cref="JTreeNode"/> represented by <paramref name="jsonElement"/>.</returns>
         /// <exception cref="ArgumentException">
-        ///   Provided <see cref="JsonElement"/> was not build from <see cref="JNode"/>.
+        ///   Provided <see cref="JsonElement"/> was not build from <see cref="JTreeNode"/>.
         /// </exception>
-        public static JNode GetOriginatingNode(JsonElement jsonElement) => !jsonElement.IsImmutable ? (JNode)jsonElement._parent : throw new ArgumentException(SR.NotNodeJsonElementParent);
+        public static JTreeNode GetOriginatingNode(JsonElement jsonElement) => !jsonElement.IsImmutable ? (JTreeNode)jsonElement._parent : throw new ArgumentException(SR.NotNodeJsonElementParent);
 
         /// <summary>
-        ///    Gets the <see cref="JNode"/> represented by the <paramref name="jsonElement"/> if it was already backed by one.
-        ///    Operations performed on the returned <see cref="JNode"/> will modify the <paramref name="jsonElement"/>.
+        ///    Gets the <see cref="JTreeNode"/> represented by the <paramref name="jsonElement"/> if it was already backed by one.
+        ///    Operations performed on the returned <see cref="JTreeNode"/> will modify the <paramref name="jsonElement"/>.
         ///    A return value indicates whether the operation succeeded.
         /// </summary>
-        /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JNode"/> from.</param>
-        /// <param name="jsonNode"><see cref="JNode"/> represented by <paramref name="jsonElement"/>.</param>
+        /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JTreeNode"/> from.</param>
+        /// <param name="jsonNode"><see cref="JTreeNode"/> represented by <paramref name="jsonElement"/>.</param>
         /// <returns>
         ///  <see langword="true"/> if the operation succeded;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public static bool TryGetOriginatingNode(JsonElement jsonElement, out JNode jsonNode)
+        public static bool TryGetOriginatingNode(JsonElement jsonElement, out JTreeNode jsonNode)
         {
             if (!jsonElement.IsImmutable)
             {
-                jsonNode = (JNode)jsonElement._parent;
+                jsonNode = (JTreeNode)jsonElement._parent;
                 return true;
             }
 
@@ -62,97 +62,97 @@ namespace System.Text.Json.Linq
         /// <summary>
         ///   Performs a deep copy operation on this instance.
         /// </summary>
-        /// <returns><see cref="JNode"/> which is a clone of this instance.</returns>
-        public abstract JNode Clone();
+        /// <returns><see cref="JTreeNode"/> which is a clone of this instance.</returns>
+        public abstract JTreeNode Clone();
 
         /// <summary>
-        ///   Converts a <see cref="string"/> to a <see cref="JString"/>.
+        ///   Converts a <see cref="string"/> to a <see cref="JTreeString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(string value)
+        public static implicit operator JTreeNode(string value)
         {
             if (value == null)
             {
-                return new JNull();
+                return new JTreeNull();
             }
 
-            return new JString(value);
+            return new JTreeString(value);
         }
 
         /// <summary>
-        ///   Converts a <see cref="DateTime"/> to a <see cref="JString"/>.
+        ///   Converts a <see cref="DateTime"/> to a <see cref="JTreeString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(DateTime value) => new JString(value);
+        public static implicit operator JTreeNode(DateTime value) => new JTreeString(value);
 
         /// <summary>
-        ///   Converts a <see cref="DateTimeOffset"/> to a <see cref="JString"/>.
+        ///   Converts a <see cref="DateTimeOffset"/> to a <see cref="JTreeString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(DateTimeOffset value) => new JString(value);
+        public static implicit operator JTreeNode(DateTimeOffset value) => new JTreeString(value);
 
         /// <summary>
-        ///   Converts a <see cref="Guid"/> to a <see cref="JString"/>.
+        ///   Converts a <see cref="Guid"/> to a <see cref="JTreeString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(Guid value) => new JString(value);
+        public static implicit operator JTreeNode(Guid value) => new JTreeString(value);
 
         /// <summary>
-        ///   Converts a <see cref="bool"/> to a <see cref="JBoolean"/>.
+        ///   Converts a <see cref="bool"/> to a <see cref="JTreeBoolean"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(bool value) => new JBoolean(value);
+        public static implicit operator JTreeNode(bool value) => new JTreeBoolean(value);
 
         /// <summary>
         ///   Converts a <see cref="byte"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(byte value) => new JNumber(value);
+        public static implicit operator JTreeNode(byte value) => new JTreeNumber(value);
 
         /// <summary>
         ///   Converts a <see cref="short"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(short value) => new JNumber(value);
+        public static implicit operator JTreeNode(short value) => new JTreeNumber(value);
 
         /// <summary>
         ///   Converts an <see cref="int"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(int value) => new JNumber(value);
+        public static implicit operator JTreeNode(int value) => new JTreeNumber(value);
 
         /// <summary>
         ///   Converts a <see cref="long"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(long value) => new JNumber(value);
+        public static implicit operator JTreeNode(long value) => new JTreeNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="float"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(float value)
+        public static implicit operator JTreeNode(float value)
         {
             if (float.IsInfinity(value) || float.IsNaN(value))
             {
-                return new JString(value.ToString());
+                return new JTreeString(value.ToString());
             }
 
-            return new JNumber(value);
+            return new JTreeNumber(value);
         }
 
         /// <summary>
         ///    Converts a <see cref="double"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(double value)
+        public static implicit operator JTreeNode(double value)
         {
             if (double.IsInfinity(value) || double.IsNaN(value))
             {
-                return new JString(value.ToString());
+                return new JTreeString(value.ToString());
             }
 
-            return new JNumber(value);
+            return new JTreeNumber(value);
         }
 
         /// <summary>
@@ -160,33 +160,33 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator JNode(sbyte value) => new JNumber(value);
+        public static implicit operator JTreeNode(sbyte value) => new JTreeNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="ushort"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator JNode(ushort value) => new JNumber(value);
+        public static implicit operator JTreeNode(ushort value) => new JTreeNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="uint"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator JNode(uint value) => new JNumber(value);
+        public static implicit operator JTreeNode(uint value) => new JTreeNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="ulong"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator JNode(ulong value) => new JNumber(value);
+        public static implicit operator JTreeNode(ulong value) => new JTreeNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="decimal"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JNode(decimal value) => new JNumber(value);
+        public static implicit operator JTreeNode(decimal value) => new JTreeNumber(value);
     }
 }

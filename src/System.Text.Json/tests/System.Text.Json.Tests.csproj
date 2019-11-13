@@ -122,16 +122,16 @@
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Linq\JArrayTests.cs" />
-    <Compile Include="Linq\JBooleanTests.cs" />
     <Compile Include="Linq\JsonElementWithNodeParentTests.cs" />
-    <Compile Include="Linq\JNodeTestData.cs" />
-    <Compile Include="Linq\JNode.AsJsonElementTests.cs" />
-    <Compile Include="Linq\JNode.CloneTests.cs" />
-    <Compile Include="Linq\JNode.TraversalTests.cs" />
-    <Compile Include="Linq\JNullTests.cs" />
-    <Compile Include="Linq\JNumberTests.cs" />
-    <Compile Include="Linq\JObjectTests.cs" />
-    <Compile Include="Linq\JStringTests.cs" />
+    <Compile Include="Linq\JTreeArrayTests.cs" />
+    <Compile Include="Linq\JTreeBooleanTests.cs" />
+    <Compile Include="Linq\JTreeNodeTestData.cs" />
+    <Compile Include="Linq\JTreeNode.AsJsonElementTests.cs" />
+    <Compile Include="Linq\JTreeNode.CloneTests.cs" />
+    <Compile Include="Linq\JTreeNode.TraversalTests.cs" />
+    <Compile Include="Linq\JTreeNullTests.cs" />
+    <Compile Include="Linq\JTreeNumberTests.cs" />
+    <Compile Include="Linq\JTreeObjectTests.cs" />
+    <Compile Include="Linq\JTreeStringTests.cs" />
   </ItemGroup>
 </Project>

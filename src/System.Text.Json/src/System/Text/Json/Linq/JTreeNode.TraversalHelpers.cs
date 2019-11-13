@@ -10,20 +10,20 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   The base class that represents a single node within a mutable JSON document.
     /// </summary>
-    public abstract partial class JNode
+    public abstract partial class JTreeNode
     {
         private static void AddToParent(
-            KeyValuePair<string, JNode> nodePair,
-            ref Stack<KeyValuePair<string, JNode>> currentNodes,
-            ref JNode toReturn,
+            KeyValuePair<string, JTreeNode> nodePair,
+            ref Stack<KeyValuePair<string, JTreeNode>> currentNodes,
+            ref JTreeNode toReturn,
             DuplicatePropertyNameHandlingStrategy duplicatePropertyNameHandling = DuplicatePropertyNameHandlingStrategy.Replace)
         {
-            if (currentNodes.TryPeek(out KeyValuePair<string, JNode> parentPair))
+            if (currentNodes.TryPeek(out KeyValuePair<string, JTreeNode> parentPair))
             {
-                // Parent needs to be JObject or JArray
-                Debug.Assert(parentPair.Value is JObject || parentPair.Value is JArray);
+                // Parent needs to be JTreeObject or JTreeArray
+                Debug.Assert(parentPair.Value is JTreeObject || parentPair.Value is JTreeArray);
 
-                if (parentPair.Value is JObject jsonObject)
+                if (parentPair.Value is JTreeObject jsonObject)
                 {
                     Debug.Assert(nodePair.Key != null);
 
@@ -45,7 +45,7 @@ namespace System.Text.Json.Linq
                         jsonObject.Add(nodePair);
                     }
                 }
-                else if (parentPair.Value is JArray jsonArray)
+                else if (parentPair.Value is JTreeArray jsonArray)
                 {
                     Debug.Assert(nodePair.Key == null);
                     jsonArray.Add(nodePair.Value);
@@ -60,17 +60,17 @@ namespace System.Text.Json.Linq
         private struct RecursionStackFrame
         {
             public string PropertyName { get; set; }
-            public JNode PropertyValue { get; set; }
+            public JTreeNode PropertyValue { get; set; }
             public JsonValueKind ValueKind { get; set; } // to retrieve ValueKind when PropertyValue is null
 
-            public RecursionStackFrame(string propertyName, JNode propertyValue, JsonValueKind valueKind)
+            public RecursionStackFrame(string propertyName, JTreeNode propertyValue, JsonValueKind valueKind)
             {
                 PropertyName = propertyName;
                 PropertyValue = propertyValue;
                 ValueKind = valueKind;
             }
 
-            public RecursionStackFrame(string propertyName, JNode propertyValue) : this(propertyName, propertyValue, propertyValue.ValueKind)
+            public RecursionStackFrame(string propertyName, JTreeNode propertyValue) : this(propertyName, propertyValue, propertyValue.ValueKind)
             {
             }
         }

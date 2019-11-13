@@ -6,21 +6,21 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///  Represents a mutable JSON object.
     /// </summary>
-    public sealed partial class JObject : JNode, IEnumerable<KeyValuePair<string, JNode>>
+    public sealed partial class JTreeObject : JTreeNode, IEnumerable<KeyValuePair<string, JTreeNode>>
     {
         /// <summary>
         ///   Supports an iteration over a JSON object.
         /// </summary>
-        public struct Enumerator : IEnumerator<KeyValuePair<string, JNode>>
+        public struct Enumerator : IEnumerator<KeyValuePair<string, JTreeNode>>
         {
-            private JObjectProperty _first;
-            private JObjectProperty _current;
+            private JTreeObjectProperty _first;
+            private JTreeObjectProperty _current;
 
             /// <summary>
             ///   Initializes a new instance of the <see cref="Enumerator"/> class supporting an interation over provided JSON object.
             /// </summary>
             /// <param name="jsonObject">JSON object to iterate over.</param>
-            public Enumerator(JObject jsonObject)
+            public Enumerator(JTreeObject jsonObject)
             {
                 _first = jsonObject._first;
                 _current = null;
@@ -29,7 +29,7 @@ namespace System.Text.Json.Linq
             /// <summary>
             ///   Gets the property in the JSON object at the current position of the enumerator.
             /// </summary>
-            public KeyValuePair<string, JNode> Current
+            public KeyValuePair<string, JTreeNode> Current
             {
                 get
                 {
@@ -38,7 +38,7 @@ namespace System.Text.Json.Linq
                         return default;
                     }
 
-                    return new KeyValuePair<string, JNode>(_current.Name, _current.Value);
+                    return new KeyValuePair<string, JTreeNode>(_current.Name, _current.Value);
                 }
             }
 

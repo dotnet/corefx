@@ -71,7 +71,7 @@ namespace System.Text.Json
         public uint GetUInt32() { throw null; }
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
-        public System.Text.Json.Linq.JNode ToJNode() { throw null; }
+        public System.Text.Json.Linq.JTreeNode ToJTreeNode() { throw null; }
         public override string ToString() { throw null; }
         public bool TryGetByte(out byte value) { throw null; }
         public bool TryGetBytesFromBase64(out byte[] value) { throw null; }
@@ -460,106 +460,106 @@ namespace System.Text.Json.Linq
         Ignore = 1,
         Error = 2,
     }
-    public sealed partial class JArray : System.Text.Json.Linq.JNode, System.Collections.Generic.ICollection<System.Text.Json.Linq.JNode>, System.Collections.Generic.IEnumerable<System.Text.Json.Linq.JNode>, System.Collections.Generic.IList<System.Text.Json.Linq.JNode>, System.Collections.Generic.IReadOnlyCollection<System.Text.Json.Linq.JNode>, System.Collections.Generic.IReadOnlyList<System.Text.Json.Linq.JNode>, System.Collections.IEnumerable
+    public sealed partial class JTreeArray : System.Text.Json.Linq.JTreeNode, System.Collections.Generic.ICollection<System.Text.Json.Linq.JTreeNode>, System.Collections.Generic.IEnumerable<System.Text.Json.Linq.JTreeNode>, System.Collections.Generic.IList<System.Text.Json.Linq.JTreeNode>, System.Collections.Generic.IReadOnlyCollection<System.Text.Json.Linq.JTreeNode>, System.Collections.Generic.IReadOnlyList<System.Text.Json.Linq.JTreeNode>, System.Collections.IEnumerable
     {
-        public JArray() { }
-        public JArray(System.Collections.Generic.IEnumerable<bool> values) { }
-        public JArray(System.Collections.Generic.IEnumerable<byte> values) { }
-        public JArray(System.Collections.Generic.IEnumerable<decimal> values) { }
-        public JArray(System.Collections.Generic.IEnumerable<double> values) { }
-        public JArray(System.Collections.Generic.IEnumerable<short> values) { }
-        public JArray(System.Collections.Generic.IEnumerable<int> values) { }
-        public JArray(System.Collections.Generic.IEnumerable<long> values) { }
+        public JTreeArray() { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<bool> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<byte> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<decimal> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<double> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<short> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<int> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<long> values) { }
         [System.CLSCompliantAttribute(false)]
-        public JArray(System.Collections.Generic.IEnumerable<sbyte> values) { }
-        public JArray(System.Collections.Generic.IEnumerable<float> values) { }
-        public JArray(System.Collections.Generic.IEnumerable<string> values) { }
-        public JArray(System.Collections.Generic.IEnumerable<System.Text.Json.Linq.JNode> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<sbyte> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<float> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<string> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<System.Text.Json.Linq.JTreeNode> values) { }
         [System.CLSCompliantAttribute(false)]
-        public JArray(System.Collections.Generic.IEnumerable<ushort> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<ushort> values) { }
         [System.CLSCompliantAttribute(false)]
-        public JArray(System.Collections.Generic.IEnumerable<uint> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<uint> values) { }
         [System.CLSCompliantAttribute(false)]
-        public JArray(System.Collections.Generic.IEnumerable<ulong> values) { }
+        public JTreeArray(System.Collections.Generic.IEnumerable<ulong> values) { }
         public int Count { get { throw null; } }
         public bool IsReadOnly { get { throw null; } }
-        public System.Text.Json.Linq.JNode this[int idx] { get { throw null; } set { } }
+        public System.Text.Json.Linq.JTreeNode this[int idx] { get { throw null; } set { } }
         public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
-        public void Add(System.Text.Json.Linq.JNode value) { }
+        public void Add(System.Text.Json.Linq.JTreeNode value) { }
         public void Clear() { }
-        public override System.Text.Json.Linq.JNode Clone() { throw null; }
-        public bool Contains(System.Text.Json.Linq.JNode value) { throw null; }
-        public System.Text.Json.Linq.JArray.Enumerator GetEnumerator() { throw null; }
-        public int IndexOf(System.Text.Json.Linq.JNode item) { throw null; }
-        public void Insert(int index, System.Text.Json.Linq.JNode item) { }
-        public int LastIndexOf(System.Text.Json.Linq.JNode item) { throw null; }
-        public static new System.Text.Json.Linq.JArray Parse(string json, System.Text.Json.Linq.JNodeOptions options = default(System.Text.Json.Linq.JNodeOptions)) { throw null; }
-        public bool Remove(System.Text.Json.Linq.JNode item) { throw null; }
-        public int RemoveAll(System.Predicate<System.Text.Json.Linq.JNode> match) { throw null; }
+        public override System.Text.Json.Linq.JTreeNode Clone() { throw null; }
+        public bool Contains(System.Text.Json.Linq.JTreeNode value) { throw null; }
+        public System.Text.Json.Linq.JTreeArray.Enumerator GetEnumerator() { throw null; }
+        public int IndexOf(System.Text.Json.Linq.JTreeNode item) { throw null; }
+        public void Insert(int index, System.Text.Json.Linq.JTreeNode item) { }
+        public int LastIndexOf(System.Text.Json.Linq.JTreeNode item) { throw null; }
+        public static new System.Text.Json.Linq.JTreeArray Parse(string json, System.Text.Json.Linq.JTreeNodeOptions options = default(System.Text.Json.Linq.JTreeNodeOptions)) { throw null; }
+        public bool Remove(System.Text.Json.Linq.JTreeNode item) { throw null; }
+        public int RemoveAll(System.Predicate<System.Text.Json.Linq.JTreeNode> match) { throw null; }
         public void RemoveAt(int index) { }
-        void System.Collections.Generic.ICollection<System.Text.Json.Linq.JNode>.CopyTo(System.Text.Json.Linq.JNode[] array, int arrayIndex) { }
-        System.Collections.Generic.IEnumerator<System.Text.Json.Linq.JNode> System.Collections.Generic.IEnumerable<System.Text.Json.Linq.JNode>.GetEnumerator() { throw null; }
+        void System.Collections.Generic.ICollection<System.Text.Json.Linq.JTreeNode>.CopyTo(System.Text.Json.Linq.JTreeNode[] array, int arrayIndex) { }
+        System.Collections.Generic.IEnumerator<System.Text.Json.Linq.JTreeNode> System.Collections.Generic.IEnumerable<System.Text.Json.Linq.JTreeNode>.GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
-        public partial struct Enumerator : System.Collections.Generic.IEnumerator<System.Text.Json.Linq.JNode>, System.Collections.IEnumerator, System.IDisposable
+        public partial struct Enumerator : System.Collections.Generic.IEnumerator<System.Text.Json.Linq.JTreeNode>, System.Collections.IEnumerator, System.IDisposable
         {
             private object _dummy;
-            public Enumerator(System.Text.Json.Linq.JArray jsonArray) { throw null; }
-            public System.Text.Json.Linq.JNode Current { get { throw null; } }
+            public Enumerator(System.Text.Json.Linq.JTreeArray jsonArray) { throw null; }
+            public System.Text.Json.Linq.JTreeNode Current { get { throw null; } }
             object System.Collections.IEnumerator.Current { get { throw null; } }
             public void Dispose() { }
             public bool MoveNext() { throw null; }
             void System.Collections.IEnumerator.Reset() { }
         }
     }
-    public sealed partial class JBoolean : System.Text.Json.Linq.JNode, System.IEquatable<System.Text.Json.Linq.JBoolean>
+    public sealed partial class JTreeBoolean : System.Text.Json.Linq.JTreeNode, System.IEquatable<System.Text.Json.Linq.JTreeBoolean>
     {
-        public JBoolean() { }
-        public JBoolean(bool value) { }
+        public JTreeBoolean() { }
+        public JTreeBoolean(bool value) { }
         public bool Value { get { throw null; } set { } }
         public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
-        public override System.Text.Json.Linq.JNode Clone() { throw null; }
+        public override System.Text.Json.Linq.JTreeNode Clone() { throw null; }
         public override bool Equals(object obj) { throw null; }
-        public bool Equals(System.Text.Json.Linq.JBoolean other) { throw null; }
+        public bool Equals(System.Text.Json.Linq.JTreeBoolean other) { throw null; }
         public override int GetHashCode() { throw null; }
-        public static bool operator ==(System.Text.Json.Linq.JBoolean left, System.Text.Json.Linq.JBoolean right) { throw null; }
-        public static bool operator !=(System.Text.Json.Linq.JBoolean left, System.Text.Json.Linq.JBoolean right) { throw null; }
+        public static bool operator ==(System.Text.Json.Linq.JTreeBoolean left, System.Text.Json.Linq.JTreeBoolean right) { throw null; }
+        public static bool operator !=(System.Text.Json.Linq.JTreeBoolean left, System.Text.Json.Linq.JTreeBoolean right) { throw null; }
         public override string ToString() { throw null; }
     }
-    public abstract partial class JNode
+    public abstract partial class JTreeNode
     {
-        internal JNode() { }
+        internal JTreeNode() { }
         public abstract System.Text.Json.JsonValueKind ValueKind { get; }
         public System.Text.Json.JsonElement AsJsonElement() { throw null; }
-        public abstract System.Text.Json.Linq.JNode Clone();
-        public static System.Text.Json.Linq.JNode DeepCopy(System.Text.Json.JsonElement jsonElement) { throw null; }
-        public static System.Text.Json.Linq.JNode GetOriginatingNode(System.Text.Json.JsonElement jsonElement) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (bool value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (byte value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (System.DateTime value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (System.DateTimeOffset value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (decimal value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (double value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (System.Guid value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (short value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (int value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (long value) { throw null; }
+        public abstract System.Text.Json.Linq.JTreeNode Clone();
+        public static System.Text.Json.Linq.JTreeNode DeepCopy(System.Text.Json.JsonElement jsonElement) { throw null; }
+        public static System.Text.Json.Linq.JTreeNode GetOriginatingNode(System.Text.Json.JsonElement jsonElement) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (bool value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (byte value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (System.DateTime value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (System.DateTimeOffset value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (decimal value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (double value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (System.Guid value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (short value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (int value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (long value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static implicit operator System.Text.Json.Linq.JNode (sbyte value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (float value) { throw null; }
-        public static implicit operator System.Text.Json.Linq.JNode (string value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (sbyte value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (float value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (string value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static implicit operator System.Text.Json.Linq.JNode (ushort value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (ushort value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static implicit operator System.Text.Json.Linq.JNode (uint value) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static implicit operator System.Text.Json.Linq.JNode (ulong value) { throw null; }
-        public static System.Text.Json.Linq.JNode Parse(string json, System.Text.Json.Linq.JNodeOptions options = default(System.Text.Json.Linq.JNodeOptions)) { throw null; }
+        public static implicit operator System.Text.Json.Linq.JTreeNode (ulong value) { throw null; }
+        public static System.Text.Json.Linq.JTreeNode Parse(string json, System.Text.Json.Linq.JTreeNodeOptions options = default(System.Text.Json.Linq.JTreeNodeOptions)) { throw null; }
         public string ToJsonString() { throw null; }
         public override string ToString() { throw null; }
-        public static bool TryGetOriginatingNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.Linq.JNode jsonNode) { throw null; }
+        public static bool TryGetOriginatingNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.Linq.JTreeNode jsonNode) { throw null; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
     }
-    public partial struct JNodeOptions
+    public partial struct JTreeNodeOptions
     {
         private int _dummyPrimitive;
         public bool AllowTrailingCommas { readonly get { throw null; } set { } }
@@ -567,41 +567,41 @@ namespace System.Text.Json.Linq
         public System.Text.Json.Linq.DuplicatePropertyNameHandlingStrategy DuplicatePropertyNameHandling { readonly get { throw null; } set { } }
         public int MaxDepth { readonly get { throw null; } set { } }
     }
-    public sealed partial class JNull : System.Text.Json.Linq.JNode, System.IEquatable<System.Text.Json.Linq.JNull>
+    public sealed partial class JTreeNull : System.Text.Json.Linq.JTreeNode, System.IEquatable<System.Text.Json.Linq.JTreeNull>
     {
-        public JNull() { }
+        public JTreeNull() { }
         public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
-        public override System.Text.Json.Linq.JNode Clone() { throw null; }
+        public override System.Text.Json.Linq.JTreeNode Clone() { throw null; }
         public override bool Equals(object obj) { throw null; }
-        public bool Equals(System.Text.Json.Linq.JNull other) { throw null; }
+        public bool Equals(System.Text.Json.Linq.JTreeNull other) { throw null; }
         public override int GetHashCode() { throw null; }
-        public static bool operator ==(System.Text.Json.Linq.JNull left, System.Text.Json.Linq.JNull right) { throw null; }
-        public static bool operator !=(System.Text.Json.Linq.JNull left, System.Text.Json.Linq.JNull right) { throw null; }
+        public static bool operator ==(System.Text.Json.Linq.JTreeNull left, System.Text.Json.Linq.JTreeNull right) { throw null; }
+        public static bool operator !=(System.Text.Json.Linq.JTreeNull left, System.Text.Json.Linq.JTreeNull right) { throw null; }
         public override string ToString() { throw null; }
     }
-    public sealed partial class JNumber : System.Text.Json.Linq.JNode, System.IEquatable<System.Text.Json.Linq.JNumber>
+    public sealed partial class JTreeNumber : System.Text.Json.Linq.JTreeNode, System.IEquatable<System.Text.Json.Linq.JTreeNumber>
     {
-        public JNumber() { }
-        public JNumber(byte value) { }
-        public JNumber(decimal value) { }
-        public JNumber(double value) { }
-        public JNumber(short value) { }
-        public JNumber(int value) { }
-        public JNumber(long value) { }
+        public JTreeNumber() { }
+        public JTreeNumber(byte value) { }
+        public JTreeNumber(decimal value) { }
+        public JTreeNumber(double value) { }
+        public JTreeNumber(short value) { }
+        public JTreeNumber(int value) { }
+        public JTreeNumber(long value) { }
         [System.CLSCompliantAttribute(false)]
-        public JNumber(sbyte value) { }
-        public JNumber(float value) { }
-        public JNumber(string value) { }
+        public JTreeNumber(sbyte value) { }
+        public JTreeNumber(float value) { }
+        public JTreeNumber(string value) { }
         [System.CLSCompliantAttribute(false)]
-        public JNumber(ushort value) { }
+        public JTreeNumber(ushort value) { }
         [System.CLSCompliantAttribute(false)]
-        public JNumber(uint value) { }
+        public JTreeNumber(uint value) { }
         [System.CLSCompliantAttribute(false)]
-        public JNumber(ulong value) { }
+        public JTreeNumber(ulong value) { }
         public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
-        public override System.Text.Json.Linq.JNode Clone() { throw null; }
+        public override System.Text.Json.Linq.JTreeNode Clone() { throw null; }
         public override bool Equals(object obj) { throw null; }
-        public bool Equals(System.Text.Json.Linq.JNumber other) { throw null; }
+        public bool Equals(System.Text.Json.Linq.JTreeNumber other) { throw null; }
         public byte GetByte() { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
@@ -618,8 +618,8 @@ namespace System.Text.Json.Linq
         public uint GetUInt32() { throw null; }
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
-        public static bool operator ==(System.Text.Json.Linq.JNumber left, System.Text.Json.Linq.JNumber right) { throw null; }
-        public static bool operator !=(System.Text.Json.Linq.JNumber left, System.Text.Json.Linq.JNumber right) { throw null; }
+        public static bool operator ==(System.Text.Json.Linq.JTreeNumber left, System.Text.Json.Linq.JTreeNumber right) { throw null; }
+        public static bool operator !=(System.Text.Json.Linq.JTreeNumber left, System.Text.Json.Linq.JTreeNumber right) { throw null; }
         public void SetByte(byte value) { }
         public void SetDecimal(decimal value) { }
         public void SetDouble(double value) { }
@@ -653,68 +653,68 @@ namespace System.Text.Json.Linq
         [System.CLSCompliantAttribute(false)]
         public bool TryGetUInt64(out ulong value) { throw null; }
     }
-    public sealed partial class JObject : System.Text.Json.Linq.JNode, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode>>, System.Collections.IEnumerable
+    public sealed partial class JTreeObject : System.Text.Json.Linq.JTreeNode, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JTreeNode>>, System.Collections.IEnumerable
     {
-        public JObject() { }
-        public JObject(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode>> jsonProperties) { }
-        public System.Text.Json.Linq.JNode this[string propertyName] { get { throw null; } set { } }
+        public JTreeObject() { }
+        public JTreeObject(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JTreeNode>> jsonProperties) { }
+        public System.Text.Json.Linq.JTreeNode this[string propertyName] { get { throw null; } set { } }
         public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
-        public void Add(System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode> jsonProperty) { }
-        public void Add(string propertyName, System.Text.Json.Linq.JNode propertyValue) { }
-        public void AddRange(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode>> jsonProperties) { }
-        public override System.Text.Json.Linq.JNode Clone() { throw null; }
+        public void Add(System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JTreeNode> jsonProperty) { }
+        public void Add(string propertyName, System.Text.Json.Linq.JTreeNode propertyValue) { }
+        public void AddRange(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JTreeNode>> jsonProperties) { }
+        public override System.Text.Json.Linq.JTreeNode Clone() { throw null; }
         public bool ContainsProperty(string propertyName) { throw null; }
         public bool ContainsProperty(string propertyName, System.StringComparison stringComparison) { throw null; }
-        public System.Text.Json.Linq.JObject.Enumerator GetEnumerator() { throw null; }
-        public System.Text.Json.Linq.JArray GetJsonArrayPropertyValue(string propertyName) { throw null; }
-        public System.Text.Json.Linq.JArray GetJsonArrayPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
-        public System.Text.Json.Linq.JObject GetJsonObjectPropertyValue(string propertyName) { throw null; }
-        public System.Text.Json.Linq.JObject GetJsonObjectPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
+        public System.Text.Json.Linq.JTreeObject.Enumerator GetEnumerator() { throw null; }
+        public System.Text.Json.Linq.JTreeArray GetJsonArrayPropertyValue(string propertyName) { throw null; }
+        public System.Text.Json.Linq.JTreeArray GetJsonArrayPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
+        public System.Text.Json.Linq.JTreeObject GetJsonObjectPropertyValue(string propertyName) { throw null; }
+        public System.Text.Json.Linq.JTreeObject GetJsonObjectPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
         public System.Collections.Generic.IReadOnlyCollection<string> GetPropertyNames() { throw null; }
-        public System.Text.Json.Linq.JNode GetPropertyValue(string propertyName) { throw null; }
-        public System.Text.Json.Linq.JNode GetPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
-        public System.Collections.Generic.IReadOnlyCollection<System.Text.Json.Linq.JNode> GetPropertyValues() { throw null; }
-        public static new System.Text.Json.Linq.JObject Parse(string json, System.Text.Json.Linq.JNodeOptions options = default(System.Text.Json.Linq.JNodeOptions)) { throw null; }
+        public System.Text.Json.Linq.JTreeNode GetPropertyValue(string propertyName) { throw null; }
+        public System.Text.Json.Linq.JTreeNode GetPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
+        public System.Collections.Generic.IReadOnlyCollection<System.Text.Json.Linq.JTreeNode> GetPropertyValues() { throw null; }
+        public static new System.Text.Json.Linq.JTreeObject Parse(string json, System.Text.Json.Linq.JTreeNodeOptions options = default(System.Text.Json.Linq.JTreeNodeOptions)) { throw null; }
         public bool Remove(string propertyName) { throw null; }
         public bool Remove(string propertyName, System.StringComparison stringComparison) { throw null; }
-        System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.String,System.Text.Json.Linq.JNode>>.GetEnumerator() { throw null; }
+        System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JTreeNode>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.String,System.Text.Json.Linq.JTreeNode>>.GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
-        public bool TryGetJsonArrayPropertyValue(string propertyName, System.StringComparison stringComparison, out System.Text.Json.Linq.JArray jsonArray) { throw null; }
-        public bool TryGetJsonArrayPropertyValue(string propertyName, out System.Text.Json.Linq.JArray jsonArray) { throw null; }
-        public bool TryGetJsonObjectPropertyValue(string propertyName, System.StringComparison stringComparison, out System.Text.Json.Linq.JObject jsonObject) { throw null; }
-        public bool TryGetJsonObjectPropertyValue(string propertyName, out System.Text.Json.Linq.JObject jsonObject) { throw null; }
-        public bool TryGetPropertyValue(string propertyName, System.StringComparison stringComparison, out System.Text.Json.Linq.JNode jsonNode) { throw null; }
-        public bool TryGetPropertyValue(string propertyName, out System.Text.Json.Linq.JNode jsonNode) { throw null; }
-        public partial struct Enumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode>>, System.Collections.IEnumerator, System.IDisposable
+        public bool TryGetJsonArrayPropertyValue(string propertyName, System.StringComparison stringComparison, out System.Text.Json.Linq.JTreeArray jsonArray) { throw null; }
+        public bool TryGetJsonArrayPropertyValue(string propertyName, out System.Text.Json.Linq.JTreeArray jsonArray) { throw null; }
+        public bool TryGetJsonObjectPropertyValue(string propertyName, System.StringComparison stringComparison, out System.Text.Json.Linq.JTreeObject jsonObject) { throw null; }
+        public bool TryGetJsonObjectPropertyValue(string propertyName, out System.Text.Json.Linq.JTreeObject jsonObject) { throw null; }
+        public bool TryGetPropertyValue(string propertyName, System.StringComparison stringComparison, out System.Text.Json.Linq.JTreeNode jsonNode) { throw null; }
+        public bool TryGetPropertyValue(string propertyName, out System.Text.Json.Linq.JTreeNode jsonNode) { throw null; }
+        public partial struct Enumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JTreeNode>>, System.Collections.IEnumerator, System.IDisposable
         {
             private object _dummy;
-            public Enumerator(System.Text.Json.Linq.JObject jsonObject) { throw null; }
-            public System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode> Current { get { throw null; } }
+            public Enumerator(System.Text.Json.Linq.JTreeObject jsonObject) { throw null; }
+            public System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JTreeNode> Current { get { throw null; } }
             object System.Collections.IEnumerator.Current { get { throw null; } }
             public void Dispose() { }
             public bool MoveNext() { throw null; }
             void System.Collections.IEnumerator.Reset() { }
         }
     }
-    public sealed partial class JString : System.Text.Json.Linq.JNode, System.IEquatable<System.Text.Json.Linq.JString>
+    public sealed partial class JTreeString : System.Text.Json.Linq.JTreeNode, System.IEquatable<System.Text.Json.Linq.JTreeString>
     {
-        public JString() { }
-        public JString(System.DateTime value) { }
-        public JString(System.DateTimeOffset value) { }
-        public JString(System.Guid value) { }
-        public JString(System.ReadOnlySpan<char> value) { }
-        public JString(string value) { }
+        public JTreeString() { }
+        public JTreeString(System.DateTime value) { }
+        public JTreeString(System.DateTimeOffset value) { }
+        public JTreeString(System.Guid value) { }
+        public JTreeString(System.ReadOnlySpan<char> value) { }
+        public JTreeString(string value) { }
         public string Value { get { throw null; } set { } }
         public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
-        public override System.Text.Json.Linq.JNode Clone() { throw null; }
+        public override System.Text.Json.Linq.JTreeNode Clone() { throw null; }
         public override bool Equals(object obj) { throw null; }
-        public bool Equals(System.Text.Json.Linq.JString other) { throw null; }
+        public bool Equals(System.Text.Json.Linq.JTreeString other) { throw null; }
         public System.DateTime GetDateTime() { throw null; }
         public System.DateTimeOffset GetDateTimeOffset() { throw null; }
         public System.Guid GetGuid() { throw null; }
         public override int GetHashCode() { throw null; }
-        public static bool operator ==(System.Text.Json.Linq.JString left, System.Text.Json.Linq.JString right) { throw null; }
-        public static bool operator !=(System.Text.Json.Linq.JString left, System.Text.Json.Linq.JString right) { throw null; }
+        public static bool operator ==(System.Text.Json.Linq.JTreeString left, System.Text.Json.Linq.JTreeString right) { throw null; }
+        public static bool operator !=(System.Text.Json.Linq.JTreeString left, System.Text.Json.Linq.JTreeString right) { throw null; }
         public override string ToString() { throw null; }
         public bool TryGetDateTime(out System.DateTime value) { throw null; }
         public bool TryGetDateTimeOffset(out System.DateTimeOffset value) { throw null; }

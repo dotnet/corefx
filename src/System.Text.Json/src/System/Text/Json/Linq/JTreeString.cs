@@ -11,53 +11,53 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   Represents a mutable text JSON value.
     /// </summary>
-    public sealed class JString : JNode, IEquatable<JString>
+    public sealed class JTreeString : JTreeNode, IEquatable<JTreeString>
     {
         private string _value;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JString"/> class representing the empty value.
+        ///   Initializes a new instance of the <see cref="JTreeString"/> class representing the empty value.
         /// </summary>
-        public JString() => Value = string.Empty;
+        public JTreeString() => Value = string.Empty;
 
         /// <summary>
-        ///  Initializes a new instance of the <see cref="JString"/> class representing a specified value.
+        ///  Initializes a new instance of the <see cref="JTreeString"/> class representing a specified value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
         /// <exception cref="ArgumentNullException">
         ///   Provided value is null.
         /// </exception>
-        public JString(string value) => Value = value;
+        public JTreeString(string value) => Value = value;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JString"/> class representing a specified value.
+        ///   Initializes a new instance of the <see cref="JTreeString"/> class representing a specified value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
-        public JString(ReadOnlySpan<char> value) => Value = value.ToString();
+        public JTreeString(ReadOnlySpan<char> value) => Value = value.ToString();
 
         /// <summary>
-        ///  Initializes a new instance of the <see cref="JString"/> with a string representation of the <see cref="Guid"/> structure.
+        ///  Initializes a new instance of the <see cref="JTreeString"/> with a string representation of the <see cref="Guid"/> structure.
         /// </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
-        public JString(Guid value) => Value = value.ToString("D");
+        public JTreeString(Guid value) => Value = value.ToString("D");
 
         /// <summary>
-        ///  Initializes a new instance of the <see cref="JString"/> with an ISO 8601 representation of the <see cref="DateTime"/> structure.
-        /// </summary>
-        /// <param name="value">The value to represent as a JSON string.</param>
-        /// <exception cref="ArgumentOutOfRangeException">
-        ///   The date and time is outside the range of dates supported by the calendar used by the invariant culture.
-        /// </exception>
-        public JString(DateTime value) => Value = JsonHelpers.FormatDateTime(value);
-
-        /// <summary>
-        ///  Initializes a new instance of the <see cref="JString"/> with an ISO 8601 representation of the <see cref="DateTimeOffset"/> structure.
+        ///  Initializes a new instance of the <see cref="JTreeString"/> with an ISO 8601 representation of the <see cref="DateTime"/> structure.
         /// </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   The date and time is outside the range of dates supported by the calendar used by the invariant culture.
         /// </exception>
-        public JString(DateTimeOffset value) => Value = JsonHelpers.FormatDateTimeOffset(value);
+        public JTreeString(DateTime value) => Value = JsonHelpers.FormatDateTime(value);
+
+        /// <summary>
+        ///  Initializes a new instance of the <see cref="JTreeString"/> with an ISO 8601 representation of the <see cref="DateTimeOffset"/> structure.
+        /// </summary>
+        /// <param name="value">The value to represent as a JSON string.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   The date and time is outside the range of dates supported by the calendar used by the invariant culture.
+        /// </exception>
+        public JTreeString(DateTimeOffset value) => Value = JsonHelpers.FormatDateTimeOffset(value);
 
         /// <summary>
         ///   Gets or sets the text value represented by the instance.
@@ -149,7 +149,7 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if the text value of this instance matches <paramref name="obj"/>,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public override bool Equals(object obj) => obj is JString jsonString && Equals(jsonString);
+        public override bool Equals(object obj) => obj is JTreeString jsonString && Equals(jsonString);
 
         /// <summary>
         ///   Calculates a hash code of this instance.
@@ -165,7 +165,7 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if the text value of this instance matches <paramref name="other"/>,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public bool Equals(JString other) => !(other is null) && Value == other.Value;
+        public bool Equals(JTreeString other) => !(other is null) && Value == other.Value;
 
         /// <summary>
         ///   Compares values of two JSON strings.
@@ -176,7 +176,7 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if values of instances match,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator ==(JString left, JString right)
+        public static bool operator ==(JTreeString left, JTreeString right)
         {
             // Test "right" first to allow branch elimination when inlined for null checks (== null)
             // so it can become a simple test
@@ -198,13 +198,13 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if values of instances do not match,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator !=(JString left, JString right) => !(left == right);
+        public static bool operator !=(JTreeString left, JTreeString right) => !(left == right);
 
         /// <summary>
         ///   Creates a new JSON string that is a copy of the current instance.
         /// </summary>
         /// <returns>A new JSON string that is a copy of this instance.</returns>
-        public override JNode Clone() => new JString(Value);
+        public override JTreeNode Clone() => new JTreeString(Value);
 
         /// <summary>
         ///   Returns <see cref="JsonValueKind.String"/>

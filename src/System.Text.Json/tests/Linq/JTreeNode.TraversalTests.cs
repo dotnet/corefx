@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static partial class JNodeTests
+    public static partial class JTreeNodeTests
     {
         private static string jsonSampleString = @"
             {
@@ -38,9 +38,9 @@ namespace System.Text.Json.Linq.Tests
             }";
 
         [Fact]
-        public static void TestParseStringToJNode()
+        public static void TestParseStringToJTreeNode()
         {
-            JNode node = JNode.Parse(jsonSampleString);
+            JTreeNode node = JTreeNode.Parse(jsonSampleString);
             CheckNode(node);
         }
 
@@ -49,42 +49,42 @@ namespace System.Text.Json.Linq.Tests
         {
             using (JsonDocument document = JsonDocument.Parse(jsonSampleString))
             {
-                JNode node = JNode.DeepCopy(document.RootElement);
+                JTreeNode node = JTreeNode.DeepCopy(document.RootElement);
                 CheckNode(node);
             }
         }
 
-        private static void CheckNode(JNode node)
+        private static void CheckNode(JTreeNode node)
         {
-            var jsonObject = (JObject)node;
+            var jsonObject = (JTreeObject)node;
             Assert.Equal(10, jsonObject.GetPropertyNames().Count);
             Assert.Equal(10, jsonObject.GetPropertyValues().Count);
             Assert.Equal("property value", jsonObject["text"]);
-            Assert.True(((JBoolean)jsonObject["boolean true"]).Value);
-            Assert.False(((JBoolean)jsonObject["boolean false"]).Value);
-            Assert.IsType<JNull>(jsonObject["null"]);
+            Assert.True(((JTreeBoolean)jsonObject["boolean true"]).Value);
+            Assert.False(((JTreeBoolean)jsonObject["boolean false"]).Value);
+            Assert.IsType<JTreeNull>(jsonObject["null"]);
             Assert.Equal(17, jsonObject["int"]);
             Assert.Equal(3.14, jsonObject["double"]);
-            Assert.Equal("3e100", ((JNumber)jsonObject["scientific"]).ToString());
+            Assert.Equal("3e100", ((JTreeNumber)jsonObject["scientific"]).ToString());
 
-            var innerArray = (JArray)jsonObject["simple array"];
+            var innerArray = (JTreeArray)jsonObject["simple array"];
             Assert.Equal(3, innerArray.Count);
-            Assert.Equal(1, ((JNumber)innerArray[0]).GetInt32());
-            Assert.Equal(2, ((JNumber)innerArray[1]).GetInt32());
-            Assert.Equal(3, ((JNumber)innerArray[2]).GetInt32());
+            Assert.Equal(1, ((JTreeNumber)innerArray[0]).GetInt32());
+            Assert.Equal(2, ((JTreeNumber)innerArray[1]).GetInt32());
+            Assert.Equal(3, ((JTreeNumber)innerArray[2]).GetInt32());
 
-            var innerObject = (JObject)jsonObject["inner object"];
+            var innerObject = (JTreeObject)jsonObject["inner object"];
             Assert.Equal(1, innerObject.GetPropertyNames().Count);
             Assert.Equal(1, innerObject.GetPropertyValues().Count);
             Assert.Equal("value", innerObject["inner property"]);
 
-            var comboObject = (JObject)jsonObject.GetJsonArrayPropertyValue("combo array")[0];
+            var comboObject = (JTreeObject)jsonObject.GetJsonArrayPropertyValue("combo array")[0];
             Assert.Equal(4, comboObject.GetPropertyNames().Count);
             Assert.Equal(4, comboObject.GetPropertyValues().Count);
             Assert.Equal("value", comboObject["inner property"]);
             Assert.Equal(0, comboObject.GetJsonObjectPropertyValue("empty object").GetPropertyNames().Count);
             Assert.Equal(3, comboObject.GetJsonArrayPropertyValue("simple array").Count);
-            var nestedObject = (JObject)comboObject["nested object"];
+            var nestedObject = (JTreeObject)comboObject["nested object"];
             Assert.Equal(0, nestedObject.GetJsonArrayPropertyValue("empty array").Count);
             Assert.Equal(2, nestedObject.GetJsonArrayPropertyValue("nested empty array").Count);
         }
@@ -103,8 +103,8 @@ namespace System.Text.Json.Linq.Tests
                 builder.Append("]");
             }
 
-            var options = new JNodeOptions { MaxDepth = 5_000 };
-            JNode jsonNode = JNode.Parse(builder.ToString(), options);
+            var options = new JTreeNodeOptions { MaxDepth = 5_000 };
+            JTreeNode jsonNode = JTreeNode.Parse(builder.ToString(), options);
         }
 
         [Fact]
@@ -124,14 +124,14 @@ namespace System.Text.Json.Linq.Tests
             var options = new JsonDocumentOptions { MaxDepth = 5_000 };
             using (JsonDocument dom = JsonDocument.Parse(builder.ToString(), options))
             {
-                JNode node = JNode.DeepCopy(dom.RootElement);
+                JTreeNode node = JTreeNode.DeepCopy(dom.RootElement);
             }
         }
 
         [Fact]
         public static void TestToJsonString()
         {
-            var jsonObject = new JObject()
+            var jsonObject = new JTreeObject()
             {
                 { "text", "property value" },
                 { "boolean true", true },
@@ -139,26 +139,26 @@ namespace System.Text.Json.Linq.Tests
                 {  "null", null },
                 {  "int", 17 },
                 {
-                    "combo array", new JArray()
+                    "combo array", new JTreeArray()
                     {
-                        new JObject()
+                        new JTreeObject()
                         {
                             { "inner property", "value" },
-                            { "simple array", new JArray() { 0, 2.2, 3.14 } },
-                            { "empty object", new JObject() },
-                            { "nested object", new JObject
+                            { "simple array", new JTreeArray() { 0, 2.2, 3.14 } },
+                            { "empty object", new JTreeObject() },
+                            { "nested object", new JTreeObject
                                 {
-                                    {  "empty array", new JArray() },
-                                    {  "nested empty array", new JArray() { new JArray(), new JArray()} }
+                                    {  "empty array", new JTreeArray() },
+                                    {  "nested empty array", new JTreeArray() { new JTreeArray(), new JTreeArray()} }
                                 }
                             }
                         }
                     }
                 },
                 { "double", 3.14 },
-                { "scientific", new JNumber("3e100") },
-                { "simple array", new JArray() { 1,2,3 } },
-                { "inner object", new JObject()
+                { "scientific", new JTreeNumber("3e100") },
+                { "simple array", new JTreeArray() { 1,2,3 } },
+                { "inner object", new JTreeObject()
                     {
                         { "inner property", "value" }
                     }
@@ -166,7 +166,7 @@ namespace System.Text.Json.Linq.Tests
             };
 
             string json = jsonObject.ToJsonString();
-            JNode node = JNode.Parse(json);
+            JTreeNode node = JTreeNode.Parse(json);
             CheckNode(node);
         }
 
@@ -181,22 +181,22 @@ namespace System.Text.Json.Linq.Tests
                 ""property"": ""last duplicate value""
             }";
 
-            var jsonObject = (JObject)JNode.Parse(stringWithDuplicates);
+            var jsonObject = (JTreeObject)JTreeNode.Parse(stringWithDuplicates);
             Assert.Equal(2, jsonObject.GetPropertyNames().Count);
             Assert.Equal(2, jsonObject.GetPropertyValues().Count);
             Assert.Equal("last duplicate value", jsonObject["property"]);
 
-            jsonObject = (JObject) JNode.Parse(stringWithDuplicates, new JNodeOptions() { DuplicatePropertyNameHandling = DuplicatePropertyNameHandlingStrategy.Replace });
+            jsonObject = (JTreeObject) JTreeNode.Parse(stringWithDuplicates, new JTreeNodeOptions() { DuplicatePropertyNameHandling = DuplicatePropertyNameHandlingStrategy.Replace });
             Assert.Equal(2, jsonObject.GetPropertyNames().Count);
             Assert.Equal(2, jsonObject.GetPropertyValues().Count);
             Assert.Equal("last duplicate value", jsonObject["property"]);
 
-            jsonObject = (JObject)JNode.Parse(stringWithDuplicates, new JNodeOptions() { DuplicatePropertyNameHandling = DuplicatePropertyNameHandlingStrategy.Ignore });
+            jsonObject = (JTreeObject)JTreeNode.Parse(stringWithDuplicates, new JTreeNodeOptions() { DuplicatePropertyNameHandling = DuplicatePropertyNameHandlingStrategy.Ignore });
             Assert.Equal(2, jsonObject.GetPropertyNames().Count);
             Assert.Equal(2, jsonObject.GetPropertyValues().Count);
             Assert.Equal("first value", jsonObject["property"]);
 
-            Assert.Throws<ArgumentException>(() => JNode.Parse(stringWithDuplicates, new JNodeOptions() { DuplicatePropertyNameHandling = DuplicatePropertyNameHandlingStrategy.Error }));
+            Assert.Throws<ArgumentException>(() => JTreeNode.Parse(stringWithDuplicates, new JTreeNodeOptions() { DuplicatePropertyNameHandling = DuplicatePropertyNameHandlingStrategy.Error }));
         }
     }
 }

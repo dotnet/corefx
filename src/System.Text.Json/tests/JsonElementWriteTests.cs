@@ -38,11 +38,11 @@ namespace System.Text.Json.Tests
         }
     }
 
-    public sealed class JNodeWriteTests : JsonDomWriteTests
+    public sealed class JTreeNodeWriteTests : JsonDomWriteTests
     {
         protected override JsonDocument PrepareDocument(string jsonIn)
         {
-            JNode jsonNode = JNode.Parse(jsonIn, new JNodeOptions
+            JTreeNode jsonNode = JTreeNode.Parse(jsonIn, new JTreeNodeOptions
             {
                 AllowTrailingCommas = s_options.AllowTrailingCommas,
                 CommentHandling = s_options.CommentHandling,
