@@ -60,6 +60,11 @@ namespace SslStress
                 .ToArray();
     }
 
+    public class ChecksumMismatchException : Exception
+    {
+        public ChecksumMismatchException(string message) : base(message) { }
+    }
+
     // Serializes data segment using the following format: <length>,<checksum>,<data>
     public class DataSegmentSerializer
     {
@@ -156,7 +161,7 @@ namespace SslStress
             if (checksum != chunk.Checksum)
             {
                 chunk.Return();
-                throw new Exception("declared checksum doesn't match payload checksum");
+                throw new ChecksumMismatchException("declared checksum doesn't match payload checksum");
             }
 
             return chunk;
@@ -173,39 +178,42 @@ namespace SslStress
 
         protected override async Task HandleConnection(int workerId, SslStream stream, TcpClient client, Random random, CancellationToken token)
         {
-            using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-            if (_config.ConnectionLifetime != null) cts.CancelAfter(_config.ConnectionLifetime.Value);
-
             long messagesInFlight = 0;
 
-            await Utils.TaskExtensions.WhenAllThrowOnFirstException(cts.Token, Sender, Receiver);
+            await Utils.TaskExtensions.WhenAllThrowOnFirstException(token, Sender, Receiver);
 
-            async Task Sender(CancellationToken token)
+            async Task Sender(CancellationToken taskToken)
             {
                 var serializer = new DataSegmentSerializer();
 
-                while (!token.IsCancellationRequested)
+                try
                 {
-                    await ApplyBackpressure(token);
+                    while (!taskToken.IsCancellationRequested)
+                    {
+                        await ApplyBackpressure(taskToken);
 
-                    DataSegment chunk = DataSegment.CreateRandom(random, _config.MaxBufferLength);
-                    try
-                    {
-                        await serializer.SerializeAsync(stream, chunk, random);
-                        stream.WriteByte((byte)'\n');
-                        await stream.FlushAsync();
-                        Interlocked.Increment(ref messagesInFlight);
-                    }
-                    finally
-                    {
-                        chunk.Return();
+                        DataSegment chunk = DataSegment.CreateRandom(random, _config.MaxBufferLength);
+                        try
+                        {
+                            await serializer.SerializeAsync(stream, chunk, random, token);
+                            stream.WriteByte((byte)'\n');
+                            await stream.FlushAsync(token);
+                            Interlocked.Increment(ref messagesInFlight);
+                        }
+                        finally
+                        {
+                            chunk.Return();
+                        }
                     }
                 }
-
-                // write an empty line to signal completion to the server
-                stream.WriteByte((byte)'\n');
-                await stream.FlushAsync();
-                await Task.Delay(1000);
+                finally
+                {
+                    // write an empty line to signal completion to the server
+                    stream.WriteByte((byte)'\n');
+                    stream.WriteByte((byte)'\n');
+                    await stream.FlushAsync();
+                    await Task.Delay(1000);
+                }
             }
 
             async Task Receiver(CancellationToken token)
@@ -231,6 +239,7 @@ namespace SslStress
                     {
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine($"worker #{workerId}: applying backpressure");
+                        Console.WriteLine();
                         Console.ResetColor();
                     }
 
@@ -266,16 +275,27 @@ namespace SslStress
                     return;
                 }
 
-                DataSegment chunk = serializer.Deserialize(buffer);
+                DataSegment? chunk = null;
                 try
                 {
-                    await serializer.SerializeAsync(sslStream, chunk, token: token);
+                    chunk = serializer.Deserialize(buffer);
+                    await serializer.SerializeAsync(sslStream, chunk.Value, token: token);
                     sslStream.WriteByte((byte)'\n');
                     await sslStream.FlushAsync(token);
                 }
+                catch (ChecksumMismatchException e)
+                {
+                    // report as warning and continue
+                    lock (Console.Out)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine($"Server: {e.Message}");
+                        Console.ResetColor();
+                    }
+                }
                 finally
                 {
-                    chunk.Return();
+                    chunk?.Return();
                 }
             }
         }

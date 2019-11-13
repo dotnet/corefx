@@ -19,6 +19,7 @@ namespace SslStress
         public int MaxBufferLength { get; set; }
         public TimeSpan? MaxExecutionTime { get; set; }
         public TimeSpan DisplayInterval { get; set; }
-        public TimeSpan? ConnectionLifetime { get; set; }
+        public TimeSpan MinConnectionLifetime { get; set; }
+        public TimeSpan MaxConnectionLifetime { get; set; }
     }
 }

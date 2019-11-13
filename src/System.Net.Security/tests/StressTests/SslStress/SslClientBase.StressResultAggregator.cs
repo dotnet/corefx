@@ -17,7 +17,7 @@ namespace SslStress
         private class StressResultAggregator
         {
             private long _totalConnections = 0;
-            private readonly long[] _successes, _failures, _cancellations;
+            private readonly long[] _successes, _failures;
             private readonly ErrorAggregator _errors = new ErrorAggregator();
             private readonly StreamCounter[] _currentCounters;
             private readonly StreamCounter[] _aggregateCounters;
@@ -28,12 +28,10 @@ namespace SslStress
                 _aggregateCounters = Enumerable.Range(0, workerCount).Select(_ => new StreamCounter()).ToArray();
                 _successes = new long[workerCount];
                 _failures = new long[workerCount];
-                _cancellations = new long[workerCount];
             }
 
             public long TotalConnections => _totalConnections;
             public long TotalFailures => _failures.Sum();
-            public long TotalCancellations => _cancellations.Sum();
 
             public StreamCounter GetCounters(int workerId) => _currentCounters[workerId];
 
@@ -58,13 +56,6 @@ namespace SslStress
                     Console.WriteLine();
                     Console.ResetColor();
                 }
-            }
-
-            public void RecordCancellation(int workerId)
-            {
-                _cancellations[workerId]++;
-                Interlocked.Increment(ref _totalConnections);
-                UpdateCounters(workerId);
             }
 
             private void UpdateCounters(int workerId)

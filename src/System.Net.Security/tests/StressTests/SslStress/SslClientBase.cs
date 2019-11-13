@@ -99,19 +99,23 @@ namespace SslStress
 
                 for (long testId = 0; !_cts.IsCancellationRequested; testId++)
                 {
+                    TimeSpan duration = _config.MinConnectionLifetime + random.NextDouble() * (_config.MaxConnectionLifetime - _config.MinConnectionLifetime);
+                    using var cts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
+                    cts.CancelAfter(duration);
+
                     try
                     {
                         using var client = new TcpClient();
                         await client.ConnectAsync(_config.ServerEndpoint.Address, _config.ServerEndpoint.Port);
                         var stream = new CountingStream(client.GetStream(), counter);
-                        using SslStream sslStream = await EstablishSslStream(stream, random, _cts.Token);
-                        await HandleConnection(workerId, sslStream, client, random, _cts.Token);
+                        using SslStream sslStream = await EstablishSslStream(stream, random, cts.Token);
+                        await HandleConnection(workerId, sslStream, client, random, cts.Token);
 
                         _aggregator.RecordSuccess(workerId);
                     }
-                    catch (OperationCanceledException) when (_cts.IsCancellationRequested)
+                    catch (OperationCanceledException) when (cts.IsCancellationRequested)
                     {
-                        _aggregator.RecordCancellation(workerId);
+                        _aggregator.RecordSuccess(workerId);
                     }
                     catch (Exception e)
                     {
