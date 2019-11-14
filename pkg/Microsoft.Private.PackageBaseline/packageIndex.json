@@ -185,16 +185,18 @@
         "2.2.0",
         "2.2.1",
         "2.2.2",
-        "3.0.0"
+        "3.0.0",
+        "3.1.0"
       ],
       "BaselineVersion": "3.0.0",
       "InboxOn": {}
     },
     "Microsoft.NETCore.Platforms.Future": {
-      "BaselineVersion": "3.1.0",
       "StableVersions": [
-        "3.0.0"
+        "3.0.0",
+        "3.1.0"
       ],
+      "BaselineVersion": "3.1.0",
       "InboxOn": {}
     },
     "Microsoft.NETCore.Targets": {
@@ -214,7 +216,8 @@
         "1.1.4",
         "2.0.0",
         "2.1.0",
-        "3.0.0"
+        "3.0.0",
+        "3.1.0"
       ],
       "BaselineVersion": "3.1.0",
       "InboxOn": {}
@@ -401,7 +404,8 @@
         "2.0.0",
         "2.0.1",
         "2.1.0",
-        "3.0.0"
+        "3.0.0",
+        "3.1.0"
       ],
       "BaselineVersion": "3.1.0",
       "InboxOn": {}
@@ -581,6 +585,24 @@
         "net45": "4.0.0.0"
       }
     },
+    "runtime.linux-arm.runtime.native.System.IO.Ports": {
+      "StableVersions": [
+        "4.7.0"
+      ],
+      "InboxOn": {}
+    },
+    "runtime.linux-arm64.runtime.native.System.IO.Ports": {
+      "StableVersions": [
+        "4.7.0"
+      ],
+      "InboxOn": {}
+    },
+    "runtime.linux-x64.runtime.native.System.IO.Ports": {
+      "StableVersions": [
+        "4.7.0"
+      ],
+      "InboxOn": {}
+    },
     "runtime.native.System.Data.SqlClient.sni": {
       "StableVersions": [
         "4.0.0",
@@ -594,9 +616,16 @@
     },
     "runtime.native.System.IO.Ports": {
       "StableVersions": [
-        "4.6.0"
+        "4.6.0",
+        "4.7.0"
       ],
       "BaselineVersion": "4.7.0",
+      "InboxOn": {}
+    },
+    "runtime.osx-x64.runtime.native.System.IO.Ports": {
+      "StableVersions": [
+        "4.7.0"
+      ],
       "InboxOn": {}
     },
     "runtime.win7-x64.runtime.native.System.Data.SqlClient.sni": {
@@ -3682,14 +3711,13 @@
       "InboxOn": {
         "netcoreapp2.0": "4.1.0.0",
         "netcoreapp2.1": "4.1.1.0",
-        "netcoreapp3.0": "4.1.1.0",
         "netcoreapp3.1": "4.1.2.0",
         "net45": "4.0.0.0",
         "netstandard2.1": "4.0.0.0",
         "monoandroid10": "Any",
-        "xamarinmac20": "Any",
         "monotouch10": "Any",
         "xamarinios10": "Any",
+        "xamarinmac20": "Any",
         "xamarintvos10": "Any",
         "xamarinwatchos10": "Any"
       },
