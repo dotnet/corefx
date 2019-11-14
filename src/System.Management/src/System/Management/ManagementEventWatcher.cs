@@ -704,9 +704,9 @@ namespace System.Management
         private void Cancel2(object o)
         {
             //
-            // Try catch the call to cancel. In this case the cancel is being done without the client
-            // knowing about it so catching all exceptions is not a bad thing to do. If a client calls
-            // Stop (which calls Cancel), they will still recieve any exceptions that may have occured.
+            // Try/catch the call to cancel. In this case the cancel is being done without the client
+            // knowing about it, so catching all exceptions is not a bad thing to do. If a client calls
+            // Stop (which calls Cancel), they will still receive any exceptions that may have occured.
             //
             try
             {
