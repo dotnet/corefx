@@ -56,6 +56,9 @@ namespace System.Text.Json
                         }
                         break;
 
+                    case UnicodeCategory.Surrogate:
+                        break;
+
                     default:
                         if (previousCategory != null)
                         {
