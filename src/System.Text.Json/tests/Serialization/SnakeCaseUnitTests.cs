@@ -67,9 +67,7 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData("spaces", "  spaces")]
         [InlineData("spaces", " spaces")]
         //
-        [InlineData("9999_12_31t23_59_59_9999999z", "9999_12_31t23_59_59_9999999z")]
         [InlineData("9999_12_31t23_59_59_9999999z", "9999-12-31T23:59:59.9999999Z")]
-        //
         [InlineData("hi_this_is_text_time_to_test", "Hi!! This is text. Time to test.")]
         //
         [InlineData("is_cia", "IsCIA")]
