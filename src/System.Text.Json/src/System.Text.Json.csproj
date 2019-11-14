@@ -167,7 +167,7 @@
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.SignedNumber.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.String.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.UnsignedNumber.cs" />
-    <Compile Include="$(CommonPath)\CoreLib\System\Runtime\CompilerServices\PreserveDependencyAttribute.cs">
+    <Compile Include="$(CoreLibDir)System\Runtime\CompilerServices\PreserveDependencyAttribute.cs">
       <Link>Common\System\Runtime\CompilerServices\PreserveDependencyAttribute.cs</Link>
     </Compile>
   </ItemGroup>
@@ -212,7 +212,8 @@
     <Compile Include="System\Text\Json\Node\JsonArray.cs" />
     <Compile Include="System\Text\Json\Node\JsonArrayEnumerator.cs" />
     <Compile Include="System\Text\Json\Node\JsonBoolean.cs" />
-    <Compile Include="System\Text\Json\Node\JsonNode.cs" /> 
+    <Compile Include="System\Text\Json\Node\JsonNode.cs" />
+    <Compile Include="System\Text\Json\Node\JsonNode.RecursionStackFrame.cs" />
     <Compile Include="System\Text\Json\Node\JsonNode.Traversal.cs" /> 
     <Compile Include="System\Text\Json\Node\JsonNode.TraversalHelpers.cs" /> 
     <Compile Include="System\Text\Json\Node\JsonNodeOptions.cs" />
