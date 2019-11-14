@@ -328,45 +328,15 @@ namespace System.Text.Json
                 }
             }
 
-            if (Options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates)
+            // No cached item was found. Try the main list which has all of the properties.
+
+            string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
+
+            Debug.Assert(PropertyCache != null);
+
+            if (!PropertyCache.TryGetValue(stringPropertyName, out info))
             {
-                MetadataPropertyName meta = JsonSerializer.GetMetadataPropertyName(propertyName);
-
-                if (meta == MetadataPropertyName.Unknown) // Non-metadata case, repeat logic from line 394
-                {
-                    // No cached item was found. Try the main list which has all of the properties.
-                    string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
-                    if (!PropertyCache.TryGetValue(stringPropertyName, out info))
-                    {
-                        info = JsonPropertyInfo.s_missingProperty;
-                    }
-                }
-                // Not sure if we should add Metadata to property cache.
-                else if (meta == MetadataPropertyName.Values)
-                {
-                    string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
-                    info = PropertyCache[stringPropertyName];
-                    info.JsonPropertyName = propertyName.ToArray();
-                    info.IsMetadata = true;
-                    info.MetadataProperty = meta;
-                }
-                else
-                {
-                    info = JsonPropertyInfo.GetMetadataProperty(propertyName, meta);
-                }
-            }
-            else
-            {
-                // No cached item was found. Try the main list which has all of the properties.
-
-                string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
-
-                Debug.Assert(PropertyCache != null);
-
-                if (!PropertyCache.TryGetValue(stringPropertyName, out info))
-                {
-                    info = JsonPropertyInfo.s_missingProperty;
-                }
+                info = JsonPropertyInfo.s_missingProperty;
             }
 
             Debug.Assert(info != null);

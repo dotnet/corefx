@@ -47,11 +47,13 @@ namespace System.Text.Json
                     {
                         Debug.Assert(tokenType == JsonTokenType.String || tokenType == JsonTokenType.Number || tokenType == JsonTokenType.True || tokenType == JsonTokenType.False);
 
-                        HandleValue(tokenType, options, ref reader, ref readStack);
+                        //HandleValue(tokenType, options, ref reader, ref readStack);
+                        readStack.HandleValue(tokenType, options, ref reader, ref readStack);
                     }
                     else if (tokenType == JsonTokenType.PropertyName)
                     {
-                        HandlePropertyName(options, ref reader, ref readStack);
+                        //HandlePropertyName(options, ref reader, ref readStack);
+                        readStack.HandlePropertyName(options, ref reader, ref readStack);
                     }
                     else if (tokenType == JsonTokenType.StartObject)
                     {
@@ -70,35 +72,17 @@ namespace System.Text.Json
                         }
                         else if (readStack.Current.IsProcessingDictionary())
                         {
-                            HandleStartDictionary(options, ref readStack);
+                            //HandleStartDictionary(options, ref readStack);
+                            readStack.HandleStartDictionary(options, ref readStack);
                         }
                         else
                         {
-                            HandleStartObject(options, ref readStack);
+                            readStack.HandleStartObject(options, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.EndObject)
                     {
-                        if (readStack.Current.ShouldHandleReference)
-                        {
-                            HandleReference(options, ref readStack, ref reader);
-                        }
-                        else if (readStack.Current.Drain)
-                        {
-                            readStack.Pop();
-
-                            // Clear the current property in case it is a dictionary, since dictionaries must have EndProperty() called when completed.
-                            // A non-dictionary property can also have EndProperty() called when completed, although it is redundant.
-                            readStack.Current.EndProperty();
-                        }
-                        else if (readStack.Current.IsProcessingDictionary())
-                        {
-                            HandleEndDictionary(options, ref readStack);
-                        }
-                        else
-                        {
-                            HandleEndObject(ref readStack);
-                        }
+                        readStack.EndObject(ref readStack, ref reader, options);
                     }
                     else if (tokenType == JsonTokenType.StartArray)
                     {
@@ -182,6 +166,50 @@ namespace System.Text.Json
 
             HandleValue(tokenType, options, ref reader, ref readStack);
             return true;
+        }
+
+        private static void EndObject(ref ReadStack state, ref Utf8JsonReader reader, JsonSerializerOptions options)
+        {
+            if (state.Current.Drain)
+            {
+                state.Pop();
+
+                // Clear the current property in case it is a dictionary, since dictionaries must have EndProperty() called when completed.
+                // A non-dictionary property can also have EndProperty() called when completed, although it is redundant.
+                state.Current.EndProperty();
+            }
+            else if (state.Current.IsProcessingDictionary())
+            {
+                state.HandleEndDictionary(options, ref state);
+            }
+            else
+            {
+                state.HandleEndObject(ref state);
+            }
+        }
+
+        private static void EndObjectOrHandleReference(ref ReadStack state, ref Utf8JsonReader reader, JsonSerializerOptions options)
+        {
+            if (state.Current.ShouldHandleReference)
+            {
+                HandleReference(options, ref state, ref reader);
+            }
+            else if (state.Current.Drain)
+            {
+                state.Pop();
+
+                // Clear the current property in case it is a dictionary, since dictionaries must have EndProperty() called when completed.
+                // A non-dictionary property can also have EndProperty() called when completed, although it is redundant.
+                state.Current.EndProperty();
+            }
+            else if (state.Current.IsProcessingDictionary())
+            {
+                state.HandleEndDictionary(options, ref state);
+            }
+            else
+            {
+                state.HandleEndObject(ref state);
+            }
         }
 
         private static ReadOnlySpan<byte> GetUnescapedString(ReadOnlySpan<byte> utf8Source, int idx)

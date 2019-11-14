@@ -93,7 +93,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact] //Employee list as a property and then use reference to itself on nested Employee.
-        public static void ObjectWithArrayReferencedDeeper()
+        public static void ObjectWithArrayReferenceDeeper()
         {
             string json =
             @"{
@@ -116,7 +116,8 @@ namespace System.Text.Json.Tests
             Assert.Same(employee.Subordinates, employee.Subordinates[0].Subordinates);
         }
 
-        [Fact] //Employee Dictionary as a property and then use reference to itself on nested Employee.
+        [Fact] //Employee Dictionary as a property and then use reference to itself on nested Employee.MissingMethodException: Method not found: 'Void System.Text.Json.JsonSerializerOptions.set_ReferenceHandlingOnDeserialize(System.Text.Json.ReferenceHandlingOnDeserialize)'.
+
         public static void ObjectWithDictionaryReferenceDeeper()
         {
             string json =

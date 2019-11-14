@@ -85,6 +85,7 @@ namespace System.Text.Json
 
             ReadStack readStack = default;
             readStack.Current.Initialize(returnType, options);
+            SetDelegates(ref readStack, options);
 
             var readerState = new JsonReaderState(options.GetReaderOptions());
 

@@ -13,6 +13,7 @@ namespace System.Text.Json
         {
             ReadStack state = default;
             state.Current.Initialize(returnType, options);
+            SetDelegates(ref state, options);
 
             ReadCore(options, ref reader, ref state);
 

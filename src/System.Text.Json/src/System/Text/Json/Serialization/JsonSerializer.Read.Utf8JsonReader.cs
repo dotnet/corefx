@@ -110,6 +110,8 @@ namespace System.Text.Json
 
             ReadStack readStack = default;
             readStack.Current.Initialize(returnType, options);
+            SetDelegates(ref readStack, options);
+
 
             ReadValueCore(options, ref reader, ref readStack);
 

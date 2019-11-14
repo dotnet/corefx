@@ -184,7 +184,7 @@ namespace System.Text.Json
                     JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
                     object currentEnumerable = jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
-                    if (currentEnumerable == null ||
+                    if (currentEnumerable == null || !state.Current.CollectionPropertyInitialized ||
                         // ImmutableArray<T> is a struct, so default value won't be null.
                         jsonPropertyInfo.IsImmutableArray)
                     {

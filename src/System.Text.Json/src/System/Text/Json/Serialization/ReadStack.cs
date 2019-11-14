@@ -22,6 +22,15 @@ namespace System.Text.Json
         //Preserved references
         private Dictionary<string, object> _preservedReferences;
 
+        //Bunch of delegates needed for read $ref, $id and $values without impacting performance on normal loop.
+        public HandlePropertyName HandlePropertyName;
+        public HandleValue HandleValue;
+        public EndObject EndObject;
+        public HandleStartDictionary HandleStartDictionary;
+        public HandleStartObject HandleStartObject;
+        public HandleEndObject HandleEndObject;
+        public HandleEndDictionary HandleEndDictionary;
+
         public void AddReference(string key, object value)
         {
             if (_preservedReferences == null)
