@@ -30,16 +30,16 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Arcade dependencies -->
-    <MicrosoftDotNetApiCompatVersion>5.0.0-beta.19562.5</MicrosoftDotNetApiCompatVersion>
-    <MicrosoftDotNetCodeAnalysisVersion>5.0.0-beta.19562.5</MicrosoftDotNetCodeAnalysisVersion>
-    <MicrosoftDotNetGenAPIVersion>5.0.0-beta.19562.5</MicrosoftDotNetGenAPIVersion>
-    <MicrosoftDotNetGenFacadesVersion>5.0.0-beta.19562.5</MicrosoftDotNetGenFacadesVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.19562.5</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftDotNetXUnitConsoleRunnerVersion>2.5.1-beta.19562.5</MicrosoftDotNetXUnitConsoleRunnerVersion>
-    <MicrosoftDotNetBuildTasksPackagingVersion>5.0.0-beta.19562.5</MicrosoftDotNetBuildTasksPackagingVersion>
-    <MicrosoftDotNetRemoteExecutorVersion>5.0.0-beta.19562.5</MicrosoftDotNetRemoteExecutorVersion>
-    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19562.5</MicrosoftDotNetBuildTasksFeedVersion>
-    <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19562.5</MicrosoftDotNetVersionToolsTasksVersion>
+    <MicrosoftDotNetApiCompatVersion>5.0.0-beta.19563.9</MicrosoftDotNetApiCompatVersion>
+    <MicrosoftDotNetCodeAnalysisVersion>5.0.0-beta.19563.9</MicrosoftDotNetCodeAnalysisVersion>
+    <MicrosoftDotNetGenAPIVersion>5.0.0-beta.19563.9</MicrosoftDotNetGenAPIVersion>
+    <MicrosoftDotNetGenFacadesVersion>5.0.0-beta.19563.9</MicrosoftDotNetGenFacadesVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.19563.9</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitConsoleRunnerVersion>2.5.1-beta.19563.9</MicrosoftDotNetXUnitConsoleRunnerVersion>
+    <MicrosoftDotNetBuildTasksPackagingVersion>5.0.0-beta.19563.9</MicrosoftDotNetBuildTasksPackagingVersion>
+    <MicrosoftDotNetRemoteExecutorVersion>5.0.0-beta.19563.9</MicrosoftDotNetRemoteExecutorVersion>
+    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19563.9</MicrosoftDotNetBuildTasksFeedVersion>
+    <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19563.9</MicrosoftDotNetVersionToolsTasksVersion>
     <!-- Core-setup dependencies -->
     <MicrosoftNETCoreAppVersion>5.0.0-alpha.1.19562.8</MicrosoftNETCoreAppVersion>
     <MicrosoftNETCoreDotNetHostVersion>5.0.0-alpha.1.19562.8</MicrosoftNETCoreDotNetHostVersion>
