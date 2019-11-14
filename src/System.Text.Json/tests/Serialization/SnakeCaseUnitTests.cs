@@ -96,7 +96,8 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData("u_ppe_r_case", "UPpeR Case")]
         [InlineData("u_ppe_r_c_a_se", "UPpeR cASe")]
         //
-        [InlineData("\u0467", "\u0467")]
+        [InlineData("ä", "ä")]
+        [InlineData("𝟜𝟚", "𝟜𝟚")]
         public static void Convert_SpecifiedName_MatchesExpected(string expected, string name) =>
             Assert.Equal(expected, JsonNamingPolicy.SnakeCase.ConvertName(name));
 
