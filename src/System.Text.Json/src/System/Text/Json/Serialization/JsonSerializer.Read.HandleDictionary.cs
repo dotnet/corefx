@@ -68,17 +68,14 @@ namespace System.Text.Json
             {
                 state.Current.DetermineIfDictionaryCanBePopulated(value);
 
-                if (value != null)
+                if (state.Current.ReturnValue != null)
                 {
-                    if (state.Current.ReturnValue != null)
-                    {
-                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
-                    }
-                    else
-                    {
-                        // A dictionary is being returned directly, or a nested dictionary.
-                        state.Current.ReturnValue = value;
-                    }
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                }
+                else
+                {
+                    // A dictionary is being returned directly, or a nested dictionary.
+                    state.Current.ReturnValue = value;
                 }
             }
         }
@@ -141,19 +138,16 @@ namespace System.Text.Json
             {
                 state.Current.DetermineIfDictionaryCanBePopulated(value);
 
-                if (value != null)
+                if (state.Current.ReturnValue != null)
                 {
-                    if (state.Current.ReturnValue != null)
-                    {
-                        // Special case: If the dictionary is a reference and the reference does not exist, avoid setting the value directly to ReturnValue in order to not write it when JsonIgnoreNull is set.
-                        // In other words; delay setting the value.
-                        state.Current.DictionaryCandidate = value;
-                    }
-                    else
-                    {
-                        // A dictionary is being returned directly, or a nested dictionary.
-                        state.Current.ReturnValue = value;
-                    }
+                    // Special case: If the dictionary is a reference and the reference does not exist, avoid setting the value directly to ReturnValue in order to not write it when JsonIgnoreNull is set.
+                    // In other words; delay setting the value.
+                    state.Current.DictionaryCandidate = value;
+                }
+                else
+                {
+                    // A dictionary is being returned directly, or a nested dictionary.
+                    state.Current.ReturnValue = value;
                 }
             }
         }
