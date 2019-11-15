@@ -62,7 +62,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             DataTestUtility.AssertEqualsWithDescription((long)0, (long)stats["CursorOpens"], "Non-zero CursorOpens value: " + (long)stats["CursorOpens"]);
                             DataTestUtility.AssertEqualsWithDescription((long)0, (long)stats["IduRows"], "Non-zero IduRows value: " + (long)stats["IduRows"]);
 
-                            DataTestUtility.AssertEqualsWithDescription((long)4, stats["BuffersReceived"], "Unexpected BuffersReceived value.");
+                            DataTestUtility.AssertEqualsWithDescription((long)3, stats["BuffersReceived"], "Unexpected BuffersReceived value.");
                             DataTestUtility.AssertEqualsWithDescription((long)3, stats["BuffersSent"], "Unexpected BuffersSent value.");
                             DataTestUtility.AssertEqualsWithDescription((long)0, stats["IduCount"], "Unexpected IduCount value.");
                             DataTestUtility.AssertEqualsWithDescription((long)3, stats["SelectCount"], "Unexpected SelectCount value.");
