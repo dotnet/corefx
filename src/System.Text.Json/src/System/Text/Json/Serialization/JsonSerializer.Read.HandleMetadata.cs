@@ -84,7 +84,7 @@ namespace System.Text.Json
             else
             {
                 state.Current.ReturnValue = referenceValue;
-                HandleEndObjectExtractValues(ref state);
+                HandleEndObjectRef(ref state);
             }
 
             state.Current.ShouldHandleReference = false;
@@ -109,30 +109,6 @@ namespace System.Text.Json
                 throw new JsonException("Object already defines a reference identifier.");
             }
         }
-
-        private static void SetDelegates(ref ReadStack state, JsonSerializerOptions options)
-        {
-            if (options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates)
-            {
-                state.HandlePropertyName = HandlePropertyNameAndMetadata;
-                state.HandleValue = HandleValueWithMetadata;
-                state.EndObject = EndObjectOrHandleReference;
-                state.HandleStartDictionary = HandleStartDictionaryOrDelayInCaseOfReference;
-                state.HandleStartObject = HandleStartObjectOrReferenceOrPreservedArray;
-                state.HandleEndObject = HandleEndObjectExtractValues;
-                state.HandleEndDictionary = HandleEndDictionaryInitializeIfDelayed;
-            }
-            else
-            {
-                state.HandlePropertyName = HandlePropertyName;
-                state.HandleValue = HandleValue;
-                state.EndObject = EndObject;
-                state.HandleStartDictionary = HandleStartDictionary;
-                state.HandleStartObject = HandleStartObject;
-                state.HandleEndObject = HandleEndObject;
-                state.HandleEndDictionary = HandleEndDictionary;
-            }
-        }
     }
 
     internal enum MetadataPropertyName
@@ -142,12 +118,4 @@ namespace System.Text.Json
         Id,
         Ref,
     }
-
-    internal delegate void HandlePropertyName(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state);
-    internal delegate void HandleValue(JsonTokenType tokenType, JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state);
-    internal delegate void EndObject(ref ReadStack state, ref Utf8JsonReader reader, JsonSerializerOptions options);
-    internal delegate void HandleStartDictionary(JsonSerializerOptions options, ref ReadStack state);
-    internal delegate void HandleStartObject(JsonSerializerOptions options, ref ReadStack state);
-    internal delegate void HandleEndObject(ref ReadStack state);
-    internal delegate void HandleEndDictionary(JsonSerializerOptions options, ref ReadStack state);
 }

@@ -77,7 +77,7 @@ namespace System.Text.Json
             }
         }
 
-        private static void HandleStartObjectOrReferenceOrPreservedArray(JsonSerializerOptions options, ref ReadStack state)
+        private static void HandleStartObjectRef(JsonSerializerOptions options, ref ReadStack state)
         {
             Debug.Assert(!state.Current.IsProcessingDictionary());
 
@@ -192,7 +192,7 @@ namespace System.Text.Json
             }
         }
 
-        private static void HandleEndObjectExtractValues(ref ReadStack state)
+        private static void HandleEndObjectRef(ref ReadStack state)
         {
             // Only allow dictionaries to be processed here if this is the DataExtensionProperty or a reference object evaluated as null and is now finishing the dictionary object.
             Debug.Assert(!state.Current.IsProcessingDictionary() || state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo || state.Current.ShouldHandleReference);

@@ -101,7 +101,8 @@ namespace System.Text.Json
             }
         }
 
-        private static void HandlePropertyNameAndMetadata(
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void HandlePropertyNameRef(
             JsonSerializerOptions options,
             ref Utf8JsonReader reader,
             ref ReadStack state)

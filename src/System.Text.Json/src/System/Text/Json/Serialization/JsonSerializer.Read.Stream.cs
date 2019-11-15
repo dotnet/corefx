@@ -85,7 +85,6 @@ namespace System.Text.Json
 
             ReadStack readStack = default;
             readStack.Current.Initialize(returnType, options);
-            SetDelegates(ref readStack, options);
 
             var readerState = new JsonReaderState(options.GetReaderOptions());
 
@@ -217,10 +216,21 @@ namespace System.Text.Json
             readStack.ReadAhead = !isFinalBlock;
             readStack.BytesConsumed = 0;
 
-            ReadCore(
-                options,
-                ref reader,
-                ref readStack);
+            if (options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates)
+            {
+                ReadCoreRef(
+                    options,
+                    ref reader,
+                    ref readStack);
+
+            }
+            else
+            {
+                ReadCore(
+                    options,
+                    ref reader,
+                    ref readStack);
+            }
 
             readerState = reader.CurrentState;
         }

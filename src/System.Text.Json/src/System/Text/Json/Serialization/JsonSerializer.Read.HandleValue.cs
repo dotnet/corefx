@@ -30,9 +30,8 @@ namespace System.Text.Json
             jsonPropertyInfo.Read(tokenType, ref state, ref reader);
         }
 
-        // AggressiveInlining used although a large method it is only called from two locations and is on a hot path.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void HandleValueWithMetadata(JsonTokenType tokenType, JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleValueRef(JsonTokenType tokenType, JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
             if (state.Current.SkipProperty)
             {

@@ -80,7 +80,7 @@ namespace System.Text.Json
             }
         }
 
-        private static void HandleStartDictionaryOrDelayInCaseOfReference(JsonSerializerOptions options, ref ReadStack state)
+        private static void HandleStartDictionaryRef(JsonSerializerOptions options, ref ReadStack state)
         {
             Debug.Assert(!state.Current.IsProcessingEnumerable());
 
@@ -207,7 +207,7 @@ namespace System.Text.Json
             }
         }
 
-        private static void HandleEndDictionaryInitializeIfDelayed(JsonSerializerOptions options, ref ReadStack state)
+        private static void HandleEndDictionaryRef(JsonSerializerOptions options, ref ReadStack state)
         {
             Debug.Assert(!state.Current.SkipProperty);
 
