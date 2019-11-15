@@ -95,9 +95,12 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData("u_ppe_r_case", "UPpeR case")]
         [InlineData("u_ppe_r_case", "UPpeR Case")]
         [InlineData("u_ppe_r_c_a_se", "UPpeR cASe")]
-        //
-        [InlineData("ä", "ä")]
-        [InlineData("𝟜𝟚", "𝟜𝟚")]
+        // Valid unicode
+        [InlineData("\u00E4", "\u00E4")]
+        [InlineData("\uD835\uDFDC", "\uD835\uDFDC")]
+        // Invalid unicode
+        [InlineData("\uDC01", "\uDC01")]
+        [InlineData("\uD801", "\uD801")]
         public static void Convert_SpecifiedName_MatchesExpected(string expected, string name) =>
             Assert.Equal(expected, JsonNamingPolicy.SnakeCase.ConvertName(name));
 
