@@ -50,6 +50,7 @@ namespace System.Text.Json
                     Debug.Assert(idx != -1);
                     propertyName = GetUnescapedString(propertyName, idx);
                 }
+
                 JsonPropertyInfo jsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(propertyName, ref state.Current);
                 if (jsonPropertyInfo == JsonPropertyInfo.s_missingProperty)
                 {
