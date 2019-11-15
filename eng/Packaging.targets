@@ -49,6 +49,13 @@
         <BlockStable>$(BlockStable)</BlockStable>
       </_PackageIdentityWithoutPrerelease>
     </ItemGroup>
+
+    <ItemGroup Condition="'@(BuildRID)' != ''">
+      <_PackageIdentityWithoutPrerelease Include="@(BuildRID->'runtime.%(Identity).$(Id)')">
+        <Version>$(PackageVersion)</Version>
+        <BlockStable>$(BlockStable)</BlockStable>
+      </_PackageIdentityWithoutPrerelease>
+    </ItemGroup>
   </Target>
 
   <PropertyGroup>
