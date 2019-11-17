@@ -3,6 +3,7 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CloseOnAsync.cs" />
     <Compile Include="DisposeTests.cs" />
     <Compile Include="WriteWithEncoding.cs" />
     <Compile Include="WriteWithEncodingWithFallback.cs" />
