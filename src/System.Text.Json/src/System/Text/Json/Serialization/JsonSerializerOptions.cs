@@ -35,6 +35,11 @@ namespace System.Text.Json
         private bool _propertyNameCaseInsensitive;
         private bool _writeIndented;
 
+        // Reference Handling delegates for Serialization.
+        internal ReferenceHandlingStrategy HandleReference;
+        internal WriteStart WriteStart;
+        internal PopReference PopReference;
+
         /// <summary>
         /// Constructs a new <see cref="JsonSerializerOptions"/> instance.
         /// </summary>

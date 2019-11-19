@@ -133,30 +133,35 @@ namespace System.Text.Json
                 WriteStack state = default;
                 state.Current.Initialize(type, options);
                 state.Current.CurrentValue = value;
-
-                if (options.ReferenceHandlingOnSerialize == ReferenceHandlingOnSerialize.Preserve)
-                {
-                    state.WriteStart = WriteReferenceObjectOrArrayStart;
-                    state.HandleReference = PreserveReferencesStrategy;
-                    state.PopReference = (ref WriteStack _, bool __, int ___, int ____) => { }; //enpty delegate, we dont need to use the reference stack when optiong-in for preserve.
-                }
-                else if (options.ReferenceHandlingOnSerialize == ReferenceHandlingOnSerialize.Ignore)
-                {
-                    state.WriteStart = WriteObjectOrArrayStart;
-                    state.HandleReference = IgnoreReferencesStrategy;
-                    state.PopReference = PopReference;
-                }
-                else
-                {
-                    state.WriteStart = WriteObjectOrArrayStart;
-                    state.HandleReference = ThrowOnReferencesStrategy;
-                    state.PopReference = PopReferenceAfterThreshold;
-                }
+                SetReferenceHandlingDelegates(options);
 
                 Write(writer, writer.CurrentDepth, flushThreshold: -1, options, ref state);
             }
 
             writer.Flush();
+        }
+
+
+        private static void SetReferenceHandlingDelegates(JsonSerializerOptions options)
+        {
+            if (options.ReferenceHandlingOnSerialize == ReferenceHandlingOnSerialize.Preserve)
+            {
+                options.WriteStart = WriteReferenceObjectOrArrayStart;
+                options.HandleReference = PreserveReferencesStrategy;
+                options.PopReference = (ref WriteStack _, bool __, int ___, int ____) => { }; //enpty delegate, we dont need to use the reference stack when optiong-in for preserve.
+            }
+            else if (options.ReferenceHandlingOnSerialize == ReferenceHandlingOnSerialize.Ignore)
+            {
+                options.WriteStart = WriteObjectOrArrayStart;
+                options.HandleReference = IgnoreReferencesStrategy;
+                options.PopReference = PopReference;
+            }
+            else
+            {
+                options.WriteStart = WriteObjectOrArrayStart;
+                options.HandleReference = ThrowOnReferencesStrategy;
+                options.PopReference = PopReferenceAfterThreshold;
+            }
         }
     }
 }

@@ -39,7 +39,7 @@ namespace System.Text.Json
                     return true;
                 }
 
-                ResolvedReferenceHandling handling = state.HandleReference(ref state, out string referenceId, out bool writeAsReference, enumerable, options.EffectiveMaxDepth, writer.CurrentDepth);
+                ResolvedReferenceHandling handling = options.HandleReference(ref state, out string referenceId, out bool writeAsReference, enumerable, options.EffectiveMaxDepth, writer.CurrentDepth);
 
                 if (handling == ResolvedReferenceHandling.Ignore)
                 {
@@ -48,7 +48,7 @@ namespace System.Text.Json
                 }
                 state.Current.CollectionEnumerator = enumerable.GetEnumerator();
 
-                state.WriteStart(ref state.Current, ClassType.Enumerable, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
+                options.WriteStart(ref state.Current, ClassType.Enumerable, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
 
                 if (handling == ResolvedReferenceHandling.IsReference)
                 {
@@ -105,7 +105,7 @@ namespace System.Text.Json
             }
             else
             {
-                state.PopReference(ref state, true, options.EffectiveMaxDepth, writer.CurrentDepth);
+                options.PopReference(ref state, true, options.EffectiveMaxDepth, writer.CurrentDepth);
                 state.Current.EndArray();
             }
 

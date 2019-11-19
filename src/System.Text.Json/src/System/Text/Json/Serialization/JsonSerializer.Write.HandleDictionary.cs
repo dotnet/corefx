@@ -41,7 +41,7 @@ namespace System.Text.Json
                     return true;
                 }
 
-                ResolvedReferenceHandling handling = state.HandleReference(ref state, out string referenceId, out bool writeAsReference, enumerable, options.EffectiveMaxDepth, writer.CurrentDepth);
+                ResolvedReferenceHandling handling = options.HandleReference(ref state, out string referenceId, out bool writeAsReference, enumerable, options.EffectiveMaxDepth, writer.CurrentDepth);
                 if (handling == ResolvedReferenceHandling.Ignore)
                 {
                     //Reference loop found, do not write anything and pop the frame from the stack.
@@ -56,7 +56,7 @@ namespace System.Text.Json
 
                 if (state.Current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing)
                 {
-                    state.WriteStart(ref state.Current, ClassType.Dictionary, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
+                    options.WriteStart(ref state.Current, ClassType.Dictionary, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
                 }
 
                 // Return when writeAsReference is true.
@@ -123,7 +123,7 @@ namespace System.Text.Json
             }
             else
             {
-                state.PopReference(ref state, true, options.EffectiveMaxDepth, writer.CurrentDepth);
+                options.PopReference(ref state, true, options.EffectiveMaxDepth, writer.CurrentDepth);
                 state.Current.EndDictionary();
             }
 

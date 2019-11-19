@@ -35,7 +35,7 @@ namespace System.Text.Json
                 //if seen before
                 //just write { "$ref": "#" } and finish processing the object/array.
 
-                ResolvedReferenceHandling handling = state.HandleReference(ref state, out string referenceId, out bool writeAsReference, threshold: options.EffectiveMaxDepth, currentDepth: writer.CurrentDepth);
+                ResolvedReferenceHandling handling = options.HandleReference(ref state, out string referenceId, out bool writeAsReference, state.Current.CurrentValue, threshold: options.EffectiveMaxDepth, currentDepth: writer.CurrentDepth);
 
                 if (handling == ResolvedReferenceHandling.Ignore)
                 {
@@ -44,7 +44,7 @@ namespace System.Text.Json
                 }
 
                 //state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, options);
-                state.WriteStart(ref state.Current, ClassType.Object, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
+                options.WriteStart(ref state.Current, ClassType.Object, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
 
                 if (handling == ResolvedReferenceHandling.IsReference)
                 {

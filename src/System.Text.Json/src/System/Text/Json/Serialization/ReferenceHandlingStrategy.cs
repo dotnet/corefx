@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    internal delegate ResolvedReferenceHandling ReferenceHandlingStrategy(ref WriteStack state, out string referenceId, out bool writeAsReference, object currentPropertyValue = null, int threshold = default, int currentDepth = default);
+    internal delegate ResolvedReferenceHandling ReferenceHandlingStrategy(ref WriteStack state, out string referenceId, out bool writeAsReference, object value, int threshold = default, int currentDepth = default);
 
     internal delegate void WriteStart(ref WriteStackFrame frame, ClassType classType, Utf8JsonWriter writer, JsonSerializerOptions options, bool writeNull = false, bool writeAsReference = false, string referenceId = null);
 
@@ -15,9 +15,8 @@ namespace System.Text.Json
 
     public static partial class JsonSerializer
     {
-        internal static ResolvedReferenceHandling PreserveReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object currentPropertyValue = null, int threshold = default, int currentDepth = default)
+        internal static ResolvedReferenceHandling PreserveReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object value, int threshold = default, int currentDepth = default)
         {
-            object value = currentPropertyValue ?? state.Current.CurrentValue;
             if (skip = state.GetPreservedReference(value, out referenceId))
             {
                 return ResolvedReferenceHandling.IsReference;
@@ -26,9 +25,8 @@ namespace System.Text.Json
             return ResolvedReferenceHandling.Preserve;
         }
 
-        internal static ResolvedReferenceHandling IgnoreReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object currentPropertyValue = null, int threshold = default, int currentDepth = default)
+        internal static ResolvedReferenceHandling IgnoreReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object value, int threshold = default, int currentDepth = default)
         {
-            object value = currentPropertyValue ?? state.Current.CurrentValue;
             if (!state.AddStackReference(value))
             {
                 //if reference wasn't added to the set, it means it was already there, therefore we should ignore it BUT not remove it from the set in order to keep validating against further references.
@@ -43,12 +41,11 @@ namespace System.Text.Json
             return ResolvedReferenceHandling.None;
         }
 
-        internal static ResolvedReferenceHandling ThrowOnReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object currentPropertyValue = null, int threshold = default, int currentDepth = default)
+        internal static ResolvedReferenceHandling ThrowOnReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object value, int threshold = default, int currentDepth = default)
         {
             // For performance, start detecting circular references after certain threshold.
             if (currentDepth >= threshold)
             {
-                object value = currentPropertyValue ?? state.Current.CurrentValue;
                 if (!state.AddStackReference(value))
                 {
                     //Nice to have: include the name of the property in this message.

@@ -17,9 +17,6 @@ namespace System.Text.Json
 
         private ReferenceResolver _referenceResolver;
         private HashSet<object> _referenceStack;
-        public ReferenceHandlingStrategy HandleReference;
-        public WriteStart WriteStart;
-        public PopReference PopReference;
 
         public void Push()
         {
@@ -69,7 +66,7 @@ namespace System.Text.Json
         {
             Debug.Assert(_index > 0);
 
-            PopReference(ref this, false, options.EffectiveMaxDepth, writer.CurrentDepth);
+            options.PopReference(ref this, false, options.EffectiveMaxDepth, writer.CurrentDepth);
 
             Current = _previous[--_index];
         }
