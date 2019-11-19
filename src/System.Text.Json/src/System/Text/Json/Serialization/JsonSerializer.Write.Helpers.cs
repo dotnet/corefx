@@ -156,12 +156,12 @@ namespace System.Text.Json
                 options.HandleReference = IgnoreReferencesStrategy;
                 options.PopReference = PopReference;
             }
-            else
-            {
-                options.WriteStart = WriteObjectOrArrayStart;
-                options.HandleReference = ThrowOnReferencesStrategy;
-                options.PopReference = PopReferenceAfterThreshold;
-            }
+            //else
+            //{
+            //    options.WriteStart = WriteObjectOrArrayStart;
+            //    options.HandleReference = ThrowOnReferencesStrategy;
+            //    options.PopReference = PopReferenceAfterThreshold;
+            //}
         }
     }
 }

@@ -59,7 +59,7 @@ namespace System.Text.Json
             return ResolvedReferenceHandling.None;
         }
 
-        private static void WriteObjectOrArrayStart(ref WriteStackFrame frame, ClassType classType, Utf8JsonWriter writer, JsonSerializerOptions options, bool writeNull = false, bool writeAsReference = false, string referenceId = null)
+        internal static void WriteObjectOrArrayStart(ref WriteStackFrame frame, ClassType classType, Utf8JsonWriter writer, JsonSerializerOptions options, bool writeNull = false, bool writeAsReference = false, string referenceId = null)
         {
             if (frame.JsonPropertyInfo?.EscapedName.HasValue == true)
             {
@@ -190,7 +190,7 @@ namespace System.Text.Json
             }
         }
 
-        private static void PopReference(ref WriteStack state, bool isCollectionProperty, int threshold, int currentDepth)
+        internal static void PopReference(ref WriteStack state, bool isCollectionProperty, int threshold, int currentDepth)
         {
             if (!state.Current.KeepReferenceInSet) // Only remove objects that are the first reference in the stack.
             {
