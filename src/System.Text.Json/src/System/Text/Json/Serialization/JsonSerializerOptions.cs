@@ -36,9 +36,9 @@ namespace System.Text.Json
         private bool _writeIndented;
 
         // Reference Handling delegates for Serialization.
-        internal ReferenceHandlingStrategy HandleReference = JsonSerializer.ThrowOnReferencesStrategy;
+        internal ReferenceHandlingStrategy HandleReference = JsonSerializer.DefaultOnReferencesStrategy;
         internal WriteStart WriteStart = JsonSerializer.WriteObjectOrArrayStart;
-        internal PopReference PopReference = JsonSerializer.PopReference;
+        internal PopReference PopReference = JsonSerializer.DefaultPopReference;
 
         /// <summary>
         /// Constructs a new <see cref="JsonSerializerOptions"/> instance.

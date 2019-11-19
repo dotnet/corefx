@@ -53,6 +53,10 @@ namespace System.Text.Json
                             break;
                         }
                     }
+                    else if (writer.CurrentDepth >= options.EffectiveMaxDepth)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_SerializerCycleDetected(options.MaxDepth);
+                    }
 
                     // If serialization is not finished and we surpass flush threshold then return false which will flush stream.
                     if (flushThreshold >= 0 && writer.BytesPending > flushThreshold)

@@ -66,7 +66,7 @@ namespace System.Text.Json
         {
             Debug.Assert(_index > 0);
 
-            options.PopReference(ref this, false, options.EffectiveMaxDepth, writer.CurrentDepth);
+            options.PopReference(ref this, false);
 
             Current = _previous[--_index];
         }

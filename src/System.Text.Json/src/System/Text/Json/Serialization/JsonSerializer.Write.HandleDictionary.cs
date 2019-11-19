@@ -41,7 +41,7 @@ namespace System.Text.Json
                     return true;
                 }
 
-                ResolvedReferenceHandling handling = options.HandleReference(ref state, out string referenceId, out bool writeAsReference, enumerable, options.EffectiveMaxDepth, writer.CurrentDepth);
+                ResolvedReferenceHandling handling = options.HandleReference(ref state, out string referenceId, out bool writeAsReference, enumerable);
                 if (handling == ResolvedReferenceHandling.Ignore)
                 {
                     //Reference loop found, do not write anything and pop the frame from the stack.
@@ -129,7 +129,7 @@ namespace System.Text.Json
             }
             else
             {
-                options.PopReference(ref state, true, options.EffectiveMaxDepth, writer.CurrentDepth);
+                options.PopReference(ref state, true);
                 state.Current.EndDictionary();
             }
 

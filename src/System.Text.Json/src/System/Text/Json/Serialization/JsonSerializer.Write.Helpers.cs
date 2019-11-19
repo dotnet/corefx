@@ -148,7 +148,7 @@ namespace System.Text.Json
             {
                 options.WriteStart = WriteReferenceObjectOrArrayStart;
                 options.HandleReference = PreserveReferencesStrategy;
-                options.PopReference = (ref WriteStack _, bool __, int ___, int ____) => { }; //enpty delegate, we dont need to use the reference stack when optiong-in for preserve.
+                options.PopReference = (ref WriteStack _, bool __) => { }; //enpty delegate, we dont need to use the reference stack when optiong-in for preserve.
             }
             else if (options.ReferenceHandlingOnSerialize == ReferenceHandlingOnSerialize.Ignore)
             {

@@ -7,15 +7,15 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    internal delegate ResolvedReferenceHandling ReferenceHandlingStrategy(ref WriteStack state, out string referenceId, out bool writeAsReference, object value, int threshold = default, int currentDepth = default);
+    internal delegate ResolvedReferenceHandling ReferenceHandlingStrategy(ref WriteStack state, out string referenceId, out bool writeAsReference, object value);
 
     internal delegate void WriteStart(ref WriteStackFrame frame, ClassType classType, Utf8JsonWriter writer, JsonSerializerOptions options, bool writeNull = false, bool writeAsReference = false, string referenceId = null);
 
-    internal delegate void PopReference(ref WriteStack state, bool isCollectionProperty, int threshold, int currentDepth);
+    internal delegate void PopReference(ref WriteStack state, bool isCollectionProperty);
 
     public static partial class JsonSerializer
     {
-        internal static ResolvedReferenceHandling PreserveReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object value, int threshold = default, int currentDepth = default)
+        internal static ResolvedReferenceHandling PreserveReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object value)
         {
             if (skip = state.GetPreservedReference(value, out referenceId))
             {
@@ -25,7 +25,7 @@ namespace System.Text.Json
             return ResolvedReferenceHandling.Preserve;
         }
 
-        internal static ResolvedReferenceHandling IgnoreReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object value, int threshold = default, int currentDepth = default)
+        internal static ResolvedReferenceHandling IgnoreReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object value)
         {
             if (!state.AddStackReference(value))
             {
@@ -41,18 +41,8 @@ namespace System.Text.Json
             return ResolvedReferenceHandling.None;
         }
 
-        internal static ResolvedReferenceHandling ThrowOnReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object value, int threshold = default, int currentDepth = default)
+        internal static ResolvedReferenceHandling DefaultOnReferencesStrategy(ref WriteStack state, out string referenceId, out bool skip, object value)
         {
-            // For performance, start detecting circular references after certain threshold.
-            if (currentDepth >= threshold)
-            {
-                if (!state.AddStackReference(value))
-                {
-                    //Nice to have: include the name of the property in this message.
-                    throw new JsonException("Invalid Reference Loop Detected!.");
-                }
-            }
-
             //params not meant for this code path.
             skip = default;
             referenceId = default;
@@ -190,7 +180,7 @@ namespace System.Text.Json
             }
         }
 
-        internal static void PopReference(ref WriteStack state, bool isCollectionProperty, int threshold, int currentDepth)
+        private static void PopReference(ref WriteStack state, bool isCollectionProperty)
         {
             if (!state.Current.KeepReferenceInSet) // Only remove objects that are the first reference in the stack.
             {
@@ -202,17 +192,9 @@ namespace System.Text.Json
             }
         }
 
-        private static void PopReferenceAfterThreshold(ref WriteStack state, bool isCollectionProperty, int threshold, int currentDepth)
+        internal static void DefaultPopReference(ref WriteStack state, bool isCollectionProperty)
         {
-            // For performance, start detecting circular references after certain threshold.
-            if (currentDepth >= threshold)
-            {
-                object value = isCollectionProperty ?
-                    (IEnumerable)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue) :
-                    state.Current.CurrentValue;
-
-                state.PopStackReference(value);
-            }
+            //Nothig to do when opting in for the default behavior.
         }
     }
 }
