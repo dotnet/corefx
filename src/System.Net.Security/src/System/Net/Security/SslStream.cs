@@ -391,23 +391,26 @@ namespace System.Net.Security
 
         public virtual Task AuthenticateAsClientAsync(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
         {
-            var beginMethod = checkCertificateRevocation ? (Func<string, X509CertificateCollection, SslProtocols, AsyncCallback, object, IAsyncResult>)
-                ((arg1, arg2, arg3, callback, state) => ((SslStream)state).BeginAuthenticateAsClient(arg1, arg2, arg3, true, callback, state)) :
-                ((arg1, arg2, arg3, callback, state) => ((SslStream)state).BeginAuthenticateAsClient(arg1, arg2, arg3, false, callback, state));
-            return Task.Factory.FromAsync(
-                beginMethod,
-                iar => ((SslStream)iar.AsyncState).EndAuthenticateAsClient(iar),
-                targetHost, clientCertificates, enabledSslProtocols,
-                this);
+            SslClientAuthenticationOptions options = new SslClientAuthenticationOptions()
+            {
+                TargetHost =  targetHost,
+                ClientCertificates =  clientCertificates,
+                EnabledSslProtocols = enabledSslProtocols,
+                CertificateRevocationCheckMode = checkCertificateRevocation ? X509RevocationMode.Online : X509RevocationMode.NoCheck,
+                EncryptionPolicy = _encryptionPolicy,
+            };
+
+            return AuthenticateAsClientAsync(options);
         }
 
         public Task AuthenticateAsClientAsync(SslClientAuthenticationOptions sslClientAuthenticationOptions, CancellationToken cancellationToken = default)
         {
-            return Task.Factory.FromAsync(
-                (arg1, arg2, callback, state) => ((SslStream)state).BeginAuthenticateAsClient(arg1, arg2, callback, state),
-                iar => ((SslStream)iar.AsyncState).EndAuthenticateAsClient(iar),
-                sslClientAuthenticationOptions, cancellationToken,
-                this);
+            SetAndVerifyValidationCallback(sslClientAuthenticationOptions.RemoteCertificateValidationCallback);
+            SetAndVerifySelectionCallback(sslClientAuthenticationOptions.LocalCertificateSelectionCallback);
+
+            ValidateCreateContext(sslClientAuthenticationOptions, _certValidationDelegate, _certSelectionDelegate);
+
+            return ForceAuthenticationAsync(false, null, cancellationToken);
         }
 
         public virtual Task AuthenticateAsServerAsync(X509Certificate serverCertificate) =>
