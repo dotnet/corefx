@@ -9,6 +9,7 @@
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations)
+      netstandard2.0-FreeBSD;
       netfx-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>

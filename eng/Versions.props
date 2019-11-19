@@ -30,29 +30,29 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Arcade dependencies -->
-    <MicrosoftDotNetApiCompatVersion>5.0.0-beta.19557.20</MicrosoftDotNetApiCompatVersion>
-    <MicrosoftDotNetCodeAnalysisVersion>5.0.0-beta.19557.20</MicrosoftDotNetCodeAnalysisVersion>
-    <MicrosoftDotNetGenAPIVersion>5.0.0-beta.19557.20</MicrosoftDotNetGenAPIVersion>
-    <MicrosoftDotNetGenFacadesVersion>5.0.0-beta.19557.20</MicrosoftDotNetGenFacadesVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.19557.20</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftDotNetXUnitConsoleRunnerVersion>2.5.1-beta.19557.20</MicrosoftDotNetXUnitConsoleRunnerVersion>
-    <MicrosoftDotNetBuildTasksPackagingVersion>5.0.0-beta.19557.20</MicrosoftDotNetBuildTasksPackagingVersion>
-    <MicrosoftDotNetRemoteExecutorVersion>5.0.0-beta.19557.20</MicrosoftDotNetRemoteExecutorVersion>
-    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19557.20</MicrosoftDotNetBuildTasksFeedVersion>
-    <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19557.20</MicrosoftDotNetVersionToolsTasksVersion>
+    <MicrosoftDotNetApiCompatVersion>5.0.0-beta.19562.5</MicrosoftDotNetApiCompatVersion>
+    <MicrosoftDotNetCodeAnalysisVersion>5.0.0-beta.19562.5</MicrosoftDotNetCodeAnalysisVersion>
+    <MicrosoftDotNetGenAPIVersion>5.0.0-beta.19562.5</MicrosoftDotNetGenAPIVersion>
+    <MicrosoftDotNetGenFacadesVersion>5.0.0-beta.19562.5</MicrosoftDotNetGenFacadesVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.19562.5</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitConsoleRunnerVersion>2.5.1-beta.19562.5</MicrosoftDotNetXUnitConsoleRunnerVersion>
+    <MicrosoftDotNetBuildTasksPackagingVersion>5.0.0-beta.19562.5</MicrosoftDotNetBuildTasksPackagingVersion>
+    <MicrosoftDotNetRemoteExecutorVersion>5.0.0-beta.19562.5</MicrosoftDotNetRemoteExecutorVersion>
+    <MicrosoftDotNetBuildTasksFeedVersion>5.0.0-beta.19562.5</MicrosoftDotNetBuildTasksFeedVersion>
+    <MicrosoftDotNetVersionToolsTasksVersion>5.0.0-beta.19562.5</MicrosoftDotNetVersionToolsTasksVersion>
     <!-- Core-setup dependencies -->
-    <MicrosoftNETCoreAppVersion>5.0.0-alpha.1.19555.8</MicrosoftNETCoreAppVersion>
-    <MicrosoftNETCoreDotNetHostVersion>5.0.0-alpha.1.19555.8</MicrosoftNETCoreDotNetHostVersion>
-    <MicrosoftNETCoreDotNetHostPolicyVersion>5.0.0-alpha.1.19555.8</MicrosoftNETCoreDotNetHostPolicyVersion>
+    <MicrosoftNETCoreAppVersion>5.0.0-alpha.1.19562.8</MicrosoftNETCoreAppVersion>
+    <MicrosoftNETCoreDotNetHostVersion>5.0.0-alpha.1.19562.8</MicrosoftNETCoreDotNetHostVersion>
+    <MicrosoftNETCoreDotNetHostPolicyVersion>5.0.0-alpha.1.19562.8</MicrosoftNETCoreDotNetHostPolicyVersion>
     <!-- Coreclr dependencies -->
-    <MicrosoftNETCoreILAsmVersion>5.0.0-alpha1.19560.2</MicrosoftNETCoreILAsmVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19560.2</MicrosoftNETCoreRuntimeCoreCLRVersion>
-    <MicrosoftNETSdkILVersion>5.0.0-alpha1.19560.2</MicrosoftNETSdkILVersion>
+    <MicrosoftNETCoreILAsmVersion>5.0.0-alpha1.19562.1</MicrosoftNETCoreILAsmVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRVersion>5.0.0-alpha1.19562.1</MicrosoftNETCoreRuntimeCoreCLRVersion>
+    <MicrosoftNETSdkILVersion>5.0.0-alpha1.19562.1</MicrosoftNETSdkILVersion>
     <!-- Corefx dependencies -->
-    <MicrosoftNETCorePlatformsVersion>5.0.0-alpha.1.19557.22</MicrosoftNETCorePlatformsVersion>
-    <runtimenativeSystemIOPortsVersion>5.0.0-alpha.1.19557.22</runtimenativeSystemIOPortsVersion>
+    <MicrosoftNETCorePlatformsVersion>5.0.0-alpha.1.19562.8</MicrosoftNETCorePlatformsVersion>
+    <runtimenativeSystemIOPortsVersion>5.0.0-alpha.1.19562.8</runtimenativeSystemIOPortsVersion>
     <!-- Standard dependencies -->
-    <NETStandardLibraryVersion>2.2.0-prerelease.19557.1</NETStandardLibraryVersion>
+    <NETStandardLibraryVersion>2.2.0-prerelease.19562.1</NETStandardLibraryVersion>
     <!-- dotnet-optimization dependencies -->
     <optimizationwindows_ntx64IBCCoreFxVersion>99.99.99-master-20190716.1</optimizationwindows_ntx64IBCCoreFxVersion>
     <!-- sni -->
