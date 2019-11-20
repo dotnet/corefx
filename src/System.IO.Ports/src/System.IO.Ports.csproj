@@ -95,7 +95,7 @@
     <Compile Include="$(CoreLibDir)Interop\Windows\Kernel32\Interop.FlushFileBuffers.cs">
       <Link>Interop\Windows\Kernel32\Interop.FlushFileBuffers.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GenericOperations.cs">
+    <Compile Include="$(CoreLibDir)Interop\Windows\Kernel32\Interop.GenericOperations.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.GenericOperations.cs</Link>
     </Compile>
     <Compile Include="$(CoreLibDir)Interop\Windows\Kernel32\Interop.SECURITY_ATTRIBUTES.cs">
