@@ -100,12 +100,12 @@ stages:
         SDLValidationParameters:
           enable: false
           params: ' -SourceToolsList @("policheck","credscan")
-          -TsaInstanceURL "https://devdiv.visualstudio.com/"
-          -TsaProjectName "DEVDIV"
+          -TsaInstanceURL "$(TsaInstanceURL)"
+          -TsaProjectName "$(TsaProjectName)"
           -TsaNotificationEmail "$(TsaNotificationEmail)"
           -TsaCodebaseAdmin "$(TsaCodebaseAdmin)"
-          -TsaBugAreaPath "DevDiv\NET\NET Core"
-          -TsaIterationPath "DevDiv"
+          -TsaBugAreaPath "$(TsaBugAreaPath)"
+          -TsaIterationPath "$(TsaIterationPath)"
           -TsaRepositoryName "CoreFX"
           -TsaCodebaseName "CoreFX"
           -TsaPublish $True'
