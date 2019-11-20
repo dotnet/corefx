@@ -460,41 +460,39 @@ namespace System.Net.Security
         {
             _Framing = Framing.Unknown;
             ProtocolToken message;
+            SslReadAsync adapter = new SslReadAsync(this, cancellationToken);
 
-            //StartSendBlob(buffer, 0);
-         //   SecurityStatusPal status;
-        //    byte[] output = null;
-           //ReadOnlyMemory<byte> output = null;
-            //Span<byte> output;
             if (!receiveFirst)
             {
                 message =_context.NextMessage(null, 0, 0);
                  //   _context.GenerateToken(buffer, 0, (buffer == null ? 0 : buffer.Length), ref output);
                 //         ProtocolToken message =  _context.NextMessage(buffer, 0, (buffer == null ? 0 : buffer.Length));
-                Console.WriteLine("got first blob  {0}", message.Payload?.Length);
                 await InnerStream.WriteAsync(message.Payload, cancellationToken).ConfigureAwait(false);
             }
-
 
             do
             {
 
-                 message  = await StartReceiveBlobAsync(null, cancellationToken).ConfigureAwait(false);
-                Console.WriteLine("Received blob processed");
-                //output = null;
+                message  = await StartReceiveBlobAsync(adapter, null, cancellationToken).ConfigureAwait(false);
                 //status = _context.GenerateToken(null, 0, 0, ref output);
-                Console.WriteLine("Generate token with {0} {1} status = {2}", message.Payload, message.Payload?.Length, message.Status);
+                //Console.WriteLine("Generate token with {0} {1} status = {2}", message.Payload, message.Payload?.Length, message.Status);
                 if (message.Size > 0)
                 {
                     await InnerStream.WriteAsync(message.Payload, cancellationToken).ConfigureAwait(false);
                 }
             } while (message.Status.ErrorCode != SecurityStatusPalErrorCode.OK);
 
-            Console.WriteLine("All DONE");
+            ProtocolToken alertToken = null;
+            if (!CompleteHandshake(ref alertToken))
+            {
+                StartSendAuthResetSignal(alertToken, null, ExceptionDispatchInfo.Capture(new AuthenticationException(SR.net_ssl_io_cert_validation, null)));
+                return;
+            }
+
             return;
         }
 
-    //
+        //
         // Client side starts here, but server also loops through this method.
         //
         private void StartSendBlob(byte[] incoming, int count, AsyncProtocolRequest asyncRequest)
@@ -620,7 +618,7 @@ namespace System.Net.Security
             StartReadFrame(buffer, readBytes, asyncRequest);
         }
 
-        private async Task<ProtocolToken> StartReceiveBlobAsync(byte[] buffer, CancellationToken cancellationToken)
+        private async Task<ProtocolToken> StartReceiveBlobAsync(SslReadAsync adapter, byte[] buffer, CancellationToken cancellationToken)
         {
             //          if (_pendingReHandshake)
             //          {
@@ -638,7 +636,7 @@ namespace System.Net.Security
             //         }
 
             //This is first server read.
-            SslReadAsync adapter = new SslReadAsync(this, cancellationToken);
+//            SslReadAsync adapter = new SslReadAsync(this, cancellationToken);
 
             ResetReadBuffer();
             int readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize).ConfigureAwait(false);
@@ -647,17 +645,12 @@ namespace System.Net.Security
                 throw new IOException(SR.net_io_eof);
             }
 
-            Console.WriteLine("1 fill buffer returned {0} out of {1} {2}", readBytes, SecureChannel.ReadHeaderSize,
-                _Framing);
-
             if (_Framing == Framing.Unified || _Framing == Framing.Unknown)
             {
                 _Framing = DetectFraming(_internalBuffer, readBytes);
-                Console.WriteLine("Changed fromaing to {0}", _Framing);
             }
 
             int payloadBytes = GetRemainingFrameSize(_internalBuffer, _internalOffset, readBytes);
-            Console.WriteLine("Got remaining size={0}", payloadBytes);
             if (payloadBytes < 0)
             {
                 throw new IOException(SR.net_frame_read_size);
@@ -674,41 +667,15 @@ namespace System.Net.Security
                 }
             }
 
-            Console.WriteLine("Got frame = {0} frame = {1}", readBytes, frameSize);
-
-            //buffer = EnsureBufferSize(buffer, 0, SecureChannel.ReadHeaderSize);
-
-            //int readBytes = 0;
-//            if (asyncRequest == null)
-//            {
-//                readBytes = FixedSizeReader.ReadPacket(_innerStream, buffer, 0, SecureChannel.ReadHeaderSize);
-//            }
-//            else
-/*
-            {
-
-                asyncRequest.SetNextRequest(buffer, 0, SecureChannel.ReadHeaderSize, s_partialFrameCallback);
-                _ = FixedSizeReader.ReadPacketAsync(_innerStream, asyncRequest);
-                if (!asyncRequest.MustCompleteSynchronously)
-                {
-                    return;
-                }
-
-                readBytes = asyncRequest.Result;
-            }
-
-*/
-       //     StartReadFrame(buffer, readBytes, null);
-       var inputBuffer = new ReadOnlyMemory<byte>(_internalBuffer, _internalOffset, frameSize);
-       ConsumeBufferedBytes(frameSize);
-        return ProcessReceivedBlob2(inputBuffer, cancellationToken);
-
+            var inputBuffer = new ReadOnlyMemory<byte>(_internalBuffer, _internalOffset, frameSize);
+            ConsumeBufferedBytes(frameSize);
+            return ProcessReceivedBlob2(inputBuffer, cancellationToken);
         }
 
         //
         private void StartReadFrame(byte[] buffer, int readBytes, AsyncProtocolRequest asyncRequest)
         {
-            Console.WriteLine("StartReadingFRame called with {0}", readBytes);
+//            Console.WriteLine("StartReadingFRame called with {0}", readBytes);
             if (readBytes == 0)
             {
                 // EOF received
@@ -718,11 +685,10 @@ namespace System.Net.Security
             if (_Framing == Framing.Unknown)
             {
                 _Framing = DetectFraming(buffer, readBytes);
-                Console.WriteLine("Framing from Unknow to {0}", _Framing);
             }
 
             int restBytes = GetRemainingFrameSize(buffer, 0, readBytes);
-            Console.WriteLine("GetReamingBytes returned res={0}", restBytes);
+//            Console.WriteLine("GetReamingBytes returned res={0}", restBytes);
 
             if (restBytes < 0)
             {
@@ -762,7 +728,7 @@ namespace System.Net.Security
 
         private void ProcessReceivedBlob(byte[] buffer, int count, AsyncProtocolRequest asyncRequest)
         {
-            Console.WriteLine("ProcessReceivedBlob called with {0}", count);
+//            Console.WriteLine("ProcessReceivedBlob called with {0}", count);
             if (count == 0)
             {
                 // EOF received.
@@ -809,13 +775,13 @@ namespace System.Net.Security
 
         private ProtocolToken ProcessReceivedBlob2(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
-            Console.WriteLine("ProcessReceivedBlobAsync called with {0}", buffer.Length);
+//            Console.WriteLine("ProcessReceivedBlobAsync called with {0}", buffer.Length);
             int count = buffer.Length;
-            if (buffer.Length == 0)
-            {
-                // EOF received.
-                throw new AuthenticationException(SR.net_auth_eof, null);
-            }
+//            if (buffer.Length == 0)
+//            {
+//                // EOF received.
+//                throw new AuthenticationException(SR.net_auth_eof, null);
+//            }
 
             if (_pendingReHandshake)
             {
@@ -852,21 +818,11 @@ namespace System.Net.Security
                     //Buffer.BlockCopy();
                 }
             }
-Console.WriteLine("leng = {0} count={1}", buffer.Length, count);
+
             ProtocolToken message2 = _context.NextMessage(buffer.ToArray(), 0, count);
-            Console.WriteLine("Mesage2 = {0} {1} {2}", message2, message2?.Size, message2?.Status);
+//            Console.WriteLine("Mesage2 = {0} {1} {2}", message2, message2?.Size, message2?.Status);
 
             return message2;
-            /*
-            if (message2?.Size > 0)
-            {
-                await InnerStream.WriteAsync(message2.Payload, 0, message2.Size, cancellationToken).ConfigureAwait(false);
-                Console.WriteLine("___________________________________");
-            }
-            */
-
-
-        // StartSendBlob(buffer, count, asyncRequest);
         }
 
         //

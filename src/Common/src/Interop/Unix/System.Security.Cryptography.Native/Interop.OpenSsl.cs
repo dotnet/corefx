@@ -255,16 +255,28 @@ internal static partial class Interop
 
         internal static bool DoSslHandshake(SafeSslHandle context, byte[] recvBuf, int recvOffset, int recvCount, out byte[] sendBuf, out int sendCount)
         {
+            return DoSslHandshake(context, new ReadOnlyMemory<byte>(recvBuf, recvOffset, recvCount),  out sendBuf, out sendCount);
+        }
+
+        internal static bool DoSslHandshake(SafeSslHandle context, ReadOnlyMemory<byte> input, out byte[] sendBuf, out int sendCount)
+        {
             sendBuf = null;
             sendCount = 0;
             Exception handshakeException = null;
 
-            if ((recvBuf != null) && (recvCount > 0))
+            //if ((recvBuf != null) && (recvCount > 0))
+
+            if (input.Length > 0)
             {
-                if (BioWrite(context.InputBio, recvBuf, recvOffset, recvCount) <= 0)
-                {
-                    // Make sure we clear out the error that is stored in the queue
-                    throw Crypto.CreateOpenSslCryptographicException();
+                unsafe {
+                    using (MemoryHandle handle = input.Pin())
+                    {
+                        if (Ssl.BioWrite(context.InputBio, (byte*)handle.Pointer, input.Length) != input.Length)
+                        {
+                            // Make sure we clear out the error that is stored in the queue
+                            throw Crypto.CreateOpenSslCryptographicException();
+                        }
+                    }
                 }
             }
 
