@@ -40,9 +40,6 @@ namespace System.Net.Mail
         private readonly ChannelBinding _channelBindingToken = null;
         private bool _enableSsl;
         private X509CertificateCollection _clientCertificates;
-#pragma warning disable CS0414
-        private bool _aborted; // Tracks whether Abort was called, for debugging https://github.com/dotnet/corefx/issues/40711.
-#pragma warning restore CS0414
 
         internal SmtpConnection(SmtpTransport parent, SmtpClient client, ICredentialsByHost credentials, ISmtpAuthenticationModule[] authenticationModules)
         {
@@ -154,8 +151,6 @@ namespace System.Net.Mail
 
         internal void Abort()
         {
-            _aborted = true;
-
             if (!_isClosed)
             {
                 lock (this)
@@ -172,7 +167,13 @@ namespace System.Net.Mail
                         // interpreted correctly by the server if it's in the middle of a
                         // DATA command or some similar situation.  This may send a RST
                         // but this is ok in this situation.  Do not reuse this connection
-                        _tcpClient.LingerState = new LingerOption(true, 0);
+                        try
+                        {
+                            _tcpClient.LingerState = new LingerOption(true, 0);
+                        }
+                        catch
+                        { }
+
                         _networkStream?.Close();
                         _tcpClient.Dispose();
                     }
