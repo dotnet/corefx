@@ -198,5 +198,17 @@ namespace System.Memory.Tests.SequenceReader
                 Assert.Equal(i + 1, value);
             }
         }
+
+        [Fact]
+        public void TryReadTo_Span_At_Segmet_Boundary()
+        {
+            Span<byte> delimiter = new byte[] { 13, 10 }; // \r\n
+            BufferSegment<byte> bufSeq = new BufferSegment<byte>(Text.Encoding.ASCII.GetBytes("Hello\r"));
+            bufSeq.Append(Text.Encoding.ASCII.GetBytes("\nWorld"));
+            ReadOnlySequence<byte> inputSeq = new ReadOnlySequence<byte>(bufSeq, 0, bufSeq, 6); // span only the first segment!
+            SequenceReader<byte> sr = new SequenceReader<byte>(inputSeq);
+            bool r = sr.TryReadTo(out _, delimiter);
+            Assert.False(r);
+        }
     }
 }
