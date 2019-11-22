@@ -49,7 +49,7 @@ namespace System.Net.Security
         public static SecurityStatusPal AcceptSecurityContext(ref SafeFreeCredentials credentialsHandle, ref SafeDeleteSslContext context, byte[] inputBuffer, int offset, int count, ref byte[] outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
         {
             Interop.SspiCli.ContextFlags unusedAttributes = default;
-            ArraySegment<byte> input = input != null ? new ArraySegment<byte>(inputBuffer, offset, count) : default,
+            ArraySegment<byte> input = inputBuffer != null ? new ArraySegment<byte>(inputBuffer, offset, count) : default;
 
             ThreeSecurityBuffers threeSecurityBuffers = default;
             SecurityBuffer? incomingSecurity = input.Array != null ?
@@ -77,7 +77,7 @@ namespace System.Net.Security
         public static SecurityStatusPal InitializeSecurityContext(ref SafeFreeCredentials credentialsHandle, ref SafeDeleteSslContext context, string targetName, byte[] inputBuffer, int offset, int count, ref byte[] outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
         {
             Interop.SspiCli.ContextFlags unusedAttributes = default;
-            ArraySegment<byte> input = input != null ? new ArraySegment<byte>(inputBuffer, offset, count) : default,
+            ArraySegment<byte> input = inputBuffer != null ? new ArraySegment<byte>(inputBuffer, offset, count) : default;
 
             ThreeSecurityBuffers threeSecurityBuffers = default;
             SecurityBuffer? incomingSecurity = input.Array != null ?
