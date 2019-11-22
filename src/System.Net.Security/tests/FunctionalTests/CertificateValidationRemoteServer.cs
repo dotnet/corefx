@@ -16,6 +16,7 @@ namespace System.Net.Security.Tests
     public class CertificateValidationRemoteServer
     {
         [Fact]
+        [ActiveIssue(42231)]
         public async Task CertificateValidationRemoteServer_EndToEnd_Ok()
         {
             using (var client = new TcpClient(AddressFamily.InterNetwork))
