@@ -148,6 +148,19 @@
         "rhel.7-x64"
       ]
     },
+    "centos.8": {
+      "#import": [
+        "centos",
+        "rhel.8"
+      ]
+    },
+    "centos.8-x64": {
+      "#import": [
+        "centos.8",
+        "centos-x64",
+        "rhel.8-x64"
+      ]
+    },
     "debian": {
       "#import": [
         "linux"
@@ -455,6 +468,23 @@
     "fedora.31-x64": {
       "#import": [
         "fedora.31",
+        "fedora-x64"
+      ]
+    },
+    "fedora.32": {
+      "#import": [
+        "fedora"
+      ]
+    },
+    "fedora.32-arm64": {
+      "#import": [
+        "fedora.32",
+        "fedora-arm64"
+      ]
+    },
+    "fedora.32-x64": {
+      "#import": [
+        "fedora.32",
         "fedora-x64"
       ]
     },
