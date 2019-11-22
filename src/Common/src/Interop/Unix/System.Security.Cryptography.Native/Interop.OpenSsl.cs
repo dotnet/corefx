@@ -253,30 +253,18 @@ internal static partial class Interop
             return context;
         }
 
-        internal static bool DoSslHandshake(SafeSslHandle context, byte[] recvBuf, int recvOffset, int recvCount, out byte[] sendBuf, out int sendCount)
-        {
-            return DoSslHandshake(context, new ReadOnlyMemory<byte>(recvBuf, recvOffset, recvCount),  out sendBuf, out sendCount);
-        }
-
-        internal static bool DoSslHandshake(SafeSslHandle context, ReadOnlyMemory<byte> input, out byte[] sendBuf, out int sendCount)
+        internal static bool DoSslHandshake(SafeSslHandle context, ReadOnlySpan<byte> input, out byte[] sendBuf, out int sendCount)
         {
             sendBuf = null;
             sendCount = 0;
             Exception handshakeException = null;
 
-            //if ((recvBuf != null) && (recvCount > 0))
-
-            if (input.Length > 0)
+            if (input != null && input.Length > 0)
             {
-                unsafe {
-                    using (MemoryHandle handle = input.Pin())
-                    {
-                        if (Ssl.BioWrite(context.InputBio, (byte*)handle.Pointer, input.Length) != input.Length)
-                        {
-                            // Make sure we clear out the error that is stored in the queue
-                            throw Crypto.CreateOpenSslCryptographicException();
-                        }
-                    }
+                if (Ssl.BioWrite(context.InputBio, ref MemoryMarshal.GetReference(input), input.Length) != input.Length)
+                {
+                    // Make sure we clear out the error that is stored in the queue
+                    throw Crypto.CreateOpenSslCryptographicException();
                 }
             }
 
@@ -333,7 +321,7 @@ internal static partial class Interop
             return stateOk;
         }
 
-        internal static int Encrypt(SafeSslHandle context, ReadOnlyMemory<byte> input, ref byte[] output, out Ssl.SslErrorCode errorCode)
+        internal static int Encrypt(SafeSslHandle context, ReadOnlySpan<byte> input, ref byte[] output, out Ssl.SslErrorCode errorCode)
         {
 #if DEBUG
             ulong assertNoError = Crypto.ErrPeekError();
@@ -346,13 +334,7 @@ internal static partial class Interop
 
             lock (context)
             {
-                unsafe
-                {
-                    using (MemoryHandle handle = input.Pin())
-                    {
-                        retVal = Ssl.SslWrite(context, (byte*)handle.Pointer, input.Length);
-                    }
-                }
+                retVal = Ssl.SslWrite(context, ref MemoryMarshal.GetReference(input), input.Length);
 
                 if (retVal != input.Length)
                 {

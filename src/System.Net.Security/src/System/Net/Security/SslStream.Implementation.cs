@@ -464,7 +464,7 @@ namespace System.Net.Security
 
             if (!receiveFirst)
             {
-                message =_context.NextMessage(null, 0, 0);
+                message =_context.NextMessage(null);
                  //   _context.GenerateToken(buffer, 0, (buffer == null ? 0 : buffer.Length), ref output);
                 //         ProtocolToken message =  _context.NextMessage(buffer, 0, (buffer == null ? 0 : buffer.Length));
                 await InnerStream.WriteAsync(message.Payload, cancellationToken).ConfigureAwait(false);
@@ -497,7 +497,7 @@ namespace System.Net.Security
         //
         private void StartSendBlob(byte[] incoming, int count, AsyncProtocolRequest asyncRequest)
         {
-            ProtocolToken message = _context.NextMessage(incoming, 0, count);
+            ProtocolToken message = _context.NextMessage(new ReadOnlySpan<byte>(incoming, 0, count));
             _securityStatus = message.Status;
 
             if (message.Size != 0)
@@ -667,15 +667,15 @@ namespace System.Net.Security
                 }
             }
 
-            var inputBuffer = new ReadOnlyMemory<byte>(_internalBuffer, _internalOffset, frameSize);
+            var r = ProcessReceivedBlob2(_internalBuffer, _internalOffset, frameSize, cancellationToken);
             ConsumeBufferedBytes(frameSize);
-            return ProcessReceivedBlob2(inputBuffer, cancellationToken);
+
+            return r;
         }
 
         //
         private void StartReadFrame(byte[] buffer, int readBytes, AsyncProtocolRequest asyncRequest)
         {
-//            Console.WriteLine("StartReadingFRame called with {0}", readBytes);
             if (readBytes == 0)
             {
                 // EOF received
@@ -688,7 +688,6 @@ namespace System.Net.Security
             }
 
             int restBytes = GetRemainingFrameSize(buffer, 0, readBytes);
-//            Console.WriteLine("GetReamingBytes returned res={0}", restBytes);
 
             if (restBytes < 0)
             {
@@ -773,24 +772,16 @@ namespace System.Net.Security
             StartSendBlob(buffer, count, asyncRequest);
         }
 
-        private ProtocolToken ProcessReceivedBlob2(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
+        private ProtocolToken ProcessReceivedBlob2(byte[] buffer, int bufferOffset, int count, CancellationToken cancellationToken)
         {
-//            Console.WriteLine("ProcessReceivedBlobAsync called with {0}", buffer.Length);
-            int count = buffer.Length;
-//            if (buffer.Length == 0)
-//            {
-//                // EOF received.
-//                throw new AuthenticationException(SR.net_auth_eof, null);
-//            }
-
             if (_pendingReHandshake)
             {
                 int offset = 0;
-                SecurityStatusPal status = PrivateDecryptData(buffer.ToArray(), ref offset, ref count);
+                SecurityStatusPal status = PrivateDecryptData(buffer, ref offset, ref count);
 
                 if (status.ErrorCode == SecurityStatusPalErrorCode.OK)
                 {
-                    Exception e = EnqueueOldKeyDecryptedData(buffer.ToArray(), offset, count);
+                    Exception e = EnqueueOldKeyDecryptedData(buffer, offset, count);
                     if (e != null)
                     {
                         //StartSendAuthResetSignal(null, asyncRequest, ExceptionDispatchInfo.Capture(e));
@@ -819,10 +810,7 @@ namespace System.Net.Security
                 }
             }
 
-            ProtocolToken message2 = _context.NextMessage(buffer.ToArray(), 0, count);
-//            Console.WriteLine("Mesage2 = {0} {1} {2}", message2, message2?.Size, message2?.Status);
-
-            return message2;
+            return _context.NextMessage(new ReadOnlySpan<byte>(buffer, bufferOffset, count));
         }
 
         //

@@ -718,14 +718,13 @@ namespace System.Net.Security
             return cachedCred;
         }
 
-        //
-        internal ProtocolToken NextMessage(byte[] incoming, int offset, int count)
+        internal ProtocolToken NextMessage(ReadOnlySpan<byte> incoming)
         {
             if (NetEventSource.IsEnabled)
                 NetEventSource.Enter(this);
 
             byte[] nextmsg = null;
-            SecurityStatusPal status = GenerateToken(incoming, offset, count, ref nextmsg);
+            SecurityStatusPal status = GenerateToken(incoming, ref nextmsg);
 
             if (!_sslAuthenticationOptions.IsServer && status.ErrorCode == SecurityStatusPalErrorCode.CredentialsNeeded)
             {
@@ -733,7 +732,7 @@ namespace System.Net.Security
                     NetEventSource.Info(this, "NextMessage() returned SecurityStatusPal.CredentialsNeeded");
 
                 SetRefreshCredentialNeeded();
-                status = GenerateToken(incoming, offset, count, ref nextmsg);
+                status = GenerateToken(incoming, ref nextmsg);
             }
 
             ProtocolToken token = new ProtocolToken(nextmsg, status);
@@ -781,11 +780,10 @@ namespace System.Net.Security
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            return GenerateToken(new ReadOnlyMemory<byte>(input, offset, count), ref output);
+            return GenerateToken(new ReadOnlySpan<byte>(input, offset, count), ref output);
         }
 
-    //    internal SecurityStatusPal GenerateToken(byte[] input, int offset, int count, ref byte[] output)
-    internal SecurityStatusPal GenerateToken(ReadOnlyMemory<byte> input, ref byte[] output)
+        internal SecurityStatusPal GenerateToken(ReadOnlySpan<byte> input, ref byte[] output)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, $"_refreshCredentialNeeded = {_refreshCredentialNeeded}");
 
