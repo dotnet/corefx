@@ -464,7 +464,7 @@ namespace System.Net.Security
 
             if (!receiveFirst)
             {
-                message =_context.NextMessage(null);
+                message =_context.NextMessage(null, 0, 0);
                  //   _context.GenerateToken(buffer, 0, (buffer == null ? 0 : buffer.Length), ref output);
                 //         ProtocolToken message =  _context.NextMessage(buffer, 0, (buffer == null ? 0 : buffer.Length));
                 await InnerStream.WriteAsync(message.Payload, cancellationToken).ConfigureAwait(false);
@@ -503,7 +503,7 @@ namespace System.Net.Security
         //
         private void StartSendBlob(byte[] incoming, int count, AsyncProtocolRequest asyncRequest)
         {
-            ProtocolToken message = _context.NextMessage(new ReadOnlySpan<byte>(incoming, 0, count));
+            ProtocolToken message = _context.NextMessage(incoming, 0, count);
             _securityStatus = message.Status;
 
             if (message.Size != 0)
@@ -811,12 +811,11 @@ namespace System.Net.Security
                 _pendingReHandshake = false;
                 if (offset != 0)
                 {
-                    // FUT FIX Buffer.BlockCopy(buffer, offset, buffer, 0, buffer.Length);
-                    //Buffer.BlockCopy();
+                    Buffer.BlockCopy(buffer, offset, buffer, 0, buffer.Length);
                 }
             }
 
-            return _context.NextMessage(new ReadOnlySpan<byte>(buffer, bufferOffset, count));
+            return _context.NextMessage(buffer, bufferOffset, count);
         }
 
         //

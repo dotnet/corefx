@@ -718,13 +718,13 @@ namespace System.Net.Security
             return cachedCred;
         }
 
-        internal ProtocolToken NextMessage(ReadOnlySpan<byte> incoming)
+        internal ProtocolToken NextMessage(byte[] incoming, int offset, int count)
         {
             if (NetEventSource.IsEnabled)
                 NetEventSource.Enter(this);
 
             byte[] nextmsg = null;
-            SecurityStatusPal status = GenerateToken(incoming, ref nextmsg);
+            SecurityStatusPal status = GenerateToken(incoming, offset, count, ref nextmsg);
 
             if (!_sslAuthenticationOptions.IsServer && status.ErrorCode == SecurityStatusPalErrorCode.CredentialsNeeded)
             {
@@ -732,7 +732,7 @@ namespace System.Net.Security
                     NetEventSource.Info(this, "NextMessage() returned SecurityStatusPal.CredentialsNeeded");
 
                 SetRefreshCredentialNeeded();
-                status = GenerateToken(incoming, ref nextmsg);
+                status = GenerateToken(incoming, offset, count, ref nextmsg);
             }
 
             ProtocolToken token = new ProtocolToken(nextmsg, status);
@@ -766,8 +766,12 @@ namespace System.Net.Security
             Return:
                 status - error information
         --*/
+
+        //internal SecurityStatusPal GenerateToken(ReadOnlySpan<byte> input, ref byte[] output)
         internal SecurityStatusPal GenerateToken(byte[] input, int offset, int count, ref byte[] output)
         {
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(this, $"_refreshCredentialNeeded = {_refreshCredentialNeeded}");
+
             if (offset < 0 || offset > (input == null ? 0 : input.Length))
             {
                 NetEventSource.Fail(this, "Argument 'offset' out of range.");
@@ -780,13 +784,7 @@ namespace System.Net.Security
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            return GenerateToken(new ReadOnlySpan<byte>(input, offset, count), ref output);
-        }
-
-        internal SecurityStatusPal GenerateToken(ReadOnlySpan<byte> input, ref byte[] output)
-        {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this, $"_refreshCredentialNeeded = {_refreshCredentialNeeded}");
-
+//            return GenerateToken(new ReadOnlySpan<byte>(input, offset, count), ref output);
 
             byte[] result = Array.Empty<byte>();
             SecurityStatusPal status = default;
@@ -805,7 +803,7 @@ namespace System.Net.Security
                     if (_refreshCredentialNeeded)
                     {
                         cachedCreds = _sslAuthenticationOptions.IsServer
-                                        ? AcquireServerCredentials(ref thumbPrint, input.ToArray())
+                                        ? AcquireServerCredentials(ref thumbPrint, input)
                                         : AcquireClientCredentials(ref thumbPrint);
                     }
 
@@ -814,7 +812,7 @@ namespace System.Net.Security
                         status = SslStreamPal.AcceptSecurityContext(
                                       ref _credentialsHandle,
                                       ref _securityContext,
-                                      input,
+                                      input, offset, count,
                                       ref result,
                                       _sslAuthenticationOptions);
                     }
@@ -824,7 +822,7 @@ namespace System.Net.Security
                                        ref _credentialsHandle,
                                        ref _securityContext,
                                        _sslAuthenticationOptions.TargetHost,
-                                      input,
+                                       input, offset, count,
                                        ref result,
                                        _sslAuthenticationOptions);
                     }
