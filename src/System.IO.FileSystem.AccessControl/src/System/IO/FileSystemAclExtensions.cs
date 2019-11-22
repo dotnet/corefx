@@ -52,21 +52,27 @@ namespace System.IO
 
         public static FileSecurity GetAccessControl(this FileStream fileStream)
         {
+            if (fileStream == null)
+                throw new NullReferenceException(nameof(fileStream));
+
             SafeFileHandle handle = fileStream.SafeFileHandle;
             if (handle.IsClosed)
             {
                 throw new ObjectDisposedException(null, SR.ObjectDisposed_FileClosed);
             }
+
             return new FileSecurity(handle, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
         }
 
         public static void SetAccessControl(this FileStream fileStream, FileSecurity fileSecurity)
         {
-            SafeFileHandle handle = fileStream.SafeFileHandle;
+            if (fileStream == null)
+                throw new NullReferenceException(nameof(fileStream));
 
             if (fileSecurity == null)
                 throw new ArgumentNullException(nameof(fileSecurity));
 
+            SafeFileHandle handle = fileStream.SafeFileHandle;
             if (handle.IsClosed)
             {
                 throw new ObjectDisposedException(null, SR.ObjectDisposed_FileClosed);
@@ -116,14 +122,10 @@ namespace System.IO
         public static FileStream Create(this FileInfo fileInfo, FileMode mode, FileSystemRights rights, FileShare share, int bufferSize, FileOptions options, FileSecurity fileSecurity)
         {
             if (fileInfo == null)
-            {
                 throw new ArgumentNullException(nameof(fileInfo));
-            }
 
             if (fileSecurity == null)
-            {
                 throw new ArgumentNullException(nameof(fileSecurity));
-            }
 
             // don't include inheritable in our bounds check for share
             FileShare tempshare = share & ~FileShare.Inheritable;
