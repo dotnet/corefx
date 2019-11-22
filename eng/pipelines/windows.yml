@@ -146,7 +146,12 @@ stages:
                   _helixQueues: $(allConfigurationsQueues)
 
           pool:
-            name: Hosted VS2017
+            ${{ if ne(variables['System.TeamProject'], 'public') }}:
+              name: NetCoreInternal-Pool
+              queue: BuildPool.Windows.10.Amd64.VS2017
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
+              name: NetCorePublic-Pool
+              queue: BuildPool.Windows.10.Amd64.VS2017.Open
 
           submitToHelix: true
           buildExtraArguments: /p:RuntimeOS=win10
