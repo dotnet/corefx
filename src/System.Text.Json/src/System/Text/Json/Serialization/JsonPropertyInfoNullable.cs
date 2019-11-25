@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
@@ -91,13 +92,37 @@ namespace System.Text.Json
                 key = enumerator.Current.Key;
                 value = enumerator.Current.Value;
             }
-            else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty)
+            else
             {
-                key = (string)((DictionaryEntry)current.CollectionEnumerator.Current).Key;
-                value = (TProperty?)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
+                if (((DictionaryEntry)current.CollectionEnumerator.Current).Key is string keyAsString)
+                {
+                    key = keyAsString;
+                    value = (TProperty?)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
+                }
+                else
+                {
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                        current.JsonPropertyInfo.DeclaredPropertyType,
+                        current.JsonPropertyInfo.ParentClassType,
+                        current.JsonPropertyInfo.PropertyInfo);
+                }
             }
 
             Debug.Assert(key != null);
+
+            if (Options.DictionaryKeyPolicy != null)
+            {
+                // We should not be in the Nullable-value implementation branch for extension data.
+                // (TValue should be typeof(object) or typeof(JsonElement)).
+                Debug.Assert(current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing);
+
+                key = Options.DictionaryKeyPolicy.ConvertName(key);
+
+                if (key == null)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_SerializerDictionaryKeyNull(Options.DictionaryKeyPolicy.GetType());
+                }
+            }
 
             if (value == null)
             {
@@ -105,16 +130,6 @@ namespace System.Text.Json
             }
             else
             {
-                if (Options.DictionaryKeyPolicy != null)
-                {
-                    key = Options.DictionaryKeyPolicy.ConvertName(key);
-
-                    if (key == null)
-                    {
-                        ThrowHelper.ThrowInvalidOperationException_SerializerDictionaryKeyNull(Options.DictionaryKeyPolicy.GetType());
-                    }
-                }
-
                 writer.WritePropertyName(key);
                 Converter.Write(writer, value.GetValueOrDefault(), Options);
             }
@@ -151,6 +166,22 @@ namespace System.Text.Json
         public override Type GetDictionaryConcreteType()
         {
             return typeof(Dictionary<string, TProperty?>);
+        }
+
+        public override void GetDictionaryKeyAndValueFromGenericDictionary(ref WriteStackFrame writeStackFrame, out string key, out object value)
+        {
+            if (writeStackFrame.CollectionEnumerator is IEnumerator<KeyValuePair<string, TProperty?>> genericEnumerator)
+            {
+                key = genericEnumerator.Current.Key;
+                value = genericEnumerator.Current.Value;
+            }
+            else
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    writeStackFrame.JsonPropertyInfo.DeclaredPropertyType,
+                    writeStackFrame.JsonPropertyInfo.ParentClassType,
+                    writeStackFrame.JsonPropertyInfo.PropertyInfo);
+            }
         }
     }
 }

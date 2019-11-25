@@ -1021,7 +1021,7 @@ namespace System.Threading.Tasks
                 "thread local functions should only be supplied for loops w/ thread local bodies");
 
             // Instantiate our result.  Specifics will be filled in later.
-            ParallelLoopResult result = new ParallelLoopResult();
+            ParallelLoopResult result = default;
 
             // We just return immediately if 'to' is smaller (or equal to) 'from'.
             if (toExclusive <= fromInclusive)
@@ -1040,7 +1040,7 @@ namespace System.Threading.Tasks
 
             // initialize ranges with passed in loop arguments and expected number of workers
             int numExpectedWorkers = (parallelOptions.EffectiveMaxConcurrencyLevel == -1) ?
-                PlatformHelper.ProcessorCount :
+                Environment.ProcessorCount :
                 parallelOptions.EffectiveMaxConcurrencyLevel;
             RangeManager rangeManager = new RangeManager(fromInclusive, toExclusive, 1, numExpectedWorkers);
 
@@ -1282,7 +1282,7 @@ namespace System.Threading.Tasks
                 "thread local functions should only be supplied for loops w/ thread local bodies");
 
             // Instantiate our result.  Specifics will be filled in later.
-            ParallelLoopResult result = new ParallelLoopResult();
+            ParallelLoopResult result = default;
 
             // We just return immediately if 'to' is smaller (or equal to) 'from'.
             if (toExclusive <= fromInclusive)
@@ -1302,7 +1302,7 @@ namespace System.Threading.Tasks
 
             // initialize ranges with passed in loop arguments and expected number of workers
             int numExpectedWorkers = (parallelOptions.EffectiveMaxConcurrencyLevel == -1) ?
-                PlatformHelper.ProcessorCount :
+                Environment.ProcessorCount :
                 parallelOptions.EffectiveMaxConcurrencyLevel;
             RangeManager rangeManager = new RangeManager(fromInclusive, toExclusive, 1, numExpectedWorkers);
 
@@ -3101,7 +3101,7 @@ namespace System.Threading.Tasks
             ParallelLoopStateFlags64 sharedPStateFlags = new ParallelLoopStateFlags64();
 
             // Instantiate our result.  Specifics will be filled in later.
-            ParallelLoopResult result = new ParallelLoopResult();
+            ParallelLoopResult result = default;
 
             // Keep track of any cancellations
             OperationCanceledException? oce = null;

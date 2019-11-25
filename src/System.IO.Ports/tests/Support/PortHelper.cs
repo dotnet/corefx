@@ -22,12 +22,12 @@ namespace Legacy.Support
 
         public static string[] GetPorts()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (!PlatformDetection.IsWindows)
             {
                 return SerialPort.GetPortNames();
             }
 
-            if (PlatformDetection.IsUap)
+            if (PlatformDetection.IsInAppContainer)
             {
                 // On UAP it is not possible to call QueryDosDevice, so use HARDWARE\DEVICEMAP\SERIALCOMM on the registry
                 // to get this information. The UAP code uses the GetCommPorts API to retrieve the same information.

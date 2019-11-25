@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Tests;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -18,40 +19,32 @@ namespace System.Globalization.Tests
             yield return new object[] { CultureInfo.InvariantCulture };
         }
 
-        [ActiveIssue(33904, TargetFrameworkMonikers.Uap)]
         [Theory]
         [MemberData(nameof(CurrentInfo_CustomCulture_TestData))]
         public void CurrentInfo_CustomCulture(CultureInfo newCurrentCulture)
         {
-            RemoteExecutor.Invoke((cultureName) =>
+            using (new ThreadCultureChange(newCurrentCulture))
             {
-                CultureInfo newCulture = CultureInfo.GetCultureInfo(cultureName);
-                CultureInfo.CurrentCulture = newCulture;
-                Assert.Same(newCulture.NumberFormat, NumberFormatInfo.CurrentInfo);
-                return RemoteExecutor.SuccessExitCode;
-            }, newCurrentCulture.Name).Dispose();
+                Assert.Same(newCurrentCulture.NumberFormat, NumberFormatInfo.CurrentInfo);
+            }
         }
 
         [Fact]
         public void CurrentInfo_Subclass_OverridesGetFormat()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange(new CultureInfoSubclassOverridesGetFormat("en-US")))
             {
-                CultureInfo.CurrentCulture = new CultureInfoSubclassOverridesGetFormat("en-US");
                 Assert.Same(CultureInfoSubclassOverridesGetFormat.CustomFormat, NumberFormatInfo.CurrentInfo);
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]
         public void CurrentInfo_Subclass_OverridesNumberFormat()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange(new CultureInfoSubclassOverridesNumberFormat("en-US")))
             {
-                CultureInfo.CurrentCulture = new CultureInfoSubclassOverridesNumberFormat("en-US");
                 Assert.Same(CultureInfoSubclassOverridesNumberFormat.CustomFormat, NumberFormatInfo.CurrentInfo);
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         private class CultureInfoSubclassOverridesGetFormat : CultureInfo

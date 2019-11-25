@@ -241,15 +241,10 @@ namespace System.Globalization
             return new CultureInfo(cultureName)._cultureData.GetLocaleInfo(cultureName, LocaleStringData.LocalizedDisplayName);
         }
 
-        private static string? GetRegionDisplayName(string? isoCountryCode)
+        private static string? GetRegionDisplayName()
         {
             // use the fallback which is to return NativeName
             return null;
-        }
-
-        private static CultureInfo GetUserDefaultCulture()
-        {
-            return CultureInfo.GetUserDefaultCulture();
         }
 
         private static string ConvertIcuTimeFormatString(ReadOnlySpan<char> icuFormatString)

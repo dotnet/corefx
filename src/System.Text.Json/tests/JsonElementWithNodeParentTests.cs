@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Globalization;
 using System.IO;
 using Xunit;
@@ -100,7 +101,6 @@ namespace System.Text.Json.Tests
             jsonObject["2"] = 4;
             Assert.Throws<InvalidOperationException>(() => objectEnumerator.MoveNext());
 
-
             JsonElement notObject = new JsonArray().AsJsonElement();
             Assert.Throws<InvalidOperationException>(() => notObject.EnumerateObject());
         }
@@ -122,8 +122,22 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestBytesFromBase64()
         {
-            Assert.Throws<NotSupportedException>(() => new JsonString().AsJsonElement().GetBytesFromBase64());
+            string valueString = "value";
+            string valueBase64String = "dmFsdWU=";
+
+            Assert.Equal(Encoding.UTF8.GetBytes(valueString), new JsonString(valueBase64String).AsJsonElement().GetBytesFromBase64());
+            Assert.Equal(Encoding.UTF8.GetBytes(SR.LoremIpsum40Words), new JsonString(SR.LoremIpsum40WordsBase64).AsJsonElement().GetBytesFromBase64());
+
+            Assert.Throws<FormatException>(() => new JsonString("Not base-64").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JsonString("abc").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JsonString("").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JsonString().AsJsonElement().GetBytesFromBase64());
+
             Assert.Throws<InvalidOperationException>(() => new JsonBoolean().AsJsonElement().GetBytesFromBase64());
+
+            Assert.True(new JsonString(valueBase64String).AsJsonElement().TryGetBytesFromBase64(out byte[] buffer));
+            Assert.Equal(Encoding.UTF8.GetBytes(valueString), buffer);
+            Assert.False(new JsonString().AsJsonElement().TryGetBytesFromBase64(out _));
         }
 
         [Fact]
@@ -244,13 +258,13 @@ namespace System.Text.Json.Tests
                 ["array"] = new JsonArray() { 1, 2 }
             };
 
-            var stream = new MemoryStream();
-            using (var writer = new Utf8JsonWriter(stream))
+            var output = new ArrayBufferWriter<byte>();
+            using (var writer = new Utf8JsonWriter(output))
             {
                 jsonObject.AsJsonElement().WriteTo(writer);
-                string result = Encoding.UTF8.GetString(stream.ToArray());
-                Assert.Equal(jsonObject.ToJsonString(), result);
             }
+
+            JsonTestHelper.AssertContents(jsonObject.ToJsonString(), output);
         }
 
         [Fact]
@@ -258,7 +272,10 @@ namespace System.Text.Json.Tests
         {
             var jsonObject = new JsonObject()
             {
-                ["text"] = "value",
+                ["text"] = "za\u017C\u00F3\u0142\u0107 g\u0119\u015Bl\u0105 ja\u017A\u0144",
+                ["text2"] = ">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>",
+                ["text3"] = "..\t\r\n...\"quote\"",
+                ["<<.\t\r\n.\"quote\".\u017C\u00F3>>"] = "",
                 ["boolean"] = true,
                 ["null"] = null,
                 ["array"] = new JsonArray() { 1, 2 }

@@ -99,29 +99,27 @@ namespace System.Text.Json.Tests
             Assert.Equal(guidString, ((JsonString)jsonObject["guid"]).Value);
         }
 
-        public static IEnumerable<object[]> DateTimeData =>
-            new List<object[]>
-            {
-                new object[] { new DateTime(DateTime.MinValue.Ticks, DateTimeKind.Utc) },
-                new object[] { new DateTime(2019, 1, 1) },
-                new object[] { new DateTime(2019, 1, 1, new GregorianCalendar()) },
-                new object[] { new DateTime(2019, 1, 1, new ChineseLunisolarCalendar()) }
-            };
-
         [Theory]
-        [MemberData(nameof(DateTimeData))]
-        public static void TestDateTime(DateTime dateTime)
+        [MemberData(nameof(JsonDateTimeTestData.DateTimeFractionTrimBaseTests), MemberType = typeof(JsonDateTimeTestData))]
+        [MemberData(nameof(JsonDateTimeTestData.DateTimeFractionTrimUtcOffsetTests), MemberType = typeof(JsonDateTimeTestData))]
+        public static void TestDateTime(string testStr, string expectedStr)
         {
+            var dateTime = DateTime.ParseExact(testStr, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+
             var jsonObject = new JsonObject { { "dateTime", dateTime } };
-            Assert.Equal(dateTime.ToString("s", CultureInfo.InvariantCulture), ((JsonString)jsonObject["dateTime"]).Value);
+
+            Assert.Equal(expectedStr, ((JsonString)jsonObject["dateTime"]).Value);
         }
 
         [Theory]
-        [MemberData(nameof(DateTimeData))]
-        public static void TestDateTimeOffset(DateTimeOffset dateTimeOffset)
+        [MemberData(nameof(JsonDateTimeTestData.DateTimeOffsetFractionTrimTests), MemberType = typeof(JsonDateTimeTestData))]
+        public static void TestDateTimeOffset(string testStr, string expectedStr)
         {
+            var dateTimeOffset = DateTimeOffset.ParseExact(testStr, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+
             var jsonObject = new JsonObject { { "dateTimeOffset", dateTimeOffset } };
-            Assert.Equal(dateTimeOffset.ToString("s", CultureInfo.InvariantCulture), ((JsonString)jsonObject["dateTimeOffset"]).Value);
+
+            Assert.Equal(expectedStr, ((JsonString)jsonObject["dateTimeOffset"]).Value);
         }
 
         [Fact]
@@ -343,6 +341,19 @@ namespace System.Text.Json.Tests
 
             jsonObject["null1"] = null;
             Assert.IsType<JsonNull>(jsonObject["null1"]);
+        }
+
+        [Fact]
+        public static void TestGetAndTryGetNullProperty()
+        {
+            var jsonObject = new JsonObject
+            {
+                { "null", null }
+            };
+
+            Assert.IsType<JsonNull>(jsonObject.GetPropertyValue("null"));
+            Assert.True(jsonObject.TryGetPropertyValue("null", out JsonNode node));
+            Assert.IsType<JsonNull>(node);
         }
 
         [Fact]
@@ -570,6 +581,23 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestGetJsonObjectPropertyValueOnDifferentLevelFails()
+        {
+            var jsonObject = new JsonObject()
+            {
+                {
+                    "inner object", new JsonObject()
+                    {
+                        {  "object", new JsonObject() }
+                    }
+                }
+            };
+
+            Assert.Equal(1, jsonObject.GetJsonObjectPropertyValue("inner object").GetPropertyNames().Count);
+            Assert.Throws<KeyNotFoundException>(() => jsonObject.GetJsonObjectPropertyValue("object"));
+        }
+
+        [Fact]
         public static void TestTryGetObjectPropertyFails()
         {
             var jsonObject = new JsonObject()
@@ -596,6 +624,22 @@ namespace System.Text.Json.Tests
 
                 jsonObject.GetJsonArrayPropertyValue("name");
             });
+        }
+
+        [Fact]
+        public static void TestGetJsonArrayPropertyValueOnDifferentLevelFails()
+        {
+            var jsonObject = new JsonObject()
+            {
+                {
+                    "inner object", new JsonObject()
+                    {
+                        {  "array", new JsonArray() { 1, 2 } }
+                    }
+                }
+            };
+
+            Assert.Throws<KeyNotFoundException>(() => jsonObject.GetJsonArrayPropertyValue("array"));
         }
 
         [Fact]
@@ -654,7 +698,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestStringComparisonEnum()
+        public static void TestStringComparisonEnumGetPropertyRemoveContains()
         {
             var jsonObject = new JsonObject()
             {
@@ -670,30 +714,56 @@ namespace System.Text.Json.Tests
             Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", out JsonNode jsonNode));
             Assert.Null(jsonNode);
             Assert.Throws<KeyNotFoundException>(() => jsonObject.GetPropertyValue("ENCYCLOPAEDIA"));
-            jsonObject.Remove("ENCYCLOPAEDIA");
+            Assert.False(jsonObject.Remove("ENCYCLOPAEDIA"));
             Assert.Equal(4, jsonObject.Count());
 
-            Assert.False(jsonObject.ContainsProperty("ENCYCLOPAEDIA", StringComparison.CurrentCulture));
-            Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", StringComparison.CurrentCulture, out jsonNode));
-            Assert.Null(jsonNode);
-            Assert.Throws<KeyNotFoundException>(() => jsonObject.GetPropertyValue("ENCYCLOPAEDIA", StringComparison.CurrentCulture));
-            jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.CurrentCulture);
-            Assert.Equal(4, jsonObject.Count());
+            Check(jsonObject, StringComparison.CurrentCulture);
+            Check(jsonObject, StringComparison.InvariantCulture);
+            Check(jsonObject, StringComparison.Ordinal);
 
-            Assert.True(jsonObject.ContainsProperty("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase));
-            Assert.True(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase, out jsonNode));
-            Assert.Equal("value2", jsonNode);
-            Assert.Equal("value2", jsonObject.GetPropertyValue("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase));
-            jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase);
-            Assert.Equal(3, jsonObject.Count());
+            CheckIgnoreCase(StringComparison.CurrentCultureIgnoreCase);
+            CheckIgnoreCase(StringComparison.InvariantCultureIgnoreCase);
+            CheckIgnoreCase(StringComparison.OrdinalIgnoreCase);
 
-            IReadOnlyCollection<JsonNode> values = jsonObject.GetPropertyValues();
-            Assert.False(values.Contains("value2"));
-            Assert.True(values.Contains("value1"));
-            Assert.True(values.Contains("value3"));
-            Assert.True(values.Contains("value4"));
+            void Check(JsonObject jsonObject, StringComparison stringComparison)
+            {
+                Assert.False(jsonObject.ContainsProperty("ENCYCLOPAEDIA", stringComparison));
+                Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", stringComparison, out JsonNode jsonNode));
+                Assert.Null(jsonNode);
+                Assert.Throws<KeyNotFoundException>(() => jsonObject.GetPropertyValue("ENCYCLOPAEDIA", stringComparison));
+                Assert.False(jsonObject.Remove("ENCYCLOPAEDIA", stringComparison));
+                Assert.Equal(4, jsonObject.Count());
+            }
 
-            jsonObject = new JsonObject()
+            void CheckIgnoreCase(StringComparison stringComparison)
+            {
+                var jsonObject = new JsonObject()
+                {
+                    { "not encyclopaedia", "value1" },
+                    { "Encyclopaedia", "value2" },
+                    { "NOT encyclopaedia", "value3" },
+                    { "encyclopaedia", "value4" }
+                };
+
+                Assert.True(jsonObject.ContainsProperty("ENCYCLOPAEDIA", stringComparison));
+                Assert.True(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", stringComparison, out jsonNode));
+                Assert.Equal("value2", jsonNode);
+                Assert.Equal("value2", jsonObject.GetPropertyValue("ENCYCLOPAEDIA", stringComparison));
+                Assert.True(jsonObject.Remove("ENCYCLOPAEDIA", stringComparison));
+                Assert.Equal(3, jsonObject.Count());
+
+                IReadOnlyCollection<JsonNode> values = jsonObject.GetPropertyValues();
+                Assert.False(values.Contains("value2"));
+                Assert.True(values.Contains("value1"));
+                Assert.True(values.Contains("value3"));
+                Assert.True(values.Contains("value4"));
+            }
+        }
+
+        [Fact]
+        public static void TestStringComparisonEnumGetArrayOrObjectProperty()
+        {
+            var jsonObject = new JsonObject()
             {
                 { "object first", new JsonObject() },
                 { "object FIRST", new JsonArray() },
@@ -701,34 +771,73 @@ namespace System.Text.Json.Tests
                 { "array FIRST", new JsonObject() }
             };
 
-            Assert.Equal(0, jsonObject.GetJsonObjectPropertyValue("OBJECT first",
-                StringComparison.InvariantCultureIgnoreCase).GetPropertyNames().Count);
-            Assert.True(jsonObject.TryGetJsonObjectPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase,
-                out JsonObject objectProperty));
-            Assert.Equal(0, objectProperty.GetPropertyNames().Count);
+            Check(jsonObject, StringComparison.CurrentCulture);
+            Check(jsonObject, StringComparison.InvariantCulture);
+            Check(jsonObject, StringComparison.Ordinal);
 
-            Assert.Throws<ArgumentException>(() =>
-                jsonObject.GetJsonArrayPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase));
-            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase,
-                out JsonArray arrayProperty));
-            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("something different", StringComparison.InvariantCultureIgnoreCase,
-                out arrayProperty));
+            CheckIgnoreCase(jsonObject, StringComparison.CurrentCultureIgnoreCase);
+            CheckIgnoreCase(jsonObject, StringComparison.InvariantCultureIgnoreCase);
+            CheckIgnoreCase(jsonObject, StringComparison.OrdinalIgnoreCase);
 
-            Assert.Equal(0, jsonObject.GetJsonArrayPropertyValue("ARRAY first",
-                StringComparison.InvariantCultureIgnoreCase).Count);
-            Assert.True(jsonObject.TryGetJsonArrayPropertyValue("ARRAY first", StringComparison.InvariantCultureIgnoreCase,
-                out arrayProperty));
-            Assert.Equal(0, arrayProperty.Count);
+            void Check(JsonObject jsonObject, StringComparison stringComparison)
+            {
+                Assert.Equal(0, jsonObject.GetJsonObjectPropertyValue("object first",
+                    stringComparison).GetPropertyNames().Count);
+                Assert.True(jsonObject.TryGetJsonObjectPropertyValue("object first", stringComparison,
+                    out JsonObject objectProperty));
+                Assert.Equal(0, objectProperty.GetPropertyNames().Count);
 
-            Assert.Throws<ArgumentException>(() =>
-                jsonObject.GetJsonObjectPropertyValue("ARRAY first", StringComparison.InvariantCultureIgnoreCase));
-            Assert.False(jsonObject.TryGetJsonObjectPropertyValue("ARRAY first", StringComparison.InvariantCultureIgnoreCase,
-                out objectProperty));
-            Assert.False(jsonObject.TryGetJsonObjectPropertyValue("something different", StringComparison.InvariantCultureIgnoreCase,
-                out objectProperty));
+                Assert.Throws<ArgumentException>(() =>
+                    jsonObject.GetJsonObjectPropertyValue("object FIRST", stringComparison));
+                Assert.False(jsonObject.TryGetJsonObjectPropertyValue("object FIRST", stringComparison,
+                    out objectProperty));
 
-            Assert.Throws<ArgumentNullException>(() =>
-               jsonObject.Remove(null, StringComparison.InvariantCultureIgnoreCase));
+                Assert.Equal(0, jsonObject.GetJsonArrayPropertyValue("array first",
+                   stringComparison).Count);
+                Assert.True(jsonObject.TryGetJsonArrayPropertyValue("array first", stringComparison,
+                    out JsonArray arrayProperty));
+                Assert.Equal(0, arrayProperty.Count);
+
+                Assert.Throws<ArgumentException>(() =>
+                    jsonObject.GetJsonArrayPropertyValue("array FIRST", stringComparison));
+                Assert.False(jsonObject.TryGetJsonArrayPropertyValue("array FIRST", stringComparison,
+                    out arrayProperty));
+
+                Assert.Throws<ArgumentNullException>(() =>
+                   jsonObject.Remove(null, stringComparison));
+            }
+
+            void CheckIgnoreCase(JsonObject jsonObject, StringComparison stringComparison)
+            {
+                Assert.Equal(0, jsonObject.GetJsonObjectPropertyValue("OBJECT first",
+                    stringComparison).GetPropertyNames().Count);
+                Assert.True(jsonObject.TryGetJsonObjectPropertyValue("OBJECT first", stringComparison,
+                    out JsonObject objectProperty));
+                Assert.Equal(0, objectProperty.GetPropertyNames().Count);
+
+                Assert.Throws<ArgumentException>(() =>
+                    jsonObject.GetJsonArrayPropertyValue("OBJECT first", stringComparison));
+                Assert.False(jsonObject.TryGetJsonArrayPropertyValue("OBJECT first", stringComparison,
+                    out JsonArray arrayProperty));
+                Assert.False(jsonObject.TryGetJsonArrayPropertyValue("something different", stringComparison,
+                    out arrayProperty));
+
+                Assert.Equal(0, jsonObject.GetJsonArrayPropertyValue("ARRAY first",
+                   stringComparison).Count);
+                Assert.True(jsonObject.TryGetJsonArrayPropertyValue("ARRAY first", stringComparison,
+                    out arrayProperty));
+                Assert.Equal(0, arrayProperty.Count);
+
+                Assert.Throws<ArgumentException>(() =>
+                    jsonObject.GetJsonObjectPropertyValue("ARRAY first", stringComparison));
+                Assert.False(jsonObject.TryGetJsonObjectPropertyValue("ARRAY first", stringComparison,
+                    out objectProperty));
+                Assert.False(jsonObject.TryGetJsonObjectPropertyValue("something different", stringComparison,
+                    out objectProperty));
+
+                Assert.Throws<ArgumentNullException>(() =>
+                   jsonObject.Remove(null, stringComparison));
+            }
         }
 
         [Fact]

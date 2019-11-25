@@ -271,22 +271,18 @@ namespace System.Net.Sockets
             }
         }
 
-        public IntPtr Handle
-        {
-            get
-            {
-                _handle.SetExposed();
-                return _handle.DangerousGetHandle();
-            }
-        }
+        public IntPtr Handle => SafeHandle.DangerousGetHandle();
 
         public SafeSocketHandle SafeHandle
         {
             get
             {
+                _handle.SetExposed();
                 return _handle;
             }
         }
+
+        internal SafeSocketHandle InternalSafeHandle => _handle; // returns _handle without calling SetExposed.
 
         // Gets and sets the blocking mode of a socket.
         public bool Blocking
@@ -949,7 +945,18 @@ namespace System.Net.Sockets
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, timeout);
         }
 
-        // Places a socket in a listening state.
+        /// <summary>
+        /// Places a <see cref="Socket"/> in a listening state.
+        /// </summary>
+        /// <remarks>
+        /// The maximum length of the pending connections queue will be determined automatically.
+        /// </remarks>
+        public void Listen() => Listen(int.MaxValue);
+
+        /// <summary>
+        /// Places a <see cref="Socket"/> in a listening state.
+        /// </summary>
+        /// <param name="backlog">The maximum length of the pending connections queue.</param>
         public void Listen(int backlog)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, backlog);
@@ -5073,6 +5080,21 @@ namespace System.Net.Sockets
         private void ThrowObjectDisposedException() => throw new ObjectDisposedException(GetType().FullName);
 
         private bool IsConnectionOriented => _socketType == SocketType.Stream;
+
+        internal static void SocketListDangerousReleaseRefs(IList socketList, ref int refsAdded)
+        {
+            if (socketList == null)
+            {
+                return;
+            }
+
+            for (int i = 0; (i < socketList.Count) && (refsAdded > 0); i++)
+            {
+                Socket socket = (Socket)socketList[i];
+                socket.InternalSafeHandle.DangerousRelease();
+                refsAdded--;
+            }
+        }
 
         #endregion
     }

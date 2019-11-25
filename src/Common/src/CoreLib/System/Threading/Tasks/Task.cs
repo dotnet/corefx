@@ -2273,7 +2273,7 @@ namespace System.Threading.Tasks
 
             // ETW event for Task Started
             TplEventSource log = TplEventSource.Log;
-            Guid savedActivityID = new Guid();
+            Guid savedActivityID = default;
             bool etwIsEnabled = log.IsEnabled();
             if (etwIsEnabled)
             {
@@ -2550,7 +2550,6 @@ namespace System.Threading.Tasks
             // If we're unable to because the task has already completed, queue it.
             if (!AddTaskContinuation(stateMachineBox, addBeforeOthers: false))
             {
-                Debug.Assert(stateMachineBox is Task, "Every state machine box should derive from Task");
                 ThreadPool.UnsafeQueueUserWorkItemInternal(stateMachineBox, preferLocal: true);
             }
         }
@@ -2563,7 +2562,7 @@ namespace System.Threading.Tasks
         /// </returns>
         public static YieldAwaitable Yield()
         {
-            return new YieldAwaitable();
+            return default;
         }
         #endregion
 
@@ -2882,7 +2881,7 @@ namespace System.Threading.Tasks
             }
 
             int spinCount = Threading.SpinWait.SpinCountforSpinBeforeWait;
-            var spinner = new SpinWait();
+            SpinWait spinner = default;
             while (spinner.Count < spinCount)
             {
                 spinner.SpinOnce(sleep1Threshold: -1);

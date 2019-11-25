@@ -72,7 +72,7 @@ namespace System.Text.Json
         internal static string Utf8GetString(ReadOnlySpan<byte> bytes)
         {
             return Encoding.UTF8.GetString(bytes
-#if netstandard
+#if NETSTANDARD2_0 || NETFRAMEWORK
                         .ToArray()
 #endif
                 );
@@ -83,7 +83,7 @@ namespace System.Text.Json
         /// </summary>
         internal static bool TryAdd<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, TValue value)
         {
-#if netstandard
+#if NETSTANDARD2_0 || NETFRAMEWORK
             if (!dictionary.ContainsKey(key))
             {
                 dictionary[key] = value;
@@ -93,6 +93,24 @@ namespace System.Text.Json
             return false;
 #else
             return dictionary.TryAdd(key, value);
+#endif
+        }
+
+        internal static bool IsFinite(double value)
+        {
+#if BUILDING_INBOX_LIBRARY
+            return double.IsFinite(value);
+#else
+            return !(double.IsNaN(value) || double.IsInfinity(value));
+#endif
+        }
+
+        internal static bool IsFinite(float value)
+        {
+#if BUILDING_INBOX_LIBRARY
+            return float.IsFinite(value);
+#else
+            return !(float.IsNaN(value) || float.IsInfinity(value));
 #endif
         }
     }

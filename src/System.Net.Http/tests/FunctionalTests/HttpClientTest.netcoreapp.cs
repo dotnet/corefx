@@ -32,8 +32,6 @@ namespace System.Net.Http.Functional.Tests
                 IWebProxy proxy = new WebProxy("http://localhost:3128/");
                 HttpClient.DefaultProxy = proxy;
                 Assert.True(Object.ReferenceEquals(proxy, HttpClient.DefaultProxy));
-
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -103,7 +101,7 @@ namespace System.Net.Http.Functional.Tests
         {
             using (var client = new HttpClient())
             {
-                Assert.Equal(PlatformDetection.IsUap ? new Version(2, 0) : new Version(1, 1), client.DefaultRequestVersion);
+                Assert.Equal(HttpVersion.Version11, client.DefaultRequestVersion);
                 Assert.Same(client.DefaultRequestVersion, client.DefaultRequestVersion);
             }
         }

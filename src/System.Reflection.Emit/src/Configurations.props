@@ -1,13 +1,12 @@
 ﻿<Project>
   <PropertyGroup>
     <PackageConfigurations>
-      netstandard;
+      netstandard2.0;
       netstandard1.1;
     </PackageConfigurations>
     <BuildConfigurations>
       netcoreapp-Windows_NT;
       netcoreapp-Unix;
-      uap-Windows_NT;
       $(PackageConfigurations);
     </BuildConfigurations>
   </PropertyGroup>

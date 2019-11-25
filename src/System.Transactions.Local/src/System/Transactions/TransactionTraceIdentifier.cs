@@ -11,7 +11,7 @@ namespace System.Transactions
     /// </summary>
     internal readonly struct TransactionTraceIdentifier : IEquatable<TransactionTraceIdentifier>
     {
-        public static readonly TransactionTraceIdentifier Empty = new TransactionTraceIdentifier();
+        public static readonly TransactionTraceIdentifier Empty = default;
 
         public TransactionTraceIdentifier(string transactionIdentifier, int cloneIdentifier)
         {
@@ -34,7 +34,7 @@ namespace System.Transactions
 
         public override int GetHashCode() => base.GetHashCode();  // Don't have anything better to do.
 
-        public override bool Equals(object obj) => obj is TransactionTraceIdentifier && Equals((TransactionTraceIdentifier)obj);
+        public override bool Equals(object? obj) => obj is TransactionTraceIdentifier transactionTraceId && Equals(transactionTraceId);
 
         public bool Equals(TransactionTraceIdentifier other) =>
             _cloneIdentifier == other._cloneIdentifier &&

@@ -9,6 +9,7 @@ using System.CommandLine;
 using System.IO;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Net;
 using HttpStress;
@@ -35,7 +36,7 @@ public static class Program
     {
         var cmd = new RootCommand();
         cmd.AddOption(new Option("-n", "Max number of requests to make concurrently.") { Argument = new Argument<int>("numWorkers", Environment.ProcessorCount) });
-        cmd.AddOption(new Option("-serverUri", "Stress suite server uri.") { Argument = new Argument<Uri>("serverUri", new Uri("https://localhost:5001")) });
+        cmd.AddOption(new Option("-serverUri", "Stress suite server uri.") { Argument = new Argument<string>("serverUri", "https://localhost:5001") });
         cmd.AddOption(new Option("-runMode", "Stress suite execution mode. Defaults to Both.") { Argument = new Argument<RunMode>("runMode", RunMode.both) });
         cmd.AddOption(new Option("-maxExecutionTime", "Maximum stress execution time, in minutes. Defaults to infinity.") { Argument = new Argument<double?>("minutes", null) });
         cmd.AddOption(new Option("-maxContentLength", "Max content length for request and response bodies.") { Argument = new Argument<int>("numBytes", 1000) });
@@ -77,7 +78,7 @@ public static class Program
         config = new Configuration()
         {
             RunMode = cmdline.ValueForOption<RunMode>("-runMode"),
-            ServerUri = cmdline.ValueForOption<Uri>("-serverUri"),
+            ServerUri = cmdline.ValueForOption<string>("-serverUri"),
             ListOperations = cmdline.ValueForOption<bool>("-listOps"),
 
             HttpVersion = cmdline.ValueForOption<Version>("-http"),
@@ -123,7 +124,7 @@ public static class Program
             return ExitCode.CliError;
         }
 
-        if (!config.ServerUri.Scheme.StartsWith("http"))
+        if (!config.ServerUri.StartsWith("http"))
         {
             Console.Error.WriteLine("Invalid server uri");
             return ExitCode.CliError;
@@ -151,9 +152,11 @@ public static class Program
                 .ToArray(),
         };
 
-        Console.WriteLine("       .NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(object).Assembly.Location)));
-        Console.WriteLine("    ASP.NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(WebHost).Assembly.Location)));
-        Console.WriteLine(" System.Net.Http: " + GetSysNetHttpAssemblyInfo());
+        string GetAssemblyInfo(Assembly assembly) => $"{assembly.Location}, modified {new FileInfo(assembly.Location).LastWriteTime}";
+
+        Console.WriteLine("       .NET Core: " + GetAssemblyInfo(typeof(object).Assembly));
+        Console.WriteLine("    ASP.NET Core: " + GetAssemblyInfo(typeof(WebHost).Assembly));
+        Console.WriteLine(" System.Net.Http: " + GetAssemblyInfo(typeof(System.Net.Http.HttpClient).Assembly));
         Console.WriteLine("          Server: " + (config.UseHttpSys ? "http.sys" : "Kestrel"));
         Console.WriteLine("      Server URL: " + config.ServerUri);
         Console.WriteLine("         Tracing: " + (config.LogPath == null ? (object)false : config.LogPath.Length == 0 ? (object)true : config.LogPath));
@@ -215,11 +218,5 @@ public static class Program
     private static S? Select<T, S>(this T? value, Func<T, S> mapper) where T : struct where S : struct
     {
         return value is null ? null : new S?(mapper(value.Value));
-    }
-
-    private static string GetSysNetHttpAssemblyInfo()
-    {
-        string location = typeof(System.Net.Http.HttpClient).Assembly.Location;
-        return $"{location}, last modified {new FileInfo(location).LastWriteTime}";
     }
 }

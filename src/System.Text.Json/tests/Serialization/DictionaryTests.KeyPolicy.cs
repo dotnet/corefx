@@ -47,6 +47,29 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void IgnoreKeyPolicyForExtensionData()
+        {
+            var options = new JsonSerializerOptions
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase // e.g. Key1 -> key1.
+            };
+
+            // Ensure we ignore key policy for extension data and deserialize keys as they are.
+            ClassWithExtensionData myClass = JsonSerializer.Deserialize<ClassWithExtensionData>(@"{""Key1"":1, ""Key2"":2}", options);
+            Assert.Equal(1, (myClass.ExtensionData["Key1"]).GetInt32());
+            Assert.Equal(2, (myClass.ExtensionData["Key2"]).GetInt32());
+
+            // Ensure we ignore key policy for extension data and serialize keys as they are.
+            Assert.Equal(@"{""Key1"":1,""Key2"":2}", JsonSerializer.Serialize(myClass, options));
+        }
+
+        public class ClassWithExtensionData
+        {
+            [JsonExtensionData]
+            public Dictionary<string, JsonElement> ExtensionData { get; set; }
+        }
+
+        [Fact]
         public static void CamelCaseSerialize()
         {
             var options = new JsonSerializerOptions()
@@ -62,6 +85,56 @@ namespace System.Text.Json.Serialization.Tests
 
             const string Json = @"[{""Key1"":1,""Key2"":2},{""Key1"":3,""Key2"":4}]";
             const string JsonCamel = @"[{""key1"":1,""key2"":2},{""key1"":3,""key2"":4}]";
+
+            // Without key policy option, serialize keys as they are.
+            string json = JsonSerializer.Serialize<object>(obj);
+            Assert.Equal(Json, json);
+
+            // With key policy option, serialize keys with camel casing.
+            json = JsonSerializer.Serialize<object>(obj, options);
+            Assert.Equal(JsonCamel, json);
+        }
+
+        [Fact]
+        public static void CamelCaseSerialize_Null_Values()
+        {
+            var options = new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase // e.g. Key1 -> key1.
+            };
+
+            Dictionary<string, string>[] obj = new Dictionary<string, string>[]
+            {
+                new Dictionary<string, string>() { { "Key1", null }, { "Key2", null } },
+            };
+
+            const string Json = @"[{""Key1"":null,""Key2"":null}]";
+            const string JsonCamel = @"[{""key1"":null,""key2"":null}]";
+
+            // Without key policy option, serialize keys as they are.
+            string json = JsonSerializer.Serialize<object>(obj);
+            Assert.Equal(Json, json);
+
+            // With key policy option, serialize keys with camel casing.
+            json = JsonSerializer.Serialize<object>(obj, options);
+            Assert.Equal(JsonCamel, json);
+        }
+
+        [Fact]
+        public static void CamelCaseSerialize_Null_Nullable_Values()
+        {
+            var options = new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase // e.g. Key1 -> key1.
+            };
+
+            Dictionary<string, int?>[] obj = new Dictionary<string, int?>[]
+            {
+                new Dictionary<string, int?>() { { "Key1", null }, { "Key2", null } },
+            };
+
+            const string Json = @"[{""Key1"":null,""Key2"":null}]";
+            const string JsonCamel = @"[{""key1"":null,""key2"":null}]";
 
             // Without key policy option, serialize keys as they are.
             string json = JsonSerializer.Serialize<object>(obj);
@@ -184,6 +257,148 @@ namespace System.Text.Json.Serialization.Tests
 
             // Check that we write all.
             Assert.Equal(@"{""myInt"":1,""myInt"":2}", json);
+        }
+        
+        [Fact]
+        public static void CamelCaseSerialize_ApplyDictionaryKeyPolicy()
+        {
+            const string JsonCamel = @"{""keyDict"":{""keyString"":""text"",""keyNumber"":1000,""keyBool"":true},""keyList"":[1,2,3]}";
+            var options = new JsonSerializerOptions
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            };
+            
+            var obj = new Dictionary<string, object>();
+            obj["KeyDict"] = new Dictionary<string, object>()
+            {
+                { "KeyString", "text" },
+                { "KeyNumber", 1000 },
+                { "KeyBool", true }
+            };
+            obj["KeyList"] = new List<int>() { 1, 2, 3 };
+            
+            var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            });
+            
+            Assert.Equal(JsonCamel, json);
+        }
+        
+        [Fact]
+        public static void SerializationWithJsonExtensionDataAttribute_IgoneDictionaryKeyPolicy()
+        {
+            var expectedJson = @"{""KeyInt"":1000,""KeyString"":""text"",""KeyBool"":true,""KeyObject"":{},""KeyList"":[],""KeyDictionary"":{}}";
+            var obj = new ClassWithExtensionDataProperty();
+            obj.Data = new Dictionary<string, object>()
+            {
+                { "KeyInt", 1000 },
+                { "KeyString", "text" },
+                { "KeyBool", true },
+                { "KeyObject", new object() },
+                { "KeyList", new List<string>() },
+                { "KeyDictionary", new Dictionary<string, string>() }
+            };
+            string json = JsonSerializer.Serialize(obj, new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            });
+            Assert.Equal(expectedJson, json);
+        }
+
+        private class ClassWithExtensionDataProperty
+        {
+           [JsonExtensionData]
+            public Dictionary<string, object> Data { get; set; }
+        }
+        
+        [Fact]
+        public static void CamelCaseSerialize_ForTypedDictionary_ApplyDictionaryKeyPolicy()
+        {
+            const string JsonCamel = @"{""keyDict"":{""Name"":""text"",""Number"":1000,""isValid"":true,""Values"":[1,2,3]}}";
+            var obj = new Dictionary<string, CustomClass>()
+            {
+                { "KeyDict", CreateCustomObject() }
+            };
+            var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            Assert.Equal(JsonCamel, json);
+        }
+
+        private class CustomClass
+        {
+            public string Name { get; set; }
+            public int Number { get; set; }
+            public bool isValid { get; set; }
+            public List<int> Values { get; set; }
+        }
+        
+        private static CustomClass CreateCustomObject()
+        {
+            return new CustomClass { Name = "text", Number = 1000, isValid = true, Values = new List<int>() { 1, 2, 3 } };
+        }
+
+        [Fact]
+        public static void CamelCaseSerialize_ForNestedTypedDictionary_ApplyDictionaryKeyPolicy()
+        {
+            const string JsonCamel = @"{""keyDict"":{""nestedKeyDict"":{""Name"":""text"",""Number"":1000,""isValid"":true,""Values"":[1,2,3]}}}";
+            var options = new JsonSerializerOptions
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            };
+            var obj = new Dictionary<string, Dictionary<string, CustomClass>>(){
+                { "KeyDict", new  Dictionary<string,CustomClass>()
+                {{ "NestedKeyDict", CreateCustomObject() }}
+            }};
+            var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            Assert.Equal(JsonCamel, json);
+        }
+
+        private class TestClassWithDictionary
+        {
+           public Dictionary<string, CustomClass> Data { get; set; }
+		}
+
+        [Fact]
+        public static void CamelCaseSerialize_ForClassWithDictionaryProperty_ApplyDictionaryKeyPolicy()
+        {
+            const string JsonCamel = @"{""Data"":{""keyObj"":{""Name"":""text"",""Number"":1000,""isValid"":true,""Values"":[1,2,3]}}}";
+            var obj = new TestClassWithDictionary();
+            obj.Data = new Dictionary<string, CustomClass> {
+                {"KeyObj", CreateCustomObject() }
+            };
+            var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            });
+            Assert.Equal(JsonCamel, json);
+        }
+
+        [Fact]
+        public static void CamelCaseSerialize_ForKeyValuePairWithDictionaryValue_ApplyDictionaryKeyPolicy()
+        {
+            const string JsonCamel = @"{""Key"":""KeyPair"",""Value"":{""keyDict"":{""Name"":""text"",""Number"":1000,""isValid"":true,""Values"":[1,2,3]}}}";
+            var options = new JsonSerializerOptions
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            };
+            var obj = new KeyValuePair<string, Dictionary<string, CustomClass>>
+              ("KeyPair", new Dictionary<string, CustomClass> {
+              {"KeyDict", CreateCustomObject() }
+            });
+            var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            Assert.Equal(JsonCamel, json);
         }
     }
 }

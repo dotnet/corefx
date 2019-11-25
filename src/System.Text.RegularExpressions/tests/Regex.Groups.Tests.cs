@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Tests;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -677,85 +678,73 @@ namespace System.Text.RegularExpressions.Tests
         [Fact]
         public void GroupsEnUS()
         {
-            RemoteExecutor.Invoke(() => {
-                CultureInfo.CurrentCulture = s_enUSCulture;
+            using (new ThreadCultureChange(s_enUSCulture))
+            {
                 foreach (object[] testCase in Groups_CustomCulture_TestData_enUS())
                 {
                     GroupsTest(testCase);
                 }
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]
         public void GroupsCzech()
         {
-            RemoteExecutor.Invoke(() => {
-                CultureInfo.CurrentCulture = s_czechCulture;
+            using (new ThreadCultureChange(s_czechCulture))
+            {
                 foreach (object[] testCase in Groups_CustomCulture_TestData_Czech())
                 {
                     GroupsTest(testCase);
                 }
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]
         public void GroupsDanish()
         {
-            RemoteExecutor.Invoke(() => {
-                CultureInfo.CurrentCulture = s_danishCulture;
+            using (new ThreadCultureChange(s_danishCulture))
+            {
                 foreach (object[] testCase in Groups_CustomCulture_TestData_Danish())
                 {
                     GroupsTest(testCase);
                 }
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]
         public void GroupsTurkish()
         {
-            RemoteExecutor.Invoke(() => {
-                CultureInfo.CurrentCulture = s_turkishCulture;
+            using (new ThreadCultureChange(s_turkishCulture))
+            {
                 foreach (object[] testCase in Groups_CustomCulture_TestData_Turkish())
                 {
                     GroupsTest(testCase);
                 }
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]
         public void GroupsAzeriLatin()
         {
-            RemoteExecutor.Invoke(() => {
-                CultureInfo.CurrentCulture = s_azeriLatinCulture;
+            using (new ThreadCultureChange(s_azeriLatinCulture))
+            {
                 foreach (object[] testCase in Groups_CustomCulture_TestData_AzeriLatin())
                 {
                     GroupsTest(testCase);
                 }
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]
         public void GroupsBasic()
         {
-            RemoteExecutor.Invoke(() => {
-                CultureInfo.CurrentCulture = GetDefaultCultureForTests();
+            using (new ThreadCultureChange(GetDefaultCultureForTests()))
+            {
                 foreach (object[] testCase in Groups_Basic_TestData())
                 {
                     GroupsTest(testCase);
                 }
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]

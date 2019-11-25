@@ -113,7 +113,7 @@ namespace System.Collections.Generic
                         T[] newItems = new T[value];
                         if (_size > 0)
                         {
-                            Array.Copy(_items, 0, newItems, 0, _size);
+                            Array.Copy(_items, newItems, _size);
                         }
                         _items = newItems;
                     }
@@ -1020,7 +1020,7 @@ namespace System.Collections.Generic
 
             if (_size > 1)
             {
-                ArraySortHelper<T>.Sort(_items, 0, _size, comparison);
+                ArraySortHelper<T>.Sort(new Span<T>(_items, 0, _size), comparison);
             }
             _version++;
         }
@@ -1035,7 +1035,7 @@ namespace System.Collections.Generic
             }
 
             T[] array = new T[_size];
-            Array.Copy(_items, 0, array, 0, _size);
+            Array.Copy(_items, array, _size);
             return array;
         }
 

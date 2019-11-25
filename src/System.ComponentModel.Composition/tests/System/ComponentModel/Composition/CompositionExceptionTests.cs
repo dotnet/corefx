@@ -3,17 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Common.Tests;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Tests;
 using System.Text;
 using System.UnitTesting;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using Xunit.Sdk;
 
 namespace System.ComponentModel.Composition
 {
@@ -376,7 +377,7 @@ namespace System.ComponentModel.Composition
                 foreach (CultureInfo culture in cultures)
                 {
                     // Save old culture and set a fixed culture for object instantiation
-                    using (new ThreadCultureChange(culture))
+                    using (new ThreadCultureChange(culture, culture))
                     {
                         CompositionError[] errors = CreateCompositionErrors(1000);
                         CompositionException exception = CreateCompositionException(errors);
@@ -387,7 +388,6 @@ namespace System.ComponentModel.Composition
                         AssertMessage(exception, 1, culture);
                     }
                 }
-                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -417,10 +417,12 @@ namespace System.ComponentModel.Composition
                 }
                 else
                 {
-                    Assert.True(
-                        line.Contains(string.Format(CultureInfo.CurrentCulture, SR.CompositionException_SingleErrorWithMultiplePaths, rootCauseCount)) ||
-                        line.Contains(string.Format(CultureInfo.CurrentCulture, SR.CompositionException_MultipleErrorsWithMultiplePaths, rootCauseCount))
-                        );
+                    string option1 = string.Format(CultureInfo.CurrentCulture, SR.CompositionException_SingleErrorWithMultiplePaths, rootCauseCount);
+                    string option2 = string.Format(CultureInfo.CurrentCulture, SR.CompositionException_MultipleErrorsWithMultiplePaths, rootCauseCount);
+                    if (!line.Contains(option1) && !line.Contains(option2))
+                    {
+                        throw new XunitException($"`{line}` contains neither `{option1}` nor `{option2}`");
+                    }
                 }
             }
         }

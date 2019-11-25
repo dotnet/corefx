@@ -9,9 +9,8 @@
     <BuildConfigurations>
       $(PackageConfigurations);
       netcoreapp;
-      netstandard;
+      netstandard2.0;
       netfx;
-      uap-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

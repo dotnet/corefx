@@ -3894,7 +3894,7 @@ namespace System.Data.SqlClient
                 else
                 {
                     MultiPartTableName[] newTables = new MultiPartTableName[tables.Length + 1];
-                    Array.Copy(tables, 0, newTables, 0, tables.Length);
+                    Array.Copy(tables, newTables, tables.Length);
                     newTables[tables.Length] = mpt;
                     tables = newTables;
                 }
@@ -3914,7 +3914,7 @@ namespace System.Data.SqlClient
 
             multiPartTableName = default(MultiPartTableName);
 
-            mpt = new MultiPartTableName();
+            mpt = default;
             byte nParts;
 
             // Find out how many parts in the TDS stream

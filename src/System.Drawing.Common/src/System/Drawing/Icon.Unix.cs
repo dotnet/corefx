@@ -44,15 +44,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing
 {
-#if netcoreapp || netcoreapp30
+#if NETCOREAPP
     [System.ComponentModel.TypeConverter("System.Drawing.IconConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
-#else
-#if !NETCORE
-#if !MONOTOUCH
-    [Editor("System.Drawing.Design.IconEditor, " + Consts.AssemblySystem_Drawing_Design, typeof(System.Drawing.Design.UITypeEditor))]
-#endif
-    [TypeConverter(typeof(IconConverter))]
-#endif
 #endif
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
@@ -134,7 +127,6 @@ namespace System.Drawing
         {
         }
 
-#if !MONOTOUCH
         private Icon(IntPtr handle)
         {
             this.handle = handle;
@@ -145,7 +137,6 @@ namespace System.Drawing
             // FIXME: we need to convert the bitmap into an icon
             undisposable = true;
         }
-#endif
 
         public Icon(Icon original, int width, int height)
             : this(original, new Size(width, height))
@@ -214,7 +205,7 @@ namespace System.Drawing
                 }
 
                 if (id == ushort.MaxValue)
-                    throw new ArgumentException("Icon", "No valid icon image found");
+                    throw new ArgumentException(SR.NoValidIconImageFound, "Icon");
 
                 iconSize.Height = iconDir.idEntries[id].height;
                 iconSize.Width = iconDir.idEntries[id].width;
@@ -322,9 +313,9 @@ namespace System.Drawing
             if (filePath == null)
                 throw new ArgumentNullException(nameof(filePath));
             if (string.IsNullOrEmpty(filePath))
-                throw new ArgumentException("Null or empty path.", "path");
+                throw new ArgumentException(SR.NullOrEmptyPath, "path");
             if (!File.Exists(filePath))
-                throw new FileNotFoundException("Couldn't find specified file.", filePath);
+                throw new FileNotFoundException(SR.CouldntFindSpecifiedFile, filePath);
 
             return SystemIcons.WinLogo;
         }
@@ -352,7 +343,6 @@ namespace System.Drawing
             return new Icon(this, Size);
         }
 
-#if !MONOTOUCH
         public static Icon FromHandle(IntPtr handle)
         {
             if (handle == IntPtr.Zero)
@@ -360,7 +350,7 @@ namespace System.Drawing
 
             return new Icon(handle);
         }
-#endif
+
         private void SaveIconImage(BinaryWriter writer, IconImage ii)
         {
             BitmapInfoHeader bih = ii.iconHeader;
@@ -466,7 +456,7 @@ namespace System.Drawing
             writer.Write((ushort)1);    // only one icon
 
             // when transformed into a bitmap only a single image exists
-            IconDirEntry ide = new IconDirEntry();
+            IconDirEntry ide = default;
             ide.width = (byte)bitmap.Width;
             ide.height = (byte)bitmap.Height;
             ide.colorCount = 0; // 32 bbp == 0, for palette size
@@ -475,7 +465,7 @@ namespace System.Drawing
             ide.bitCount = 32;
             ide.imageOffset = 22;   // 22 is the first icon position (for single icon files)
 
-            BitmapInfoHeader bih = new BitmapInfoHeader();
+            BitmapInfoHeader bih = default;
             bih.biSize = (uint)Marshal.SizeOf(typeof(BitmapInfoHeader));
             bih.biWidth = bitmap.Width;
             bih.biHeight = 2 * bitmap.Height; // include both XOR and AND images
@@ -542,7 +532,7 @@ namespace System.Drawing
             // save every icons available
             Save(outputStream, -1, -1);
         }
-#if !MONOTOUCH
+
         internal Bitmap BuildBitmapOnWin32()
         {
             Bitmap bmp;
@@ -645,7 +635,7 @@ namespace System.Drawing
         public Bitmap ToBitmap()
         {
             if (disposed)
-                throw new ObjectDisposedException("Icon instance was disposed.");
+                throw new ObjectDisposedException(SR.IconInstanceWasDisposed);
 
             // note: we can't return the original image because
             // (a) we have no control over the bitmap instance we return (i.e. it could be disposed)
@@ -653,14 +643,13 @@ namespace System.Drawing
             //     Image16 for the differences
             return new Bitmap(GetInternalBitmap());
         }
-#endif
+
         public override string ToString()
         {
             //is this correct, this is what returned by .Net
             return "<Icon>";
         }
 
-#if !MONOTOUCH
         [Browsable(false)]
         public IntPtr Handle
         {
@@ -679,7 +668,7 @@ namespace System.Drawing
                 return handle;
             }
         }
-#endif
+
         [Browsable(false)]
         public int Height
         {

@@ -4,7 +4,7 @@
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <RootNamespace />
     <AssemblyVersion>9.9.9.9</AssemblyVersion>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="Drawing\ColorConverterTests.cs" />
@@ -16,6 +16,8 @@
   <ItemGroup>
     <Compile Include="Design\Serialization\ComponentSerializationServiceTests.cs" />
     <Compile Include="Design\StandardCommandsTests.cs" />
+    <Compile Include="Extensions\EnumeratorExtensions.cs" />
+    <Compile Include="MaskedTextProviderTests.cs" />
     <Compile Include="Mocks\MockDesigner.cs" />
     <Compile Include="Mocks\MockDesignerHost.cs" />
     <Compile Include="NestedContainerTests.cs" />
@@ -156,8 +158,8 @@
     <Compile Include="XTypeDescriptionProviderTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.ComponentModel.TypeConverter.TestData" Version="$(SystemComponentModelTypeConverterTestDataPackageVersion)" />
-    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+    <PackageReference Include="System.ComponentModel.TypeConverter.TestData" Version="$(SystemComponentModelTypeConverterTestDataVersion)" />
+    <PackageReference Include="Moq" Version="$(MoqVersion)" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\TestResx.resx">
@@ -165,5 +167,4 @@
       <LastGenOutput>TestResx.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
 </Project>
