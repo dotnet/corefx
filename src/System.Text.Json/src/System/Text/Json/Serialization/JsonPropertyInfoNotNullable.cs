@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
@@ -15,11 +15,11 @@ namespace System.Text.Json
         JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty, TConverter>
         where TConverter : TDeclaredProperty
     {
-        protected override void OnRead(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader)
+        protected override void OnRead(ref ReadStack state, ref Utf8JsonReader reader)
         {
             if (Converter == null)
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
             }
 
             TConverter value = Converter.Read(ref reader, RuntimePropertyType, Options);
@@ -34,28 +34,28 @@ namespace System.Text.Json
             }
         }
 
-        protected override void OnReadEnumerable(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader)
+        protected override void OnReadEnumerable(ref ReadStack state, ref Utf8JsonReader reader)
         {
             if (Converter == null)
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
             }
 
-            if (state.Current.KeyName == null && (state.Current.IsProcessingDictionary || state.Current.IsProcessingIDictionaryConstructible))
+            if (state.Current.KeyName == null && state.Current.IsProcessingDictionaryOrIDictionaryConstructible())
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
                 return;
             }
 
             // We need an initialized array in order to store the values.
-            if (state.Current.IsProcessingEnumerable && state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
+            if (state.Current.IsProcessingEnumerable() && state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
                 return;
             }
 
             TConverter value = Converter.Read(ref reader, RuntimePropertyType, Options);
-            JsonSerializer.ApplyValueToEnumerable(ref value, ref state, ref reader);
+            JsonSerializer.ApplyValueToEnumerable(ref value, ref state);
         }
 
         protected override void OnWrite(ref WriteStackFrame current, Utf8JsonWriter writer)
@@ -120,6 +120,27 @@ namespace System.Text.Json
                 {
                     Converter.Write(writer, value, Options);
                 }
+            }
+        }
+
+        public override Type GetDictionaryConcreteType()
+        {
+            return typeof(Dictionary<string, TRuntimeProperty>);
+        }
+
+        public override void GetDictionaryKeyAndValueFromGenericDictionary(ref WriteStackFrame writeStackFrame, out string key, out object value)
+        {
+            if (writeStackFrame.CollectionEnumerator is IEnumerator<KeyValuePair<string, TRuntimeProperty>> genericEnumerator)
+            {
+                key = genericEnumerator.Current.Key;
+                value = genericEnumerator.Current.Value;
+            }
+            else
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    writeStackFrame.JsonPropertyInfo.DeclaredPropertyType,
+                    writeStackFrame.JsonPropertyInfo.ParentClassType,
+                    writeStackFrame.JsonPropertyInfo.PropertyInfo);
             }
         }
     }

@@ -182,6 +182,7 @@
       <TestRestoreCommand>$(TestRestoreCommand) --packages "$(TestPackageDir)"</TestRestoreCommand>
       <TestRestoreCommand>$(TestRestoreCommand) /p:LocalPackagesPath=$(PackageOutputPath)</TestRestoreCommand>
       <TestRestoreCommand>$(TestRestoreCommand) /nr:false</TestRestoreCommand>
+      <TestRestoreCommand>$(TestRestoreCommand) /warnaserror</TestRestoreCommand>
       <TestRestoreCommand  Condition="'$(TestPackages)' != ''">$(TestRestoreCommand) /p:TestPackages=$(TestPackages)</TestRestoreCommand>
     </PropertyGroup>
 
@@ -198,6 +199,7 @@
       <TestBuildCommand>$(TestBuildCommand) msbuild</TestBuildCommand>
       <TestBuildCommand>$(TestBuildCommand) /t:Test</TestBuildCommand>
       <TestBuildCommand>$(TestBuildCommand) /nr:false</TestBuildCommand>
+      <TestBuildCommand>$(TestBuildCommand) /warnaserror</TestBuildCommand>
       <TestBuildCommand  Condition="'$(TestPackages)' != ''">$(TestBuildCommand) /p:TestPackages=$(TestPackages)</TestBuildCommand>
     </PropertyGroup>
 

@@ -1,4 +1,12 @@
 <Project>
+  <!-- Add validation for netcoreapp3.1 to package build and testing 
+      This would get moved to arcade with other validate frameworks and should get removed from here. -->
+  <ItemGroup>
+    <DefaultValidateFramework Include="netcoreapp3.1">
+      <RuntimeIDs>@(NETCoreApp30RIDs)</RuntimeIDs>
+    </DefaultValidateFramework>
+  </ItemGroup>
+
   <!--     There are some packages where we require only one ref for a specific framework to be present. In order to avoid problems with this package when targetting 
            dektop with RAR we will make sure there are no exclude=compile references in the package.
     For more info, please check issues:
@@ -26,7 +34,30 @@
                       '$(_excludeCompile)' == 'true' AND
                       '%(Dependency.Identity)' != '_._'" />
   </Target>
- 
+
+  <Target Name="BlockStable" Condition="'$(BlockStable)' == 'true'" AfterTargets="CalculatePackageVersion">
+    <!-- DO NOT ship this packages as stable -->
+    <Error Condition="!$(PackageVersion.Contains('-'))" Text="Package $(Id) should not be built stable" />
+  </Target>
+
+  <!-- Get the package version without pre-release -->
+  <Target Name="GetPackageIdentityWithoutPrerelease"
+          Returns="@(_PackageIdentityWithoutPrerelease)">
+    <ItemGroup>
+      <_PackageIdentityWithoutPrerelease Include="$(Id)">
+        <Version>$(PackageVersion)</Version>
+        <BlockStable>$(BlockStable)</BlockStable>
+      </_PackageIdentityWithoutPrerelease>
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(BuildRID)' != ''">
+      <_PackageIdentityWithoutPrerelease Include="@(BuildRID->'runtime.%(Identity).$(Id)')">
+        <Version>$(PackageVersion)</Version>
+        <BlockStable>$(BlockStable)</BlockStable>
+      </_PackageIdentityWithoutPrerelease>
+    </ItemGroup>
+  </Target>
+
   <PropertyGroup>
     <VersionSuffix>$(_PreReleaseLabel)$(_BuildNumberLabels)</VersionSuffix>
   </PropertyGroup>
