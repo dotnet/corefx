@@ -28,7 +28,7 @@ namespace Internal.Cryptography
                 _currentIv = new byte[IV.Length];
             }
 
-            Interop.BCrypt.BCryptImportKey(algorithm, key);
+            _hKey = Interop.BCrypt.BCryptImportKey(algorithm, key);
 
             if (ownsParentHandle)
             {
