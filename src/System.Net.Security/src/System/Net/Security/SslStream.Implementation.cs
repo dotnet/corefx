@@ -464,28 +464,27 @@ namespace System.Net.Security
 
             if (!receiveFirst)
             {
-                message =_context.NextMessage(null, 0, 0);
-                 //   _context.GenerateToken(buffer, 0, (buffer == null ? 0 : buffer.Length), ref output);
-                //         ProtocolToken message =  _context.NextMessage(buffer, 0, (buffer == null ? 0 : buffer.Length));
+                message =_context.NextMessage(buffer, 0, (buffer == null ? 0 : buffer.Length));
+                if (message.Failed)
+                {
+                    throw new AuthenticationException(SR.net_auth_SSPI, message.GetException());
+                }
                 await InnerStream.WriteAsync(message.Payload, cancellationToken).ConfigureAwait(false);
             }
 
             do
             {
-
                 message  = await StartReceiveBlobAsync(adapter, null, cancellationToken).ConfigureAwait(false);
-                //status = _context.GenerateToken(null, 0, 0, ref output);
-                //Console.WriteLine("Generate token with {0} {1} status = {2}", message.Payload, message.Payload?.Length, message.Status);
-
                 if (message.Size > 0)
                 {
                     // If there is message send it out even if call failed. It may contain TLS Altert.
                     await InnerStream.WriteAsync(message.Payload, cancellationToken).ConfigureAwait(false);
                 }
-                 if (message.Failed)
-                 {
+
+                if (message.Failed)
+                {
                     throw new AuthenticationException(SR.net_auth_SSPI, message.GetException());
-                 }
+                }
             } while (message.Status.ErrorCode != SecurityStatusPalErrorCode.OK);
 
             ProtocolToken alertToken = null;

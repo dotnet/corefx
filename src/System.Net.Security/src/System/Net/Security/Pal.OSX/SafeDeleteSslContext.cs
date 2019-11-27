@@ -227,13 +227,13 @@ namespace System.Net
             }
         }
 
-        internal void Write(ReadOnlyMemory<byte> buf)
+        internal void Write(ReadOnlySpan<byte> buf)
         {
             lock (_fromConnection)
             {
                 for (int i = 0; i < buf.Length; i++)
                 {
-                    _fromConnection.Enqueue(buf.Span[i]);
+                    _fromConnection.Enqueue(buf[i]);
                 }
             }
         }
