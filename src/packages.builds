@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <BuildAllPackages>true</BuildAllPackages>
+    <BuildAllPackages>false</BuildAllPackages>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'true'">
