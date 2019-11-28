@@ -8,6 +8,7 @@ trigger:
     include:
     - master
     - release/3.*
+    - internal/release/3.*
   paths:
     exclude:
     - Documentation/*
@@ -18,6 +19,7 @@ pr:
     include:
     - master
     - release/3.*
+    - internal/release/3.*
   paths:
     exclude:
     - Documentation/*
