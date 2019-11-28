@@ -414,38 +414,41 @@ namespace System.Net.Security
         }
 
         public virtual Task AuthenticateAsServerAsync(X509Certificate serverCertificate) =>
-            Task.Factory.FromAsync(
-                (arg1, callback, state) => ((SslStream)state).BeginAuthenticateAsServer(arg1, callback, state),
-                iar => ((SslStream)iar.AsyncState).EndAuthenticateAsServer(iar),
-                serverCertificate,
-                this);
+            AuthenticateAsServerAsync(serverCertificate, false, SecurityProtocol.SystemDefaultSecurityProtocols, false);
 
-        public virtual Task AuthenticateAsServerAsync(X509Certificate serverCertificate, bool clientCertificateRequired, bool checkCertificateRevocation) =>
-            Task.Factory.FromAsync(
-                (arg1, arg2, arg3, callback, state) => ((SslStream)state).BeginAuthenticateAsServer(arg1, arg2, SecurityProtocol.SystemDefaultSecurityProtocols, arg3, callback, state),
-                iar => ((SslStream)iar.AsyncState).EndAuthenticateAsServer(iar),
-                serverCertificate, clientCertificateRequired, checkCertificateRevocation,
-                this);
+        public virtual Task AuthenticateAsServerAsync(X509Certificate serverCertificate, bool clientCertificateRequired, bool checkCertificateRevocation)
+        {
+            SslServerAuthenticationOptions options = new SslServerAuthenticationOptions
+            {
+                ServerCertificate = serverCertificate,
+                ClientCertificateRequired = clientCertificateRequired,
+                CertificateRevocationCheckMode = checkCertificateRevocation ? X509RevocationMode.Online : X509RevocationMode.NoCheck,
+                EncryptionPolicy = _encryptionPolicy,
+            };
+
+            return AuthenticateAsServerAsync(options);
+        }
 
         public virtual Task AuthenticateAsServerAsync(X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
         {
-            var beginMethod = checkCertificateRevocation ? (Func<X509Certificate, bool, SslProtocols, AsyncCallback, object, IAsyncResult>)
-                ((arg1, arg2, arg3, callback, state) => ((SslStream)state).BeginAuthenticateAsServer(arg1, arg2, arg3, true, callback, state)) :
-                ((arg1, arg2, arg3, callback, state) => ((SslStream)state).BeginAuthenticateAsServer(arg1, arg2, arg3, false, callback, state));
-            return Task.Factory.FromAsync(
-                beginMethod,
-                iar => ((SslStream)iar.AsyncState).EndAuthenticateAsServer(iar),
-                serverCertificate, clientCertificateRequired, enabledSslProtocols,
-                this);
+            SslServerAuthenticationOptions options = new SslServerAuthenticationOptions
+            {
+                ServerCertificate = serverCertificate,
+                ClientCertificateRequired = clientCertificateRequired,
+                EnabledSslProtocols = enabledSslProtocols,
+                CertificateRevocationCheckMode = checkCertificateRevocation ? X509RevocationMode.Online : X509RevocationMode.NoCheck,
+                EncryptionPolicy = _encryptionPolicy,
+            };
+
+            return AuthenticateAsServerAsync(options);
         }
 
         public Task AuthenticateAsServerAsync(SslServerAuthenticationOptions sslServerAuthenticationOptions, CancellationToken cancellationToken = default)
         {
-            return Task.Factory.FromAsync(
-                (arg1, arg2, callback, state) => ((SslStream)state).BeginAuthenticateAsServer(arg1, arg2, callback, state),
-                iar => ((SslStream)iar.AsyncState).EndAuthenticateAsServer(iar),
-                sslServerAuthenticationOptions, cancellationToken,
-                this);
+            SetAndVerifyValidationCallback(sslServerAuthenticationOptions.RemoteCertificateValidationCallback);
+            ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
+
+            return ForceAuthenticationAsync(true, null, cancellationToken);
         }
 
         public virtual Task ShutdownAsync() =>
