@@ -46,10 +46,8 @@ namespace System.Net.Security
         {
             if (NetEventSource.IsEnabled)
             {
-                NetEventSource.Enter(this, sslAuthenticationOptions.TargetHost,
-                    sslAuthenticationOptions.ClientCertificates);
-                NetEventSource.Log.SecureChannelCtor(this, sslAuthenticationOptions.TargetHost,
-                    sslAuthenticationOptions.ClientCertificates, sslAuthenticationOptions.EncryptionPolicy);
+                NetEventSource.Enter(this, sslAuthenticationOptions.TargetHost, sslAuthenticationOptions.ClientCertificates);
+                NetEventSource.Log.SecureChannelCtor(this, sslAuthenticationOptions.TargetHost, sslAuthenticationOptions.ClientCertificates, sslAuthenticationOptions.EncryptionPolicy);
             }
 
             SslStreamPal.VerifyPackageInfo();
@@ -78,17 +76,26 @@ namespace System.Net.Security
         //
         internal X509Certificate LocalServerCertificate
         {
-            get { return _sslAuthenticationOptions.ServerCertificate; }
+            get
+            {
+                return _sslAuthenticationOptions.ServerCertificate;
+            }
         }
 
         internal X509Certificate LocalClientCertificate
         {
-            get { return _selectedClientCertificate; }
+            get
+            {
+                return _selectedClientCertificate;
+            }
         }
 
         internal bool IsRemoteCertificateAvailable
         {
-            get { return _isRemoteCertificateAvailable; }
+            get
+            {
+                return _isRemoteCertificateAvailable;
+            }
         }
 
         internal ChannelBinding GetChannelBinding(ChannelBindingKind kind)
@@ -109,38 +116,59 @@ namespace System.Net.Security
 
         internal X509RevocationMode CheckCertRevocationStatus
         {
-            get { return _sslAuthenticationOptions.CertificateRevocationCheckMode; }
+            get
+            {
+                return _sslAuthenticationOptions.CertificateRevocationCheckMode;
+            }
         }
 
         internal int MaxDataSize
         {
-            get { return _maxDataSize; }
+            get
+            {
+                return _maxDataSize;
+            }
         }
 
         internal SslConnectionInfo ConnectionInfo
         {
-            get { return _connectionInfo; }
+            get
+            {
+                return _connectionInfo;
+            }
         }
 
         internal bool IsValidContext
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return !(_securityContext == null || _securityContext.IsInvalid); }
+            get
+            {
+                return !(_securityContext == null || _securityContext.IsInvalid);
+            }
         }
 
         internal bool IsServer
         {
-            get { return _sslAuthenticationOptions.IsServer; }
+            get
+            {
+                return _sslAuthenticationOptions.IsServer;
+            }
         }
 
         internal bool RemoteCertRequired
         {
-            get { return _sslAuthenticationOptions.RemoteCertRequired; }
+            get
+            {
+                return _sslAuthenticationOptions.RemoteCertRequired;
+            }
         }
 
         internal SslApplicationProtocol NegotiatedApplicationProtocol
         {
-            get { return _negotiatedApplicationProtocol; }
+            get
+            {
+                return _negotiatedApplicationProtocol;
+            }
         }
 
         internal void SetRefreshCredentialNeeded()
@@ -245,12 +273,8 @@ namespace System.Net.Security
                     certificateEx = new X509Certificate2(certificate);
                 }
             }
-            catch (SecurityException)
-            {
-            }
-            catch (CryptographicException)
-            {
-            }
+            catch (SecurityException) { }
+            catch (CryptographicException) { }
 
             return certificateEx;
         }
@@ -267,7 +291,6 @@ namespace System.Net.Security
             {
                 issuers = CertificateValidationPal.GetRequestCertificateAuthorities(_securityContext);
             }
-
             return issuers;
         }
 
@@ -314,14 +337,9 @@ namespace System.Net.Security
                 NetEventSource.Enter(this);
 
             // Acquire possible Client Certificate information and set it on the handle.
-            X509Certificate
-                clientCertificate =
-                    null; // This is a candidate that can come from the user callback or be guessed when targeting a session restart.
-            List<X509Certificate>
-                filteredCerts =
-                    null; // This is an intermediate client certs collection that try to use if no selectedCert is available yet.
-            string[]
-                issuers; // This is a list of issuers sent by the server, only valid is we do know what the server cert is.
+            X509Certificate clientCertificate = null;        // This is a candidate that can come from the user callback or be guessed when targeting a session restart.
+            List<X509Certificate> filteredCerts = null;      // This is an intermediate client certs collection that try to use if no selectedCert is available yet.
+            string[] issuers;                                // This is a list of issuers sent by the server, only valid is we do know what the server cert is.
 
             bool sessionRestartAttempt = false; // If true and no cached creds we will use anonymous creds.
 
@@ -340,10 +358,7 @@ namespace System.Net.Security
                     {
                         _sslAuthenticationOptions.ClientCertificates = new X509CertificateCollection();
                     }
-
-                    clientCertificate = _sslAuthenticationOptions.CertSelectionDelegate(
-                        _sslAuthenticationOptions.TargetHost, _sslAuthenticationOptions.ClientCertificates, remoteCert,
-                        issuers);
+                    clientCertificate = _sslAuthenticationOptions.CertSelectionDelegate(_sslAuthenticationOptions.TargetHost, _sslAuthenticationOptions.ClientCertificates, remoteCert, issuers);
                 }
                 finally
                 {
@@ -364,8 +379,7 @@ namespace System.Net.Security
                 }
                 else
                 {
-                    if (_sslAuthenticationOptions.ClientCertificates == null ||
-                        _sslAuthenticationOptions.ClientCertificates.Count == 0)
+                    if (_sslAuthenticationOptions.ClientCertificates == null || _sslAuthenticationOptions.ClientCertificates.Count == 0)
                     {
                         if (NetEventSource.IsEnabled)
                             NetEventSource.Log.NoDelegateNoClientCert(this);
@@ -379,8 +393,7 @@ namespace System.Net.Security
                     }
                 }
             }
-            else if (_credentialsHandle == null && _sslAuthenticationOptions.ClientCertificates != null &&
-                     _sslAuthenticationOptions.ClientCertificates.Count > 0)
+            else if (_credentialsHandle == null && _sslAuthenticationOptions.ClientCertificates != null && _sslAuthenticationOptions.ClientCertificates.Count > 0)
             {
                 // This is where we attempt to restart a session by picking the FIRST cert from the collection.
                 // Otherwise it is either server sending a client cert request or the session is renegotiated.
@@ -394,8 +407,7 @@ namespace System.Net.Security
                 if (NetEventSource.IsEnabled)
                     NetEventSource.Log.AttemptingRestartUsingCert(clientCertificate, this);
             }
-            else if (_sslAuthenticationOptions.ClientCertificates != null &&
-                     _sslAuthenticationOptions.ClientCertificates.Count > 0)
+            else if (_sslAuthenticationOptions.ClientCertificates != null && _sslAuthenticationOptions.ClientCertificates.Count > 0)
             {
                 //
                 // This should be a server request for the client cert sent over currently anonymous sessions.
@@ -458,7 +470,6 @@ namespace System.Net.Security
                                             NetEventSource.Info(this, $"Matched {issuer}");
                                         break;
                                     }
-
                                     if (NetEventSource.IsEnabled)
                                         NetEventSource.Info(this, $"No match: {issuer}");
                                 }
@@ -482,8 +493,7 @@ namespace System.Net.Security
                                 }
                             }
 
-                            if (certificateEx != null && (object)certificateEx !=
-                                (object)_sslAuthenticationOptions.ClientCertificates[i])
+                            if (certificateEx != null && (object)certificateEx != (object)_sslAuthenticationOptions.ClientCertificates[i])
                             {
                                 certificateEx.Dispose();
                             }
@@ -497,9 +507,8 @@ namespace System.Net.Security
                 }
             }
 
-            bool cachedCred = false; // This is a return result from this method.
-            X509Certificate2
-                selectedCert = null; // This is a final selected cert (ensured that it does have private key with it).
+            bool cachedCred = false;                   // This is a return result from this method.
+            X509Certificate2 selectedCert = null;      // This is a final selected cert (ensured that it does have private key with it).
 
             clientCertificate = null;
 
@@ -554,9 +563,7 @@ namespace System.Net.Security
                 // SECURITY: selectedCert ref if not null is a safe object that does not depend on possible **user** inherited X509Certificate type.
                 //
                 byte[] guessedThumbPrint = selectedCert?.GetCertHash();
-                SafeFreeCredentials cachedCredentialHandle = SslSessionsCache.TryCachedCredential(guessedThumbPrint,
-                    _sslAuthenticationOptions.EnabledSslProtocols, _sslAuthenticationOptions.IsServer,
-                    _sslAuthenticationOptions.EncryptionPolicy);
+                SafeFreeCredentials cachedCredentialHandle = SslSessionsCache.TryCachedCredential(guessedThumbPrint, _sslAuthenticationOptions.EnabledSslProtocols, _sslAuthenticationOptions.IsServer, _sslAuthenticationOptions.EncryptionPolicy);
 
                 // We can probably do some optimization here. If the selectedCert is returned by the delegate
                 // we can always go ahead and use the certificate to create our credential
@@ -594,9 +601,7 @@ namespace System.Net.Security
                 }
                 else
                 {
-                    _credentialsHandle = SslStreamPal.AcquireCredentialsHandle(selectedCert,
-                        _sslAuthenticationOptions.EnabledSslProtocols, _sslAuthenticationOptions.EncryptionPolicy,
-                        _sslAuthenticationOptions.IsServer);
+                    _credentialsHandle = SslStreamPal.AcquireCredentialsHandle(selectedCert, _sslAuthenticationOptions.EnabledSslProtocols, _sslAuthenticationOptions.EncryptionPolicy, _sslAuthenticationOptions.IsServer);
 
                     thumbPrint = guessedThumbPrint; // Delay until here in case something above threw.
                     _selectedClientCertificate = clientCertificate;
@@ -621,7 +626,7 @@ namespace System.Net.Security
         //
         // Acquire Server Side Certificate information and set it on the class.
         //
-        private bool AcquireServerCredentials(ref byte[] thumbPrint, byte[] clientHello)
+        private bool AcquireServerCredentials(ref byte[] thumbPrint, byte[] clientHello, int offset, int count)
         {
             if (NetEventSource.IsEnabled)
                 NetEventSource.Enter(this);
@@ -635,7 +640,7 @@ namespace System.Net.Security
             // with .NET Framework), and if neither is set we fall back to using ServerCertificate.
             if (_sslAuthenticationOptions.ServerCertSelectionDelegate != null)
             {
-                string serverIdentity = SniHelper.GetServerName(clientHello);
+                string serverIdentity = SniHelper.GetServerName(clientHello, offset, count);
                 localCertificate = _sslAuthenticationOptions.ServerCertSelectionDelegate(serverIdentity);
 
                 if (localCertificate == null)
@@ -648,9 +653,7 @@ namespace System.Net.Security
                 X509CertificateCollection tempCollection = new X509CertificateCollection();
                 tempCollection.Add(_sslAuthenticationOptions.ServerCertificate);
                 // We pass string.Empty here to maintain strict compatability with .NET Framework.
-                localCertificate =
-                    _sslAuthenticationOptions.CertSelectionDelegate(string.Empty, tempCollection, null,
-                        Array.Empty<string>());
+                localCertificate = _sslAuthenticationOptions.CertSelectionDelegate(string.Empty, tempCollection, null, Array.Empty<string>());
                 if (NetEventSource.IsEnabled)
                     NetEventSource.Info(this, "Use delegate selected Cert");
             }
@@ -685,9 +688,7 @@ namespace System.Net.Security
             byte[] guessedThumbPrint = selectedCert.GetCertHash();
             try
             {
-                SafeFreeCredentials cachedCredentialHandle = SslSessionsCache.TryCachedCredential(guessedThumbPrint,
-                    _sslAuthenticationOptions.EnabledSslProtocols, _sslAuthenticationOptions.IsServer,
-                    _sslAuthenticationOptions.EncryptionPolicy);
+                SafeFreeCredentials cachedCredentialHandle = SslSessionsCache.TryCachedCredential(guessedThumbPrint, _sslAuthenticationOptions.EnabledSslProtocols, _sslAuthenticationOptions.IsServer, _sslAuthenticationOptions.EncryptionPolicy);
 
                 if (cachedCredentialHandle != null)
                 {
@@ -697,9 +698,7 @@ namespace System.Net.Security
                 }
                 else
                 {
-                    _credentialsHandle = SslStreamPal.AcquireCredentialsHandle(selectedCert,
-                        _sslAuthenticationOptions.EnabledSslProtocols, _sslAuthenticationOptions.EncryptionPolicy,
-                        _sslAuthenticationOptions.IsServer);
+                    _credentialsHandle = SslStreamPal.AcquireCredentialsHandle(selectedCert, _sslAuthenticationOptions.EnabledSslProtocols, _sslAuthenticationOptions.EncryptionPolicy, _sslAuthenticationOptions.IsServer);
                     thumbPrint = guessedThumbPrint;
                     _sslAuthenticationOptions.ServerCertificate = localCertificate;
                 }
@@ -718,6 +717,7 @@ namespace System.Net.Security
             return cachedCred;
         }
 
+        //
         internal ProtocolToken NextMessage(byte[] incoming, int offset, int count)
         {
             if (NetEventSource.IsEnabled)
@@ -741,13 +741,11 @@ namespace System.Net.Security
             {
                 if (token.Failed)
                 {
-                    NetEventSource.Error(this,
-                        $"Authentication failed. Status: {status.ToString()}, Exception message: {token.GetException().Message}");
+                    NetEventSource.Error(this, $"Authentication failed. Status: {status.ToString()}, Exception message: {token.GetException().Message}");
                 }
 
                 NetEventSource.Exit(this, token);
             }
-
             return token;
         }
 
@@ -766,9 +764,7 @@ namespace System.Net.Security
             Return:
                 status - error information
         --*/
-
-        //internal SecurityStatusPal GenerateToken(ReadOnlySpan<byte> input, ref byte[] output)
-        internal SecurityStatusPal GenerateToken(byte[] input, int offset, int count, ref byte[] output)
+        private SecurityStatusPal GenerateToken(byte[] input, int offset, int count, ref byte[] output)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, $"_refreshCredentialNeeded = {_refreshCredentialNeeded}");
 
@@ -783,8 +779,6 @@ namespace System.Net.Security
                 NetEventSource.Fail(this, "Argument 'count' out of range.");
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
-
-//            return GenerateToken(new ReadOnlySpan<byte>(input, offset, count), ref output);
 
             byte[] result = Array.Empty<byte>();
             SecurityStatusPal status = default;
@@ -803,7 +797,7 @@ namespace System.Net.Security
                     if (_refreshCredentialNeeded)
                     {
                         cachedCreds = _sslAuthenticationOptions.IsServer
-                                        ? AcquireServerCredentials(ref thumbPrint, input)
+                                        ? AcquireServerCredentials(ref thumbPrint, input, offset, count)
                                         : AcquireClientCredentials(ref thumbPrint);
                     }
 
