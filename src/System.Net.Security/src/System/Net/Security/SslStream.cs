@@ -226,19 +226,10 @@ namespace System.Net.Security
             return BeginAuthenticateAsClient(options, CancellationToken.None, asyncCallback, asyncState);
         }
 
-        internal IAsyncResult BeginAuthenticateAsClient(SslClientAuthenticationOptions sslClientAuthenticationOptions, CancellationToken cancellationToken, AsyncCallback asyncCallback, object asyncState)
-        {
-            SetAndVerifyValidationCallback(sslClientAuthenticationOptions.RemoteCertificateValidationCallback);
-            SetAndVerifySelectionCallback(sslClientAuthenticationOptions.LocalCertificateSelectionCallback);
+        internal IAsyncResult BeginAuthenticateAsClient(SslClientAuthenticationOptions sslClientAuthenticationOptions, CancellationToken cancellationToken, AsyncCallback asyncCallback, object asyncState) =>
+            TaskToApm.Begin(AuthenticateAsClientAsync(sslClientAuthenticationOptions, cancellationToken), asyncCallback, asyncState);
 
-            ValidateCreateContext(sslClientAuthenticationOptions, _certValidationDelegate, _certSelectionDelegate);
-
-            LazyAsyncResult result = new LazyAsyncResult(this, asyncState, asyncCallback);
-            ProcessAuthentication(result, cancellationToken);
-            return result;
-        }
-
-        public virtual void EndAuthenticateAsClient(IAsyncResult asyncResult) => EndProcessAuthentication(asyncResult);
+        public virtual void EndAuthenticateAsClient(IAsyncResult asyncResult) => TaskToApm.End(asyncResult);
 
         //
         // Server side auth.
@@ -248,7 +239,7 @@ namespace System.Net.Security
         {
             return BeginAuthenticateAsServer(serverCertificate, false, SecurityProtocol.SystemDefaultSecurityProtocols, false,
                                                           asyncCallback,
-                                                            asyncState);
+                                                          asyncState);
         }
 
         public virtual IAsyncResult BeginAuthenticateAsServer(X509Certificate serverCertificate, bool clientCertificateRequired,
@@ -274,18 +265,10 @@ namespace System.Net.Security
             return BeginAuthenticateAsServer(options, CancellationToken.None, asyncCallback, asyncState);
         }
 
-        private IAsyncResult BeginAuthenticateAsServer(SslServerAuthenticationOptions sslServerAuthenticationOptions, CancellationToken cancellationToken, AsyncCallback asyncCallback, object asyncState)
-        {
-            SetAndVerifyValidationCallback(sslServerAuthenticationOptions.RemoteCertificateValidationCallback);
+        private IAsyncResult BeginAuthenticateAsServer(SslServerAuthenticationOptions sslServerAuthenticationOptions, CancellationToken cancellationToken, AsyncCallback asyncCallback, object asyncState) =>
+            TaskToApm.Begin(AuthenticateAsServerAsync(sslServerAuthenticationOptions, cancellationToken), asyncCallback, asyncState);
 
-            ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
-
-            LazyAsyncResult result = new LazyAsyncResult(this, asyncState, asyncCallback);
-            ProcessAuthentication(result, cancellationToken);
-            return result;
-        }
-
-        public virtual void EndAuthenticateAsServer(IAsyncResult asyncResult) => EndProcessAuthentication(asyncResult);
+        public virtual void EndAuthenticateAsServer(IAsyncResult asyncResult) => TaskToApm.End(asyncResult);
 
         internal IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
         {
@@ -375,19 +358,9 @@ namespace System.Net.Security
         #endregion
 
         #region Task-based async public methods
-        public virtual Task AuthenticateAsClientAsync(string targetHost) =>
-            Task.Factory.FromAsync(
-                (arg1, callback, state) => ((SslStream)state).BeginAuthenticateAsClient(arg1, callback, state),
-                iar => ((SslStream)iar.AsyncState).EndAuthenticateAsClient(iar),
-                targetHost,
-                this);
+        public virtual Task AuthenticateAsClientAsync(string targetHost) => AuthenticateAsClientAsync(targetHost, null, false);
 
-        public virtual Task AuthenticateAsClientAsync(string targetHost, X509CertificateCollection clientCertificates, bool checkCertificateRevocation) =>
-            Task.Factory.FromAsync(
-                (arg1, arg2, arg3, callback, state) => ((SslStream)state).BeginAuthenticateAsClient(arg1, arg2, SecurityProtocol.SystemDefaultSecurityProtocols, arg3, callback, state),
-                iar => ((SslStream)iar.AsyncState).EndAuthenticateAsClient(iar),
-                targetHost, clientCertificates, checkCertificateRevocation,
-                this);
+        public virtual Task AuthenticateAsClientAsync(string targetHost, X509CertificateCollection clientCertificates, bool checkCertificateRevocation) => AuthenticateAsClientAsync(targetHost, clientCertificates, SecurityProtocol.SystemDefaultSecurityProtocols, checkCertificateRevocation);
 
         public virtual Task AuthenticateAsClientAsync(string targetHost, X509CertificateCollection clientCertificates, SslProtocols enabledSslProtocols, bool checkCertificateRevocation)
         {
