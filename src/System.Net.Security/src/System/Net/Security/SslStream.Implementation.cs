@@ -474,7 +474,7 @@ namespace System.Net.Security
 
             do
             {
-                message  = await StartReceiveBlobAsync(adapter, null, cancellationToken).ConfigureAwait(false);
+                message  = await ReceiveBlobAsync(adapter, null, cancellationToken).ConfigureAwait(false);
                 if (message.Size > 0)
                 {
                     // If there is message send it out even if call failed. It may contain TLS Altert.
@@ -623,26 +623,8 @@ namespace System.Net.Security
             StartReadFrame(buffer, readBytes, asyncRequest);
         }
 
-        private async Task<ProtocolToken> StartReceiveBlobAsync(SslReadAsync adapter, byte[] buffer, CancellationToken cancellationToken)
+        private async Task<ProtocolToken> ReceiveBlobAsync(SslReadAsync adapter, byte[] buffer, CancellationToken cancellationToken)
         {
-            //          if (_pendingReHandshake)
-            //          {
-            //        if (CheckEnqueueHandshakeRead(ref buffer, asyncRequest))
-//                {
-//                    return;
-//                }
-
-//                if (!_pendingReHandshake)
-//                {
-            //                   // Renegotiate: proceed to the next step.
-            //                   ProcessReceivedBlob(buffer, buffer.Length, asyncRequest);
-            //                   return;
-            //              }
-            //         }
-
-            //This is first server read.
-//            SslReadAsync adapter = new SslReadAsync(this, cancellationToken);
-
             ResetReadBuffer();
             int readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize).ConfigureAwait(false);
             if (readBytes == 0)
@@ -672,10 +654,10 @@ namespace System.Net.Security
                 }
             }
 
-            var r = ProcessReceivedBlob2(_internalBuffer, _internalOffset, frameSize, cancellationToken);
+            ProtocolToken token = ProcessBlob(_internalBuffer, _internalOffset, frameSize);
             ConsumeBufferedBytes(frameSize);
 
-            return r;
+            return token;
         }
 
         //
@@ -732,7 +714,6 @@ namespace System.Net.Security
 
         private void ProcessReceivedBlob(byte[] buffer, int count, AsyncProtocolRequest asyncRequest)
         {
-//            Console.WriteLine("ProcessReceivedBlob called with {0}", count);
             if (count == 0)
             {
                 // EOF received.
@@ -777,7 +758,7 @@ namespace System.Net.Security
             StartSendBlob(buffer, count, asyncRequest);
         }
 
-        private ProtocolToken ProcessReceivedBlob2(byte[] buffer, int bufferOffset, int count, CancellationToken cancellationToken)
+        private ProtocolToken ProcessBlob(byte[] buffer, int bufferOffset, int count)
         {
             if (_pendingReHandshake)
             {
@@ -789,8 +770,7 @@ namespace System.Net.Security
                     Exception e = EnqueueOldKeyDecryptedData(buffer, offset, count);
                     if (e != null)
                     {
-                        //StartSendAuthResetSignal(null, asyncRequest, ExceptionDispatchInfo.Capture(e));
-                        return null;
+                        ExceptionDispatchInfo.Throw(e);
                     }
 
                     _Framing = Framing.Unknown;
