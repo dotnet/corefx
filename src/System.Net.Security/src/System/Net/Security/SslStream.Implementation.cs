@@ -467,8 +467,10 @@ namespace System.Net.Security
                 message =_context.NextMessage(buffer, 0, (buffer == null ? 0 : buffer.Length));
                 if (message.Failed)
                 {
+                    // tracing done in NextMessage()
                     throw new AuthenticationException(SR.net_auth_SSPI, message.GetException());
                 }
+
                 await InnerStream.WriteAsync(message.Payload, cancellationToken).ConfigureAwait(false);
             }
 
