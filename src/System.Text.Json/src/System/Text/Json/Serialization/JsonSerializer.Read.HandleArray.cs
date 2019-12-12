@@ -254,11 +254,26 @@ namespace System.Text.Json
             else if (state.Current.IsProcessingDictionary())
             {
                 Debug.Assert(state.Current.ReturnValue != null);
-                IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+
+                object currentDictionary = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
-                dictionary[key] = value;
+
+                if (currentDictionary is IDictionary<string, TProperty> genericDict)
+                {
+                    Debug.Assert(!genericDict.IsReadOnly);
+                    genericDict[key] = value;
+                }
+                else if (currentDictionary is IDictionary dict)
+                {
+                    Debug.Assert(!dict.IsReadOnly);
+                    dict[key] = value;
+                }
+                else
+                {
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(currentDictionary.GetType(), parentType: null, memberInfo: null);
+                }
             }
             else if (state.Current.IsProcessingIDictionaryConstructible())
             {

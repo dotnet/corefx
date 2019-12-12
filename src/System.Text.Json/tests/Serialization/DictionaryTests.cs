@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Encodings.Web;
 using Xunit;
@@ -930,6 +931,102 @@ namespace System.Text.Json.Serialization.Tests
             // Verify that typeof(object) doesn't interfere.
             json = JsonSerializer.Serialize<object>(obj);
             Assert.Equal(JsonString, json);
+        }
+
+        private interface IClass { }
+
+        private class MyClass : IClass { }
+
+        private class MyFactory : JsonConverterFactory
+        {
+            public override bool CanConvert(Type typeToConvert)
+            {
+                return typeToConvert == typeof(IClass) || typeToConvert == typeof(MyClass);
+            }
+
+            public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+            {
+                return new MyStuffConverter();
+            }
+        }
+
+        private class MyStuffConverter : JsonConverter<IClass>
+        {
+            public override IClass Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                return new MyClass();
+            }
+
+            public override void Write(Utf8JsonWriter writer, IClass value, JsonSerializerOptions options)
+            {
+                writer.WriteNumberValue(1);
+            }
+        }
+
+        private static IEnumerable<(Type, string)> NestedDictionaryTypeData()
+        {
+            string testJson = @"{""Key"":1}";
+
+            List<Type> genericDictTypes = new List<Type>()
+            {
+                typeof(IDictionary<,>),
+                typeof(Dictionary<,>),
+                typeof(ConcurrentDictionary<,>),
+            };
+
+            List<Type> nonGenericDictTypes = new List<Type>()
+            {
+                typeof(IDictionary),
+                typeof(Hashtable),
+            };
+
+            List<Type> baseDictionaryTypes = new List<Type>
+            {
+                typeof(IReadOnlyDictionary<string, MyClass>),
+                typeof(Dictionary<string, IClass>),
+                typeof(ConcurrentDictionary<string, int>),
+                typeof(ImmutableDictionary<string, object>),
+            };
+            baseDictionaryTypes.AddRange(nonGenericDictTypes);
+
+            int maxTestDepth = 4;
+
+            HashSet<(Type, string)> tests = new HashSet<(Type, string)>();
+
+            for (int i = 0; i < maxTestDepth; i++)
+            {
+                List<Type> newBaseTypes = new List<Type>();
+
+                foreach (Type testType in baseDictionaryTypes)
+                {
+                    tests.Add((testType, testJson));
+
+                    foreach (Type genericType in genericDictTypes)
+                    {
+                        newBaseTypes.Add(genericType.MakeGenericType(typeof(string), testType));
+                    }
+
+                    newBaseTypes.AddRange(nonGenericDictTypes);
+                }
+
+                baseDictionaryTypes = newBaseTypes;
+                testJson = @"{""Key"":" + testJson + "}";
+            }
+
+            return tests;
+        }
+
+        [Fact]
+        public static void NestedDictionariesRoundtrip()
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions();
+            options.Converters.Add(new MyFactory());
+
+            foreach ((Type dictionaryType, string testJson) in NestedDictionaryTypeData())
+            {
+                object dict = JsonSerializer.Deserialize(testJson, dictionaryType, options);
+                Assert.Equal(testJson, JsonSerializer.Serialize(dict, options));
+            }
         }
 
         [Fact]
