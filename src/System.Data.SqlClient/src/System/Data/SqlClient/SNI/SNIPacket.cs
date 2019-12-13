@@ -26,6 +26,11 @@ namespace System.Data.SqlClient.SNI
         }
 
         /// <summary>
+        /// Dispose Packet data
+        /// </summary>
+        public void Dispose() => Release();
+
+        /// <summary>
         /// Length of data left to process
         /// </summary>
         public int DataLeft => (_dataLength - _dataOffset);
@@ -250,8 +255,5 @@ namespace System.Data.SqlClient.SNI
         {
             stream.Write(_data, _headerLength, _dataLength);
         }
-
     }
-
-
 }
