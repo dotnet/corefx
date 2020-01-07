@@ -44,9 +44,6 @@ static void DlOpen(const char* libraryName)
 {
     assert(libssl == NULL);
     libssl = dlopen(libraryName, RTLD_LAZY);
-#ifdef DEBUG_LIBRARY_LOAD
-    printf("Attempting load of %s ... %s\n", libraryName, libssl == NULL ? "failed." : "succeeded!");
-#endif
 }
 
 static bool OpenLibrary()
