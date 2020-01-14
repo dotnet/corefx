@@ -132,7 +132,7 @@ namespace System.Text.Json.Serialization
 
         public override void GetDictionaryKeyAndValueFromGenericDictionary(ref WriteStackFrame writeStackFrame, out string key, out object value)
         {
-            if (writeStackFrame.CollectionEnumerator is IEnumerator<KeyValuePair<string, TRuntimeProperty>> genericEnumerator)
+            if (writeStackFrame.CollectionEnumerator is IEnumerator<KeyValuePair<string, TDeclaredProperty>> genericEnumerator)
             {
                 key = genericEnumerator.Current.Key;
                 value = genericEnumerator.Current.Value;
