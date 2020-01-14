@@ -3913,13 +3913,15 @@
     "System.Reflection.MetadataLoadContext": {
       "StableVersions": [
         "4.6.0",
-        "4.7.0"
+        "4.7.0",
+        "4.7.1"
       ],
       "BaselineVersion": "4.7.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.6.0",
-        "4.0.1.0": "4.7.0"
+        "4.0.1.0": "4.7.0",
+        "4.0.1.1": "4.7.1"
       }
     },
     "System.Reflection.Primitives": {
