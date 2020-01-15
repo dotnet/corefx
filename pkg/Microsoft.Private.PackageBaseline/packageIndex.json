@@ -5531,7 +5531,7 @@
       "BaselineVersion": "4.7.0",
       "InboxOn": {
         "netcoreapp3.0": "4.0.0.0",
-        "netcoreapp3.1": "4.0.1.0",
+        "netcoreapp3.1": "4.0.1.1",
         "uap10.0.16300": "4.0.1.0"
       },
       "AssemblyVersionInPackageVersion": {
