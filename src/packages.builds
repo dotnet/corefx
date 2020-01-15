@@ -29,6 +29,12 @@
     <Project Include="$(MSBuildThisFileDirectory)System.Reflection.MetadataLoadContext\pkg\System.Reflection.MetadataLoadContext.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Text.Json\pkg\System.Text.Json.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Data.SqlClient\pkg\System.Data.SqlClient.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <ItemGroup>
