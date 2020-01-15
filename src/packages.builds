@@ -27,7 +27,7 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
      </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Security.Cryptography.Cng\pkg\System.Security.Cryptography.Cng.pkgproj"> 
+    <Project Include="$(MSBuildThisFileDirectory)System.Data.SqlClient\pkg\System.Data.SqlClient.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>
