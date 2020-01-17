@@ -9,8 +9,8 @@ namespace System.Text.Json
     public static partial class JsonSerializer
     {
         // There are three conditions to consider for an object (primitive value, enumerable or object) being processed here:
-        // 1) The object type was specified as the root-level return type to a Parse\Read method.
-        // 2) The object is property on a parent object.
+        // 1) The object type was specified as the root-level return type to a Deserialize method.
+        // 2) The object is a property on a parent object.
         // 3) The object is an element in an enumerable.
         private static bool Write(
             Utf8JsonWriter writer,
@@ -25,35 +25,31 @@ namespace System.Text.Json
             {
                 do
                 {
-                    WriteStackFrame current = state.Current;
-                    switch (current.JsonClassInfo.ClassType)
+                    switch (state.Current.JsonClassInfo.ClassType)
                     {
                         case ClassType.Enumerable:
-                            finishedSerializing = HandleEnumerable(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
+                            finishedSerializing = HandleEnumerable(state.Current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
                             break;
                         case ClassType.Value:
-                            Debug.Assert(current.JsonPropertyInfo.ClassType == ClassType.Value);
-                            current.JsonPropertyInfo.Write(ref state, writer);
+                            Debug.Assert(state.Current.JsonPropertyInfo.ClassType == ClassType.Value);
+                            state.Current.JsonPropertyInfo.Write(ref state, writer);
                             finishedSerializing = true;
-                            break;
-                        case ClassType.Object:
-                            finishedSerializing = WriteObject(options, writer, ref state);
                             break;
                         case ClassType.Dictionary:
                         case ClassType.IDictionaryConstructible:
-                            finishedSerializing = HandleDictionary(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
+                            finishedSerializing = HandleDictionary(state.Current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
                             break;
                         default:
-                            Debug.Assert(state.Current.JsonClassInfo.ClassType == ClassType.Unknown);
+                            Debug.Assert(state.Current.JsonClassInfo.ClassType == ClassType.Object ||
+                                state.Current.JsonClassInfo.ClassType == ClassType.Unknown);
 
-                            // Treat typeof(object) as an empty object.
                             finishedSerializing = WriteObject(options, writer, ref state);
                             break;
                     }
 
                     if (finishedSerializing)
                     {
-                        if (writer.CurrentDepth == 0 || writer.CurrentDepth == originalWriterDepth)
+                        if (writer.CurrentDepth == originalWriterDepth)
                         {
                             break;
                         }
@@ -63,7 +59,7 @@ namespace System.Text.Json
                         ThrowHelper.ThrowInvalidOperationException_SerializerCycleDetected(options.MaxDepth);
                     }
 
-                    // If serialization is not yet end and we surpass beyond flush threshold return false and flush stream.
+                    // If serialization is not finished and we surpass flush threshold then return false which will flush stream.
                     if (flushThreshold >= 0 && writer.BytesPending > flushThreshold)
                     {
                         return false;

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -1150,9 +1151,86 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadReadOnlyCollections_Throws()
         {
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyWrapperForIList>(@"[""1"", ""2""]"));
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]"));
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]"));
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}"));
+        }
+
+        [Fact]
+        public static void HigherOrderCollectionInheritance_Works()
+        {
+            static void RunTest<T>(T instance)
+            {
+                string expectedJson;
+
+                if (instance is IEnumerable<string> || instance is IList)
+                {
+                    expectedJson = @"[""item""]";
+                }
+                else
+                {
+                    expectedJson = @"{""key"":""item""}";
+                }
+
+                string outputJson = JsonSerializer.Serialize(instance);
+                Assert.Equal(expectedJson, outputJson);
+
+                T deserializedObject = JsonSerializer.Deserialize<T>(outputJson);
+                IEnumerator enumerator = ((IEnumerable)deserializedObject).GetEnumerator();
+                enumerator.MoveNext();
+
+                if (enumerator.Current is KeyValuePair<string, string> pair)
+                {
+                    Assert.Equal("key", pair.Key);
+                    Assert.Equal("item", pair.Value);
+                }
+                else if (enumerator.Current is DictionaryEntry entry)
+                {
+                    Assert.Equal("key", (string)entry.Key);
+                    Assert.Equal("item", ((JsonElement)entry.Value).GetString());
+                }
+                else if (enumerator.Current is JsonElement element)
+                {
+                    Assert.Equal("item", element.GetString());
+                }
+                else
+                {
+                    Assert.Equal("item", (string)enumerator.Current);
+                }
+
+                // Ensure roundtrip.
+                Assert.Equal(outputJson, JsonSerializer.Serialize(deserializedObject));
+            }
+
+            // List<string>
+            RunTest(new List<string> { "item" });
+
+            // Type that implements List<string>
+            RunTest(new StringListWrapper { "item" });
+
+            // Type that implements List<T>
+            RunTest(new GenericListWrapper<string> { "item" });
+
+            // Type that implements a type that implements List<T>
+            RunTest(new WrapperForGenericListWrapper<string> { "item" });
+
+            // Type that implements a type that implements List<string>
+            RunTest(new WrapperForGenericListWrapper { "item" });
+
+            // Type that implements a type that implements Stack<T>
+            WrapperForGenericStackWrapper<string> stack = new WrapperForGenericStackWrapper<string>();
+            stack.Push("item");
+            RunTest(stack);
+
+            // Type that implements a type that implements IList
+            RunTest(new WrapperForWrapperForIList { "item" });
+
+            // Type that implements a type that implements IDictionary<string, string>
+            RunTest(new WrapperForStringToStringIDictionaryWrapper { ["key"] = "item" });
+
+            // Type that implements a type that implements IDictionary
+            RunTest(new WrapperForWrapperForIDictionary { ["key"] = "item" });
         }
     }
 }

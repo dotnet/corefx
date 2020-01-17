@@ -62,6 +62,7 @@
     <Compile Include="Serialization\JsonElementTests.cs" />
     <Compile Include="Serialization\Null.ReadTests.cs" />
     <Compile Include="Serialization\Null.WriteTests.cs" />
+    <Compile Include="Serialization\NullableTests.cs" />
     <Compile Include="Serialization\Object.ReadTests.cs" />
     <Compile Include="Serialization\Object.WriteTests.cs" />
     <Compile Include="Serialization\OptionsTests.cs" />
@@ -89,10 +90,12 @@
     <Compile Include="Serialization\Value.ReadTests.GenericCollections.cs" />
     <Compile Include="Serialization\Value.ReadTests.ImmutableCollections.cs" />
     <Compile Include="Serialization\Value.ReadTests.NonGenericCollections.cs" />
+    <Compile Include="Serialization\Value.ReadTests.ObjectModelCollections.cs" />
     <Compile Include="Serialization\Value.WriteTests.cs" />
     <Compile Include="Serialization\Value.WriteTests.GenericCollections.cs" />
     <Compile Include="Serialization\Value.WriteTests.ImmutableCollections.cs" />
     <Compile Include="Serialization\Value.WriteTests.NonGenericCollections.cs" />
+    <Compile Include="Serialization\Value.WriteTests.ObjectModelCollections.cs" />
     <Compile Include="Serialization\WriteValueTests.cs" />
     <Compile Include="TestCaseType.cs" />
     <Compile Include="TestClasses.ClassWithComplexObjects.cs" />

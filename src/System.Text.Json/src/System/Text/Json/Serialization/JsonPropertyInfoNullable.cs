@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
@@ -16,11 +18,11 @@ namespace System.Text.Json
     {
         private static readonly Type s_underlyingType = typeof(TProperty);
 
-        protected override void OnRead(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader)
+        protected override void OnRead(ref ReadStack state, ref Utf8JsonReader reader)
         {
             if (Converter == null)
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
             }
 
             TProperty value = Converter.Read(ref reader, s_underlyingType, Options);
@@ -35,16 +37,16 @@ namespace System.Text.Json
             }
         }
 
-        protected override void OnReadEnumerable(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader)
+        protected override void OnReadEnumerable(ref ReadStack state, ref Utf8JsonReader reader)
         {
             if (Converter == null)
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
             }
 
             TProperty value = Converter.Read(ref reader, s_underlyingType, Options);
             TProperty? nullableValue = new TProperty?(value);
-            JsonSerializer.ApplyValueToEnumerable(ref nullableValue, ref state, ref reader);
+            JsonSerializer.ApplyValueToEnumerable(ref nullableValue, ref state);
         }
 
         protected override void OnWrite(ref WriteStackFrame current, Utf8JsonWriter writer)
@@ -79,6 +81,50 @@ namespace System.Text.Json
             }
         }
 
+        protected override void OnWriteDictionary(ref WriteStackFrame current, Utf8JsonWriter writer)
+        {
+            Debug.Assert(Converter != null && current.CollectionEnumerator != null);
+
+            string key = null;
+            TProperty? value = null;
+            if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, TProperty?>> enumerator)
+            {
+                key = enumerator.Current.Key;
+                value = enumerator.Current.Value;
+            }
+            else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty)
+            {
+                key = (string)((DictionaryEntry)current.CollectionEnumerator.Current).Key;
+                value = (TProperty?)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
+            }
+
+            Debug.Assert(key != null);
+
+            if (Options.DictionaryKeyPolicy != null)
+            {
+                // We should not be in the Nullable-value implementation branch for extension data.
+                // (TValue should be typeof(object) or typeof(JsonElement)).
+                Debug.Assert(current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing);
+
+                key = Options.DictionaryKeyPolicy.ConvertName(key);
+
+                if (key == null)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_SerializerDictionaryKeyNull(Options.DictionaryKeyPolicy.GetType());
+                }
+            }
+
+            if (value == null)
+            {
+                writer.WriteNull(key);
+            }
+            else
+            {
+                writer.WritePropertyName(key);
+                Converter.Write(writer, value.GetValueOrDefault(), Options);
+            }
+        }
+
         protected override void OnWriteEnumerable(ref WriteStackFrame current, Utf8JsonWriter writer)
         {
             if (Converter != null)
@@ -104,6 +150,27 @@ namespace System.Text.Json
                 {
                     Converter.Write(writer, value.GetValueOrDefault(), Options);
                 }
+            }
+        }
+
+        public override Type GetDictionaryConcreteType()
+        {
+            return typeof(Dictionary<string, TProperty?>);
+        }
+
+        public override void GetDictionaryKeyAndValueFromGenericDictionary(ref WriteStackFrame writeStackFrame, out string key, out object value)
+        {
+            if (writeStackFrame.CollectionEnumerator is IEnumerator<KeyValuePair<string, TProperty?>> genericEnumerator)
+            {
+                key = genericEnumerator.Current.Key;
+                value = genericEnumerator.Current.Value;
+            }
+            else
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    writeStackFrame.JsonPropertyInfo.DeclaredPropertyType,
+                    writeStackFrame.JsonPropertyInfo.ParentClassType,
+                    writeStackFrame.JsonPropertyInfo.PropertyInfo);
             }
         }
     }

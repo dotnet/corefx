@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <!-- this assembly is inbox in desktop, do not version it unless you
+         plan on shipping a new desktop version out of band. Instead add API
+         to a different assembly. -->
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <ProjectGuid>{404455B6-466C-4F78-9DCC-C37DCC0B75DA}</ProjectGuid>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>

@@ -5,11 +5,14 @@
 using System.Buffers;
 using System.Collections;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
+        // AggressiveInlining used although a large method it is only called from one locations and is on a hot path.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void HandlePropertyName(
             JsonSerializerOptions options,
             ref Utf8JsonReader reader,
@@ -23,24 +26,21 @@ namespace System.Text.Json
             Debug.Assert(state.Current.ReturnValue != default || state.Current.TempDictionaryValues != default);
             Debug.Assert(state.Current.JsonClassInfo != default);
 
-            if ((state.Current.IsProcessingDictionary || state.Current.IsProcessingIDictionaryConstructible) &&
+            bool isProcessingDictObject = state.Current.IsProcessingDictionaryOrIDictionaryConstructibleObject();
+            if ((isProcessingDictObject || state.Current.IsProcessingDictionaryOrIDictionaryConstructibleProperty()) &&
                 state.Current.JsonClassInfo.DataExtensionProperty != state.Current.JsonPropertyInfo)
             {
-                if (state.Current.IsDictionary || state.Current.IsIDictionaryConstructible)
+                if (isProcessingDictObject)
                 {
                     state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.PolicyProperty;
                 }
-
-                Debug.Assert(
-                    state.Current.IsDictionary ||
-                    (state.Current.IsDictionaryProperty && state.Current.JsonPropertyInfo != null) ||
-                    state.Current.IsIDictionaryConstructible ||
-                    (state.Current.IsIDictionaryConstructibleProperty && state.Current.JsonPropertyInfo != null));
 
                 state.Current.KeyName = reader.GetString();
             }
             else
             {
+                Debug.Assert(state.Current.JsonClassInfo.ClassType == ClassType.Object);
+
                 state.Current.EndProperty();
 
                 ReadOnlySpan<byte> propertyName = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
@@ -52,7 +52,7 @@ namespace System.Text.Json
                 }
 
                 JsonPropertyInfo jsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(propertyName, ref state.Current);
-                if (jsonPropertyInfo == null)
+                if (jsonPropertyInfo == JsonPropertyInfo.s_missingProperty)
                 {
                     JsonPropertyInfo dataExtProperty = state.Current.JsonClassInfo.DataExtensionProperty;
                     if (dataExtProperty == null)
@@ -94,9 +94,10 @@ namespace System.Text.Json
                             state.Current.JsonPropertyInfo.JsonPropertyName = propertyNameArray;
                         }
                     }
-
-                    state.Current.PropertyIndex++;
                 }
+
+                // Increment the PropertyIndex so JsonClassInfo.GetProperty() starts with the next property.
+                state.Current.PropertyIndex++;
             }
         }
 

@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <!-- The .NET Core product branding version -->
-    <ProductVersion>3.0.3</ProductVersion>
+    <ProductVersion>3.1.2</ProductVersion>
     <!-- We need to move to 4.7 as part of our versioning change when we switch to arcade to avoid downgrading versions -->
     <MajorVersion>4</MajorVersion>
     <MinorVersion>7</MinorVersion>
@@ -47,13 +47,13 @@
     <!-- roslyn -->
     <MicrosoftNetCompilersToolsetVersion>3.3.0-beta2-19367-02</MicrosoftNetCompilersToolsetVersion>
     <!-- Core-setup dependencies -->
-    <MicrosoftNETCoreAppPackageVersion>3.0.2-servicing-19571-02</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftNETCoreDotNetHostPackageVersion>3.0.2-servicing-19571-02</MicrosoftNETCoreDotNetHostPackageVersion>
-    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.0.2-servicing-19571-02</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>3.1.0-preview3.19553.2</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreDotNetHostPackageVersion>3.1.0-preview3.19553.2</MicrosoftNETCoreDotNetHostPackageVersion>
+    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.1.0-preview3.19553.2</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
     <!-- Coreclr dependencies -->
-    <MicrosoftNETCoreILAsmPackageVersion>3.0.3-servicing.20066.3</MicrosoftNETCoreILAsmPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.3-servicing.20066.3</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
-    <MicrosoftNETSdkILPackageVersion>3.0.3-servicing.20066.3</MicrosoftNETSdkILPackageVersion>
+    <MicrosoftNETSdkILPackageVersion>3.1.2-servicing.20066.2</MicrosoftNETSdkILPackageVersion>
+    <MicrosoftNETCoreILAsmPackageVersion>3.1.2-servicing.20066.2</MicrosoftNETCoreILAsmPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.1.2-servicing.20066.2</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- Corefx dependencies -->
     <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview9.19409.15</MicrosoftNETCorePlatformsPackageVersion>
     <runtimenativeSystemIOPortsPackageVersion>4.6.0-preview9.19409.15</runtimenativeSystemIOPortsPackageVersion>
@@ -72,7 +72,7 @@
     <NewtonsoftJsonPackageVersion>12.0.1</NewtonsoftJsonPackageVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.0.0-preview6-27804-01</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <!-- Test data -->
-    <SystemIOCompressionTestDataPackageVersion>1.0.14</SystemIOCompressionTestDataPackageVersion>
+    <SystemIOCompressionTestDataPackageVersion>1.0.16</SystemIOCompressionTestDataPackageVersion>
     <SystemIOPackagingTestDataPackageVersion>1.0.4</SystemIOPackagingTestDataPackageVersion>
     <SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>1.0.7</SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>
     <SystemNetTestDataPackageVersion>1.0.6</SystemNetTestDataPackageVersion>
@@ -83,7 +83,7 @@
     <CoverletConsolePackageVersion>1.5.0</CoverletConsolePackageVersion>
     <DotNetReportGeneratorGlobalToolPackageVersion>4.1.4</DotNetReportGeneratorGlobalToolPackageVersion>
     <!-- Docs -->
-    <MicrosoftPrivateIntellisensePackageVersion>3.0.0-preview9-190909-1</MicrosoftPrivateIntellisensePackageVersion>
+    <MicrosoftPrivateIntellisensePackageVersion>3.1.1-preview-191205-1</MicrosoftPrivateIntellisensePackageVersion>
     <!-- ILLink -->
     <ILLinkTasksPackageVersion>0.1.5-preview-1461378</ILLinkTasksPackageVersion>
   </PropertyGroup>

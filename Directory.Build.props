@@ -197,13 +197,6 @@
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
-  <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
-    <Copyright>$(CopyrightNetFoundation)</Copyright>
-    <!-- Temporarily disable PackageLicenseExpression until we can workaround 
-         https://github.com/NuGet/Home/issues/7894 -->
-    <!-- PackageLicenseExpression>MIT</PackageLicenseExpression -->
-  </PropertyGroup>
-
   <!-- Import packaging props -->
   <Import Project="$(RepositoryEngineeringDir)Packaging.props" />
 
@@ -364,6 +357,8 @@
     <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants),netstandard21</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants),netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp2.0'">$(DefineConstants),netcoreapp20</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp3.0'">$(DefineConstants),netcoreapp30</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp5.0'">$(DefineConstants),netcoreapp50</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

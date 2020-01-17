@@ -102,11 +102,6 @@ namespace System.Text.Json
             return new List<TDeclaredProperty>();
         }
 
-        public override Type GetDictionaryConcreteType()
-        {
-            return typeof(Dictionary<string, TRuntimeProperty>);
-        }
-
         public override Type GetConcreteType(Type parentType)
         {
             if (JsonClassInfo.IsDeserializedByAssigningFromList(parentType))
@@ -121,8 +116,17 @@ namespace System.Text.Json
             return parentType;
         }
 
-        public override IEnumerable CreateDerivedEnumerableInstance(JsonPropertyInfo collectionPropertyInfo, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        public override IEnumerable CreateDerivedEnumerableInstance(ref ReadStack state, JsonPropertyInfo collectionPropertyInfo, IList sourceList)
         {
+            // Implementing types that don't have default constructors are not supported for deserialization.
+            if (collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject == null)
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    collectionPropertyInfo.DeclaredPropertyType,
+                    collectionPropertyInfo.ParentClassType,
+                    collectionPropertyInfo.PropertyInfo);
+            }
+
             object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
 
             if (instance is IList instanceOfIList && !instanceOfIList.IsReadOnly)
@@ -131,43 +135,56 @@ namespace System.Text.Json
                 {
                     instanceOfIList.Add(item);
                 }
+
                 return instanceOfIList;
             }
-            else if (instance is ICollection<TRuntimeProperty> instanceOfICollection && !instanceOfICollection.IsReadOnly)
+            else if (instance is ICollection<TDeclaredProperty> instanceOfICollection && !instanceOfICollection.IsReadOnly)
             {
-                foreach (TRuntimeProperty item in sourceList)
+                foreach (TDeclaredProperty item in sourceList)
                 {
                     instanceOfICollection.Add(item);
                 }
+
                 return instanceOfICollection;
             }
-            else if (instance is Stack<TRuntimeProperty> instanceOfStack)
+            else if (instance is Stack<TDeclaredProperty> instanceOfStack)
             {
-                foreach (TRuntimeProperty item in sourceList)
+                foreach (TDeclaredProperty item in sourceList)
                 {
                     instanceOfStack.Push(item);
                 }
+
                 return instanceOfStack;
             }
-            else if (instance is Queue<TRuntimeProperty> instanceOfQueue)
+            else if (instance is Queue<TDeclaredProperty> instanceOfQueue)
             {
-                foreach (TRuntimeProperty item in sourceList)
+                foreach (TDeclaredProperty item in sourceList)
                 {
                     instanceOfQueue.Enqueue(item);
                 }
+
                 return instanceOfQueue;
             }
 
-            // TODO: Use reflection to support types implementing Stack or Queue.
-
+            // TODO (https://github.com/dotnet/corefx/issues/40479):
+            // Use reflection to support types implementing Stack or Queue.
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                 collectionPropertyInfo.DeclaredPropertyType,
                 collectionPropertyInfo.ParentClassType,
                 collectionPropertyInfo.PropertyInfo);
         }
 
-        public override object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        public override object CreateDerivedDictionaryInstance(ref ReadStack state, JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary)
         {
+            // Implementing types that don't have default constructors are not supported for deserialization.
+            if (collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject == null)
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    collectionPropertyInfo.DeclaredPropertyType,
+                    collectionPropertyInfo.ParentClassType,
+                    collectionPropertyInfo.PropertyInfo);
+            }
+
             object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
 
             if (instance is IDictionary instanceOfIDictionary && !instanceOfIDictionary.IsReadOnly)
@@ -176,18 +193,21 @@ namespace System.Text.Json
                 {
                     instanceOfIDictionary.Add((string)entry.Key, entry.Value);
                 }
+
                 return instanceOfIDictionary;
             }
-            else if (instance is IDictionary<string, TRuntimeProperty> instanceOfGenericIDictionary && !instanceOfGenericIDictionary.IsReadOnly)
+            else if (instance is IDictionary<string, TDeclaredProperty> instanceOfGenericIDictionary && !instanceOfGenericIDictionary.IsReadOnly)
             {
                 foreach (DictionaryEntry entry in sourceDictionary)
                 {
-                    instanceOfGenericIDictionary.Add((string)entry.Key, (TRuntimeProperty)entry.Value);
+                    instanceOfGenericIDictionary.Add((string)entry.Key, (TDeclaredProperty)entry.Value);
                 }
+
                 return instanceOfGenericIDictionary;
             }
 
-            // TODO: Use reflection to support types implementing SortedList and maybe immutable dictionaries.
+            // TODO (https://github.com/dotnet/corefx/issues/40479):
+            // Use reflection to support types implementing SortedList and maybe immutable dictionaries.
 
             // Types implementing SortedList and immutable dictionaries will fail here.
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
@@ -196,7 +216,7 @@ namespace System.Text.Json
                 collectionPropertyInfo.PropertyInfo);
         }
 
-        public override IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        public override IEnumerable CreateIEnumerableInstance(ref ReadStack state, Type parentType, IList sourceList)
         {
             if (parentType.IsGenericType)
             {
@@ -240,7 +260,7 @@ namespace System.Text.Json
             }
         }
 
-        public override IDictionary CreateIDictionaryInstance(Type parentType, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        public override IDictionary CreateIDictionaryInstance(ref ReadStack state, Type parentType, IDictionary sourceDictionary)
         {
             if (parentType.FullName == JsonClassInfo.HashtableTypeName)
             {
@@ -253,44 +273,36 @@ namespace System.Text.Json
             }
         }
 
-        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
+        // Creates an IEnumerable<TDeclaredPropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        public override IEnumerable CreateImmutableCollectionInstance(ref ReadStack state, Type collectionType, string delegateKey, IList sourceList, JsonSerializerOptions options)
         {
             IEnumerable collection = null;
 
             if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
                 !creator.CreateImmutableEnumerable(sourceList, out collection))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, state.JsonPath());
             }
 
             return collection;
         }
 
-        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
+        // Creates an IEnumerable<TDeclaredPropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        public override IDictionary CreateImmutableDictionaryInstance(ref ReadStack state, Type collectionType, string delegateKey, IDictionary sourceDictionary, JsonSerializerOptions options)
         {
             IDictionary collection = null;
 
             if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
                 !creator.CreateImmutableDictionary(sourceDictionary, out collection))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, state.JsonPath());
             }
 
             return collection;
-        }
-
-        private IEnumerable<TRuntimeProperty> CreateGenericTRuntimePropertyIEnumerable(IList sourceList)
-        {
-            foreach (object item in sourceList)
-            {
-                yield return (TRuntimeProperty)item;
-            }
         }
 
         private IEnumerable<TDeclaredProperty> CreateGenericTDeclaredPropertyIEnumerable(IList sourceList)
@@ -298,14 +310,6 @@ namespace System.Text.Json
             foreach (object item in sourceList)
             {
                 yield return (TDeclaredProperty)item;
-            }
-        }
-
-        private IEnumerable<KeyValuePair<string, TRuntimeProperty>> CreateGenericIEnumerableFromDictionary(IDictionary sourceDictionary)
-        {
-            foreach (DictionaryEntry item in sourceDictionary)
-            {
-                yield return new KeyValuePair<string, TRuntimeProperty>((string)item.Key, (TRuntimeProperty)item.Value);
             }
         }
     }
