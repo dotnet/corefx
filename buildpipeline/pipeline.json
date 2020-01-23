@@ -23,7 +23,7 @@
             "PB_BuildArguments": "-buildArch=x64 -$(PB_ConfigurationGroup) -stripSymbols -- /p:StabilizePackageVersion=$(PB_IsStable) /p:PackageVersionStamp=$(PB_VersionStamp)",
             "PB_BuildTestsArguments": "-buildArch=x64 -$(PB_ConfigurationGroup) -SkipTests -Outerloop -- /p:ArchiveTests=true /p:EnableDumpling=true",
             "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:DotNetRestoreSources=$(PB_RestoreSource) /p:DotNetAssetRootUrl=$(PB_AssetRootUrl)",
-            "PB_TargetQueue": "Centos.7.Amd64+RedHat.7.Amd64+RedHat.7.Amd64+Debian.8.Amd64+Debian.9.Amd64+Ubuntu.1404.Amd64+Ubuntu.1604.Amd64+Ubuntu.1804.Amd64+OpenSuse.42.Amd64+SLES.12.Amd64+Fedora.27.Amd64+Fedora.28.Amd64",
+            "PB_TargetQueue": "Centos.7.Amd64+RedHat.7.Amd64+Debian.8.Amd64+Debian.9.Amd64+Ubuntu.1604.Amd64+Ubuntu.1804.Amd64+SLES.12.Amd64+SLES.15.Amd64+(Fedora.30.Amd64)ubuntu.1604.amd64@mcr.microsoft.com/dotnet-buildtools/prereqs:fedora-30-helix-4f8cef7-20200121150022",
             "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=$(PB_ConfigurationGroup) /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Linux"
           },
           "ReportingParameters": {
@@ -55,7 +55,7 @@
             "PB_BuildArguments": "-buildArch=x64 -$(PB_ConfigurationGroup) -stripSymbols -RuntimeOS=linux-musl -- /p:PortableBuild=false /p:StabilizePackageVersion=$(PB_IsStable) /p:PackageVersionStamp=$(PB_VersionStamp)",
             "PB_BuildTestsArguments": "-buildArch=x64 -$(PB_ConfigurationGroup) -SkipTests -Outerloop -RuntimeOS=linux-musl -- /p:ArchiveTests=true /p:EnableDumpling=true /p:PortableBuild=false",
             "PB_SyncArguments": "-p -BuildTests=false -RuntimeOS=linux-musl -- /p:ArchGroup=x64 /p:PortableBuild=false /p:DotNetRestoreSources=$(PB_RestoreSource) /p:DotNetAssetRootUrl=$(PB_AssetRootUrl)",
-            "PB_TargetQueue": "(Alpine.310.Amd64)ubuntu.1604.amd64@mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.10-helix-3043688-20190918214010+(Alpine.39.Amd64)ubuntu.1604.amd64@mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.9-helix-09ca40b-20190508143246",
+            "PB_TargetQueue": "(Alpine.310.Amd64)ubuntu.1604.amd64@mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.10-helix-08e8e40-20200107182422+(Alpine.39.Amd64)ubuntu.1604.amd64@mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.9-helix-08e8e40-20200107182422",
             "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=$(PB_ConfigurationGroup) /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Linux"
           },
           "ReportingParameters": {
@@ -111,7 +111,7 @@
           "Parameters": {
             "PB_BuildArguments": "-buildArch=x64 -$(PB_ConfigurationGroup) -- /p:StabilizePackageVersion=$(PB_IsStable) /p:PackageVersionStamp=$(PB_VersionStamp)",
             "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:DotNetRestoreSources=$(PB_RestoreSource) /p:DotNetAssetRootUrl=$(PB_AssetRootUrl)",
-            "PB_TargetQueue": "OSX.1012.Amd64+OSX.1013.Amd64",
+            "PB_TargetQueue": "OSX.1013.Amd64+OSX.1014.Amd64+OSX.1015.Amd64",
             "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=$(PB_ConfigurationGroup) /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=OSX"
           },
           "ReportingParameters": {
@@ -170,7 +170,7 @@
             "PB_BuildArguments": "-buildArch=x64 -$(PB_ConfigurationGroup) -- /p:SignType=$(PB_SignType) /p:RuntimeOS=win10 /p:StabilizePackageVersion=$(PB_IsStable) /p:PackageVersionStamp=$(PB_VersionStamp)",
             "PB_BuildTestsArguments": "-buildArch=x64 -$(PB_ConfigurationGroup) -SkipTests -Outerloop -- /p:RuntimeOS=win10 /p:ArchiveTests=true",
             "PB_SyncArguments": "-p -- /p:ArchGroup=x64 /p:RuntimeOS=win10 /p:DotNetRestoreSources=$(PB_RestoreSource) /p:DotNetAssetRootUrl=$(PB_AssetRootUrl)",
-            "PB_TargetQueue": "Windows.10.Amd64+Windows.10.Nano.Amd64+Windows.10.Amd64.Core+Windows.7.Amd64+Windows.81.Amd64",
+            "PB_TargetQueue": "Windows.10.Amd64+Windows.10.Amd64.Core+Windows.7.Amd64+Windows.81.Amd64",
             "PB_CreateHelixArguments": "/p:ArchGroup=x64 /p:ConfigurationGroup=$(PB_ConfigurationGroup) /p:TestProduct=corefx /p:TimeoutInSeconds=1200 /p:TargetOS=Windows_NT"
           },
           "ReportingParameters": {
