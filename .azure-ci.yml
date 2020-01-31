@@ -63,19 +63,19 @@ stages:
   - template: /eng/pipelines/windows.yml
     parameters:
       isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
-      fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
+      fullMatrix: true
 
   # Linux legs
   - template: /eng/pipelines/linux.yml
     parameters:
       isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
-      fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
+      fullMatrix: true
 
   # MacOS legs
   - template: /eng/pipelines/macos.yml
     parameters:
       isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
-      fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
+      fullMatrix: true
 
     # FreeBSD leg is only for official builds
     # - template: /eng/pipelines/freebsd.yml
