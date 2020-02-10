@@ -607,7 +607,7 @@
         "4.4.0",
         "4.5.0"
       ],
-      "BaselineVersion": "4.4.0",
+      "BaselineVersion": "4.5.1",
       "InboxOn": {
         "netcoreapp2.0": "4.0.2.0",
         "netcoreapp2.1": "4.0.3.0",
@@ -2500,6 +2500,7 @@
         "4.5.2",
         "4.5.3"
       ],
+      "BaselineVersion": "4.5.4",
       "InboxOn": {
         "netcoreapp2.1": "4.1.0.0"
       },
@@ -3642,6 +3643,7 @@
         "4.5.1",
         "4.5.2"
       ],
+      "BaselineVersion": "4.5.3",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.4.0": "4.5.1",

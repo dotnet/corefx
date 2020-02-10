@@ -5,6 +5,7 @@
       netcoreapp2.0;
       netstandard1.0;
       netstandard;
+      netfx;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
