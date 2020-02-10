@@ -5052,7 +5052,7 @@
         "4.5.2",
         "4.5.3"
       ],
-      "BaselineVersion": "4.4.0",
+      "BaselineVersion": "4.5.4",
       "InboxOn": {
         "netcoreapp2.0": "4.1.1.0",
         "netcoreapp2.1": "4.3.0.0",
