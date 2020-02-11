@@ -29,7 +29,7 @@ This software program is licensed subject to the BSD License,  available at
 http://www.opensource.org/licenses/bsd-license.html.
 
 
-License notice for Unicode data
+License notice for Unicode dat
 -------------------------------
 
 http://www.unicode.org/copyright.html#License
