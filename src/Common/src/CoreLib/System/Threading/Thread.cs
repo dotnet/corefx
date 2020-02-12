@@ -136,11 +136,12 @@ namespace System.Threading
         {
             get
             {
-                if (s_asyncLocalPrincipal is null)
+                IPrincipal? principal = s_asyncLocalPrincipal?.Value;
+                if (principal is null)
                 {
-                    CurrentPrincipal = AppDomain.CurrentDomain.GetThreadPrincipal();
+                    CurrentPrincipal = (principal = AppDomain.CurrentDomain.GetThreadPrincipal());
                 }
-                return s_asyncLocalPrincipal?.Value;
+                return principal;
             }
             set
             {
