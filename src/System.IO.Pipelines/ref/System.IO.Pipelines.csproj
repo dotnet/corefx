@@ -5,6 +5,9 @@
     <!-- We only plan to use this ref in netcoreapp. For all other netstandard compatible frameworks we should use the lib
     asset instead. -->
     <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard'">netcoreapp2.0</PackageTargetFramework>
+    <!-- Must match version supported by frameworks which support 4.0.2.0 inbox.
+         Can be removed when API is added and this assembly is versioned to 4.1.* -->
+    <AssemblyVersion Condition="'$(TargetsNetFx)' != 'true'">4.0.2.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.IO.Pipelines.cs" />
