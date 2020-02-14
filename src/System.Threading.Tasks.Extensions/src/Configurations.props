@@ -4,6 +4,7 @@
     <PackageConfigurations>
       netstandard1.0;
       netstandard;
+      netfx;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);

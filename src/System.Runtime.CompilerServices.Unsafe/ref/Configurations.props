@@ -4,6 +4,7 @@
     <BuildConfigurations>
       netstandard1.0;
       netstandard;
+      netfx;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
