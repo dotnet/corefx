@@ -4,6 +4,7 @@
       netcoreapp2.0;
       netstandard1.0;
       netstandard;
+      net461;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
