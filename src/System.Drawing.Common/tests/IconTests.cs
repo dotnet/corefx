@@ -829,6 +829,7 @@ namespace System.Drawing.Tests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/22221", TestPlatforms.OSX)]
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void CorrectColorDepthExtracted()
         {

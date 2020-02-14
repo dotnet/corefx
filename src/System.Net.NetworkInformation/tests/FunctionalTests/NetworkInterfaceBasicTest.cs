@@ -86,6 +86,7 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/1332")]
         [PlatformSpecific(TestPlatforms.OSX|TestPlatforms.FreeBSD)]
         public void BasicTest_AccessInstanceProperties_NoExceptions_Bsd()
         {
