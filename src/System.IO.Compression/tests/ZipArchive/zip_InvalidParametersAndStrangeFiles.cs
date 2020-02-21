@@ -190,7 +190,6 @@ namespace System.IO.Compression.Tests
         }
 
         [Fact]
-
         public static void ZipArchiveEntry_CorruptedStream_EnsureNoExtraBytesReadOrOverWritten()
         {
             MemoryStream stream = populateStream().Result;
@@ -322,55 +321,6 @@ namespace System.IO.Compression.Tests
                     int read = source.Read(buffer, 0, buffer.Length);   // We don't want to inflate this large archive entirely
                                                                         // just making sure it read successfully
                     Assert.Equal(s_bufferSize, read);                   
-                }
-            }
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fix not shipped for full framework.")]
-        public static async Task ZipArchive_CorruptedLocalHeader_UncompressedSize_NotMatchWithCentralDirectory()
-        {
-            MemoryStream stream = await LocalMemoryStream.readAppFileAsync(zfile("normal.zip"));
-
-            PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(s_tamperedFileName), stream, 8);  // patch uncompressed size in file header
-
-            using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
-            {
-                ZipArchiveEntry e = archive.GetEntry(s_tamperedFileName);
-                Assert.Throws<InvalidDataException>(() => e.Open());
-            }
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fix not shipped for full framework.")]
-        public static async Task ZipArchive_CorruptedLocalHeader_CompressedSize_NotMatchWithCentralDirectory()
-        {
-            MemoryStream stream = await LocalMemoryStream.readAppFileAsync(zfile("normal.zip"));
-
-            PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(s_tamperedFileName), stream, 12);  // patch compressed size in file header
-
-            using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
-            {
-                ZipArchiveEntry e = archive.GetEntry(s_tamperedFileName);
-                Assert.Throws<InvalidDataException>(() => e.Open());
-            }
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full Framework does not allow unseekable streams.")]
-        public static async Task ZipArchive_Unseekable_Corrupted_FileDescriptor_NotMatchWithCentralDirectory()
-        {
-            using (var s = new MemoryStream())
-            {
-                var testStream = new WrappedStream(s, false, true, false, null);
-                await CreateFromDir(zfolder("normal"), testStream, ZipArchiveMode.Create);
-              
-                PatchDataDescriptorRelativeToFileName(Encoding.ASCII.GetBytes(s_tamperedFileName), s, 8);  // patch uncompressed size in file descriptor
-
-                using (ZipArchive archive = new ZipArchive(s, ZipArchiveMode.Read))
-                {
-                    ZipArchiveEntry e = archive.GetEntry(s_tamperedFileName);
-                    Assert.Throws<InvalidDataException>(() => e.Open());
                 }
             }
         }
