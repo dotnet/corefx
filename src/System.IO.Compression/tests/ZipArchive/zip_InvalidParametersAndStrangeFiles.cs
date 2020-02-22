@@ -129,6 +129,36 @@ namespace System.IO.Compression.Tests
         }
 
         [Fact]
+        public static async Task LargeArchive_DataDescriptor_Read_NonZip64_FileLengthGreaterThanIntMax() 
+        { 
+            MemoryStream stream = await LocalMemoryStream.readAppFileAsync(strange("fileLengthGreaterIntLessUInt.zip")); 
+
+            using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read)) 
+            { 
+                ZipArchiveEntry e = archive.GetEntry("large.bin"); 
+
+                Assert.Equal(3_600_000_000, e.Length); 
+                Assert.Equal(3_499_028, e.CompressedLength); 
+
+                using (Stream source = e.Open()) 
+                { 
+                    byte[] buffer = new byte[s_bufferSize]; 
+                    int read = source.Read(buffer, 0, buffer.Length);   // We don't want to inflate this large archive entirely  
+                                                                        // just making sure it read successfully  
+                    Assert.Equal(s_bufferSize, read); 
+                    foreach (byte b in buffer) 
+                    { 
+                        if (b != '0') 
+                        { 
+                            Assert.True(false, $"The file should be all '0's, but found '{(char)b}'"); 
+
+                        }
+                    }
+                }
+            }
+        }
+        
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fix not shipped for full framework.")]
         public static async Task ZipArchiveEntry_CorruptedStream_ReadMode_CopyTo_UpToUncompressedSize()
         {
