@@ -941,6 +941,31 @@
         "fedora-x64-corert"
       ]
     },
+    "fedora.33": {
+      "#import": [
+        "fedora"
+      ]
+    },
+    "fedora.33-corert": {
+      "#import": [
+        "fedora.33",
+        "fedora-corert"
+      ]
+    },
+    "fedora.33-x64": {
+      "#import": [
+        "fedora.33",
+        "fedora-x64"
+      ]
+    },
+    "fedora.33-x64-corert": {
+      "#import": [
+        "fedora.33-corert",
+        "fedora.33-x64",
+        "fedora.33",
+        "fedora-x64-corert"
+      ]
+    },
     "gentoo": {
       "#import": [
         "linux"
