@@ -32,6 +32,9 @@
     <Project Include="$(MSBuildThisFileDirectory)System.IO.Pipelines\pkg\System.IO.Pipelines.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Data.OleDb\pkg\System.Data.OleDb.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <ItemGroup>
