@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using static System.Data.Common.UnsafeNativeMethods;
 
 namespace System.Data.OleDb
 {
