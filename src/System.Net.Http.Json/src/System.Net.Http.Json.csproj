@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
@@ -17,5 +17,6 @@
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Text.Json" />
     <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Memory" />
   </ItemGroup>
 </Project>

@@ -1081,6 +1081,13 @@
     ]
   },
   {
+    "Name": "System.Net.Http.Json",
+    "Description": "ToDO: Insert the package description approved by Immo here",
+    "CommonTypes": [
+      "ToDo: Insert Commonly Used types here"
+    ]
+  },
+  {
     "Name": "System.Net.Http.Rtc",
     "Description": "Provides the System.Net.Http.RtcRequestFactory class, which creates HTTP requests for use with the Real-Time-Communications (RTC) background notification infrastructure.",
     "CommonTypes": [
