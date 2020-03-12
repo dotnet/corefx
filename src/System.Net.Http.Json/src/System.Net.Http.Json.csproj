@@ -16,6 +16,7 @@
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Text.Json" />
     <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Threading.Tasks.Extensions" />
     <Reference Include="System.Memory" />
   </ItemGroup>
 </Project>
