@@ -8,6 +8,7 @@
     <!-- Setting Suppress Final Package Version and IsShippingAssembly properties in order to force the release build to 
     continue emitting pre-release labels as we won't want to ship stable on this release yet. -->
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <BlockStable>true</BlockStable>
     <SuppressFinalPackageVersion>true</SuppressFinalPackageVersion>
     <IsShippingAssembly>false</IsShippingAssembly>
   </PropertyGroup>
