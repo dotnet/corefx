@@ -6,7 +6,6 @@ using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Text.Unicode;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,6 +20,8 @@ namespace System.Net.Http.Json
 
         private readonly Stream _stream;
         private readonly Decoder _decoder;
+
+        private readonly Encoder _encoder;
 
         private ArraySegment<byte> _byteBuffer;
         private ArraySegment<char> _charBuffer;
@@ -54,6 +55,8 @@ namespace System.Net.Http.Json
                 count: 0);
 
             _decoder = sourceEncoding.GetDecoder();
+
+            _encoder = Encoding.UTF8.GetEncoder();
         }
 
         public override bool CanRead => true;
@@ -106,7 +109,18 @@ namespace System.Net.Http.Json
                 await ReadInputChars(cancellationToken).ConfigureAwait(false);
             }
 
-            OperationStatus operationStatus = Utf8.FromUtf16(_charBuffer, readBuffer, out int charsRead, out int bytesWritten, isFinalBlock: false);
+            OperationStatus operationStatus;
+            int charsRead = 0, bytesWritten = 0;
+            if (_encoder.GetByteCount(_charBuffer.Array, _charBuffer.Offset, _charBuffer.Count, false) > readBuffer.Count)
+            {
+                operationStatus = OperationStatus.DestinationTooSmall;
+            }
+            else
+            {
+                _encoder.Convert(_charBuffer.Array, _charBuffer.Offset, _charBuffer.Count, readBuffer.Array, readBuffer.Offset, readBuffer.Count,
+                    false, out charsRead, out bytesWritten, out bool _);
+                operationStatus = OperationStatus.Done;
+            }
             _charBuffer = _charBuffer.Slice(charsRead);
 
             switch (operationStatus)
@@ -121,7 +135,8 @@ namespace System.Net.Http.Json
                     }
 
                     // Overflow buffer is always empty when we get here and we can use it's full length to write contents to.
-                    Utf8.FromUtf16(_charBuffer, _overflowBuffer.Array, out int overFlowChars, out int overflowBytes, isFinalBlock: false);
+                    _encoder.Convert(_charBuffer.Array, _charBuffer.Offset, _charBuffer.Count, _overflowBuffer.Array, _overflowBuffer.Offset, _overflowBuffer.Count,
+                        false, out int overFlowChars, out int overflowBytes, out bool _);
 
                     Debug.Assert(overflowBytes > 0 && overFlowChars > 0, "We expect writes to the overflow buffer to always succeed since it is large enough to accommodate at least one char.");
 
@@ -161,19 +176,14 @@ namespace System.Net.Http.Json
                 _byteBuffer.Array,
                 0,
                 _byteBuffer.Count);
-
-            int readBytes = await _stream.ReadAsync(_byteBuffer.Array.AsMemory(_byteBuffer.Count), cancellationToken).ConfigureAwait(false);
+            int readBytes =
+                await _stream.ReadAsync(_byteBuffer.Array, _byteBuffer.Count, _byteBuffer.Array.Length, cancellationToken).ConfigureAwait(false);
             _byteBuffer = new ArraySegment<byte>(_byteBuffer.Array, 0, _byteBuffer.Count + readBytes);
 
             Debug.Assert(_charBuffer.Count == 0, "We should only expect to read more input chars once all buffered content is read");
 
-            _decoder.Convert(
-                _byteBuffer.AsSpan(),
-                _charBuffer.Array,
-                flush: readBytes == 0,
-                out int bytesUsed,
-                out int charsUsed,
-                out _);
+            _decoder.Convert(_byteBuffer.Array, _byteBuffer.Offset, _byteBuffer.Count, _charBuffer.Array, 0, _charBuffer.Array.Length,
+                flush: readBytes == 0, out int bytesUsed, out int charsUsed, out _);
 
             Debug.Assert(_charBuffer.Array != null);
 
@@ -218,12 +228,15 @@ namespace System.Net.Http.Json
         {
             if (!_disposed)
             {
-                Debug.Assert(_charBuffer.Array != null);
-                Debug.Assert(_byteBuffer.Array != null);
-                Debug.Assert(_overflowBuffer.Array != null);
                 _disposed = true;
+
+                Debug.Assert(_charBuffer.Array != null);
                 ArrayPool<char>.Shared.Return(_charBuffer.Array);
+
+                Debug.Assert(_byteBuffer.Array != null);
                 ArrayPool<byte>.Shared.Return(_byteBuffer.Array);
+
+                Debug.Assert(_overflowBuffer.Array != null);
                 ArrayPool<byte>.Shared.Return(_overflowBuffer.Array);
             }
         }

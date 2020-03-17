@@ -4,6 +4,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="System\Net\Http\Json\HttpClientJsonExtensions.Get.cs" />
     <Compile Include="System\Net\Http\Json\HttpClientJsonExtensions.Post.cs" />
     <Compile Include="System\Net\Http\Json\HttpClientJsonExtensions.Put.cs" />
@@ -11,6 +12,7 @@
     <Compile Include="System\Net\Http\Json\JsonContent.cs" />
     <Compile Include="System\Net\Http\Json\TranscodingReadStream.cs" />
     <Compile Include="System\Net\Http\Json\TranscodingWriteStream.cs" />
+    <Compile Include="System\Net\Http\Json\ArraySegmentExtensions.netstandard.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Runtime" />
@@ -20,5 +22,6 @@
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Tasks.Extensions" />
     <Reference Include="System.Memory" />
+    <Reference Include="System.Buffers" />
   </ItemGroup>
 </Project>

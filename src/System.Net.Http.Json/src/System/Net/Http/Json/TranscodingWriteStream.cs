@@ -82,15 +82,11 @@ namespace System.Net.Http.Json
             CancellationToken cancellationToken)
         {
             bool decoderCompleted = false;
+
             while (!decoderCompleted)
             {
-                _decoder.Convert(
-                    bufferSegment,
-                    _charBuffer.AsSpan(_charsDecoded),
-                    flush: false,
-                    out int bytesDecoded,
-                    out int charsDecoded,
-                    out decoderCompleted);
+                _decoder.Convert(bufferSegment.Array, bufferSegment.Offset, bufferSegment.Count, _charBuffer, _charsDecoded, _charBuffer.Length - _charsDecoded,
+                    flush: false, out int bytesDecoded, out int charsDecoded, out decoderCompleted);
 
                 _charsDecoded += charsDecoded;
                 bufferSegment = bufferSegment.Slice(bytesDecoded);
@@ -110,15 +106,11 @@ namespace System.Net.Http.Json
 
             while (!encoderCompleted && charsWritten < _charsDecoded)
             {
-                _encoder.Convert(
-                    _charBuffer.AsSpan(charsWritten, _charsDecoded - charsWritten),
-                    byteBuffer,
-                    flush: false,
-                    out int charsEncoded,
-                    out int bytesUsed,
-                    out encoderCompleted);
+                _encoder.Convert(_charBuffer, charsWritten, _charsDecoded - charsWritten, byteBuffer, 0, byteBuffer.Length,
+                    flush: false, out int charsEncoded, out int bytesUsed, out encoderCompleted);
 
-                await _stream.WriteAsync(byteBuffer.AsMemory(0, bytesUsed), cancellationToken).ConfigureAwait(false);
+                await _stream.WriteAsync(byteBuffer, 0, bytesUsed, cancellationToken).ConfigureAwait(false);
+
                 charsWritten += charsEncoded;
             }
 
@@ -166,15 +158,10 @@ namespace System.Net.Http.Json
 
             while (!encoderCompleted)
             {
-                _encoder.Convert(
-                    Array.Empty<char>(),
-                    byteBuffer,
-                    flush: true,
-                    out _,
-                    out int bytesUsed,
-                    out encoderCompleted);
+                _encoder.Convert(Array.Empty<char>(), 0, 0, byteBuffer, 0, byteBuffer.Length,
+                    flush: true, out _, out int bytesUsed, out encoderCompleted);
 
-                await _stream.WriteAsync(byteBuffer.AsMemory(0, bytesUsed), cancellationToken).ConfigureAwait(false);
+                await _stream.WriteAsync(byteBuffer, 0, bytesUsed, cancellationToken).ConfigureAwait(false);
             }
 
             ArrayPool<byte>.Shared.Return(byteBuffer);
