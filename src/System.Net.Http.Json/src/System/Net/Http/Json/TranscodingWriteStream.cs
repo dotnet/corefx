@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
+// Taken from https://github.com/dotnet/aspnetcore/blob/master/src/Mvc/Mvc.Core/src/Formatters/TranscodingWriteStream.cs
+
 using System.Buffers;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -21,7 +21,7 @@ namespace System.Net.Http.Json
         private readonly Stream _stream;
         private readonly Decoder _decoder;
         private readonly Encoder _encoder;
-        private readonly char[] _charBuffer;
+        private char[] _charBuffer;
         private int _charsDecoded;
         private bool _disposed;
 
@@ -72,20 +72,37 @@ namespace System.Net.Http.Json
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            ThrowArgumentException(buffer, offset, count);
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
+
+            if (buffer.Length - offset < count)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
             ArraySegment<byte> bufferSegment = new ArraySegment<byte>(buffer, offset, count);
-            return WriteAsync(bufferSegment, cancellationToken);
+            return WriteAsyncCore(bufferSegment, cancellationToken);
         }
 
-        private async Task WriteAsync(
-            ArraySegment<byte> bufferSegment,
-            CancellationToken cancellationToken)
+        private async Task WriteAsyncCore(ArraySegment<byte> bufferSegment, CancellationToken cancellationToken)
         {
             bool decoderCompleted = false;
 
             while (!decoderCompleted)
             {
-                _decoder.Convert(bufferSegment.Array, bufferSegment.Offset, bufferSegment.Count, _charBuffer, _charsDecoded, _charBuffer.Length - _charsDecoded,
+                _decoder.Convert(bufferSegment.Array!, bufferSegment.Offset, bufferSegment.Count, _charBuffer, _charsDecoded, _charBuffer.Length - _charsDecoded,
                     flush: false, out int bytesDecoded, out int charsDecoded, out decoderCompleted);
 
                 _charsDecoded += charsDecoded;
@@ -110,7 +127,6 @@ namespace System.Net.Http.Json
                     flush: false, out int charsEncoded, out int bytesUsed, out encoderCompleted);
 
                 await _stream.WriteAsync(byteBuffer, 0, bytesUsed, cancellationToken).ConfigureAwait(false);
-
                 charsWritten += charsEncoded;
             }
 
@@ -120,30 +136,13 @@ namespace System.Net.Http.Json
             _charsDecoded = 0;
         }
 
-        private static void ThrowArgumentException(byte[] buffer, int offset, int count)
-        {
-            if (count <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
-
-            if (offset < 0 || offset >= buffer.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            }
-
-            if (buffer.Length - offset < count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)
             {
                 _disposed = true;
                 ArrayPool<char>.Shared.Return(_charBuffer);
+                _charBuffer = null!;
             }
         }
 
