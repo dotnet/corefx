@@ -8,6 +8,7 @@
   <PropertyGroup>
     <BuildAllPackages>false</BuildAllPackages>
   </PropertyGroup>
+  <!-- test pr builds -->
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'true'">
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\*\*.builds" >
