@@ -208,10 +208,19 @@ jobs:
                   helixToken: ''
 
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+            - task: CopyFiles@2
+              displayName: Prepare artifacts packages folder to publish
+              inputs:
+                sourceFolder: $(Build.SourcesDirectory)/artifacts/packages
+                targetFolder: $(Build.ArtifactStagingDirectory)/artifacts/packages
+                contents: |
+                  **/System.Net.Http.Json*.nupkg
+              condition: and(succeeded(), eq(variables['_publishPackages'], true))
+
             - task: PublishBuildArtifacts@1
               displayName: Publish packages to artifacts container
               inputs:
-                pathToPublish: $(Build.SourcesDirectory)/artifacts/packages
+                pathToPublish: $(Build.ArtifactStagingDirectory)/artifacts/packages
                 artifactName: packages
                 artifactType: container
-              condition: and(succeeded(), ne(variables['_skipPublishPackages'], 'true'))
+              condition: and(succeeded(), eq(variables['_publishPackages'], 'true'))
