@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.Net.Http.Json.Functional.Tests
 {
-    public class JsonContentTests
+    public partial class JsonContentTests
     {
 
         private class Foo { }
@@ -93,26 +93,6 @@ namespace System.Net.Http.Json.Functional.Tests
         }
 
         [Fact]
-        public async Task JsonContentMediaTypeValidateOnServerAsync()
-        {
-            await LoopbackServer.CreateClientAndServerAsync(
-                async uri =>
-                {
-                    using (HttpClient client = new HttpClient())
-                    {
-                        var request = new HttpRequestMessage(HttpMethod.Post, uri);
-                        MediaTypeHeaderValue mediaType = MediaTypeHeaderValue.Parse("foo/bar; charset=utf-8");
-                        request.Content = JsonContent.Create(Person.Create(), mediaType: mediaType);
-                        await client.SendAsync(request);
-                    }
-                },
-                async server => {
-                    HttpRequestData req = await server.HandleRequestAsync();
-                    Assert.Equal("foo/bar; charset=utf-8", req.GetSingleHeaderValue("Content-Type"));
-                });
-        }
-
-        [Fact]
         public void JsonContentMediaTypeDefaultIfNull()
         {
             Type fooType = typeof(Foo);
@@ -153,29 +133,6 @@ namespace System.Net.Http.Json.Functional.Tests
         }
 
         [Fact]
-        public static async Task ValidateUtf16IsTranscodedAsync()
-        {
-            await LoopbackServer.CreateClientAndServerAsync(
-                async uri =>
-                {
-                    using (HttpClient client = new HttpClient())
-                    {
-                        var request = new HttpRequestMessage(HttpMethod.Post, uri);
-                        MediaTypeHeaderValue mediaType = MediaTypeHeaderValue.Parse("application/json; charset=utf-16");
-                        // Pass new options to avoid using the Default Web Options that use camelCase.
-                        request.Content = JsonContent.Create(Person.Create(), mediaType: mediaType, options: new JsonSerializerOptions());
-                        await client.SendAsync(request);
-                    }
-                },
-                async server => {
-                    HttpRequestData req = await server.HandleRequestAsync();
-                    Assert.Equal("application/json; charset=utf-16", req.GetSingleHeaderValue("Content-Type"));
-                    Person per = JsonSerializer.Deserialize<Person>(Encoding.Unicode.GetString(req.Body));
-                    per.Validate();
-                });
-        }
-
-        [Fact]
         public async Task EnsureDefaultJsonSerializerOptionsAsync()
         {
             HttpClient client = new HttpClient();
@@ -184,29 +141,6 @@ namespace System.Net.Http.Json.Functional.Tests
             var request = new HttpRequestMessage(HttpMethod.Post, "http://example.com");
             request.Content = JsonContent.Create(obj);
             await client.SendAsync(request);
-        }
-
-        [Fact]
-        public async Task TestJsonContentNullContentTypeAsync()
-        {
-            await LoopbackServer.CreateClientAndServerAsync(
-                async uri =>
-                {
-                    using (HttpClient client = new HttpClient())
-                    {
-                        var request = new HttpRequestMessage(HttpMethod.Post, uri);
-                        MediaTypeHeaderValue mediaType = MediaTypeHeaderValue.Parse("application/json; charset=utf-16");
-                        JsonContent content = JsonContent.Create(Person.Create(), mediaType: mediaType);
-                        content.Headers.ContentType = null;
-
-                        request.Content = content;
-                        await client.SendAsync(request);
-                    }
-                },
-                async server => {
-                    HttpRequestData req = await server.HandleRequestAsync();
-                    Assert.Equal(0, req.GetHeaderValueCount("Content-Type"));
-                });
         }
     }
 }

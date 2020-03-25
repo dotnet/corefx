@@ -3,10 +3,19 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="HttpClientJsonExtensionsTests.cs" />
-    <Compile Include="HttpContentJsonExtensionsTests.cs" />
     <Compile Include="JsonContentTests.cs" />
     <Compile Include="TestClasses.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="JsonContentLoopbackTests.cs" />
+    <Compile Include="HttpClientJsonExtensionsTests.cs" />
+    <Compile Include="HttpContentJsonExtensionsTests.cs" />
+    <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.cs">
+      <Link>Common\System\Net\Http\LoopbackServer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.AuthenticationHelpers.cs">
+      <Link>Common\System\Net\Http\LoopbackServer.AuthenticationHelpers.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.cs">
@@ -23,12 +32,6 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.Security.cs">
       <Link>Common\System\Net\Configuration.Security.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.cs">
-      <Link>Common\System\Net\Http\LoopbackServer.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.AuthenticationHelpers.cs">
-      <Link>Common\System\Net\Http\LoopbackServer.AuthenticationHelpers.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Http\GenericLoopbackServer.cs">
       <Link>Common\System\Net\Http\GenericLoopbackServer.cs</Link>
