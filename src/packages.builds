@@ -24,21 +24,6 @@
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
-    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Memory\pkg\System.Memory.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Buffers\pkg\System.Buffers.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Runtime.CompilerServices.Unsafe\pkg\System.Runtime.CompilerServices.Unsafe.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Threading.Tasks.Extensions\pkg\System.Threading.Tasks.Extensions.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
   </ItemGroup>
 
   <!-- Need the PackageIndexFile file property from baseline.props -->
