@@ -751,21 +751,10 @@ namespace System.IO.Compression
                     return false;
                 }
                 _archive.ArchiveStream.Seek(_offsetOfLocalHeader, SeekOrigin.Begin);
-                if (needToUncompress && !needToLoadIntoMemory)
+                if (!ZipLocalFileHeader.TrySkipBlock(_archive.ArchiveReader))
                 {
-                    if (!ZipLocalFileHeader.TryValidateBlock(_archive.ArchiveReader, this))
-                    {
-                        message = SR.LocalFileHeaderCorrupt;
-                        return false;
-                    }
-                }
-                else
-                {
-                    if (!ZipLocalFileHeader.TrySkipBlock(_archive.ArchiveReader))
-                    {
-                        message = SR.LocalFileHeaderCorrupt;
-                        return false;
-                    }
+                    message = SR.LocalFileHeaderCorrupt;
+                    return false;
                 }
                 // when this property gets called, some duplicated work
                 if (OffsetOfCompressedData + _compressedSize > _archive.ArchiveStream.Length)
