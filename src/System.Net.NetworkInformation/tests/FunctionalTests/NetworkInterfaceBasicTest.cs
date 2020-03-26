@@ -108,11 +108,12 @@ namespace System.Net.NetworkInformation.Tests
                 _log.WriteLine("SupportsMulticast: " + nic.SupportsMulticast);
                 _log.WriteLine("GetPhysicalAddress(): " + nic.GetPhysicalAddress());
 
-                if (nic.Name.StartsWith("en") || nic.Name == "lo0")
-                {
-                    // Ethernet, WIFI and loopback should have known status.
-                    Assert.True((nic.OperationalStatus == OperationalStatus.Up) || (nic.OperationalStatus == OperationalStatus.Down));
-                }
+                // Disabled for https://github.com/dotnet/runtime/issues/1332
+                //if (nic.Name.StartsWith("en") || nic.Name == "lo0")
+                //{
+                    //// Ethernet, WIFI and loopback should have known status.
+                    //Assert.True((nic.OperationalStatus == OperationalStatus.Up) || (nic.OperationalStatus == OperationalStatus.Down));
+                //}
             }
         }
 
