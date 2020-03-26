@@ -14,6 +14,29 @@ namespace System.Net.Http.Json.Functional.Tests
     public partial class JsonContentTests
     {
         [Fact]
+        public async Task SendQuotedCharsetAsync()
+        {
+
+            await LoopbackServer.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using (HttpClient client = new HttpClient())
+                    {
+                        JsonContent content = JsonContent.Create<Foo>(null);
+                        content.Headers.ContentType.CharSet = "\"utf-8\"";
+
+                        var request = new HttpRequestMessage(HttpMethod.Post, uri);
+                        request.Content = content;
+                        await client.SendAsync(request);
+                    }
+                },
+                async server => {
+                    HttpRequestData req = await server.HandleRequestAsync();
+                    Assert.Equal("application/json; charset=\"utf-8\"", req.GetSingleHeaderValue("Content-Type"));
+                });
+        }
+
+        [Fact]
         public async Task JsonContentMediaTypeValidateOnServerAsync()
         {
             await LoopbackServer.CreateClientAndServerAsync(
@@ -54,6 +77,24 @@ namespace System.Net.Http.Json.Functional.Tests
                     Person per = JsonSerializer.Deserialize<Person>(Encoding.Unicode.GetString(req.Body));
                     per.Validate();
                 });
+        }
+
+        [Fact]
+        public async Task EnsureDefaultJsonSerializerOptionsAsync()
+        {
+            await LoopbackServer.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using (HttpClient client = new HttpClient())
+                    {
+                        // EnsureDefaultOptions uses a JsonConverter where we validate the JsonSerializerOptions when not provided to JsonContent.Create.
+                        EnsureDefaultOptions dummyObj = new EnsureDefaultOptions();
+                        var request = new HttpRequestMessage(HttpMethod.Post, uri);
+                        request.Content = JsonContent.Create(dummyObj);
+                        await client.SendAsync(request);
+                    }
+                },
+                server => server.HandleRequestAsync());
         }
 
         [Fact]
