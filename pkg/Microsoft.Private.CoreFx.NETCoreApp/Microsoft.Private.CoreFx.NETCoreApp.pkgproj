@@ -60,6 +60,14 @@
             System.ComponentModel.Composition;
         </Value>
     </ValidatePackageSuppression>
+    <!-- Permit inbox revsion of assemblies that are part of shared framework but also ship as packages. This will
+    make sure other packages that have a reference to them will carry a package reference to the latest serviced
+    version. -->
+    <ValidatePackageSuppression Include="PermitInbox">
+      <Value>
+        System.Text.Json;
+      </Value>
+    </ValidatePackageSuppression>
   </ItemGroup>
 
   <Target Name="VerifyRuntimeOnlyFilesArePresentOnAllRuntimePackages"
