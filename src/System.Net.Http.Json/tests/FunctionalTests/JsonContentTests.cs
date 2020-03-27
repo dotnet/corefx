@@ -69,18 +69,6 @@ namespace System.Net.Http.Json.Functional.Tests
         }
 
         [Fact]
-        public async Task SendQuotedCharsetAsync()
-        {
-            JsonContent content = JsonContent.Create<Foo>(null);
-            content.Headers.ContentType.CharSet = "\"utf-8\"";
-
-            HttpClient client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Post, "http://example.com");
-            request.Content = content;
-            await client.SendAsync(request);
-        }
-
-        [Fact]
         public void TestJsonContentContentTypeIsNotTheSameOnMultipleInstances()
         {
             JsonContent jsonContent1 = JsonContent.Create<object>(null);
@@ -109,38 +97,24 @@ namespace System.Net.Http.Json.Functional.Tests
 
         [Fact]
         public void JsonContentInputTypeIsNull()
-        {
-            string foo = "test";
-
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => JsonContent.Create(foo, inputType: null, mediaType: null));
-            Assert.Equal("inputType", ex.ParamName);
-        }
+            => AssertExtensions.Throws<ArgumentNullException>("inputType", () => JsonContent.Create(null, inputType: null, mediaType: null));
 
         [Fact]
         public void JsonContentThrowsOnIncompatibleTypeAsync()
         {
-            HttpClient client = new HttpClient();
-            var foo = new Foo();
-            Type typeOfBar = typeof(Bar);
+            using (HttpClient client = new HttpClient())
+            {
+                var foo = new Foo();
+                Type typeOfBar = typeof(Bar);
 
-            Exception ex = Assert.Throws<ArgumentException>(() => JsonContent.Create(foo, typeOfBar));
+                Exception ex = Assert.Throws<ArgumentException>(() => JsonContent.Create(foo, typeOfBar));
 
-            string strTypeOfBar = typeOfBar.ToString();
-            Assert.Contains(strTypeOfBar, ex.Message);
+                string strTypeOfBar = typeOfBar.ToString();
+                Assert.Contains(strTypeOfBar, ex.Message);
 
-            string afterInputTypeMessage = ex.Message.Split(strTypeOfBar.ToCharArray())[1];
-            Assert.Contains(afterInputTypeMessage, ex.Message);
-        }
-
-        [Fact]
-        public async Task EnsureDefaultJsonSerializerOptionsAsync()
-        {
-            HttpClient client = new HttpClient();
-            EnsureDefaultOptions obj = new EnsureDefaultOptions();
-
-            var request = new HttpRequestMessage(HttpMethod.Post, "http://example.com");
-            request.Content = JsonContent.Create(obj);
-            await client.SendAsync(request);
+                string afterInputTypeMessage = ex.Message.Split(strTypeOfBar.ToCharArray())[1];
+                Assert.Contains(afterInputTypeMessage, ex.Message);
+            }
         }
     }
 }
