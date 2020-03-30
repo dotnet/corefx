@@ -1,4 +1,4 @@
-Going forward, the .NET team is using https://github.com/dotnet/runtime to
+Going forward, the dotNET team is using https://github.com/dotnet/runtime to
 develop the code and issues formerly in this repository.
 
 Please see the following for more context:
