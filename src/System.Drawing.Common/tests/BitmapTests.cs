@@ -546,6 +546,7 @@ namespace System.Drawing.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => bitmap.Clone(new RectangleF(0, 0, 1, 1), PixelFormat.Format32bppArgb));
         }
 
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/22221", TestPlatforms.OSX)]
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetFrameCount_NewBitmap_ReturnsZero()
         {
