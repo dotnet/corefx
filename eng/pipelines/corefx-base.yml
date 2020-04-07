@@ -129,6 +129,25 @@ jobs:
           - ${{ if ne(job.preBuildSteps[0], '') }}:
             - ${{ job.preBuildSteps }}
 
+          - ${{ if eq(parameters.isInternalBuild, 'true') }}:
+            - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
+              - task: PowerShell@2
+                displayName: Setup Private Feeds Credentials
+                inputs:
+                  filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+                  arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+                env:
+                  Token: $(dn-bot-dnceng-artifact-feeds-rw)
+
+            - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
+              - task: Bash@3
+                displayName: Setup Private Feeds Credentials
+                inputs:
+                  filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+                  arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+                env:
+                  Token: $(dn-bot-dnceng-artifact-feeds-rw)
+
           - script: $(_buildScript) -restore $(_commonArguments)
             displayName: Restore Build Tools
 
@@ -143,7 +162,7 @@ jobs:
                 nugetConfigPath: 'eng/internal/NuGet.config'
                 restoreDirectory: '$(Build.SourcesDirectory)\.packages'
                 verbosityRestore: 'normal'
-                externalFeedCredentials: 'dotnet-core-internal-tooling'
+                externalFeedCredentials: 'dotnet-core-internal-tooling'              
 
           - ${{ if eq(job.customBuildSteps[0], '') }}:
             - script: $(_buildScript)
@@ -152,6 +171,7 @@ jobs:
                     $(_commonArguments)
                     $(_testScopeArg)
                     $(_msbuildCommonParameters)
+                    $(_InternalRuntimeDownloadArgs)
               displayName: Build Sources and Tests
 
           - ${{ if ne(job.customBuildSteps[0], '') }}:

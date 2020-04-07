@@ -18,6 +18,7 @@ stages:
   - template: corefx-base.yml
     parameters:
       isOfficialBuild: ${{ parameters.isOfficialBuild }}
+      isInternalBuild: ${{ parameters.isInternalBuild }}
       testScope: ${{ parameters.testScope }}
       targetOS: OSX
       jobs:
