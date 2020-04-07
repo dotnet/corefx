@@ -51,6 +51,14 @@ stages:
                 artifactName: packages
                 downloadPath: $(_artifactsDir)
 
+            - task: PowerShell@2
+              displayName: Setup Private Feeds Credentials
+              inputs:
+                filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+                arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+              env:
+                Token: $(dn-bot-dnceng-artifact-feeds-rw)
+
             - script: build.cmd
                       -restore
                       -ci
