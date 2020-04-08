@@ -4,7 +4,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CLSCompliant>false</CLSCompliant>
     <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.1'">$(DefineConstants);NETSTANDARD11</DefineConstants>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Reflection.Metadata.cs" />
@@ -19,7 +19,11 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Text.Encoding" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' Or '$(TargetGroup)' == 'netstandard1.1'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' Or '$(TargetGroup)' == 'netstandard1.1' Or '$(TargetsNetFx)' == 'true'">
     <ProjectReference Include="..\..\System.Collections.Immutable\ref\System.Collections.Immutable.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
   </ItemGroup>
 </Project>

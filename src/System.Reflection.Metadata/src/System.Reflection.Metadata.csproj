@@ -9,7 +9,7 @@
     <TargetsNetCoreAppOrUap Condition="'$(TargetsNetCoreApp)'=='true' OR '$(TargetsUap)' == 'true'">true</TargetsNetCoreAppOrUap>
     <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.1'">NETSTANDARD11</DefineConstants>
     <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard1.1'">netstandard1.1;portable-net45+win8</PackageTargetFramework>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard1.1-Debug;netstandard1.1-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Reflection\Internal\Utilities\PinnedObject.cs" />
@@ -261,5 +261,10 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.IO.MemoryMappedFiles" Condition="'$(TargetGroup)' != 'netstandard1.1'" />
     <Reference Include="System.Buffers" Condition="'$(TargetsNetCoreAppOrUap)' == 'true'" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
   </ItemGroup>
 </Project>

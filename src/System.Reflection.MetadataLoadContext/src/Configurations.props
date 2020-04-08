@@ -2,10 +2,12 @@
   <PropertyGroup>
     <PackageConfigurations>
       netcoreapp3.0;
+      net461;
       netstandard;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
+      netfx;
       netcoreapp;
     </BuildConfigurations>
   </PropertyGroup>

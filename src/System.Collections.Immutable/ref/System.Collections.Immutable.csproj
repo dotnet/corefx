@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{C7EFF4EE-70DC-453B-B817-4AF67921AB03}</ProjectGuid>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard1.0-Debug;netstandard1.0-Release;netstandard1.3-Debug;netstandard1.3-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard1.0-Debug;netstandard1.0-Release;netstandard1.3-Debug;netstandard1.3-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Collections.Immutable.cs" />
@@ -22,5 +22,11 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.3' or '$(TargetGroup)' == 'netstandard'">
     <Reference Include="System.Memory" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Memory" />
+    <Reference Include="netstandard" />
   </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);CS1573</NoWarn>
     <!-- Only the netcoreapp version supports the new reflection apis (IsSZArray, etc.) -->
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp3.0-Debug;netcoreapp3.0-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp3.0-Debug;netcoreapp3.0-Release;netstandard-Debug;netstandard-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\CoreRtBridge.cs" />
@@ -79,7 +79,7 @@
     <Compile Include="System\Reflection\TypeLoading\General\HashHelpers.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\Helpers.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\TypeExtensions.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
-    <Compile Include="System\Reflection\TypeLoading\General\TypeExtensions.netstandard.cs" Condition="'$(TargetsNetStandard)' == 'true'" />
+    <Compile Include="System\Reflection\TypeLoading\General\TypeExtensions.netstandard.cs" Condition="'$(TargetsNetStandard)' == 'true' Or '$(TargetsNetFx)' == 'true'" />
     <Compile Include="System\Reflection\TypeLoading\General\MethodSig.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\RoAssemblyName.cs" />
     <Compile Include="System\Reflection\TypeLoading\General\Sentinels.cs" />
@@ -155,5 +155,10 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Threading" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
   </ItemGroup>
 </Project>

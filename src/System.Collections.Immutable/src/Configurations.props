@@ -4,9 +4,11 @@
       netstandard1.0;
       netstandard1.3;
       netstandard;
+      net461;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
+      netfx;
       netcoreapp;
       uap-Windows_NT;
     </BuildConfigurations>
