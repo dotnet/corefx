@@ -35,6 +35,12 @@
     <Project Include="$(MSBuildThisFileDirectory)System.Text.Json\pkg\System.Text.Json.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="$(MSBuildThisFileDirectory)Microsoft.Bcl.AsyncInterfaces\pkg\Microsoft.Bcl.AsyncInterfaces.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)Microsoft.XmlSerializer.Generator\pkg\Microsoft.XmlSerializer.Generator.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
     <Project Include="$(MSBuildThisFileDirectory)System.Collections.Immutable\pkg\System.Collections.Immutable.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
@@ -56,10 +62,16 @@
     <Project Include="$(MSBuildThisFileDirectory)System.Composition.TypedParts\pkg\System.Composition.TypedParts.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Diagnostics.DiagnosticSource\pkg\System.Diagnostics.DiagnosticSource.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
     <Project Include="$(MSBuildThisFileDirectory)System.IO.Pipelines\pkg\System.IO.Pipelines.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <Project Include="$(MSBuildThisFileDirectory)System.Json\pkg\System.Json.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Net.Http.WinHttpHandler\pkg\System.Net.Http.WinHttpHandler.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <Project Include="$(MSBuildThisFileDirectory)System.Net.WebSockets.WebSocketProtocol\pkg\System.Net.WebSockets.WebSocketProtocol.pkgproj">
