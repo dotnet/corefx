@@ -11,13 +11,4 @@
     <Compile Include="System.ComponentModel.Composition.cs" />
     <Compile Include="System.ComponentModel.Composition.Forwards.cs" />
   </ItemGroup>
-
-  <!-- In net461 we want to use the assembly that is part of the targetting pack, but BinPlace will replace it with
-  the live-built netstandard configuration, so we need to not binplace in those TFMs -->
-  <Target Name="RemoveNetFxBinPlacing" BeforeTargets="GetBinPlaceConfiguration">
-    <ItemGroup>
-      <BinPlaceConfiguration Remove="net461;net462;net463;net47;net471;net472;netfx" />
-    </ItemGroup>
-    <Message Importance="High" Text="@(BinPlaceConfiguration)" />
-  </Target>
 </Project>
