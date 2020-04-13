@@ -211,7 +211,7 @@ namespace System.Resources
         }
 #else
         private
-#if HIDE_READER
+#if netfx
         new
 #endif
         IResourceReader Reader => _defaultReader!;

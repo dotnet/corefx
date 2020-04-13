@@ -3,7 +3,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netstandard-Debug;netstandard-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
     <DefineConstants>$(DefineConstants);RESOURCES_EXTENSIONS;INTERNAL_NULLABLE_ATTRIBUTES</DefineConstants>
-    <DefineConstants Condition="'$(TargetsNetFx)' == 'true'">$(DefineConstants);netstandard;HIDE_READER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <ProjectGuid>{6773D354-A573-4D9C-9A67-C7FAE579DA50}</ProjectGuid>
