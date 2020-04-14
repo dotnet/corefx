@@ -1,10 +1,12 @@
 ﻿<Project DefaultTargets="Build">
   <PropertyGroup>
     <PackageConfigurations>
-      netcoreapp3.0
+      netcoreapp3.0;
+      net47;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
+      netfx;
       netcoreapp;
     </BuildConfigurations>
   </PropertyGroup>

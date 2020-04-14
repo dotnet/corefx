@@ -5,7 +5,7 @@
     <RootNamespace>
     </RootNamespace>
     <!-- CommonStrings needs RootNamespace to be empty -->
-    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Composition\Convention\ConventionBuilder.cs" />
@@ -35,5 +35,9 @@
       <Project>{c6257381-c624-494a-a9d9-5586e60856ea}</Project>
       <Name>System.Composition.AttributedModel</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Core" />
   </ItemGroup>
 </Project>

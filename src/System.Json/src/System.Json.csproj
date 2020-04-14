@@ -5,7 +5,7 @@
         System.Json is a library for compat purposes so we want to keep the same identity as it originally shipped with in Silverlight
     -->
     <StrongNameKeyId>MicrosoftShared</StrongNameKeyId>
-    <Configurations>netstandard-Debug;netstandard-Release;netstandard1.0-Debug;netstandard1.0-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release;netstandard1.0-Debug;netstandard1.0-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Json\JsonArray.cs" />
@@ -26,5 +26,10 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Text.Encoding" />
     <Reference Include="System.Text.Encoding.Extensions" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
   </ItemGroup>
 </Project>

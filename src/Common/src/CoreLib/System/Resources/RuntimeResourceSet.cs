@@ -210,7 +210,11 @@ namespace System.Resources
             Reader = _defaultReader;
         }
 #else
-        private IResourceReader Reader => _defaultReader!;
+        private
+#if netfx
+        new
+#endif
+        IResourceReader Reader => _defaultReader!;
 
         internal RuntimeResourceSet(IResourceReader reader) :
             // explicitly do not call IResourceReader constructor since it caches all resources

@@ -3,7 +3,7 @@
     <ProjectGuid>{B4B5E15C-E6B9-48EA-94C2-F067484D4D3E}</ProjectGuid>
     <RootNamespace>System.Composition</RootNamespace>
     <AssemblyName>System.Composition.TypedParts</AssemblyName>
-    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Composition\CompositionContextExtensions.cs" />
@@ -44,5 +44,9 @@
       <Project>{2711dfd2-8541-4628-bc53-eb784a14cdcf}</Project>
       <Name>System.Composition.Runtime</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Core" />
   </ItemGroup>
 </Project>

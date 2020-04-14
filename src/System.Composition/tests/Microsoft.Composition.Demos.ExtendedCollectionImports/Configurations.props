@@ -2,6 +2,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       netstandard;
+      netfx;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

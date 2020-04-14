@@ -38,7 +38,7 @@ namespace System.IO
                 Initialize(ptr, len, len, FileAccess.Read);
         }
 
-#if !netstandard
+#if (!netstandard && !netfx)
         public override int Read(Span<byte> buffer) => ReadCore(buffer);
 
         public override void Write(ReadOnlySpan<byte> buffer) => WriteCore(buffer);

@@ -1,10 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{8DEA82EF-2214-4295-8CC1-9FFB9B18838F}</ProjectGuid>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp3.0-Debug;netcoreapp3.0-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp3.0-Debug;netcoreapp3.0-Release;net47-Debug;net47-Release;netfx-Debug;netfx-Release</Configurations>
+    <AssemblyVersion Condition="'$(TargetsNetFx)' == 'true'">4.1.0.0</AssemblyVersion>
+    <!-- We need to build against net47 because that is where ECParameters got added inbox. We ship as net461 in order to not require
+    the facades when the package is restored. -->
+    <PackageTargetFramework Condition="'$(TargetGroup)' == 'net47'">net461</PackageTargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <SuppressPackageTargetFrameworkCompatibility Include="net461" />
     <Compile Include="System.Security.Cryptography.OpenSsl.cs" />
+    <Compile Include="System.Security.Cryptography.OpenSsl.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
@@ -19,5 +25,9 @@
     <Reference Include="System.IO" />
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Primitives" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Core" />
   </ItemGroup>
 </Project>

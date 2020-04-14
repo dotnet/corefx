@@ -2,11 +2,11 @@
   <PropertyGroup>
     <ProjectGuid>{2E2F7224-7C72-4A81-9625-A5241F8D836D}</ProjectGuid>
     <RootNamespace>System.Threading.Tasks.Dataflow</RootNamespace>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.1' OR '$(TargetGroup)' == 'netstandard'">$(DefineConstants);FEATURE_TRACING</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.1' OR '$(TargetGroup)' == 'netstandard' Or '$(TargetsNetFx)' == 'true'">$(DefineConstants);FEATURE_TRACING</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.0'">$(DefineConstants);USE_INTERNAL_CONCURRENT_COLLECTIONS</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.0' OR '$(TargetGroup)' == 'netstandard1.1'">$(DefineConstants);USE_INTERNAL_THREADING</DefineConstants>
     <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard1.1'">netstandard1.1;portable-net45+win8+wpa81</PackageTargetFramework>
-    <Configurations>netstandard-Debug;netstandard-Release;netstandard1.0-Debug;netstandard1.0-Release;netstandard1.1-Debug;netstandard1.1-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release;netstandard1.0-Debug;netstandard1.0-Release;netstandard1.1-Debug;netstandard1.1-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release;</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Base\DataflowBlock.cs" />
@@ -76,5 +76,10 @@
     <Reference Include="System.Runtime.Serialization.Primitives" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Core" />
+    <Reference Include="System" />
   </ItemGroup>
 </Project>
