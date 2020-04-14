@@ -1,3 +1,4 @@
+include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 include(CheckFunctionExists)
@@ -30,6 +31,9 @@ endif ()
 # Older CMake versions (3.8) do not assign the result of their tests, causing unused-value errors
 # which are not distinguished from the test failing. So no error for that one.
 set(CMAKE_REQUIRED_FLAGS "-Werror -Wno-error=unused-value")
+
+check_c_compiler_flag(-Wno-alloca HAVE_WNO_ALLOCA)
+check_c_compiler_flag(-Wno-implicit-int-float-conversion HAVE_WNO_IMPLICIT_INT_FLOAT_CONVERSION)
 
 # in_pktinfo: Find whether this struct exists
 check_include_files(
