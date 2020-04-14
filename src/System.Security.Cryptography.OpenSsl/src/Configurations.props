@@ -4,9 +4,11 @@
       netcoreapp3.0-Unix;
       netcoreapp3.0;
       netstandard;
+      net47;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
+      netfx;
       netcoreapp-Unix;
       netcoreapp;
     </BuildConfigurations>

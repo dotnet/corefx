@@ -4,9 +4,11 @@
       netcoreapp3.0;
       netstandard1.3;
       netstandard;
+      net461;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
+      netfx;
       netcoreapp;
     </BuildConfigurations>
   </PropertyGroup>

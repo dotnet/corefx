@@ -6,10 +6,15 @@
     <StringResourcesPath>..\..\System.Private.Xml\src\Resources\Strings.resx</StringResourcesPath>
     <StringResourcesName>FxResources.$(AssemblyName.Replace('-', '_')).SR</StringResourcesName>
     <OutputType>Exe</OutputType>
-    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Sgen.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System" />
   </ItemGroup>
   <Import Project=".\GenerateThisAssemblyCs.targets" />
 </Project>

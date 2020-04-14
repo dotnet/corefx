@@ -68,7 +68,7 @@ namespace System.IO.Pipelines
             return ReadAsyncInternal(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
         }
 
-#if !netstandard
+#if (!netstandard && !netfx)
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
             return ReadAsyncInternal(buffer, cancellationToken);

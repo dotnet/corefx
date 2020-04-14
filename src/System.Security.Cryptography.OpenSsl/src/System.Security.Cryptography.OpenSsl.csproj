@@ -4,9 +4,12 @@
     <OutputType>Library</OutputType>
     <AssemblyName>System.Security.Cryptography.OpenSsl</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard'">4.1.0.0</AssemblyVersion>
+    <!-- We need to build against net47 because that is where ECParameters got added inbox. We ship as net461 in order to not require
+    the facades when the package is restored. -->
+    <PackageTargetFramework Condition="'$(TargetGroup)' == 'net47'">net461</PackageTargetFramework>
+    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard' Or '$(TargetsNetFx)' == 'true'">4.1.0.0</AssemblyVersion>
     <DefineConstants Condition="'$(TargetsNetCoreApp)' == 'true'">$(DefineConstants);netcoreapp</DefineConstants>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp3.0-Debug;netcoreapp3.0-Release;netcoreapp3.0-Unix-Debug;netcoreapp3.0-Unix-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp3.0-Debug;netcoreapp3.0-Release;netcoreapp3.0-Unix-Debug;netcoreapp3.0-Unix-Release;netstandard-Debug;netstandard-Release;net47-Debug;net47-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetsUnix)' != 'true'">
     <GeneratePlatformNotSupportedAssemblyMessage>SR.PlatformNotSupported_CryptographyOpenSSL</GeneratePlatformNotSupportedAssemblyMessage>
@@ -159,5 +162,10 @@
     <Reference Include="System.Security.Cryptography.Primitives" />
     <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Threading" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <SuppressPackageTargetFrameworkCompatibility Include="net461" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Core" />
   </ItemGroup>
 </Project>

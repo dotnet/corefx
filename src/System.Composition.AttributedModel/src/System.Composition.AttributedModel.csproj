@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{C6257381-C624-494A-A9D9-5586E60856EA}</ProjectGuid>
     <AssemblyName>System.Composition.AttributedModel</AssemblyName>
-    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Composition\Convention\AttributedModelProvider.cs" />
@@ -18,5 +18,8 @@
     <Compile Include="System\Composition\PartNotDiscoverableAttribute.cs" />
     <Compile Include="System\Composition\SharedAttribute.cs" />
     <Compile Include="System\Composition\SharingBoundaryAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!-- This package is special because it uses targets to include assemblies to referencePath, so 
+    it will still require the netstandard facades. -->
+    <DisableVerifyNotDependsOnNetStandardTest>true</DisableVerifyNotDependsOnNetStandardTest>
+  </PropertyGroup>
+</Project>
