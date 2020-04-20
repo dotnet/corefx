@@ -2,7 +2,6 @@
   <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
     <AssemblyVersion>4.0.5.0</AssemblyVersion>
-    <PackageVersion>4.7.1</PackageVersion>
     <StrongNameKeyId>Microsoft</StrongNameKeyId>
   </PropertyGroup>
 </Project>

@@ -71,9 +71,6 @@
     <Project Include="$(MSBuildThisFileDirectory)System.Json\pkg\System.Json.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Net.Http.WinHttpHandler\pkg\System.Net.Http.WinHttpHandler.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
     <Project Include="$(MSBuildThisFileDirectory)System.Net.WebSockets.WebSocketProtocol\pkg\System.Net.WebSockets.WebSocketProtocol.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
