@@ -173,8 +173,11 @@ static void MergeStatusCodes(CFTypeRef key, CFTypeRef value, void* context)
         *pStatus |= PAL_X509ChainRevocationStatusUnknown;
     else if (CFEqual(keyString, CFSTR("MissingIntermediate")))
         *pStatus |= PAL_X509ChainPartialChain;
+    else if (CFEqual(keyString, CFSTR("CriticalExtensions")))
+        *pStatus |= PAL_X509ChainHasNotSupportedCriticalExtension;
     else if (CFEqual(keyString, CFSTR("WeakLeaf")) || CFEqual(keyString, CFSTR("WeakIntermediates")) ||
-             CFEqual(keyString, CFSTR("WeakRoot")) || CFEqual(keyString, CFSTR("WeakKeySize")))
+             CFEqual(keyString, CFSTR("WeakRoot")) || CFEqual(keyString, CFSTR("WeakKeySize")) ||
+             CFEqual(keyString, CFSTR("WeakSignature")))
     {
         // Because we won't report this out of a chain built by .NET on Windows,
         // don't report it here.
