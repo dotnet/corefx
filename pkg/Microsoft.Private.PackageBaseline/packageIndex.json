@@ -2994,6 +2994,15 @@
         "4.2.0.0": "4.4.0"
       }
     },
+    "System.Net.Http.Json": {
+      "StableVersions": [
+        "3.2.0"
+      ],
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "3.2.0.0": "3.2.0"
+      }
+    },
     "System.Net.Http.Rtc": {
       "StableVersions": [
         "4.0.0",
