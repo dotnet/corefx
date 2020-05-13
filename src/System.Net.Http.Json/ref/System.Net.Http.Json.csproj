@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Configurations>netstandard-Debug;netstandard-Release;net461-Debug;net461-Release;netfx-Debug;netfx-Release</Configurations>
+    <Nullable>enable</Nullable>
+    <!-- Ensure Assemblies are first resolved via targeting pack when targeting netfx -->
+    <AssemblySearchPaths Condition="'$(TargetsNetFx)' == 'true'">$(NuGetPackageRoot)\microsoft.targetingpack.netframework.v4.6.1\1.0.1\lib\net461\;$(AssemblySearchPaths)</AssemblySearchPaths>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="System.Net.Http.Json.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\System.Text.Json\ref\System.Text.Json.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+</Project>
