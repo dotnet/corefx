@@ -57,30 +57,42 @@ variables:
       value: .NETCore
     - name: _DotNetValidationArtifactsCategory
       value: .NETCore
+  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    - group: DotNet-MSRC-Storage
+    - name: _InternalRuntimeDownloadArgs
+      value: /p:DotNetRuntimeSourceFeed=https://dotnetclimsrc.blob.core.windows.net/dotnet
+             /p:DotNetRuntimeSourceFeedKey=$(dotnetclimsrc-read-sas-token-base64)
+  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    - name: _InternalRuntimeDownloadArgs
+      value: ''
 
 stages:
   # Windows legs
   - template: /eng/pipelines/windows.yml
     parameters:
       isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
+      isInternalBuild: ${{ ne(variables['System.TeamProject'], 'public') }}
       fullMatrix: true
 
   # Linux legs
   - template: /eng/pipelines/linux.yml
     parameters:
       isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
+      isInternalBuild: ${{ ne(variables['System.TeamProject'], 'public') }}
       fullMatrix: true
 
   # MacOS legs
   - template: /eng/pipelines/macos.yml
     parameters:
       isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
+      isInternalBuild: ${{ ne(variables['System.TeamProject'], 'public') }}
       fullMatrix: true
 
     # FreeBSD leg is only for official builds
     # - template: /eng/pipelines/freebsd.yml
     #   parameters:
     #     isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
+    #     isInternalBuild: ${{ ne(variables['System.TeamProject'], 'public') }}
     #     fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
   # Publish and validation steps. Only run in official builds

@@ -19,6 +19,7 @@ stages:
   - template: corefx-base.yml
     parameters:
       isOfficialBuild: ${{ parameters.isOfficialBuild }}
+      isInternalBuild: ${{ parameters.isInternalBuild }}
       testScope: ${{ parameters.testScope }}
       targetOS: Windows_NT
       jobs:
@@ -171,6 +172,7 @@ stages:
                       /p:RuntimeOS=win10
                       /p:ArchiveTests=Packages
                       $(_msbuildCommonParameters)
+                      $(_InternalRuntimeDownloadArgs)
               displayName: Build Packages and Tests
 
         # Legs without HELIX testing
