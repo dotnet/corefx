@@ -3,6 +3,6 @@
   <PropertyGroup>
     <StrongNameKeyId>Open</StrongNameKeyId>
     <AssemblyVersion>3.2.0.0</AssemblyVersion>
-    <PackageVersion>3.2.0</PackageVersion>
+    <PackageVersion>3.2.1</PackageVersion>
   </PropertyGroup>
 </Project>
