@@ -32,6 +32,9 @@
     <Project Include="$(MSBuildThisFileDirectory)System.Net.Http.WinHttpHandler\pkg\System.Net.Http.WinHttpHandler.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Runtime.CompilerServices.Unsafe\pkg\System.Runtime.CompilerServices.Unsafe.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <ItemGroup>

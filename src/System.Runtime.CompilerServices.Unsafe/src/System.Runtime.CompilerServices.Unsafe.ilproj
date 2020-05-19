@@ -7,6 +7,10 @@
     <IncludePath Condition="'$(TargetGroup)' == 'netfx'">include\net461</IncludePath>
     <IlasmFlags>$(IlasmFlags) -INCLUDE=$(IncludePath)</IlasmFlags>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp2.0-Debug;netcoreapp2.0-Release;netstandard-Debug;netstandard-Release;netstandard1.0-Debug;netstandard1.0-Release</Configurations>
+    <!-- Switching DebugType to portable on netfx builds so that we don't pass attribute -DEBUG=OPT to illink which
+    is causing attribute [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default | DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
+    to get set on Release builds. See https://github.com/dotnet/runtime/issues/36664 for more info -->
+    <DebugType Condition="'$(TargetsNetFx)' == 'true' And '$(ConfigurationGroup)' == 'Release'">portable</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
