@@ -1,4 +1,5 @@
-﻿<root>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -1156,5 +1157,8 @@
   </data>
   <data name="FailedToCreateMethodDelegate" xml:space="preserve">
     <value>Failed to create Delegate for method '{0}' of type '{1}'.</value>
+  </data>
+  <data name="ReadOnlyCollectionDeserialization" xml:space="preserve">
+    <value>Collection type '{0}' cannot be deserialized since it</value>
   </data>
 </root>
