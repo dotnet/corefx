@@ -1,8 +1,7 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <BuildConfigurations>
-      netstandard;
-      net461;
+      netcoreapp;
       netfx;
     </BuildConfigurations>
   </PropertyGroup>

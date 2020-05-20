@@ -62,7 +62,7 @@
 
   <Target Name="VerifyRuntimeClosure" 
           DependsOnTargets="ResolveReferences"
-          Condition="'$(ShouldVerifyClosure)' == 'true' AND '$(RuntimeIdentifier)' != ''">
+          Condition="'$(ShouldVerifyClosure)' == 'true' AND '$(RuntimeIdentifier)' != '' AND '$(SkipVerifyClosureForRuntime)' != 'true'">
     <ItemGroup>
       <_runClosureFileNames Include="@(ReferenceCopyLocalPaths->'%(FileName)')">
         <Original>%(Identity)</Original>

@@ -26,79 +26,10 @@
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
-    <Project Include="$(MSBuildThisFileDirectory)System.Data.OleDb\pkg\System.Data.OleDb.pkgproj">
+    <Project Include="$(MSBuildThisFileDirectory)System.Net.Http.Json\pkg\System.Net.Http.Json.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Text.Json\pkg\System.Text.Json.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)Microsoft.Bcl.AsyncInterfaces\pkg\Microsoft.Bcl.AsyncInterfaces.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)Microsoft.XmlSerializer.Generator\pkg\Microsoft.XmlSerializer.Generator.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Collections.Immutable\pkg\System.Collections.Immutable.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Composition\pkg\System.Composition.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Composition.AttributedModel\pkg\System.Composition.AttributedModel.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Composition.Convention\pkg\System.Composition.Convention.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Composition.Hosting\pkg\System.Composition.Hosting.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Composition.Runtime\pkg\System.Composition.Runtime.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Composition.TypedParts\pkg\System.Composition.TypedParts.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Diagnostics.DiagnosticSource\pkg\System.Diagnostics.DiagnosticSource.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.IO.Pipelines\pkg\System.IO.Pipelines.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Json\pkg\System.Json.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Net.WebSockets.WebSocketProtocol\pkg\System.Net.WebSockets.WebSocketProtocol.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Numerics.Tensors\pkg\System.Numerics.Tensors.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Reflection.DispatchProxy\pkg\System.Reflection.DispatchProxy.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Reflection.Metadata\pkg\System.Reflection.Metadata.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Reflection.MetadataLoadContext\pkg\System.Reflection.MetadataLoadContext.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Resources.Extensions\pkg\System.Resources.Extensions.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Text.Encoding.CodePages\pkg\System.Text.Encoding.CodePages.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Text.Encodings.Web\pkg\System.Text.Encodings.Web.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Threading.Channels\pkg\System.Threading.Channels.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Threading.Tasks.Dataflow\pkg\System.Threading.Tasks.Dataflow.pkgproj">
+    <Project Include="$(MSBuildThisFileDirectory)System.Net.Http.WinHttpHandler\pkg\System.Net.Http.WinHttpHandler.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>
