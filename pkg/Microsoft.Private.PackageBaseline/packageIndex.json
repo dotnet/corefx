@@ -3003,7 +3003,8 @@
     },
     "System.Net.Http.Json": {
       "StableVersions": [
-        "3.2.0"
+        "3.2.0",
+        "3.2.1"
       ],
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -3063,7 +3064,8 @@
         "4.5.4",
         "4.6.0",
         "4.7.0",
-        "4.7.1"
+        "4.7.1",
+        "4.7.2"
       ],
       "BaselineVersion": "4.7.0",
       "InboxOn": {},
