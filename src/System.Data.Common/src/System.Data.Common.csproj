@@ -131,6 +131,8 @@
     <Compile Include="System\Data\ITableMappingCollection.cs" />
     <Compile Include="System\Data\KeyRestrictionBehavior.cs" />
     <Compile Include="System\Data\LoadOption.cs" />
+    <Compile Include="System\Data\LocalAppContextSwitches.cs" />
+    <Compile Include="$(CommonPath)\System\LocalAppContext.cs" />
     <Compile Include="System\Data\MappingType.cs" />
     <Compile Include="System\Data\MergeFailedEvent.cs" />
     <Compile Include="System\Data\MergeFailedEventHandler.cs" />
@@ -160,6 +162,7 @@
     <Compile Include="System\Data\StateChangeEventHandler.cs" />
     <Compile Include="System\Data\StatementType.cs" />
     <Compile Include="System\Data\StrongTypingException.cs" />
+    <Compile Include="System\Data\TypeLimiter.cs" />
     <Compile Include="System\Data\UniqueConstraint.cs" />
     <Compile Include="System\Data\UpdateRowSource.cs" />
     <Compile Include="System\Data\Common\UInt64Storage.cs" />
@@ -322,6 +325,7 @@
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
     <Reference Include="System.Diagnostics.Tracing" />
+    <Reference Include="System.Drawing.Primitives" />
     <Reference Include="System.Linq" />
     <Reference Include="System.Linq.Expressions" />
     <Reference Include="System.ObjectModel" />
