@@ -261,11 +261,11 @@
       "allowOverride": true
     },
     "SourceVersion": {
-      "value": "master",
+      "value": "release/2.1",
       "allowOverride": true
     },
     "SourceBranch": {
-      "value": "master",
+      "value": "release/2.1",
       "allowOverride": true
     },
     "FeedPublishArguments": {

@@ -397,7 +397,7 @@
       "isSecret": true
     },
     "PB_SourceBranch": {
-      "value": "master",
+      "value": "release/2.1",
       "allowOverride": true
     },
     "PB_Git": {
