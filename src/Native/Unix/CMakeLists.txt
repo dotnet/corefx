@@ -247,6 +247,13 @@ endfunction()
 
 include(configure.cmake)
 
+if (HAVE_WNO_ALLOCA)
+    add_compile_options(-Wno-alloca)
+endif()
+if (HAVE_WNO_IMPLICIT_INT_FLOAT_CONVERSION)
+    add_compile_options(-Wno-implicit-int-float-conversion)
+endif()
+
 if (NOT CLR_CMAKE_PLATFORM_WASM)
     add_subdirectory(System.IO.Compression.Native)
 	add_subdirectory(System.IO.Ports.Native)
