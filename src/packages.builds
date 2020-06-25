@@ -31,7 +31,7 @@
     </Project>
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project
+    </Project>
   </ItemGroup>
 
   <ItemGroup>
