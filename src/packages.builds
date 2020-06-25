@@ -29,6 +29,9 @@
     <Project Include="$(MSBuildThisFileDirectory)Microsoft.IO.Redist\pkg\Microsoft.IO.Redist.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <ItemGroup>
