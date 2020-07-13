@@ -594,7 +594,7 @@
     "name": "DotNetCore-Build",
     "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/330",
     "pool": {
-      "id": 97,
+      "id": 95,
       "name": "DotNetCore-Build"
     }
   },
