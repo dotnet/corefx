@@ -103,9 +103,16 @@ namespace System.Data.SqlClient.SNI
                     // Account for split packets
                     while (readBytes < TdsEnums.HEADER_LEN)
                     {
-                        readBytes += async ?
+                        var readBytesForHeader = async ?
                             await _stream.ReadAsync(packetData, readBytes, TdsEnums.HEADER_LEN - readBytes, token).ConfigureAwait(false) :
                             _stream.Read(packetData, readBytes, TdsEnums.HEADER_LEN - readBytes);
+
+                        if (readBytesForHeader == 0)
+                        {
+                            throw new EndOfStreamException("End of stream reached");
+                        }
+
+                        readBytes += readBytesForHeader;
                     }
 
                     _packetBytes = (packetData[TdsEnums.HEADER_LEN_FIELD_OFFSET] << 8) | packetData[TdsEnums.HEADER_LEN_FIELD_OFFSET + 1];
