@@ -116,6 +116,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\Data\Common\DbProviderFactoriesTests.netcoreapp.cs" />
+    <Compile Include="System\Data\RestrictedTypeHandlingTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">

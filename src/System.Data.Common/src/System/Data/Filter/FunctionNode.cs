@@ -16,6 +16,7 @@ namespace System.Data
         internal int _argumentCount = 0;
         internal const int initialCapacity = 1;
         internal ExpressionNode[] _arguments;
+        private readonly TypeLimiter _capturedLimiter = null;
 
         private static readonly Function[] s_funcs = new Function[] {
             new Function("Abs", FunctionId.Abs, typeof(object), true, false, 1, typeof(object), null, null),
@@ -40,6 +41,12 @@ namespace System.Data
 
         internal FunctionNode(DataTable table, string name) : base(table)
         {
+            // Because FunctionNode instances are created eagerly but evaluated lazily,
+            // we need to capture the deserialization scope here. The scope could be
+            // null if no deserialization is in progress.
+
+            _capturedLimiter = TypeLimiter.Capture();
+
             _name = name;
             for (int i = 0; i < s_funcs.Length; i++)
             {
@@ -289,6 +296,11 @@ namespace System.Data
                 throw ExprException.InvalidType(typeName);
             }
 
+            // ReadXml might not be on the current call stack. So we'll use the TypeLimiter
+            // that was captured when this FunctionNode instance was created.
+
+            TypeLimiter.EnsureTypeIsAllowed(dataType, _capturedLimiter);
+            
             return dataType;
         }
 
