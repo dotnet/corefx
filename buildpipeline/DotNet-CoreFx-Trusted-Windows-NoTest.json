@@ -511,15 +511,15 @@
   "queue": {
     "_links": {
       "self": {
-        "href": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/330"
+        "href": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/298"
       }
     },
-    "id": 330,
-    "name": "DotNetCore-Build",
-    "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/330",
+    "id": 298,
+    "name": "VSEng-MicroBuildVS2017",
+    "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/298",
     "pool": {
       "id": 95,
-      "name": "DotNetCore-Build"
+      "name": "VSEng-MicroBuildVS2017"
     }
   },
   "id": 5308,
