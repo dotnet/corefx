@@ -39,7 +39,7 @@
       "inputs": {
         "signType": "real",
         "zipSources": "true",
-        "version": "",
+        "version": "1.1.282",
         "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json",
         "esrpSigning": "$(PB_UseEsrpSigning)"
       }
