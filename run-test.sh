@@ -257,9 +257,9 @@ coreclr_code_coverage()
 
   which curl > /dev/null 2> /dev/null
   if [ $? -ne 0 ]; then
-    wget -q -O $packageName https://www.myget.org/F/dotnet-buildtools/api/v2/package/unix-code-coverage-tools/1.0.0
+    wget -q -O $packageName https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/flat2/unix-code-coverage-tools/1.0.0/unix-code-coverage-tools.1.0.0.nupkg
   else
-    curl -sSL -o $packageName https://www.myget.org/F/dotnet-buildtools/api/v2/package/unix-code-coverage-tools/1.0.0
+    curl -sSL -o $packageName https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/flat2/unix-code-coverage-tools/1.0.0/unix-code-coverage-tools.1.0.0.nupkg
   fi
 
   echo "Unzipping to $toolsDir"

@@ -78,8 +78,8 @@
   <PropertyGroup>
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
       https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
-      https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;
+      https://dotnetmygetlegacy.blob.core.windows.net/dotnet-core/index.json;
       https://api.nuget.org/v3/index.json;
       $(OverridePackageSource);
       $(RestoreSources)
