@@ -16,7 +16,7 @@
     <RestoreSource Include="https:%2F%2Fapi.nuget.org/v3/index.json" />
 
     <!-- needed for SQLClient's SNI packages -->
-    <RestoreSource Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
+    <RestoreSource Include="https:%2F%2Fdotnetmygetlegacy.blob.core.windows.net/dotnet-core/index.json" />
 
     <!-- we don't build alpine or older OSX versions -->
     <RuntimesToExclude Include="alpine.3.4.3-x64;osx.10.10-x64;osx.10.11-x64" />
