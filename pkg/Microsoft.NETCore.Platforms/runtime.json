@@ -1922,6 +1922,19 @@
         "unix"
       ]
     },
+    "osx-arm64": {
+      "#import": [
+        "osx",
+        "unix-arm64"
+      ]
+    },
+    "osx-arm64-corert": {
+      "#import": [
+        "osx-corert",
+        "osx-arm64",
+        "unix-arm64-corert"
+      ]
+    },
     "osx-corert": {
       "#import": [
         "osx",
@@ -1944,6 +1957,20 @@
     "osx.10.10": {
       "#import": [
         "osx"
+      ]
+    },
+    "osx.10.10-arm64": {
+      "#import": [
+        "osx.10.10",
+        "osx-arm64"
+      ]
+    },
+    "osx.10.10-arm64-corert": {
+      "#import": [
+        "osx.10.10-corert",
+        "osx.10.10-arm64",
+        "osx.10.10",
+        "osx-arm64-corert"
       ]
     },
     "osx.10.10-corert": {
@@ -1971,6 +1998,20 @@
         "osx.10.10"
       ]
     },
+    "osx.10.11-arm64": {
+      "#import": [
+        "osx.10.11",
+        "osx.10.10-arm64"
+      ]
+    },
+    "osx.10.11-arm64-corert": {
+      "#import": [
+        "osx.10.11-corert",
+        "osx.10.11-arm64",
+        "osx.10.11",
+        "osx.10.10-arm64-corert"
+      ]
+    },
     "osx.10.11-corert": {
       "#import": [
         "osx.10.11",
@@ -1994,6 +2035,20 @@
     "osx.10.12": {
       "#import": [
         "osx.10.11"
+      ]
+    },
+    "osx.10.12-arm64": {
+      "#import": [
+        "osx.10.12",
+        "osx.10.11-arm64"
+      ]
+    },
+    "osx.10.12-arm64-corert": {
+      "#import": [
+        "osx.10.12-corert",
+        "osx.10.12-arm64",
+        "osx.10.12",
+        "osx.10.11-arm64-corert"
       ]
     },
     "osx.10.12-corert": {
@@ -2021,6 +2076,20 @@
         "osx.10.12"
       ]
     },
+    "osx.10.13-arm64": {
+      "#import": [
+        "osx.10.13",
+        "osx.10.12-arm64"
+      ]
+    },
+    "osx.10.13-arm64-corert": {
+      "#import": [
+        "osx.10.13-corert",
+        "osx.10.13-arm64",
+        "osx.10.13",
+        "osx.10.12-arm64-corert"
+      ]
+    },
     "osx.10.13-corert": {
       "#import": [
         "osx.10.13",
@@ -2044,6 +2113,20 @@
     "osx.10.14": {
       "#import": [
         "osx.10.13"
+      ]
+    },
+    "osx.10.14-arm64": {
+      "#import": [
+        "osx.10.14",
+        "osx.10.13-arm64"
+      ]
+    },
+    "osx.10.14-arm64-corert": {
+      "#import": [
+        "osx.10.14-corert",
+        "osx.10.14-arm64",
+        "osx.10.14",
+        "osx.10.13-arm64-corert"
       ]
     },
     "osx.10.14-corert": {
@@ -2071,6 +2154,20 @@
         "osx.10.14"
       ]
     },
+    "osx.10.15-arm64": {
+      "#import": [
+        "osx.10.15",
+        "osx.10.14-arm64"
+      ]
+    },
+    "osx.10.15-arm64-corert": {
+      "#import": [
+        "osx.10.15-corert",
+        "osx.10.15-arm64",
+        "osx.10.15",
+        "osx.10.14-arm64-corert"
+      ]
+    },
     "osx.10.15-corert": {
       "#import": [
         "osx.10.15",
@@ -2089,6 +2186,45 @@
         "osx.10.15-x64",
         "osx.10.15",
         "osx.10.14-x64-corert"
+      ]
+    },
+    "osx.11.0": {
+      "#import": [
+        "osx.10.15"
+      ]
+    },
+    "osx.11.0-arm64": {
+      "#import": [
+        "osx.11.0",
+        "osx.10.15-arm64"
+      ]
+    },
+    "osx.11.0-arm64-corert": {
+      "#import": [
+        "osx.11.0-corert",
+        "osx.11.0-arm64",
+        "osx.11.0",
+        "osx.10.15-arm64-corert"
+      ]
+    },
+    "osx.11.0-corert": {
+      "#import": [
+        "osx.11.0",
+        "osx.10.15-corert"
+      ]
+    },
+    "osx.11.0-x64": {
+      "#import": [
+        "osx.11.0",
+        "osx.10.15-x64"
+      ]
+    },
+    "osx.11.0-x64-corert": {
+      "#import": [
+        "osx.11.0-corert",
+        "osx.11.0-x64",
+        "osx.11.0",
+        "osx.10.15-x64-corert"
       ]
     },
     "rhel": {
