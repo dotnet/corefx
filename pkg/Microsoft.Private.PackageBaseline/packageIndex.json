@@ -195,7 +195,8 @@
         "2.2.2",
         "3.0.0",
         "3.1.1",
-        "3.1.2"
+        "3.1.2",
+        "3.1.3"
       ],
       "BaselineVersion": "3.0.0",
       "InboxOn": {}
@@ -644,6 +645,10 @@
       ],
       "InboxOn": {}
     },
+    "runtime.win-x64.Microsoft.Private.CoreFx.NETCoreApp": {
+      "BaselineVersion": "4.7.0",
+      "InboxOn": {}
+    },
     "runtime.win7-x64.runtime.native.System.Data.SqlClient.sni": {
       "StableVersions": [
         "4.0.1",
@@ -658,10 +663,6 @@
         "4.3.0"
       ],
       "BaselineVersion": "4.3.0",
-      "InboxOn": {}
-    },
-    "runtime.win-x64.Microsoft.Private.CoreFx.NETCoreApp": {
-      "BaselineVersion": "4.7.0",
       "InboxOn": {}
     },
     "SMDiagnostics": {
