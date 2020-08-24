@@ -70,8 +70,8 @@
     <DotnetSourceList Include="$(OverridePackageSource)" />
     <!-- Need to escape double forward slash (%2F) or MSBuild will normalize to one slash on Unix. -->
     <!-- Including buildtools to pull in TestSuite packages and repackaged xunit dependencies-->
-    <DotnetSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-buildtools/api/v3/index.json" />
-    <DotnetSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
+    <DotnetSourceList Include="https:%2F%2Fpkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json" />
+    <DotnetSourceList Include="https:%2F%2Fdotnetmygetlegacy.blob.core.windows.net/dotnet-core/index.json" />
     <DotnetSourceList Include="https:%2F%2Fapi.nuget.org/v3/index.json" />
   </ItemGroup>
 
