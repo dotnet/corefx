@@ -21,6 +21,11 @@ namespace System.Net.Http
 
         private static readonly Lazy<bool> s_allowNonAsciiHeaders = new Lazy<bool>(GetAllowNonAsciiCharactersSetting);
 
+        // Disables a validation that checks whether Http headers contain a non-ASCII character.
+        // This is a workaround that has been introduced as a patch specific to the 3.1 branch.
+        // Unlike other options in HttpConnectionSettings, this one has a global scope.
+        // Lazy initialization is being used to make sure clients can also use AppContext.SetSwitch() or Environment.SetEnvironmentVariable()
+        // before the first calls to HttpClient API-s.
         internal static bool AllowNonAsciiHeaders => s_allowNonAsciiHeaders.Value;
 
         internal DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
@@ -153,6 +158,7 @@ namespace System.Net.Http
 
         private static bool GetAllowNonAsciiCharactersSetting()
         {
+            // First check for the AppContext switch, giving it priority over the environment variable.
             if (AppContext.TryGetSwitch(AllowNonAsciiCharactersAppCtxSettingName, out bool value))
             {
                 return value;
