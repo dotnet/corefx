@@ -7,8 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.Test.Common;
+using System.Text;
 using System.Threading.Tasks;
-
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -285,6 +286,113 @@ namespace System.Net.Http.Functional.Tests
                         new HttpHeaderData("", "foo")
                     });
                 });
+        }
+
+        private static readonly (string Name, string[] Values)[] s_nonAsciiHeaders = new[]
+        {   
+            ("Some-Header1", new[] { "\uD83D\uDE03", "UTF8-best-fit-to-latin1" }),
+            ("Some-Header2", new[] { "\u00FF", "\u00C4nd", "Ascii\u00A9" }),
+        };
+
+        private static void AllowNonAsciiHeaders(string useAppCtxSwitchInner)
+        {
+            if (bool.Parse(useAppCtxSwitchInner))
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.AllowNonAsciiHeaders", true);
+            }
+            else
+            {
+                Environment.SetEnvironmentVariable("DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_ALLOWNONASCIIHEADERS", "True");
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SendAsync_CustomRequestEncodingSelector_CanSendLatin1HeaderValues(bool useAppCtxSwitchOuter)
+        {
+            RemoteExecutor.Invoke((useAppCtxSwitchInner) =>
+            {
+                AllowNonAsciiHeaders(useAppCtxSwitchInner);
+
+                LoopbackServerFactory.CreateClientAndServerAsync(
+                    async uri =>
+                    {
+                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+
+                        foreach ((string name, string[] values) in s_nonAsciiHeaders)
+                        {
+                            requestMessage.Headers.Add(name, values);
+                        }
+
+                        using HttpClientHandler handler = CreateHttpClientHandler();
+                        var underlyingHandler = (SocketsHttpHandler)GetUnderlyingSocketsHttpHandler(handler);
+
+                        using HttpClient client = CreateHttpClient(handler);
+
+                        await client.SendAsync(requestMessage);
+                    },
+                    async server =>
+                    {
+                        HttpRequestData requestData = await server.HandleRequestAsync();
+
+                        Assert.All(requestData.Headers,
+                            h => Assert.False(h.HuffmanEncoded, "Expose raw decoded bytes once HuffmanEncoding is supported"));
+
+                        Encoding valueEncoding = Encoding.GetEncoding("ISO-8859-1");
+
+                        foreach ((string name, string[] values) in s_nonAsciiHeaders)
+                        {
+                            byte[] valueBytes = valueEncoding.GetBytes(string.Join(", ", values));
+                            Assert.Single(requestData.Headers,
+                                h => h.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && h.Raw.AsSpan().IndexOf(valueBytes) != -1);
+                        }
+                    })
+                .GetAwaiter().GetResult();
+            }, useAppCtxSwitchOuter.ToString());
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SendAsync_CustomResponseEncodingSelector_CanReceiveNonAsciiHeaderValues(bool useAppCtxSwitchOuter)
+        {
+            RemoteExecutor.Invoke((useAppCtxSwitchInner) =>
+            {
+                AllowNonAsciiHeaders(useAppCtxSwitchInner);
+
+                LoopbackServerFactory.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+
+                    using HttpClientHandler handler = CreateHttpClientHandler();
+                    var underlyingHandler = (SocketsHttpHandler)GetUnderlyingSocketsHttpHandler(handler);
+
+                    using HttpClient client = CreateHttpClient(handler);
+
+                    using HttpResponseMessage response = await client.SendAsync(requestMessage);
+                    Encoding valueEncoding = Encoding.GetEncoding("ISO-8859-1");
+
+                    foreach ((string name, string[] values) in s_nonAsciiHeaders)
+                    {
+                        IEnumerable<string> receivedValues = Assert.Single(response.Headers, h => h.Key.Equals(name, StringComparison.OrdinalIgnoreCase)).Value;
+                        string value = Assert.Single(receivedValues);
+
+                        string expected = valueEncoding.GetString(valueEncoding.GetBytes(string.Join(", ", values)));
+                        Assert.Equal(expected, value, StringComparer.OrdinalIgnoreCase);
+                    }
+                },
+                async server =>
+                {
+                    List<HttpHeaderData> headerData = s_nonAsciiHeaders
+                        .Select(h => new HttpHeaderData(h.Name, string.Join(", ", h.Values)))
+                        .ToList();
+
+                    await server.HandleRequestAsync(headers: headerData);
+                })
+                .GetAwaiter().GetResult();
+            }, useAppCtxSwitchOuter.ToString());
         }
     }
 }

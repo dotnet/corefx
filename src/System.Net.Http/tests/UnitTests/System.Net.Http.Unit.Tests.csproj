@@ -300,6 +300,9 @@
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\ArrayBuffer.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\ArrayBuffer.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpConnectionSettings.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HttpConnectionSettings.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.cs</Link>
     </Compile>

@@ -1147,14 +1147,25 @@ namespace System.Net.Http
             if (s.Length <= _writeBuffer.Length - offset)
             {
                 byte[] writeBuffer = _writeBuffer;
-                foreach (char c in s)
+                if (HttpConnectionSettings.AllowNonAsciiHeaders)
                 {
-                    if ((c & 0xFF80) != 0)
+                    foreach (char c in s)
                     {
-                        throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
+                        writeBuffer[offset++] = (byte)c;
                     }
-                    writeBuffer[offset++] = (byte)c;
                 }
+                else
+                {
+                    foreach (char c in s)
+                    {
+                        if ((c & 0xFF80) != 0)
+                        {
+                            throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
+                        }
+                        writeBuffer[offset++] = (byte)c;
+                    }
+                }
+                
                 _writeOffset = offset;
                 return Task.CompletedTask;
             }
