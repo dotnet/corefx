@@ -310,7 +310,7 @@ namespace System.Net.Http.Functional.Tests
 
         private static (string Name, string[] Values)[] GetNonAsciiTestHeaders(bool unicode) => unicode ? s_invalidUnicodeCharacters : s_validLatin1Characters;
 
-        private static bool AllowNonAsciiHeaders(string useAppCtxSwitchInner, string switchValueInner)
+        private static bool AllowLatin1Headers(string useAppCtxSwitchInner, string switchValueInner)
         {
             bool switchValue = bool.Parse(switchValueInner);
             if (bool.Parse(useAppCtxSwitchInner))
@@ -337,9 +337,9 @@ namespace System.Net.Http.Functional.Tests
         // Since RemoteExecutor cannot invoke delegates defined in abstract types, we should define the actual test cases in derived classes.
         protected int SendAsync_SendNonAsciiCharacters_Impl(string useAppCtxSwitchInner, string switchValueInner, string unicodeInner)
         {
-            bool allowNonAscii = AllowNonAsciiHeaders(useAppCtxSwitchInner, switchValueInner);
+            bool allowLatin1 = AllowLatin1Headers(useAppCtxSwitchInner, switchValueInner);
             bool unicode = bool.Parse(unicodeInner);
-            bool expectSuccess = allowNonAscii && !unicode;
+            bool expectSuccess = allowLatin1 && !unicode;
 
             (string name, string[] values)[] headers = GetNonAsciiTestHeaders(unicode);
 
@@ -400,9 +400,9 @@ namespace System.Net.Http.Functional.Tests
 
         protected int SendAsync_ReceiveNonAsciiCharacters_Inner(string useAppCtxSwitchInner, string switchValueInner, string unicodeInner)
         {
-            bool allowNonAscii = AllowNonAsciiHeaders(useAppCtxSwitchInner, switchValueInner);
+            bool allowLatin1 = AllowLatin1Headers(useAppCtxSwitchInner, switchValueInner);
             bool unicode = bool.Parse(unicodeInner);
-            bool expectSuccess = allowNonAscii && !unicode;
+            bool expectSuccess = allowLatin1 && !unicode;
 
             LoopbackServerFactory.CreateClientAndServerAsync(
                 async uri =>
@@ -428,7 +428,7 @@ namespace System.Net.Http.Functional.Tests
                 async server =>
                 {
                     List<HttpHeaderData> headerData = GetNonAsciiTestHeaders(unicode)
-                        .Select(h => new HttpHeaderData(h.Name, string.Join(", ", h.Values), latin1: true))
+                        .Select(h => new HttpHeaderData(h.Name, string.Join(", ", h.Values), latin1: allowLatin1))
                         .ToList();
 
                     await server.HandleRequestAsync(headers: headerData);

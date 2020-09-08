@@ -17,6 +17,8 @@ namespace System.Net.Test.Common
 {
     public class Http2LoopbackConnection : GenericLoopbackConnection
     {
+        private static readonly Encoding s_latin1Encoding = Encoding.GetEncoding("ISO-8859-1");
+
         private Socket _connectionSocket;
         private Stream _connectionStream;
         private TaskCompletionSource<bool> _ignoredSettingsAckPromise;
@@ -381,9 +383,9 @@ namespace System.Net.Test.Common
             }
         }
 
-        private static int EncodeString(string value, Span<byte> headerBlock, bool huffmanEncode)
+        private static int EncodeString(string value, Span<byte> headerBlock, bool huffmanEncode, bool latin1 = false)
         {
-            byte[] data = Encoding.ASCII.GetBytes(value);
+            byte[] data = (latin1 ? s_latin1Encoding : Encoding.ASCII).GetBytes(value);
             byte prefix;
 
             if (!huffmanEncode)
@@ -536,12 +538,12 @@ namespace System.Net.Test.Common
             }
         }
 
-        public static int EncodeHeader(HttpHeaderData headerData, Span<byte> headerBlock)
+        public static int EncodeHeader(HttpHeaderData headerData, Span<byte> headerBlock, bool latin1 = false)
         {
             // Always encode as literal, no indexing.
             int bytesGenerated = EncodeInteger(0, 0, 0b11110000, headerBlock);
             bytesGenerated += EncodeString(headerData.Name, headerBlock.Slice(bytesGenerated), headerData.HuffmanEncoded);
-            bytesGenerated += EncodeString(headerData.Value, headerBlock.Slice(bytesGenerated), headerData.HuffmanEncoded);
+            bytesGenerated += EncodeString(headerData.Value, headerBlock.Slice(bytesGenerated), headerData.HuffmanEncoded, latin1);
             return bytesGenerated;
         }
 
@@ -680,7 +682,7 @@ namespace System.Net.Test.Common
             {
                 foreach (HttpHeaderData headerData in headers)
                 {
-                    bytesGenerated += EncodeHeader(headerData, headerBlock.AsSpan().Slice(bytesGenerated));
+                    bytesGenerated += EncodeHeader(headerData, headerBlock.AsSpan().Slice(bytesGenerated), headerData.Latin1);
                 }
             }
 
