@@ -315,11 +315,11 @@ namespace System.Net.Http.Functional.Tests
             bool switchValue = bool.Parse(switchValueInner);
             if (bool.Parse(useAppCtxSwitchInner))
             {
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.AllowNonAsciiHeaders", switchValue);
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.AllowLatin1Headers", switchValue);
             }
             else
             {
-                Environment.SetEnvironmentVariable("DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_ALLOWNONASCIIHEADERS", switchValueInner);
+                Environment.SetEnvironmentVariable("DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_ALLOWLATIN1HEADERS", switchValueInner);
             }
             return switchValue;
         }

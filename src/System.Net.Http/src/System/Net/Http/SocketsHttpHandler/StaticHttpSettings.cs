@@ -6,21 +6,21 @@ namespace System.Net.Http
 {
     internal static class StaticHttpSettings
     {
-        private const string AllowNonAsciiCharactersEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_ALLOWNONASCIIHEADERS";
-        private const string AllowNonAsciiCharactersAppCtxSettingName = "System.Net.Http.SocketsHttpHandler.AllowNonAsciiHeaders";
+        private const string AllowNonAsciiCharactersEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_ALLOWLATIN1HEADERS";
+        private const string AllowNonAsciiCharactersAppCtxSettingName = "System.Net.Http.SocketsHttpHandler.AllowLatin1Headers";
 
-        private static readonly Lazy<bool> s_allowNonAsciiHeaders = new Lazy<bool>(GetAllowNonAsciiCharactersSetting);
+        private static readonly Lazy<bool> s_allowLatin1Headers = new Lazy<bool>(GetAllowLatin1HeadersSetting);
 
         // Disables a validation that checks whether Http headers contain a non-ASCII character.
         // This is a workaround that has been introduced as a patch specific to the 3.1 branch.
         // Unlike options in HttpConnectionSettings, this one has a global scope.
         // Lazy initialization is being used to make sure clients can also use AppContext.SetSwitch() or Environment.SetEnvironmentVariable()
         // before the first calls to HttpClient API-s.
-        internal static bool AllowNonAsciiHeaders => s_allowNonAsciiHeaders.Value;
+        internal static bool AllowLatin1Headers => s_allowLatin1Headers.Value;
 
-        internal static int EncodingValidationMask => AllowNonAsciiHeaders ? 0xFF00 : 0xFF80;
+        internal static int EncodingValidationMask => AllowLatin1Headers ? 0xFF00 : 0xFF80;
 
-        private static bool GetAllowNonAsciiCharactersSetting()
+        private static bool GetAllowLatin1HeadersSetting()
         {
             // First check for the AppContext switch, giving it priority over the environment variable.
             if (AppContext.TryGetSwitch(AllowNonAsciiCharactersAppCtxSettingName, out bool value))
