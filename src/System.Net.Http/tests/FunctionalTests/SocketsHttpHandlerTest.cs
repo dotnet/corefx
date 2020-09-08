@@ -2261,8 +2261,6 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(NonAsciiTestConfigurations))]
         public void SendAsync_SendNonAsciiCharacters(bool useAppCtxSwitch, bool switchValue, bool unicode)
         {
-            //SendAsync_SendNonAsciiCharacters_Impl(useAppCtxSwitch.ToString(), switchValue.ToString(), unicode.ToString());
-
             RemoteExecutor.Invoke(
                 (useAppCtxSwitchInner, switchValueInner, utf8Inner) => SendAsync_SendNonAsciiCharacters_Impl(useAppCtxSwitchInner, switchValueInner, utf8Inner),
                 useAppCtxSwitch.ToString(),
@@ -2302,8 +2300,6 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(NonAsciiTestConfigurations))]
         public void SendAsync_SendNonAsciiCharacters(bool useAppCtxSwitch, bool switchValue, bool unicode)
         {
-            //SendAsync_SendNonAsciiCharacters_Impl(useAppCtxSwitch.ToString(), switchValue.ToString(), unicode.ToString());
-
             RemoteExecutor.Invoke(
                 (useAppCtxSwitchInner, switchValueInner, utf8Inner) => SendAsync_SendNonAsciiCharacters_Impl(useAppCtxSwitchInner, switchValueInner, utf8Inner),
                 useAppCtxSwitch.ToString(),
