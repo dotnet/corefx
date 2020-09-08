@@ -18,6 +18,8 @@ namespace System.Net.Http
         // before the first calls to HttpClient API-s.
         internal static bool AllowNonAsciiHeaders => s_allowNonAsciiHeaders.Value;
 
+        internal static int EncodingValidationMask => AllowNonAsciiHeaders ? 0xFF00 : 0xFF80;
+
         private static bool GetAllowNonAsciiCharactersSetting()
         {
             // First check for the AppContext switch, giving it priority over the environment variable.

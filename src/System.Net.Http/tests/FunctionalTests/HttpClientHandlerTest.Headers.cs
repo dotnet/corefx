@@ -298,10 +298,8 @@ namespace System.Net.Http.Functional.Tests
 
         private static readonly (string Name, string[] Values)[] s_validLatin1Characters = new[]
         {
-            ("a", new[] { "aa"})
-            //("a", new[] { "\x0081"})
-            //("Header1", new[] { "\x0081\x00FF\x00FE", "ascii-only" }),
-            //("Set-Cookie", new[] { "\u00FF", "\x00B0\x00B1\x00B2", "Ascii\x00B8" }),
+            ("Header1", new[] { "\x0081\x00FF\x00FE", "ascii-only" }),
+            ("Set-Cookie", new[] { "\u00FF", "\x00B0\x00B1\x00B2", "Ascii\x00B8" }),
         };
 
         private static readonly (string Name, string[] Values)[] s_invalidUnicodeCharacters = new[]

@@ -1147,25 +1147,16 @@ namespace System.Net.Http
             if (s.Length <= _writeBuffer.Length - offset)
             {
                 byte[] writeBuffer = _writeBuffer;
-                if (StaticHttpSettings.AllowNonAsciiHeaders)
+                int mask = StaticHttpSettings.EncodingValidationMask;
+                foreach (char c in s)
                 {
-                    foreach (char c in s)
+                    if ((c & mask) != 0)
                     {
-                        writeBuffer[offset++] = (byte)c;
+                        throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                     }
+                    writeBuffer[offset++] = (byte)c;
                 }
-                else
-                {
-                    foreach (char c in s)
-                    {
-                        if ((c & 0xFF80) != 0)
-                        {
-                            throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
-                        }
-                        writeBuffer[offset++] = (byte)c;
-                    }
-                }
-                
+
                 _writeOffset = offset;
                 return Task.CompletedTask;
             }
@@ -1197,11 +1188,13 @@ namespace System.Net.Http
 
         private async Task WriteStringAsyncSlow(string s)
         {
+            int mask = StaticHttpSettings.EncodingValidationMask;
+
             for (int i = 0; i < s.Length; i++)
             {
-                char c = s[i];
+                int c = s[i];
 
-                if (!StaticHttpSettings.AllowNonAsciiHeaders && (c & 0xFF80) != 0)
+                if ((c & mask) != 0)
                 {
                     throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                 }

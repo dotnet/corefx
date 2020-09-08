@@ -217,28 +217,18 @@ namespace System.Net.Http.HPack
         {
             if (value.Length <= destination.Length)
             {
-                if (StaticHttpSettings.AllowNonAsciiHeaders)
+                int mask = StaticHttpSettings.EncodingValidationMask;
+                for (int i = 0; i < value.Length; i++)
                 {
-                    for (int i = 0; i < value.Length; i++)
+                    int c = value[i];
+                    if ((c & mask) != 0)
                     {
-                        char c = value[i];
-                        destination[i] = (byte)c;
+                        throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                     }
-                }
-                else
-                {
-                    for (int i = 0; i < value.Length; i++)
-                    {
-                        char c = value[i];
-                        if ((c & 0xFF80) != 0)
-                        {
-                            throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
-                        }
 
-                        destination[i] = (byte)c;
-                    }
+                    destination[i] = (byte)c;
                 }
-                
+
 
                 bytesWritten = value.Length;
                 return true;
