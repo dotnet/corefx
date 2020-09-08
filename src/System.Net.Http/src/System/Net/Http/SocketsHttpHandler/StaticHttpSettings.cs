@@ -6,8 +6,8 @@ namespace System.Net.Http
 {
     internal static class StaticHttpSettings
     {
-        private const string AllowNonAsciiCharactersEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_ALLOWLATIN1HEADERS";
-        private const string AllowNonAsciiCharactersAppCtxSettingName = "System.Net.Http.SocketsHttpHandler.AllowLatin1Headers";
+        private const string AllowLatin1CharactersEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_ALLOWLATIN1HEADERS";
+        private const string AllowLatin1CharactersAppCtxSettingName = "System.Net.Http.SocketsHttpHandler.AllowLatin1Headers";
 
         private static readonly Lazy<bool> s_allowLatin1Headers = new Lazy<bool>(GetAllowLatin1HeadersSetting);
 
@@ -23,13 +23,13 @@ namespace System.Net.Http
         private static bool GetAllowLatin1HeadersSetting()
         {
             // First check for the AppContext switch, giving it priority over the environment variable.
-            if (AppContext.TryGetSwitch(AllowNonAsciiCharactersAppCtxSettingName, out bool value))
+            if (AppContext.TryGetSwitch(AllowLatin1CharactersAppCtxSettingName, out bool value))
             {
                 return value;
             }
 
             // AppContext switch wasn't used. Check the environment variable.
-            string envVar = Environment.GetEnvironmentVariable(AllowNonAsciiCharactersEnvironmentVariableSettingName);
+            string envVar = Environment.GetEnvironmentVariable(AllowLatin1CharactersEnvironmentVariableSettingName);
             if (envVar != null && (envVar.Equals("true", StringComparison.OrdinalIgnoreCase) || envVar.Equals("1")))
             {
                 return true;

@@ -229,7 +229,6 @@ namespace System.Net.Http.HPack
                     destination[i] = (byte)c;
                 }
 
-
                 bytesWritten = value.Length;
                 return true;
             }

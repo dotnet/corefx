@@ -161,10 +161,10 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Null(response.Content.Headers.Expires);
                 }
             },
-           async server =>
-           {
-               await server.HandleRequestAsync(HttpStatusCode.OK);
-           });
+            async server =>
+            {
+                await server.HandleRequestAsync(HttpStatusCode.OK);
+            });
         }
 
         [Theory]
@@ -335,7 +335,7 @@ namespace System.Net.Http.Functional.Tests
         };
 
         // Since RemoteExecutor cannot invoke delegates defined in abstract types, we should define the actual test cases in derived classes.
-        protected int SendAsync_SendNonAsciiCharacters_Inner(string useAppCtxSwitchInner, string switchValueInner, string unicodeInner)
+        protected async Task<int> SendAsync_SendNonAsciiCharacters_Inner(string useAppCtxSwitchInner, string switchValueInner, string unicodeInner)
         {
             bool allowLatin1 = AllowLatin1Headers(useAppCtxSwitchInner, switchValueInner);
             bool unicode = bool.Parse(unicodeInner);
@@ -343,7 +343,7 @@ namespace System.Net.Http.Functional.Tests
 
             (string name, string[] values)[] headers = GetNonAsciiTestHeaders(unicode);
 
-            LoopbackServerFactory.CreateClientAndServerAsync(
+            await LoopbackServerFactory.CreateClientAndServerAsync(
                 async uri =>
                 {
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri) { Version = VersionFromUseHttp2 };
@@ -371,10 +371,9 @@ namespace System.Net.Http.Functional.Tests
                     {
                         requestData = await server.HandleRequestAsync();
                     }
-                    catch (Exception)
+                    catch (Exception) when (!expectSuccess)
                     {
-                        if (expectSuccess)
-                            throw;
+                        // Eat up expected exceptions
                     }
 
                     if (!expectSuccess)
@@ -392,19 +391,18 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Single(requestData.Headers,
                             h => h.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && h.Raw.AsSpan().IndexOf(valueBytes) != -1);
                     }
-                })
-                .GetAwaiter().GetResult();
+                });
 
             return RemoteExecutor.SuccessExitCode;
         }
 
-        protected int SendAsync_ReceiveNonAsciiCharacters_Inner(string useAppCtxSwitchInner, string switchValueInner, string unicodeInner)
+        protected async Task<int> SendAsync_ReceiveNonAsciiCharacters_Inner(string useAppCtxSwitchInner, string switchValueInner, string unicodeInner)
         {
             bool allowLatin1 = AllowLatin1Headers(useAppCtxSwitchInner, switchValueInner);
             bool unicode = bool.Parse(unicodeInner);
             bool expectSuccess = allowLatin1 && !unicode;
 
-            LoopbackServerFactory.CreateClientAndServerAsync(
+            await LoopbackServerFactory.CreateClientAndServerAsync(
                 async uri =>
                 {
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri) { Version = VersionFromUseHttp2 };
@@ -432,8 +430,8 @@ namespace System.Net.Http.Functional.Tests
                         .ToList();
 
                     await server.HandleRequestAsync(headers: headerData);
-                })
-                .GetAwaiter().GetResult();
+                });
+
             return RemoteExecutor.SuccessExitCode;
         }
     }
