@@ -1200,10 +1200,12 @@ namespace System.Net.Http
             for (int i = 0; i < s.Length; i++)
             {
                 char c = s[i];
-                if ((c & 0xFF80) != 0)
+
+                if (!StaticHttpSettings.AllowNonAsciiHeaders && (c & 0xFF80) != 0)
                 {
                     throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                 }
+
                 await WriteByteAsync((byte)c).ConfigureAwait(false);
             }
         }

@@ -2255,12 +2255,74 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => true;
     }
 
+    public sealed class SocketsHttpHandlerTest_HttpClientHandlerTest_Headers_Http11_NonAscii : HttpClientHandlerTest_Headers_NonAscii
+    {
+        [Theory]
+        [MemberData(nameof(NonAsciiTestConfigurations))]
+        public void SendAsync_SendNonAsciiCharacters(bool useAppCtxSwitch, bool switchValue, bool unicode)
+        {
+            //SendAsync_SendNonAsciiCharacters_Impl(useAppCtxSwitch.ToString(), switchValue.ToString(), unicode.ToString());
+
+            RemoteExecutor.Invoke(
+                (useAppCtxSwitchInner, switchValueInner, utf8Inner) => SendAsync_SendNonAsciiCharacters_Impl(useAppCtxSwitchInner, switchValueInner, utf8Inner),
+                useAppCtxSwitch.ToString(),
+                switchValue.ToString(),
+                unicode.ToString())
+                .Dispose();
+        }
+
+        [Theory]
+        [MemberData(nameof(NonAsciiTestConfigurations))]
+        public void SendAsync_ReceiveNonAsciiCharacters(bool useAppCtxSwitch, bool switchValue, bool unicode)
+        {
+            RemoteExecutor.Invoke(
+               (useAppCtxSwitchInner, switchValueInner, utf8Inner) => SendAsync_ReceiveNonAsciiCharacters_Inner(useAppCtxSwitchInner, switchValueInner, utf8Inner),
+               useAppCtxSwitch.ToString(),
+               switchValue.ToString(),
+               unicode.ToString())
+               .Dispose();
+        }
+    }
+
     [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.SupportsAlpn))]
     public sealed class SocketsHttpHandlerTest_HttpClientHandlerTest_Headers_Http2 : HttpClientHandlerTest_Headers
     {
         public SocketsHttpHandlerTest_HttpClientHandlerTest_Headers_Http2(ITestOutputHelper output) : base(output) { }
         protected override bool UseSocketsHttpHandler => true;
         protected override bool UseHttp2 => true;
+    }
+
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.SupportsAlpn))]
+    public sealed class SocketsHttpHandlerTest_HttpClientHandlerTest_Headers_Http2_NonAscii : HttpClientHandlerTest_Headers_NonAscii
+    {
+        protected override bool UseSocketsHttpHandler => true;
+        protected override bool UseHttp2 => true;
+
+        [Theory]
+        [MemberData(nameof(NonAsciiTestConfigurations))]
+        public void SendAsync_SendNonAsciiCharacters(bool useAppCtxSwitch, bool switchValue, bool unicode)
+        {
+            //SendAsync_SendNonAsciiCharacters_Impl(useAppCtxSwitch.ToString(), switchValue.ToString(), unicode.ToString());
+
+            RemoteExecutor.Invoke(
+                (useAppCtxSwitchInner, switchValueInner, utf8Inner) => SendAsync_SendNonAsciiCharacters_Impl(useAppCtxSwitchInner, switchValueInner, utf8Inner),
+                useAppCtxSwitch.ToString(),
+                switchValue.ToString(),
+                unicode.ToString())
+                .Dispose();
+        }
+
+        [Theory]
+        [MemberData(nameof(NonAsciiTestConfigurations))]
+        public void SendAsync_ReceiveNonAsciiCharacters(bool useAppCtxSwitch, bool switchValue, bool unicode)
+        {
+            RemoteExecutor.Invoke(
+               (useAppCtxSwitchInner, switchValueInner, utf8Inner) => SendAsync_ReceiveNonAsciiCharacters_Inner(useAppCtxSwitchInner, switchValueInner, utf8Inner),
+               useAppCtxSwitch.ToString(),
+               switchValue.ToString(),
+               unicode.ToString())
+               .Dispose();
+        }
     }
 
     [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.SupportsAlpn))]
