@@ -1147,7 +1147,7 @@ namespace System.Net.Http
             if (s.Length <= _writeBuffer.Length - offset)
             {
                 byte[] writeBuffer = _writeBuffer;
-                if (HttpConnectionSettings.AllowNonAsciiHeaders)
+                if (StaticHttpSettings.AllowNonAsciiHeaders)
                 {
                     foreach (char c in s)
                     {

@@ -217,7 +217,7 @@ namespace System.Net.Http.HPack
         {
             if (value.Length <= destination.Length)
             {
-                if (HttpConnectionSettings.AllowNonAsciiHeaders)
+                if (StaticHttpSettings.AllowNonAsciiHeaders)
                 {
                     for (int i = 0; i < value.Length; i++)
                     {

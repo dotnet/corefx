@@ -300,9 +300,6 @@
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\ArrayBuffer.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\ArrayBuffer.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpConnectionSettings.cs">
-      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HttpConnectionSettings.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.cs</Link>
     </Compile>
@@ -341,6 +338,9 @@
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\StaticHttpSettings.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\StaticHttpSettings.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.cs</Link>
