@@ -335,7 +335,7 @@ namespace System.Net.Http.Functional.Tests
         };
 
         // Since RemoteExecutor cannot invoke delegates defined in abstract types, we should define the actual test cases in derived classes.
-        protected int SendAsync_SendNonAsciiCharacters_Impl(string useAppCtxSwitchInner, string switchValueInner, string unicodeInner)
+        protected int SendAsync_SendNonAsciiCharacters_Inner(string useAppCtxSwitchInner, string switchValueInner, string unicodeInner)
         {
             bool allowLatin1 = AllowLatin1Headers(useAppCtxSwitchInner, switchValueInner);
             bool unicode = bool.Parse(unicodeInner);
