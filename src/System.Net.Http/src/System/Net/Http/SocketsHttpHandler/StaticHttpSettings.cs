@@ -9,14 +9,12 @@ namespace System.Net.Http
         private const string AllowLatin1CharactersEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_ALLOWLATIN1HEADERS";
         private const string AllowLatin1CharactersAppCtxSettingName = "System.Net.Http.SocketsHttpHandler.AllowLatin1Headers";
 
-        private static readonly Lazy<bool> s_allowLatin1Headers = new Lazy<bool>(GetAllowLatin1HeadersSetting);
-
         // Disables a validation that checks whether Http headers contain a non-ASCII character.
         // This is a workaround that has been introduced as a patch specific to the 3.1 branch.
         // Unlike options in HttpConnectionSettings, this one has a global scope.
         // Lazy initialization is being used to make sure clients can also use AppContext.SetSwitch() or Environment.SetEnvironmentVariable()
         // before the first calls to HttpClient API-s.
-        internal static bool AllowLatin1Headers => s_allowLatin1Headers.Value;
+        internal static bool AllowLatin1Headers { get; } = GetAllowLatin1HeadersSetting();
 
         internal static int EncodingValidationMask => AllowLatin1Headers ? 0xFF00 : 0xFF80;
 
