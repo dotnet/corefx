@@ -18,7 +18,6 @@ namespace System.Net.Test.Common
     {
         private static readonly byte[] s_newLineBytes = new byte[] { (byte)'\r', (byte)'\n' };
         private static readonly byte[] s_colonSpaceBytes = new byte[] { (byte)':', (byte)' ' };
-        private static readonly Encoding s_latin1Encoding = Encoding.GetEncoding("ISO-8859-1");
 
         private Socket _listenSocket;
         private Options _options;
@@ -806,7 +805,7 @@ namespace System.Net.Test.Common
                         headerBytes.Write(nameBytes, 0, nameBytes.Length);
                         headerBytes.Write(s_colonSpaceBytes, 0, s_colonSpaceBytes.Length);
 
-                        byte[] valueBytes = (headerData.Latin1 ? s_latin1Encoding : Encoding.ASCII).GetBytes(headerData.Value);
+                        byte[] valueBytes = (headerData.Latin1 ? HttpHeaderData.Latin1Encoding : Encoding.ASCII).GetBytes(headerData.Value);
                         headerBytes.Write(valueBytes, 0, valueBytes.Length);
                         headerBytes.Write(s_newLineBytes, 0, s_newLineBytes.Length);
                     }

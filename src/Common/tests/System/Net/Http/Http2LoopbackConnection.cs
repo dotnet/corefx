@@ -17,8 +17,6 @@ namespace System.Net.Test.Common
 {
     public class Http2LoopbackConnection : GenericLoopbackConnection
     {
-        private static readonly Encoding s_latin1Encoding = Encoding.GetEncoding("ISO-8859-1");
-
         private Socket _connectionSocket;
         private Stream _connectionStream;
         private TaskCompletionSource<bool> _ignoredSettingsAckPromise;
@@ -385,7 +383,7 @@ namespace System.Net.Test.Common
 
         private static int EncodeString(string value, Span<byte> headerBlock, bool huffmanEncode, bool latin1 = false)
         {
-            byte[] data = (latin1 ? s_latin1Encoding : Encoding.ASCII).GetBytes(value);
+            byte[] data = (latin1 ? HttpHeaderData.Latin1Encoding : Encoding.ASCII).GetBytes(value);
             byte prefix;
 
             if (!huffmanEncode)

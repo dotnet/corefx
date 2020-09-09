@@ -83,6 +83,8 @@ namespace System.Net.Test.Common
 
     public struct HttpHeaderData
     {
+        public static readonly Encoding Latin1Encoding = Encoding.GetEncoding("ISO-8859-1");
+
         public string Name { get; }
         public string Value { get; }
         public bool HuffmanEncoded { get; }

@@ -382,7 +382,7 @@ namespace System.Net.Http.Functional.Tests
                     Assert.All(requestData.Headers,
                         h => Assert.False(h.HuffmanEncoded, "Expose raw decoded bytes once HuffmanEncoding is supported"));
 
-                    Encoding valueEncoding = Encoding.GetEncoding("ISO-8859-1");
+                    Encoding valueEncoding = HttpHeaderData.Latin1Encoding;
 
                     foreach ((string name, string[] values) in headers)
                     {
@@ -413,7 +413,7 @@ namespace System.Net.Http.Functional.Tests
                     if (!expectSuccess)
                         return;
 
-                    Encoding valueEncoding = Encoding.GetEncoding("ISO-8859-1");
+                    Encoding valueEncoding = HttpHeaderData.Latin1Encoding;
                     foreach ((string name, string[] values) in GetNonAsciiTestHeaders(unicode))
                     {
                         IEnumerable<string> receivedValues = Assert.Single(response.Headers, h => h.Key.Equals(name, StringComparison.OrdinalIgnoreCase)).Value;

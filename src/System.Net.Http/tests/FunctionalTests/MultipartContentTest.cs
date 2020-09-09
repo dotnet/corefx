@@ -378,7 +378,7 @@ namespace System.Net.Http.Functional.Tests
             var ms = new MemoryStream();
             await (await mc.ReadAsStreamAsync()).CopyToAsync(ms);
 
-            Encoding latin1 = Encoding.GetEncoding("ISO-8859-1");
+            Encoding latin1 = Test.Common.HttpHeaderData.Latin1Encoding;
 
             byte[] expected = Concat(
                 latin1.GetBytes("--fooBoundary\r\n"),
