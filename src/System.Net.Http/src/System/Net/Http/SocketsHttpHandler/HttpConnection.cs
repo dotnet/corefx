@@ -1148,7 +1148,7 @@ namespace System.Net.Http
             {
                 byte[] writeBuffer = _writeBuffer;
                 int mask = StaticHttpSettings.EncodingValidationMask;
-                foreach (char c in s)
+                foreach (int c in s)
                 {
                     if ((c & mask) != 0)
                     {
