@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{70FA2031-8D6E-4127-901E-2B0D90420E08}</ProjectGuid>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="ManualTests.cs" />
+  </ItemGroup>
+</Project>
