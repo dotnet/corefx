@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E89
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{2E666815-2EDB-464B-9DF6-380BF4789AD4}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.IO.FileSystem.Manual.Tests", "tests\ManualTests\System.IO.FileSystem.Manual.Tests.csproj", "{70FA2031-8D6E-4127-901E-2B0D90420E08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{4B15C12E-B6AB-4B05-8ECA-C2E2AEA67482}.Debug|Any CPU.Build.0 = netcoreapp-Debug|Any CPU
 		{4B15C12E-B6AB-4B05-8ECA-C2E2AEA67482}.Release|Any CPU.ActiveCfg = netcoreapp-Release|Any CPU
 		{4B15C12E-B6AB-4B05-8ECA-C2E2AEA67482}.Release|Any CPU.Build.0 = netcoreapp-Release|Any CPU
+		{70FA2031-8D6E-4127-901E-2B0D90420E08}.Debug|Any CPU.ActiveCfg = netcoreapp-Debug|Any CPU
+		{70FA2031-8D6E-4127-901E-2B0D90420E08}.Debug|Any CPU.Build.0 = netcoreapp-Debug|Any CPU
+		{70FA2031-8D6E-4127-901E-2B0D90420E08}.Release|Any CPU.ActiveCfg = netcoreapp-Release|Any CPU
+		{70FA2031-8D6E-4127-901E-2B0D90420E08}.Release|Any CPU.Build.0 = netcoreapp-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{F0D49126-6A1C-42D5-9428-4374C868BAF8} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{1B528B61-14F9-4BFC-A79A-F0BDB3339150} = {E107E9C1-E893-4E87-987E-04EF0DCEAEFD}
 		{4B15C12E-B6AB-4B05-8ECA-C2E2AEA67482} = {2E666815-2EDB-464B-9DF6-380BF4789AD4}
+		{70FA2031-8D6E-4127-901E-2B0D90420E08} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9BEAA279-BD7B-42E8-91C5-519267FEB4BB}
