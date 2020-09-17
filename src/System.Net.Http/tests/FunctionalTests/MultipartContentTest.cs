@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -359,6 +360,44 @@ namespace System.Net.Http.Functional.Tests
             mc.Add(new MockContent());
             Task t = mc.ReadAsStreamAsync();
             await Assert.ThrowsAsync<NotImplementedException>(() => t);
+        }
+
+        [Fact]
+        public async Task ReadAsStreamAsync_CanEncodeLatin1()
+        {
+            var mc = new MultipartContent("subtype", "fooBoundary");
+
+            var stringContent = new StringContent("bar1");
+            stringContent.Headers.Add("latin1", "\uD83D\uDE00");
+            mc.Add(stringContent);
+
+            var byteArrayContent = new ByteArrayContent(Encoding.ASCII.GetBytes("bar4"));
+            byteArrayContent.Headers.Add("default", "\uD83D\uDE00");
+            mc.Add(byteArrayContent);
+
+            var ms = new MemoryStream();
+            await (await mc.ReadAsStreamAsync()).CopyToAsync(ms);
+
+            Encoding latin1 = Test.Common.HttpHeaderData.Latin1Encoding;
+
+            byte[] expected = Concat(
+                latin1.GetBytes("--fooBoundary\r\n"),
+                latin1.GetBytes("Content-Type: text/plain; charset=utf-8\r\n"),
+                latin1.GetBytes("latin1: "),
+                latin1.GetBytes("\uD83D\uDE00"),
+                latin1.GetBytes("\r\n\r\n"),
+                latin1.GetBytes("bar1"),
+                latin1.GetBytes("\r\n--fooBoundary\r\n"),
+                latin1.GetBytes("default: "),
+                latin1.GetBytes("\uD83D\uDE00"),
+                latin1.GetBytes("\r\n\r\n"),
+                latin1.GetBytes("bar4"),
+                latin1.GetBytes("\r\n--fooBoundary--\r\n"));
+
+            byte[] actual = ms.ToArray();
+            Assert.Equal(expected, actual);
+
+            static byte[] Concat(params byte[][] arrays) => arrays.SelectMany(b => b).ToArray();
         }
 
         #region Helpers

@@ -1147,14 +1147,16 @@ namespace System.Net.Http
             if (s.Length <= _writeBuffer.Length - offset)
             {
                 byte[] writeBuffer = _writeBuffer;
-                foreach (char c in s)
+                int mask = StaticHttpSettings.EncodingValidationMask;
+                foreach (int c in s)
                 {
-                    if ((c & 0xFF80) != 0)
+                    if ((c & mask) != 0)
                     {
                         throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                     }
                     writeBuffer[offset++] = (byte)c;
                 }
+
                 _writeOffset = offset;
                 return Task.CompletedTask;
             }
@@ -1186,13 +1188,17 @@ namespace System.Net.Http
 
         private async Task WriteStringAsyncSlow(string s)
         {
+            int mask = StaticHttpSettings.EncodingValidationMask;
+
             for (int i = 0; i < s.Length; i++)
             {
-                char c = s[i];
-                if ((c & 0xFF80) != 0)
+                int c = s[i];
+
+                if ((c & mask) != 0)
                 {
                     throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                 }
+
                 await WriteByteAsync((byte)c).ConfigureAwait(false);
             }
         }

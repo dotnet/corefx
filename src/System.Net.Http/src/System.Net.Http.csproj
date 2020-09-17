@@ -93,6 +93,7 @@
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackEncoder.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\IntegerEncoder.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\StaticTable.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\StaticHttpSettings.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\IO\StreamHelpers.CopyValidation.cs">
       <Link>Common\CoreLib\System\IO\StreamHelpers.CopyValidation.cs</Link>

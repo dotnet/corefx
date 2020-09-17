@@ -217,10 +217,11 @@ namespace System.Net.Http.HPack
         {
             if (value.Length <= destination.Length)
             {
+                int mask = StaticHttpSettings.EncodingValidationMask;
                 for (int i = 0; i < value.Length; i++)
                 {
-                    char c = value[i];
-                    if ((c & 0xFF80) != 0)
+                    int c = value[i];
+                    if ((c & mask) != 0)
                     {
                         throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                     }

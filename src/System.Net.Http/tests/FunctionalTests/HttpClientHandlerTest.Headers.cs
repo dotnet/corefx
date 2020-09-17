@@ -7,8 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.Test.Common;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
-
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -133,7 +135,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 using (HttpClient client = CreateHttpClient())
                 {
-                    HttpResponseMessage response = await  client.GetAsync(uri).ConfigureAwait(false);
+                    HttpResponseMessage response = await client.GetAsync(uri).ConfigureAwait(false);
                     Assert.Equal(headers.Count, response.Headers.Count());
                     Assert.NotNull(response.Headers.GetValues("x-empty"));
                 }
@@ -151,8 +153,8 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_MissingExpires_ReturnNull()
         {
-             await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
-             {
+            await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
+            {
                 using (HttpClient client = CreateHttpClient())
                 {
                     HttpResponseMessage response = await client.GetAsync(uri);
@@ -285,6 +287,152 @@ namespace System.Net.Http.Functional.Tests
                         new HttpHeaderData("", "foo")
                     });
                 });
+        }
+    }
+
+    public abstract class HttpClientHandlerTest_Headers_NonAscii : HttpClientHandlerTestBase
+    {
+        public HttpClientHandlerTest_Headers_NonAscii() : base(null)
+        {
+        }
+
+        private static readonly (string Name, string[] Values)[] s_validLatin1Characters = new[]
+        {
+            ("Header1", new[] { "\x0081\x00FF\x00FE", "ascii-only" }),
+            ("Set-Cookie", new[] { "\u00FF", "\x00B0\x00B1\x00B2", "Ascii\x00B8" }),
+        };
+
+        private static readonly (string Name, string[] Values)[] s_invalidUnicodeCharacters = new[]
+        {
+            ("header-0", new[] { "\uD83D\uDE03", "\uD83D\uDE48\uD83D\uDE49\uD83D\uDE4A" }),
+            ("Set-Cookie", new[] { "\uD83C\uDDF8\uD83C\uDDEE" }),
+        };
+
+        private static (string Name, string[] Values)[] GetNonAsciiTestHeaders(bool unicode) => unicode ? s_invalidUnicodeCharacters : s_validLatin1Characters;
+
+        private static bool AllowLatin1Headers(string useAppCtxSwitchInner, string switchValueInner)
+        {
+            bool switchValue = bool.Parse(switchValueInner);
+            if (bool.Parse(useAppCtxSwitchInner))
+            {
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.AllowLatin1Headers", switchValue);
+            }
+            else
+            {
+                Environment.SetEnvironmentVariable("DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_ALLOWLATIN1HEADERS", switchValueInner);
+            }
+            return switchValue;
+        }
+
+        // bool useAppCtxSwitch, bool switchValue, bool utf8
+        public static readonly TheoryData<bool, bool, bool> NonAsciiTestConfigurations = new TheoryData<bool, bool, bool>()
+        {
+            { true, false, false },
+            { true, false, true },
+            { true, true, false },
+            { true, true, true },
+            { false, true, false },
+        };
+
+        // Since RemoteExecutor cannot invoke delegates defined in abstract types, we should define the actual test cases in derived classes.
+        protected async Task<int> SendAsync_SendNonAsciiCharacters_Inner(string useAppCtxSwitchInner, string switchValueInner, string unicodeInner)
+        {
+            bool allowLatin1 = AllowLatin1Headers(useAppCtxSwitchInner, switchValueInner);
+            bool unicode = bool.Parse(unicodeInner);
+            bool expectSuccess = allowLatin1 && !unicode;
+
+            (string name, string[] values)[] headers = GetNonAsciiTestHeaders(unicode);
+
+            await LoopbackServerFactory.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri) { Version = VersionFromUseHttp2 };
+
+                    foreach ((string name, string[] values) in headers)
+                    {
+                        requestMessage.Headers.Add(name, values);
+                    }
+
+                    using HttpClient client = CreateHttpClient();
+
+                    if (expectSuccess)
+                    {
+                        await client.SendAsync(requestMessage);
+                    }
+                    else
+                    {
+                        await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(requestMessage));
+                    }
+                },
+                async server =>
+                {
+                    HttpRequestData requestData = null;
+                    try
+                    {
+                        requestData = await server.HandleRequestAsync();
+                    }
+                    catch (Exception) when (!expectSuccess)
+                    {
+                        // Eat up expected exceptions
+                    }
+
+                    if (!expectSuccess)
+                        return;
+
+                    Assert.All(requestData.Headers,
+                        h => Assert.False(h.HuffmanEncoded, "Expose raw decoded bytes once HuffmanEncoding is supported"));
+
+                    Encoding valueEncoding = HttpHeaderData.Latin1Encoding;
+
+                    foreach ((string name, string[] values) in headers)
+                    {
+                        byte[] valueBytes = valueEncoding.GetBytes(string.Join(", ", values));
+
+                        Assert.Single(requestData.Headers,
+                            h => h.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && h.Raw.AsSpan().IndexOf(valueBytes) != -1);
+                    }
+                });
+
+            return RemoteExecutor.SuccessExitCode;
+        }
+
+        protected async Task<int> SendAsync_ReceiveNonAsciiCharacters_Inner(string useAppCtxSwitchInner, string switchValueInner, string unicodeInner)
+        {
+            bool allowLatin1 = AllowLatin1Headers(useAppCtxSwitchInner, switchValueInner);
+            bool unicode = bool.Parse(unicodeInner);
+            bool expectSuccess = allowLatin1 && !unicode;
+
+            await LoopbackServerFactory.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri) { Version = VersionFromUseHttp2 };
+                    using HttpClient client = CreateHttpClient();
+
+                    using HttpResponseMessage response = await client.SendAsync(requestMessage);
+
+                    if (!expectSuccess)
+                        return;
+
+                    Encoding valueEncoding = HttpHeaderData.Latin1Encoding;
+                    foreach ((string name, string[] values) in GetNonAsciiTestHeaders(unicode))
+                    {
+                        IEnumerable<string> receivedValues = Assert.Single(response.Headers, h => h.Key.Equals(name, StringComparison.OrdinalIgnoreCase)).Value;
+                        string value = Assert.Single(receivedValues);
+
+                        string expected = valueEncoding.GetString(valueEncoding.GetBytes(string.Join(", ", values)));
+                        Assert.Equal(expected, value, StringComparer.OrdinalIgnoreCase);
+                    }
+                },
+                async server =>
+                {
+                    List<HttpHeaderData> headerData = GetNonAsciiTestHeaders(unicode)
+                        .Select(h => new HttpHeaderData(h.Name, string.Join(", ", h.Values), latin1: allowLatin1))
+                        .ToList();
+
+                    await server.HandleRequestAsync(headers: headerData);
+                });
+
+            return RemoteExecutor.SuccessExitCode;
         }
     }
 }

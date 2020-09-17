@@ -83,17 +83,21 @@ namespace System.Net.Test.Common
 
     public struct HttpHeaderData
     {
+        public static readonly Encoding Latin1Encoding = Encoding.GetEncoding("ISO-8859-1");
+
         public string Name { get; }
         public string Value { get; }
         public bool HuffmanEncoded { get; }
         public byte[] Raw { get; }
+        public bool Latin1 { get; }
 
-        public HttpHeaderData(string name, string value, bool huffmanEncoded = false, byte[] raw = null)
+        public HttpHeaderData(string name, string value, bool huffmanEncoded = false, byte[] raw = null, bool latin1 = false)
         {
             Name = name;
             Value = value;
             HuffmanEncoded = huffmanEncoded;
             Raw = raw;
+            Latin1 = latin1;
         }
 
         public override string ToString() => Name == null ? "<empty>" : (Name + ": " + (Value ?? string.Empty));
