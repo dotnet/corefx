@@ -49,7 +49,7 @@ namespace System.IO.Pipelines
 
         private readonly bool _useSynchronizationContext;
 
-        // The number of bytes flushed but not consumed by the reader 
+        // The number of bytes flushed but not consumed by the reader
         private long _unconsumedBytes;
 
         // The number of bytes written but not flushed
@@ -108,7 +108,7 @@ namespace System.IO.Pipelines
             _readerCompletion = default;
             _writerCompletion = default;
 
-            // If we're using the default pool then mark it as null since we're just going to use the 
+            // If we're using the default pool then mark it as null since we're just going to use the
             // array pool under the covers
             _pool = options.Pool == MemoryPool<byte>.Shared ? null : options.Pool;
             _minimumSegmentSize = options.MinimumSegmentSize;
@@ -317,6 +317,12 @@ namespace System.IO.Pipelines
                 if ((uint)bytes > (uint)_writingHeadMemory.Length)
                 {
                     ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.bytes);
+                }
+
+                // If the reader is completed we no-op Advance but leave GetMemory and FlushAsync alone
+                if (_readerCompletion.IsCompleted)
+                {
+                    return;
                 }
 
                 AdvanceCore(bytes);
@@ -947,6 +953,11 @@ namespace System.IO.Pipelines
             if (_writerCompletion.IsCompleted)
             {
                 ThrowHelper.ThrowInvalidOperationException_NoWritingAllowed();
+            }
+
+            if (_readerCompletion.IsCompleted)
+            {
+                return new ValueTask<FlushResult>(new FlushResult(isCanceled: false, isCompleted: true));
             }
 
             CompletionData completionData;
