@@ -227,7 +227,7 @@ namespace System.IO
                 }
                 else
                 {
-                    ParseEventBufferAndNotifyForEach(state.Buffer);
+                    ParseEventBufferAndNotifyForEach(state.Buffer, numBytes);
                 }
             }
             finally
@@ -241,13 +241,17 @@ namespace System.IO
             }
         }
 
-        private unsafe void ParseEventBufferAndNotifyForEach(byte[] buffer)
+        private unsafe void ParseEventBufferAndNotifyForEach(byte[] buffer, uint numBytes)
         {
             Debug.Assert(buffer != null);
             Debug.Assert(buffer.Length > 0);
 
+            numBytes = Math.Min(numBytes, (uint)buffer.Length);
+
             fixed (byte* b = buffer)
             {
+                byte* pBufferLimit = b + numBytes;
+
                 Interop.Kernel32.FILE_NOTIFY_INFORMATION* info = (Interop.Kernel32.FILE_NOTIFY_INFORMATION*)b;
 
                 ReadOnlySpan<char> oldName = ReadOnlySpan<char>.Empty;
@@ -255,6 +259,22 @@ namespace System.IO
                 // Parse each event from the buffer and notify appropriate delegates
                 do
                 {
+                    // Validate the data we received in case it's corrupted.
+                    // This can happen if we are watching files over the network.
+
+                    // Verify the info object is within the expected bounds
+                    if (info < b || (((byte*)info) + sizeof(Interop.Kernel32.FILE_NOTIFY_INFORMATION)) > pBufferLimit)
+                    {
+                        break;
+                    }
+
+                    // Verify the file path is within the bounds
+                    byte* pFileEnd = ((byte*)&(info->FileName)) + info->FileNameLength;
+                    if (pFileEnd < &(info->FileName) || pFileEnd > pBufferLimit)
+                    {
+                        break;
+                    }
+
                     // A slightly convoluted piece of code follows.  Here's what's happening:
                     //
                     // We wish to collapse the poorly done rename notifications from the
@@ -280,17 +300,19 @@ namespace System.IO
                     //
                     // (Phew!)
 
+                    ReadOnlySpan<char> fileName = new ReadOnlySpan<char>(&(info->FileName), (int)info->FileNameLength / sizeof(char));
+
                     switch (info->Action)
                     {
                         case Interop.Kernel32.FileAction.FILE_ACTION_RENAMED_OLD_NAME:
                             // Action is renamed from, save the name of the file
-                            oldName = info->FileName;
+                            oldName = fileName;
                             break;
                         case Interop.Kernel32.FileAction.FILE_ACTION_RENAMED_NEW_NAME:
                             // oldName may be empty if we didn't receive FILE_ACTION_RENAMED_OLD_NAME first
                             NotifyRenameEventArgs(
                                 WatcherChangeTypes.Renamed,
-                                info->FileName,
+                                fileName,
                                 oldName);
                             oldName = ReadOnlySpan<char>.Empty;
                             break;
@@ -305,13 +327,13 @@ namespace System.IO
                             switch (info->Action)
                             {
                                 case Interop.Kernel32.FileAction.FILE_ACTION_ADDED:
-                                    NotifyFileSystemEventArgs(WatcherChangeTypes.Created, info->FileName);
+                                    NotifyFileSystemEventArgs(WatcherChangeTypes.Created, fileName);
                                     break;
                                 case Interop.Kernel32.FileAction.FILE_ACTION_REMOVED:
-                                    NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, info->FileName);
+                                    NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, fileName);
                                     break;
                                 case Interop.Kernel32.FileAction.FILE_ACTION_MODIFIED:
-                                    NotifyFileSystemEventArgs(WatcherChangeTypes.Changed, info->FileName);
+                                    NotifyFileSystemEventArgs(WatcherChangeTypes.Changed, fileName);
                                     break;
                                 default:
                                     Debug.Fail($"Unknown FileSystemEvent action type!  Value: {info->Action}");
