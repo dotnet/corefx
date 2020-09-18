@@ -269,6 +269,12 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowInvalidOperationException_NotWritingNoAlloc();
             }
 
+            // If the reader is completed we no-op Advance but leave GetMemory and FlushAsync alone
+            if (_readerCompletion.IsCompleted)
+            {
+                return;
+            }
+
             if (bytesWritten > 0)
             {
                 Debug.Assert(!_writingHead.ReadOnly);
