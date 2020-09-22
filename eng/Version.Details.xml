@@ -14,7 +14,7 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.1.9-servicing.20459.3">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.1.9">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>1a04dd08e56bf52e88668c1ef2bd3f630ad442a5</Sha>
     </Dependency>
