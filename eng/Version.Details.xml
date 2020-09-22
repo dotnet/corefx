@@ -1,20 +1,20 @@
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.9-servicing.20466.1">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.9-servicing.20469.1">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>dd56afab046dc89d4c2d04512e9345cef21a9439</Sha>
+      <Sha>3fbe13469a10dca70e50f7cb8507e348b9095563</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.9-servicing.20466.1">
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.9-servicing.20469.1">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>dd56afab046dc89d4c2d04512e9345cef21a9439</Sha>
+      <Sha>3fbe13469a10dca70e50f7cb8507e348b9095563</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.1.9-servicing.20466.1">
+    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.1.9-servicing.20469.1">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>dd56afab046dc89d4c2d04512e9345cef21a9439</Sha>
+      <Sha>3fbe13469a10dca70e50f7cb8507e348b9095563</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.1.9-servicing.20459.3">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.1.9">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>1a04dd08e56bf52e88668c1ef2bd3f630ad442a5</Sha>
     </Dependency>
