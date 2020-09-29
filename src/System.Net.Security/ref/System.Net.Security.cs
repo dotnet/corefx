@@ -213,6 +213,8 @@ namespace System.Net.Security
         public virtual System.Threading.Tasks.Task ShutdownAsync() { throw null; }
         public void Write(byte[] buffer) { }
         public override void Write(byte[] buffer, int offset, int count) { }
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) { throw null; }
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken) { throw null; }
     }
 }
 namespace System.Security.Authentication
