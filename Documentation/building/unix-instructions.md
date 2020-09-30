@@ -68,6 +68,8 @@ most systems when you install the development packages).
 
 macOS 10.12 or higher is needed to build corefx 2.x.
 
+**NOTE:** You will need Xcode version 11.7 or older. Newer versions will produce build errors. See [here](#xcode) on how to install an older version of Xcode.
+
 On macOS a few components are needed which are not provided by a default developer setup:
 * CMake
 * pkgconfig
@@ -133,3 +135,15 @@ mozroots --import --sync
 ```
 
 Bash on Ubuntu on Windows issues are tracked by: [#11057](https://github.com/dotnet/corefx/issues/11057)
+
+#### Xcode
+
+The build on macOS is only possible with Xcode 11.7 or older. Newer versions will produce build errors. If you have a newer version installed, you will need to install an older one alongside:
+1) Download Xcode 11.7 from here: https://developer.apple.com/download/more/
+2) Unpack it (double click on downloaded xip)
+3) Rename from `xcode.app` to `xcode_corefx.app` (or whatever you wish)
+4) Run `sudo xcode-select -s /Applications/Xcode_corefx.app/Contents/Developer`
+5) Run `git clean -xdf` in corefx repo (you need to remove cmake cache)
+6) Build corefx
+
+You may want to revert `xcode-select` afterwards.
