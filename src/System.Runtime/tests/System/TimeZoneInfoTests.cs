@@ -2236,7 +2236,7 @@ namespace System.Tests
                         }
                         else
                         {
-                            Assert.True(tzi.BaseUtcOffset == ts, $"{offset} != {tzi.BaseUtcOffset}, dn:{tzi.DisplayName}, sn:{tzi.StandardName}");
+                            Assert.True(tzi.BaseUtcOffset == ts || tzi.GetUtcOffset(DateTime.Now) == ts, $"{offset} != {tzi.BaseUtcOffset}, dn:{tzi.DisplayName}, sn:{tzi.StandardName}");
                         }
                     }
                 }
