@@ -3,7 +3,6 @@
     <ProjectGuid>{B77D0212-D53C-4F7F-8CEC-2E067AC6FCAB}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly Condition="'$(TargetFramework)' != 'netstandard2.0' AND '$(TargetsNetFx)' != 'true'">true</IsPartialFacadeAssembly>
-    <DefineConstants>$(DefineConstants);BUILDING_COMPAT_HASHCODE</DefineConstants>
     <OmitResources>$(IsPartialFacadeAssembly)</OmitResources>
     <Configurations>netstandard-Debug;netstandard-Release;net461-Debug;net461-Release;netcoreapp-Debug;netcoreapp-Release;netcoreapp2.1-Debug;netcoreapp2.1-Release;netfx-Debug;netfx-Release;netstandard2.1-Debug;netstandard2.1-Release</Configurations>
     <Nullable>enable</Nullable>

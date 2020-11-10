@@ -45,7 +45,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 
 namespace System
 {
@@ -55,9 +54,6 @@ namespace System
     public struct HashCode
     {
         private static readonly uint s_seed = GenerateGlobalSeed();
-#if BUILDING_COMPAT_HASHCODE // Will only be defined when building Microsoft.Bcl.HashCode project
-        private static bool UseNonRandomizedGlobalSeed => LocalAppContextSwitches.UseNonRandomizedHashSeed;
-#endif
 
         private const uint Prime1 = 2654435761U;
         private const uint Prime2 = 2246822519U;
@@ -69,38 +65,12 @@ namespace System
         private uint _queue1, _queue2, _queue3;
         private uint _length;
 
-#if BUILDING_COMPAT_HASHCODE // Will only be defined when building Microsoft.Bcl.HashCode project
-        private static unsafe uint GenerateGlobalSeed()
-        {
-            if (UseNonRandomizedGlobalSeed)
-            {
-                uint result;
-                Interop.GetRandomBytes((byte*)&result, sizeof(uint));
-                return result;
-            }
-            else
-            {
-                byte[] tmp = new byte[sizeof(uint)];
-
-                using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-                {
-                    rng.GetBytes(tmp);
-                }
-
-                fixed (byte* pTmp = tmp)
-                {
-                    return *((uint*)pTmp);
-                }
-            }
-        }
-#else
         private static unsafe uint GenerateGlobalSeed()
         {
             uint result;
             Interop.GetRandomBytes((byte*)&result, sizeof(uint));
             return result;
         }
-#endif
 
         public static int Combine<T1>(T1 value1)
         {
