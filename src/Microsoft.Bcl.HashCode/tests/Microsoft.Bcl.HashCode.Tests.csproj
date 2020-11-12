@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Configurations>netfx-Debug;netfx-Release;netcoreapp-Debug;netcoreapp-Release</Configurations>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="HashCodeSeedInitializerTests.cs" />
+  </ItemGroup>
+</Project>
