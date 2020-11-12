@@ -14,15 +14,34 @@ namespace Microsoft.Bcl.HashCode.Tests
         [Fact]
         public void EnsureSeedReturnsDifferentValuesTest()
         {
-            int FirstSeed = CalculateHashCodeInRemoteProcess();
-            int SecondSeed = CalculateHashCodeInRemoteProcess();
+            int FirstSeed = CalculateHashCodeInRemoteProcess(setAppContextSwitch: false);
+            int SecondSeed = CalculateHashCodeInRemoteProcess(setAppContextSwitch: false);
 
             Assert.NotEqual(FirstSeed, SecondSeed);
         }
 
-        private int CalculateHashCodeInRemoteProcess()
+        [Fact]
+        public void EnsureSeedReturnsEqualValuesWhenAppContextSwitchIsSet()
         {
-            var executor = RemoteExecutor.Invoke(GetHashCodeSeed, new RemoteInvokeOptions() { CheckExitCode = false });
+            int FirstSeed = CalculateHashCodeInRemoteProcess(setAppContextSwitch: true);
+            int SecondSeed = CalculateHashCodeInRemoteProcess(setAppContextSwitch: true);
+
+            Assert.Equal(FirstSeed, SecondSeed);
+        }
+
+        private int CalculateHashCodeInRemoteProcess(bool setAppContextSwitch)
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions()
+            {
+                CheckExitCode = false
+            };
+            var executor = (setAppContextSwitch) ?
+                    RemoteExecutor.Invoke(() =>
+                        {
+                            AppContext.SetSwitch("Switch.System.Data.UseNonRandomizedHashSeed", true);
+                            return GetHashCodeSeed(); 
+                        }, options) : 
+                    RemoteExecutor.Invoke(GetHashCodeSeed, options);
 
             int hashedResult = executor.ExitCode;
             executor.Dispose();
