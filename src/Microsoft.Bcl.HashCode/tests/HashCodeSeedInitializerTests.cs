@@ -14,10 +14,16 @@ namespace Microsoft.Bcl.HashCode.Tests
         [Fact]
         public void EnsureSeedReturnsDifferentValuesTest()
         {
-            int FirstSeed = CalculateHashCodeInRemoteProcess(setAppContextSwitch: false);
-            int SecondSeed = CalculateHashCodeInRemoteProcess(setAppContextSwitch: false);
+            // Adding 5 retries since in Netcoreapp-Linux the seed that is generated is time-dependant so
+            // this test might fail there. This will ensure we reduce flakiness while still providing
+            // regression coverage.
+            RetryHelper.Execute(() =>
+            {
+                int FirstSeed = CalculateHashCodeInRemoteProcess(setAppContextSwitch: false);
+                int SecondSeed = CalculateHashCodeInRemoteProcess(setAppContextSwitch: false);
 
-            Assert.NotEqual(FirstSeed, SecondSeed);
+                Assert.NotEqual(FirstSeed, SecondSeed);
+            });
         }
 
         [Fact]
