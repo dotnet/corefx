@@ -21,6 +21,7 @@ namespace Microsoft.Bcl.HashCode.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "AppContextSwitch is not supported on .NETCore")]
         public void EnsureSeedReturnsEqualValuesWhenAppContextSwitchIsSet()
         {
             int FirstSeed = CalculateHashCodeInRemoteProcess(setAppContextSwitch: true);
