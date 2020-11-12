@@ -14,23 +14,26 @@ namespace Microsoft.Bcl.HashCode.Tests
         [Fact]
         public void EnsureSeedReturnsDifferentValuesTest()
         {
-            var executor1 = RemoteExecutor.Invoke(GetHashCodeSeed, new RemoteInvokeOptions() { CheckExitCode = false });
-
-            int FirstSeed = executor1.ExitCode;
-            executor1.Dispose();
-
-            var executor2 = RemoteExecutor.Invoke(GetHashCodeSeed, new RemoteInvokeOptions() { CheckExitCode = false });
-
-            int SecondSeed = executor2.ExitCode;
-            executor2.Dispose();
+            int FirstSeed = CalculateHashCodeInRemoteProcess();
+            int SecondSeed = CalculateHashCodeInRemoteProcess();
 
             Assert.NotEqual(FirstSeed, SecondSeed);
+        }
+
+        private int CalculateHashCodeInRemoteProcess()
+        {
+            var executor = RemoteExecutor.Invoke(GetHashCodeSeed, new RemoteInvokeOptions() { CheckExitCode = false });
+
+            int hashedResult = executor.ExitCode;
+            executor.Dispose();
+
+            return hashedResult;
 
             int GetHashCodeSeed()
             {
-                var seed1Field = typeof(System.HashCode).GetField("s_seed", BindingFlags.NonPublic | BindingFlags.Static);
-                int returnCode = (int)((uint)seed1Field.GetValue(null));
-                return returnCode;
+                System.HashCode hc = new System.HashCode();
+                hc.Add(5);
+                return hc.ToHashCode();
             };
         }
 
