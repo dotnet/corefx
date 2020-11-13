@@ -29,6 +29,9 @@
     <Project Include="$(MSBuildThisFileDirectory)System.IO.Pipelines\pkg\System.IO.Pipelines.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <Project Include="$(MSBuildThisFileDirectory)Microsoft.Bcl.HashCode\pkg\Microsoft.Bcl.HashCode.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <ItemGroup>
