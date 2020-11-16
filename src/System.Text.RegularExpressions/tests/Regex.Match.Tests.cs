@@ -381,6 +381,7 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         // On 32-bit we can't test these high inputs as they cause OutOfMemoryExceptions.
+        [OuterLoop("Can take several seconds")]
         [ConditionalTheory(typeof(Environment), nameof(Environment.Is64BitProcess))]
         [InlineData(RegexOptions.Compiled)]
         [InlineData(RegexOptions.None)]
@@ -393,6 +394,7 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         // On 32-bit we can't test these high inputs as they cause OutOfMemoryExceptions.
+        [OuterLoop("Can take several seconds")]
         [ConditionalTheory(typeof(Environment), nameof(Environment.Is64BitProcess))]
         [InlineData(RegexOptions.Compiled)]
         [InlineData(RegexOptions.None)]
