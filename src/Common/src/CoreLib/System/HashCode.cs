@@ -64,7 +64,9 @@ namespace System
         private uint _v1, _v2, _v3, _v4;
         private uint _queue1, _queue2, _queue3;
         private uint _length;
-
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS        
+        [System.Security.SecuritySafeCritical]
+#endif        
         private static unsafe uint GenerateGlobalSeed()
         {
             uint result;

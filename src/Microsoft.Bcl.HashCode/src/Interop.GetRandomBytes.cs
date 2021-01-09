@@ -8,6 +8,9 @@ using System.Security.Cryptography;
 
 internal partial class Interop
 {
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+    [System.Security.SecuritySafeCritical]
+#endif
     internal static unsafe void GetRandomBytes(byte* buffer, int length)
     {
         if (!LocalAppContextSwitches.UseNonRandomizedHashSeed)
