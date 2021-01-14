@@ -119,6 +119,11 @@
       <Architectures>x64;arm64</Architectures>
       <Versions>8;8.0;8.1</Versions>
     </RuntimeGroup>
+    <RuntimeGroup Include="rhel">
+      <Parent>linux</Parent>
+      <Architectures>x64;arm64</Architectures>
+      <Versions>9</Versions>
+    </RuntimeGroup>
 
     <RuntimeGroup Include="sles">
       <Parent>linux</Parent>
