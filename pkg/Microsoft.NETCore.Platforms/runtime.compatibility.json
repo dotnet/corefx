@@ -3009,6 +3009,38 @@
     "any",
     "base"
   ],
+  "rhel.9": [
+    "rhel.9",
+    "rhel",
+    "linux",
+    "unix",
+    "any",
+    "base"
+  ],
+  "rhel.9-arm64": [
+    "rhel.9-arm64",
+    "rhel.9",
+    "rhel-arm64",
+    "rhel",
+    "linux-arm64",
+    "linux",
+    "unix-arm64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "rhel.9-x64": [
+    "rhel.9-x64",
+    "rhel.9",
+    "rhel-x64",
+    "rhel",
+    "linux-x64",
+    "linux",
+    "unix-x64",
+    "unix",
+    "any",
+    "base"
+  ],
   "sles": [
     "sles",
     "linux",
