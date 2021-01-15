@@ -34,6 +34,7 @@
 using System.IO;
 using System.Reflection;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace System.Drawing.Imaging
@@ -46,6 +47,90 @@ namespace System.Drawing.Imaging
 #endif
     public sealed class Metafile : Image
     {
+
+        // Non-null if a graphics instance was created using
+        // Graphics.FromImage(this) The metadata holder is responsible for
+        // freeing the nativeImage if the Metadata instance is disposed before
+        // the Graphics instance.
+        private MetafileHolder _metafileHolder;
+
+        // A class responsible for disposing of the native Metafile instance
+        // if it needs to outlive the managed Metafile instance.
+        //
+        // The following are both legal with win32 GDI+:
+        //     Metafile mf = ...; // get a metafile instance
+        //     Graphics g = Graphics.FromImage(mf); // get a graphics instance
+        //     g.Dispose();  mf.Dispose(); // dispose of the graphics instance first
+        //   OR
+        //     mf.Dispose(); g.Dispose();  // dispose of the metafile instance first
+        //
+        //
+        // The metafile holder is designed to take ownership of the native metafile image
+        // when the managed Metafile instance is disposed while a Graphics instance is still
+        // not disposed (ie the second code pattern above) and to keep the native image alive until the graphics
+        // instance is disposed.
+        //
+        // Note that the following throws, so we only ever need to keep track of one Graphics
+        // instance at a time:
+        //      Metafile mf = ...;  // get a metafile instance
+        //      Graphics g = Graphics.FromImage(mf);
+        //      Graphics g2 = Graphics.FromImage(mf);  // throws OutOfMemoryException on GDI+ on Win32
+        internal sealed class MetafileHolder : IDisposable
+        {
+            private bool _disposed;
+            private IntPtr _nativeImage;
+
+
+            internal bool Disposed { get => _disposed; }
+            internal MetafileHolder()
+            {
+                _disposed = false;
+                _nativeImage = IntPtr.Zero;
+            }
+
+            ~MetafileHolder() => Dispose(false);
+
+            public void Dispose()
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+
+            internal void Dispose(bool disposing)
+            {
+                if (!_disposed)
+                {
+                    IntPtr nativeImage = _nativeImage;
+                    _nativeImage = IntPtr.Zero;
+                    _disposed = true;
+                    if (nativeImage != IntPtr.Zero)
+                    {
+                        int status =  SafeNativeMethods.Gdip.GdipDisposeImage(nativeImage);
+                        SafeNativeMethods.Gdip.CheckStatus(status);
+                    }
+                }
+            }
+
+            internal void MetafileDisposed(IntPtr nativeImage)
+            {
+                _nativeImage = nativeImage;
+            }
+
+            internal void GraphicsDisposed()
+            {
+                Dispose();
+            }
+        }
+
+        internal MetafileHolder AddMetafileHolder()
+        {
+            // If _metafileHolder is not null and hasn't been disposed yet, there's already a graphics instance associated with
+            // this metafile, the native code will return an error status.
+            if (_metafileHolder != null && !_metafileHolder.Disposed)
+                return null;
+            _metafileHolder = new MetafileHolder();
+            return _metafileHolder;
+        }
 
         // constructors
 
@@ -309,6 +394,21 @@ namespace System.Drawing.Imaging
             int status = SafeNativeMethods.Gdip.GdipRecordMetafileFileName(fileName, referenceHdc, type, ref frameRect, frameUnit,
                 description, out nativeImage);
             SafeNativeMethods.Gdip.CheckStatus(status);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (_metafileHolder != null && !_metafileHolder.Disposed)
+            {
+                // There's a graphics instance created from this Metafile,
+                // transfer responsibility for disposing the nativeImage to the
+                // MetafileHolder
+                _metafileHolder.MetafileDisposed(nativeImage);
+                _metafileHolder = null;
+                nativeImage = IntPtr.Zero;
+            }
+
+            base.Dispose(disposing);
         }
 
         // methods
