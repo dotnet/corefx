@@ -51,6 +51,7 @@ namespace System.Drawing
         private static float defDpiX = 0;
         private static float defDpiY = 0;
         private IntPtr deviceContextHdc;
+        private Metafile.MetafileHolder _metafileHolder;
 
         public delegate bool EnumerateMetafileProc(EmfPlusRecordType recordType,
                                 int flags,
@@ -63,6 +64,14 @@ namespace System.Drawing
         internal Graphics(IntPtr nativeGraphics)
         {
             nativeObject = nativeGraphics;
+        }
+
+        internal Graphics(IntPtr nativeGraphics, Image image) : this(nativeGraphics)
+        {
+            if (image is Metafile mf)
+            {
+                _metafileHolder = mf.AddMetafileHolder();
+            }
         }
 
         ~Graphics()
@@ -287,6 +296,14 @@ namespace System.Drawing
                 status = SafeNativeMethods.Gdip.GdipDeleteGraphics(nativeObject);
                 nativeObject = IntPtr.Zero;
                 SafeNativeMethods.Gdip.CheckStatus(status);
+
+                if (_metafileHolder != null)
+                {
+                    var mh = _metafileHolder;
+                    _metafileHolder = null;
+                    mh.GraphicsDisposed();
+                }
+
                 disposed = true;
             }
 
@@ -1735,7 +1752,7 @@ namespace System.Drawing
 
             int status = SafeNativeMethods.Gdip.GdipGetImageGraphicsContext(image.nativeImage, out graphics);
             SafeNativeMethods.Gdip.CheckStatus(status);
-            Graphics result = new Graphics(graphics);
+            Graphics result = new Graphics(graphics, image);
 
             Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
             SafeNativeMethods.Gdip.GdipSetVisibleClip_linux(result.NativeObject, ref rect);
