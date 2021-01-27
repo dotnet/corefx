@@ -2,7 +2,7 @@
   <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
-    <PackageVersion>0.3.0</PackageVersion>
+    <PackageVersion>0.2.0</PackageVersion>
     <StrongNameKeyId>Open</StrongNameKeyId>
     <!-- This is a preview package. Do not mark as stable. -->
     <BlockStable>true</BlockStable>
