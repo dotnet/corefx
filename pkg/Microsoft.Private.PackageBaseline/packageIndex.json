@@ -3536,14 +3536,12 @@
     },
     "System.Numerics.Tensors": {
       "StableVersions": [
-        "0.1.0",
-        "0.3.0"
+        "0.1.0"
       ],
-      "BaselineVersion": "0.3.0",
+      "BaselineVersion": "0.1.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
-        "0.1.0.0": "0.1.0",
-        "0.2.0.0": "0.2.0"
+        "0.1.0.0": "0.1.0"
       }
     },
     "System.Numerics.Vectors": {
