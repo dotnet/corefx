@@ -17,7 +17,7 @@
     <RuntimeGroup Include="alpine">
       <Parent>linux-musl</Parent>
       <Architectures>x64</Architectures>
-      <Versions>3.6;3.7;3.8;3.9;3.10;3.11;3.12</Versions>
+      <Versions>3.6;3.7;3.8;3.9;3.10;3.11;3.12;3.13</Versions>
     </RuntimeGroup>
 
     <RuntimeGroup Include="android">
@@ -44,7 +44,7 @@
     <RuntimeGroup Include="fedora">
       <Parent>linux</Parent>
       <Architectures>x64</Architectures>
-      <Versions>23;24;25;26;27;28;29;30;31;32;33</Versions>
+      <Versions>23;24;25;26;27;28;29;30;31;32;33;34</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
