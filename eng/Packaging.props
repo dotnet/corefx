@@ -27,7 +27,7 @@
     <PackageVersion Condition="'$(PackageVersion)' == ''">4.7.0</PackageVersion>
     <!-- major.minor.release version of the platforms package we're currently building
          Pre-release will be appended during build -->
-    <PlatformPackageVersion>3.1.4</PlatformPackageVersion>
+    <PlatformPackageVersion>3.1.5</PlatformPackageVersion>
     <SkipValidatePackageTargetFramework>true</SkipValidatePackageTargetFramework>
     <SkipGenerationCheck>true</SkipGenerationCheck>
     <!-- The index check here is used to determine if the assembly is containted in a stable package version.
