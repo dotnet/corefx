@@ -12,6 +12,6 @@
     "Microsoft.DotNet.Build.Tasks.Configuration": "1.0.0-beta.21072.7",
     "Microsoft.DotNet.CoreFxTesting": "1.0.0-beta.21072.7",
     "FIX-85B6-MERGE-9C38-CONFLICT": "1.0.0",
-    "Microsoft.NET.Sdk.IL": "3.1.12-servicing.21065.4"
+    "Microsoft.NET.Sdk.IL": "3.1.13-servicing.21111.2"
   }
 }
