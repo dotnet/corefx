@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text.Unicode;
 
 namespace System.Text.Encodings.Web
 {
@@ -19,14 +18,6 @@ namespace System.Text.Encodings.Web
     /// </remarks>
     public abstract class TextEncoder
     {
-        // The following pragma disables a warning complaining about non-CLS compliant members being abstract, 
-        // and wants me to mark the type as non-CLS compliant. 
-        // It is true that this type cannot be extended by all CLS compliant languages. 
-        // Having said that, if I marked the type as non-CLS all methods that take it as parameter will now have to be marked CLSCompliant(false), 
-        // yet consumption of concrete encoders is totally CLS compliant, 
-        // as it?s mainly to be done by calling helper methods in TextEncoderExtensions class, 
-        // and so I think the warning is a bit too aggressive.  
-
         /// <summary>
         /// Encodes a Unicode scalar into a buffer.
         /// </summary>
@@ -57,6 +48,19 @@ namespace System.Text.Encodings.Web
         [EditorBrowsable(EditorBrowsableState.Never)]
         public unsafe abstract int FindFirstCharacterToEncode(char* text, int textLength);
 #pragma warning restore
+
+        private unsafe int FindFirstCharacterToEncode(PinnedCharBuffer charBuffer)
+        {
+            char* pCh = charBuffer.Pointer;
+            if (pCh == null)
+            {
+                Debug.Assert(charBuffer.Length == 0);
+                char dummy = default; // don't allow passing null pointer values to FindFirstCharacterToEncode
+                pCh = &dummy;
+            }
+
+            return FindFirstCharacterToEncode(pCh, charBuffer.Length);
+        }
 
         /// <summary>
         /// Determines if a given Unicode scalar will be encoded.
@@ -90,116 +94,19 @@ namespace System.Text.Encodings.Web
             {
                 fixed (char* valuePointer = value)
                 {
-                    int firstCharacterToEncode = FindFirstCharacterToEncode(valuePointer, value.Length);
+                    PinnedCharBuffer buffer = new PinnedCharBuffer(valuePointer, value, 0, value.Length);
 
-                    if (firstCharacterToEncode == -1)
+                    int indexOfFirstCharToEncode = FindFirstCharacterToEncode(buffer);
+                    if (indexOfFirstCharToEncode < 0)
                     {
-                        return value;
+                        return value; // shortcut: there's no work to perform
                     }
 
-                    int bufferSize = MaxOutputCharactersPerInputCharacter * value.Length;
-
-                    string result;
-                    if (bufferSize < 1024)
-                    {
-                        char* wholebuffer = stackalloc char[bufferSize];
-                        int totalWritten = EncodeIntoBuffer(wholebuffer, bufferSize, valuePointer, value.Length, firstCharacterToEncode);
-                        result = new string(wholebuffer, 0, totalWritten);
-                    }
-                    else
-                    {
-                        char[] wholebuffer = new char[bufferSize];
-                        fixed(char* buffer = &wholebuffer[0])
-                        {
-                            int totalWritten = EncodeIntoBuffer(buffer, bufferSize, valuePointer, value.Length, firstCharacterToEncode);
-                            result = new string(wholebuffer, 0, totalWritten);                            
-                        }
-                    }
-
-                    return result;
+                    StringBuilder stringBuilder = new StringBuilder(value, 0, indexOfFirstCharToEncode, 0 /* capacity, unused */);
+                    Encode(new StringWriter(stringBuilder), buffer.Slice(indexOfFirstCharToEncode));
+                    return stringBuilder.ToString();
                 }
             }
-        }
-
-        // NOTE: The order of the parameters to this method is a work around for https://github.com/dotnet/corefx/issues/4455
-        // and the underlying Mono bug: https://bugzilla.xamarin.com/show_bug.cgi?id=36052.
-        // If changing the signature of this method, ensure this issue isn't regressing on Mono.
-        private unsafe int EncodeIntoBuffer(char* buffer, int bufferLength, char* value, int valueLength, int firstCharacterToEncode)
-        {
-            int totalWritten = 0;
-
-            if (firstCharacterToEncode > 0)
-            {
-                int bytesToCopy = firstCharacterToEncode + firstCharacterToEncode;
-                BufferInternal.MemoryCopy(value, buffer, bytesToCopy, bytesToCopy);
-                totalWritten += firstCharacterToEncode;
-                bufferLength -= firstCharacterToEncode;
-                buffer += firstCharacterToEncode;
-            }
-
-            int valueIndex = firstCharacterToEncode;
-
-            char firstChar = value[valueIndex];
-            char secondChar = firstChar;
-            bool wasSurrogatePair = false;
-            int charsWritten;
-
-            // this loop processes character pairs (in case they are surrogates).
-            // there is an if block below to process single last character.
-            int secondCharIndex;
-            for (secondCharIndex = valueIndex + 1; secondCharIndex < valueLength; secondCharIndex++)
-            {
-                if (!wasSurrogatePair)
-                {
-                    firstChar = secondChar;
-                }
-                else
-                {
-                    firstChar = value[secondCharIndex - 1];
-                }
-                secondChar = value[secondCharIndex];
-
-                if (!WillEncode(firstChar))
-                {
-                    wasSurrogatePair = false;
-                    *buffer = firstChar;
-                    buffer++;
-                    bufferLength--;
-                    totalWritten++;
-                }
-                else
-                {
-                    int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, secondChar, out wasSurrogatePair);
-                    if (!TryEncodeUnicodeScalar(nextScalar, buffer, bufferLength, out charsWritten))
-                    {
-                        throw new ArgumentException("Argument encoder does not implement MaxOutputCharsPerInputChar correctly.");
-                    }
-
-                    buffer += charsWritten;
-                    bufferLength -= charsWritten;
-                    totalWritten += charsWritten;
-                    if (wasSurrogatePair)
-                    {
-                        secondCharIndex++;
-                    }
-                }
-            }
-
-            if (secondCharIndex == valueLength)
-            {
-                firstChar = value[valueLength - 1];
-                int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, null, out wasSurrogatePair);
-                if (!TryEncodeUnicodeScalar(nextScalar, buffer, bufferLength, out charsWritten))
-                {
-                    throw new ArgumentException("Argument encoder does not implement MaxOutputCharsPerInputChar correctly.");
-                }
-
-                buffer += charsWritten;
-                bufferLength -= charsWritten;
-                totalWritten += charsWritten;
-            }
-
-            return totalWritten;
         }
 
         /// <summary>
@@ -235,32 +142,26 @@ namespace System.Text.Encodings.Web
             {
                 fixed (char* valuePointer = value)
                 {
-                    char* substring = valuePointer + startIndex;
-                    int firstIndexToEncode = FindFirstCharacterToEncode(substring, characterCount);
+                    PinnedCharBuffer buffer = new PinnedCharBuffer(valuePointer, value, startIndex, characterCount);
 
-                    if (firstIndexToEncode == -1) // nothing to encode; 
+                    int indexOfFirstCharToEncode = FindFirstCharacterToEncode(buffer);
+                    if (indexOfFirstCharToEncode < 0)
                     {
-                        if (startIndex == 0 && characterCount == value.Length) // write whole string
-                        {
-                            output.Write(value);
-                            return;
-                        }
-                        for (int i = 0; i < characterCount; i++) // write substring
-                        {
-                            output.Write(*substring);
-                            substring++;
-                        }
-                        return;
+                        indexOfFirstCharToEncode = buffer.Length;
                     }
 
-                    // write prefix, then encode
-                    for (int i = 0; i < firstIndexToEncode; i++)
-                    {
-                        output.Write(*substring);
-                        substring++;
-                    }
+                    // If there's nothing for us to encode *and* we don't need to compute a substring, then write
+                    // the string as-is. Otherwise, make a copy of the data and fall down the slower code paths.
 
-                    EncodeCore(output, substring, characterCount - firstIndexToEncode);
+                    if (startIndex == 0 && indexOfFirstCharToEncode == value.Length)
+                    {
+                        output.Write(value);
+                    }
+                    else
+                    {
+                        output.Write(value.ToCharArray(startIndex, indexOfFirstCharToEncode)); // this portion doesn't require encoding
+                        Encode(output, buffer.Slice(indexOfFirstCharToEncode));
+                    }
                 }
             }
         }
@@ -288,93 +189,86 @@ namespace System.Text.Encodings.Web
             {
                 fixed (char* valuePointer = value)
                 {
-                    char* substring = valuePointer + startIndex;
-                    int firstIndexToEncode = FindFirstCharacterToEncode(substring, characterCount);
+                    PinnedCharBuffer buffer = new PinnedCharBuffer(valuePointer, value, startIndex, characterCount);
 
-                    if (firstIndexToEncode == -1) // nothing to encode; 
+                    int indexOfFirstCharToEncode = FindFirstCharacterToEncode(buffer);
+                    if (indexOfFirstCharToEncode < 0)
                     {
-                        if (startIndex == 0 && characterCount == value.Length) // write whole string
-                        {
-                            output.Write(value);
-                            return;
-                        }
-                        for (int i = 0; i < characterCount; i++) // write substring
-                        {
-                            output.Write(*substring);
-                            substring++;
-                        }
-                        return;
+                        indexOfFirstCharToEncode = buffer.Length;
                     }
+                    output.Write(value, startIndex, indexOfFirstCharToEncode);
 
-                    // write prefix, then encode
-                    for (int i = 0; i < firstIndexToEncode; i++)
+                    buffer = buffer.Slice(indexOfFirstCharToEncode);
+                    if (buffer.Length > 0)
                     {
-                        output.Write(*substring);
-                        substring++;
+                        Encode(output, buffer);
                     }
-
-                    EncodeCore(output, substring, characterCount - firstIndexToEncode);
                 }
             }
         }
 
-        private unsafe void EncodeCore(TextWriter output, char* value, int valueLength)
+        /// <summary>
+        /// Encodes the supplied characters.
+        /// </summary>
+        private void Encode(TextWriter output, PinnedCharBuffer source)
         {
-            Debug.Assert(value != null & output != null);
-            Debug.Assert(valueLength >= 0);
+            char[] tempEncodedBuffer = new char[checked(MaxOutputCharactersPerInputCharacter * 2) /* max 2 surrogate chars per scalar */];
 
-            int bufferLength = MaxOutputCharactersPerInputCharacter;
-            char* buffer = stackalloc char[bufferLength];
-
-            char firstChar = *value;
-            char secondChar = firstChar;
-            bool wasSurrogatePair = false;
-            int charsWritten;
-
-            // this loop processes character pairs (in case they are surrogates).
-            // there is an if block below to process single last character.
-            for (int secondCharIndex = 1; secondCharIndex < valueLength; secondCharIndex++)
+            while (source.Length > 0)
             {
-                if (!wasSurrogatePair)
+                int scalarValue = source[0];
+
+                if (!char.IsSurrogate((char)scalarValue))
                 {
-                    firstChar = secondChar;
+                    if (!WillEncode(scalarValue))
+                    {
+                        // single input char -> single output char (no escaping needed)
+                        output.Write((char)scalarValue);
+                        source = source.Slice(1);
+                        continue;
+                    }
                 }
                 else
                 {
-                    firstChar = value[secondCharIndex - 1];
-                }
-                secondChar = value[secondCharIndex];
-
-                if (!WillEncode(firstChar))
-                {
-                    wasSurrogatePair = false;
-                    output.Write(firstChar);
-                }
-                else
-                {
-                    int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, secondChar, out wasSurrogatePair);
-                    if (!TryEncodeUnicodeScalar(nextScalar, buffer, bufferLength, out charsWritten))
+                    char firstChar = (char)scalarValue;
+                    scalarValue = '\uFFFD'; // replacement char, just in case we can't read a full surrogate pair
+                    if (char.IsHighSurrogate(firstChar))
                     {
-                        throw new ArgumentException("Argument encoder does not implement MaxOutputCharsPerInputChar correctly.");
-                    }
-                    Write(output, buffer, charsWritten);
-
-                    if (wasSurrogatePair)
-                    {
-                        secondCharIndex++;
+                        if (source.Length > 1)
+                        {
+                            char secondChar = source[1];
+                            if (char.IsLowSurrogate(secondChar))
+                            {
+                                scalarValue = char.ConvertToUtf32(firstChar, secondChar);
+                                if (!WillEncode(scalarValue))
+                                {
+                                    // 2 input chars -> 2 output chars (no escaping needed)
+                                    output.Write(firstChar);
+                                    output.Write(secondChar);
+                                    source = source.Slice(2);
+                                    continue;
+                                }
+                            }
+                        }
                     }
                 }
-            }
 
-            if (!wasSurrogatePair)
-            {
-                firstChar = value[valueLength - 1];
-                int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, null, out wasSurrogatePair);
-                if (!TryEncodeUnicodeScalar(nextScalar, buffer, bufferLength, out charsWritten))
+                // If we got to this point, we need to encode.
+
+                unsafe
                 {
-                    throw new ArgumentException("Argument encoder does not implement MaxOutputCharsPerInputChar correctly.");
+                    fixed (char* pDest = tempEncodedBuffer)
+                    {
+                        if (!TryEncodeUnicodeScalar(scalarValue, pDest, tempEncodedBuffer.Length, out int numCharsWrittenJustNow))
+                        {
+                            ThrowArgumentException_MaxOutputCharsPerInputChar();
+                        }
+
+                        output.Write(tempEncodedBuffer, 0, numCharsWrittenJustNow);
+                    }
                 }
-                Write(output, buffer, charsWritten);
+
+                source = source.Slice(scalarValue > char.MaxValue ? 2 : 1);
             }
         }
 
@@ -425,15 +319,14 @@ namespace System.Text.Encodings.Web
             }
         }
 
-        private static unsafe void Write(TextWriter output, char* input, int inputLength)
+        private static void ThrowArgumentException_MaxOutputCharsPerInputChar()
         {
-            Debug.Assert(output != null && input != null && inputLength >= 0);
+            // Ideally we'd throw a proper error message here, but we can't add localized error
+            // text in an in-place update. So we'll instead smuggle the bad property name as
+            // part of the error message. It's not great, but it's better than nothing since
+            // it'll point callers toward this property.
 
-            while (inputLength-- > 0)
-            {
-                output.Write(*input);
-                input++;
-            }
+            throw new ArgumentOutOfRangeException(nameof(MaxOutputCharactersPerInputCharacter));
         }
     }
 }
