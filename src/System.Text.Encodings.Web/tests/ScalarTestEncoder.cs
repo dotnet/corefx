@@ -22,7 +22,7 @@ namespace Microsoft.Framework.WebEncoders
         /// </summary>
         public override unsafe int FindFirstCharacterToEncode(char* text, int textLength)
         {
-            return text == null ? -1 : 0;
+            return (textLength == 0) ? -1 : 0;
         }
 
         /// <summary>
@@ -46,12 +46,16 @@ namespace Microsoft.Framework.WebEncoders
         /// </summary>
         public override unsafe bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
         {
-            fixed (char* chars = unicodeScalar.ToString("X8"))
-                for (int i = 0; i < Int32Length; i++)
-                    buffer[i] = chars[i];
-
-            numberOfCharactersWritten = Int32Length;
-            return true;
+            if (unicodeScalar.ToString("X8", CultureInfo.InvariantCulture).AsSpan().TryCopyTo(new Span<char>(buffer, bufferLength)))
+            {
+                numberOfCharactersWritten = Int32Length;
+                return true;
+            }
+            else
+            {
+                numberOfCharactersWritten = 0;
+                return false;
+            }
         }
     }
 }

@@ -26,6 +26,12 @@
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Text.Encodings.Web\pkg\System.Text.Encodings.Web.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project> 
   </ItemGroup>
 
   <ItemGroup>
