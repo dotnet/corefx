@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Security.Principal;
 using Xunit;
 
@@ -16,7 +17,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         private void RefreshContext()
         {
             string username = "Administrator";
-            string password = "Adrumble@6";
+            string password = Environment.GetEnvironmentVariable("TESTPASSWORD");
 
             string OU = "Tests";
             string baseDomain = WindowsIdentity.GetCurrent().Name.Split(new char[] { '\\' })[1] + "-TEST";
