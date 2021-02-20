@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(CoreFX C)
 
-cmake_policy(SET CMP0083 NEW)
-
-include(CheckPIESupported)
-
-# All the code we build should be compiled as position independent.
-check_pie_supported(OUTPUT_VARIABLE PIE_SUPPORT_OUTPUT LANGUAGES C)
-
-if (NOT MSVC AND NOT CMAKE_C_LINK_PIE_SUPPORTED)
-    message(WARNING "PIE is not supported at link time: ${PIE_SUPPORT_OUTPUT}.\n"
-                    "PIE link options will not be passed to linker.")
+if (NOT MSVC)
+    if (NOT CMAKE_C_LINK_PIE_SUPPORTED)
+        message(WARNING "PIE is not supported at link time: ${PIE_SUPPORT_OUTPUT}.\n"
+                        "PIE link options will not be passed to linker.")
+    else()
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")
+        add_compile_options($<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:-fPIE>)
+        add_compile_options($<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:-fPIC>)
+    endif()
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
