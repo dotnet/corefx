@@ -29,7 +29,18 @@ stages:
         strategy:
           matrix:
 
+              x64_Release:
+                _BuildConfig: Release
+                _architecture: x64
+                _framework: netcoreapp
+                _helixQueues: $(linuxDefaultQueues)
+                _dockerContainer: rhel7_container
+                _buildScriptPrefix: ''
+                _buildExtraArguments: ''
+                _publishTests: true
+
             ${{ if eq(parameters.fullMatrix, 'false') }}:
+
               x64_Debug:
                 _BuildConfig: Debug
                 _architecture: x64
@@ -49,15 +60,6 @@ stages:
                 _buildExtraArguments: /p:RuntimeOS=linux-musl
 
             ${{ if eq(parameters.fullMatrix, 'true') }}:
-              x64_Release:
-                _BuildConfig: Release
-                _architecture: x64
-                _framework: netcoreapp
-                _helixQueues: $(linuxDefaultQueues)
-                _dockerContainer: rhel7_container
-                _buildScriptPrefix: ''
-                _buildExtraArguments: ''
-                _publishTests: true
 
               musl_x64_Release:
                 _BuildConfig: Release
