@@ -28,7 +28,7 @@ stages:
         displayName: Build
         strategy:
           matrix:
-
+              # Run RedHat7 in release mode on CI to cover Release configuration differences
               x64_Release:
                 _BuildConfig: Release
                 _architecture: x64
