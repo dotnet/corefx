@@ -366,9 +366,15 @@ namespace System.Diagnostics.Tests
         public void TestUserCredentialsPropertiesOnWindows()
         {
             const string username = "testForDotnetRuntime";
-            var bytes = new byte[33];
-            RandomNumberGenerator.Fill(bytes);
-            string password = Convert.ToBase64String(bytes) + "_-As@!%*(1)4#2";
+            string password;
+            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
+            {
+                var randomBytes = new byte[33];
+                rng.GetBytes(randomBytes);
+
+                // Add special chars to ensure it satisfies password requirements.
+                password = Convert.ToBase64String(randomBytes) + "_-As@!%*(1)4#2";
+            }
 
             try
             {
