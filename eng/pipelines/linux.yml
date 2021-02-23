@@ -28,16 +28,16 @@ stages:
         displayName: Build
         strategy:
           matrix:
-              # Run RedHat7 in release mode on CI to cover Release configuration differences
-              x64_Release:
-                _BuildConfig: Release
-                _architecture: x64
-                _framework: netcoreapp
-                _helixQueues: $(linuxDefaultQueues)
-                _dockerContainer: rhel7_container
-                _buildScriptPrefix: ''
-                _buildExtraArguments: ''
-                _publishTests: true
+            # Run RedHat7 in release mode on CI to cover Release configuration differences
+            x64_Release:
+              _BuildConfig: Release
+              _architecture: x64
+              _framework: netcoreapp
+              _helixQueues: $(linuxDefaultQueues)
+              _dockerContainer: rhel7_container
+              _buildScriptPrefix: ''
+              _buildExtraArguments: ''
+              _publishTests: true
 
             ${{ if eq(parameters.fullMatrix, 'false') }}:
 
