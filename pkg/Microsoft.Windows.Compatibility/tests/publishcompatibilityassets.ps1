@@ -39,7 +39,7 @@ if (!(Test-Path $localPackageSourcePath))
 	}
 }
 
-$restoreSources = -join("https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;https://api.nuget.org/v3/index.json;https://dotnetmygetlegacy.blob.core.windows.net/dotnet-core/index.json;", $localPackageSourcePath)
+$restoreSources = -join("https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json;https://dotnetmygetlegacy.blob.core.windows.net/dotnet-core/index.json;", $localPackageSourcePath)
 
 $compatPackageVersion = _getPackageVersion "Microsoft.Windows.Compatibility"
 $privatePackageVersion = _getPackageVersion "Microsoft.Private.CoreFx.NETCoreApp"
