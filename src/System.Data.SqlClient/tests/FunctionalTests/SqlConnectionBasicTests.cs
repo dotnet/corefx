@@ -122,7 +122,7 @@ namespace System.Data.SqlClient.Tests
         [Fact]
         public void ConnectionTestInvalidCredentialCombination()
         {
-            var cleartextCredsConnStr = "User=test;Password=test;";
+            var cleartextCredsConnStr = "User=test;Password=PLACEHOLDER;";
             var sspiConnStr = "Integrated Security=true;";
             var testPassword = new SecureString();
             testPassword.MakeReadOnly();

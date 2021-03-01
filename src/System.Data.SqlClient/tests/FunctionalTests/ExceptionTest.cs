@@ -11,7 +11,7 @@ namespace System.Data.SqlClient.Tests
     public class ExceptionTest
     {
         // test connection string
-        private string connectionString = "server=tcp:server,1432;database=test;uid=admin;pwd=SQLDB;connect timeout=60;";
+        private string connectionString = "server=tcp:server,1432;database=test;uid=admin;pwd=PLACEHOLDER;connect timeout=60;";
 
         // data value and server consts
         private const string badServer = "NotAServer";
