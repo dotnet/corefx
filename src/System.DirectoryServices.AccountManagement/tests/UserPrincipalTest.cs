@@ -33,7 +33,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
         public void ComputedUACCheck()
         {
             string username = "Administrator";
-            string password = "PLACEHOLDER";
+            string password = Environment.GetEnvironmentVariable("TESTPASSWORD");
             //TODO: don't assume it exists, create it if its not
             string OU = "TestNull";
             string baseDomain =WindowsIdentity.GetCurrent().Name.Split(new char[] { '\\' })[1] + "-TEST";
