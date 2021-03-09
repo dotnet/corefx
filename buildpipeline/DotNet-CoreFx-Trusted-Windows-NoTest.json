@@ -511,15 +511,15 @@
   "queue": {
     "_links": {
       "self": {
-        "href": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/298"
+        "href": "https://dev.azure.com/devdiv/_apis/build/Queues/2737"
       }
     },
-    "id": 298,
-    "name": "VSEng-MicroBuildVS2017",
-    "url": "https://devdiv.visualstudio.com/DefaultCollection/_apis/build/Queues/298",
+    "id": 2737,
+    "name": "VSEngSS-MicroBuild2017",
+    "url": "https://dev.azure.com/devdiv/_apis/build/Queues/2737",
     "pool": {
-      "id": 95,
-      "name": "VSEng-MicroBuildVS2017"
+      "id": 338,
+      "name": "VSEngSS-MicroBuild2017"
     }
   },
   "id": 5308,
