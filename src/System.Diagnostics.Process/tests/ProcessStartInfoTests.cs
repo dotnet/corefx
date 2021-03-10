@@ -10,6 +10,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using Xunit;
 using System.Text;
@@ -364,7 +365,17 @@ namespace System.Diagnostics.Tests
         [Fact, PlatformSpecific(TestPlatforms.Windows), OuterLoop] // Uses P/Invokes, Requires admin privileges
         public void TestUserCredentialsPropertiesOnWindows()
         {
-            string username = "test", password = "PLACEHOLDER";
+            const string username = "testForDotnetRuntime";
+            string password;
+            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
+            {
+                var randomBytes = new byte[33];
+                rng.GetBytes(randomBytes);
+
+                // Add special chars to ensure it satisfies password requirements.
+                password = Convert.ToBase64String(randomBytes) + "_-As@!%*(1)4#2";
+            }
+
             try
             {
                 Interop.NetUserAdd(username, password);
