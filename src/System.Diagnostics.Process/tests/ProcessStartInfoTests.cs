@@ -8,6 +8,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.ComponentModel;
@@ -375,7 +376,11 @@ namespace System.Diagnostics.Tests
         [Fact, PlatformSpecific(TestPlatforms.Windows), OuterLoop] // Uses P/Invokes, Requires admin privileges
         public void TestUserCredentialsPropertiesOnWindows()
         {
-            string username = "test", password = "PLACEHOLDER";
+            const string username = "testForDotnetRuntime";
+            var bytes = new byte[33];
+            RandomNumberGenerator.Fill(bytes);
+            string password = Convert.ToBase64String(bytes) + "_-As@!%*(1)4#2";
+
             try
             {
                 Interop.NetUserAdd(username, password);
