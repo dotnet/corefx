@@ -18,7 +18,7 @@ namespace System.Net.Http.Functional.Tests
     {
         private const string ExpectedContent = "Test contest";
         private const string UserName = "user1";
-        private const string Password = "password1";
+        private const string Password = "PLACEHOLDER";
         private static readonly Uri BasicAuthServerUri =
             Configuration.Http.BasicAuthUriForCreds(false, UserName, Password);
         private static readonly Uri SecureBasicAuthServerUri =
