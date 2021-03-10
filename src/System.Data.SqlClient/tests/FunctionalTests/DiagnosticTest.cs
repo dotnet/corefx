@@ -23,7 +23,7 @@ namespace System.Data.SqlClient.Tests
     {
         private const string BadConnectionString = "data source = bad; initial catalog = bad; uid = bad; password = PLACEHOLDER; connection timeout = 1;";
         private static readonly string s_tcpConnStr = Environment.GetEnvironmentVariable("TEST_TCP_CONN_STR") ?? string.Empty;
-        
+
         public static bool IsConnectionStringConfigured() => s_tcpConnStr != string.Empty;
 
         [Fact]
