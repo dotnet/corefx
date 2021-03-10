@@ -49,7 +49,7 @@ namespace System.Net.Http.Tests
         [InlineData("realm=\"NetCore\", qop=\"auth\", stale=false", false)]
         public async void DigestResponse_AuthToken_Handling(string response, bool expectedResult)
         {
-            NetworkCredential credential = new NetworkCredential("foo","bar");
+            NetworkCredential credential = new NetworkCredential("foo","PLACEHOLDER");
             AuthenticationHelper.DigestResponse digestResponse = new AuthenticationHelper.DigestResponse(response);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://microsoft.com/");
             string parameter = await AuthenticationHelper.GetDigestTokenForCredential(credential, request, digestResponse).ConfigureAwait(false);

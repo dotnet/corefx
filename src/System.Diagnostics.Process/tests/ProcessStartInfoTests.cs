@@ -364,7 +364,7 @@ namespace System.Diagnostics.Tests
         [Fact, PlatformSpecific(TestPlatforms.Windows), OuterLoop] // Uses P/Invokes, Requires admin privileges
         public void TestUserCredentialsPropertiesOnWindows()
         {
-            string username = "test", password = "PassWord123!!";
+            string username = "test", password = "PLACEHOLDER";
             try
             {
                 Interop.NetUserAdd(username, password);
