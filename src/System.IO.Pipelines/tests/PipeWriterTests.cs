@@ -209,6 +209,8 @@ namespace System.IO.Pipelines.Tests
                 await pipe.Writer.WriteAsync(writeBuffer);
             }
 
+            Assert.Equal(1, pool.CurrentlyRentedBlocks);
+            pipe.Writer.Complete();
             Assert.Equal(0, pool.CurrentlyRentedBlocks);
         }
 
