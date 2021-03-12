@@ -68,7 +68,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [ActiveIssue(16705, TestPlatforms.OSX)]
         public static void ExportAsPfxWithPassword()
         {
-            const string password = "Cotton";
+            const string password = "PLACEHOLDER";
 
             using (X509Certificate2 c1 = new X509Certificate2(TestData.MsCertificate))
             {
@@ -87,7 +87,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [ActiveIssue(16705, TestPlatforms.OSX)]
         public static void ExportAsPfxVerifyPassword()
         {
-            const string password = "Cotton";
+            const string password = "PLACEHOLDER";
 
             using (X509Certificate2 c1 = new X509Certificate2(TestData.MsCertificate))
             {
@@ -103,7 +103,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 Assert.True(cert.HasPrivateKey, "cert.HasPrivateKey");
 
-                const string password = "Cotton";
+                const string password = "PLACEHOLDER";
 
                 byte[] pfx = cert.Export(X509ContentType.Pkcs12, password);
 
