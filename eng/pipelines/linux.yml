@@ -137,7 +137,7 @@ stages:
 
       # Legs without helix testing
       # Only run this leg in PRs.
-      - ${{ if and(eq(parameters.fullMatrix, 'false'), and(ne(parameters.testScope, 'outerloop'), ne(parameters.testScope, 'all'))) }}:
+      - ${{ if and(eq(parameters.isOfficialBuild, 'false'), and(ne(parameters.testScope, 'outerloop'), ne(parameters.testScope, 'all'))) }}:
         - job: LinuxNoTest
           displayName: Build
           strategy:
@@ -150,29 +150,30 @@ stages:
                 _buildExtraArguments: /p:RuntimeOS=rhel.6 /p:PortableBuild=false
                 _dockerContainer: rhel6_container
 
-              arm_Debug:
-                _BuildConfig: Debug
-                _architecture: arm
-                _framework: netcoreapp
-                _buildExtraArguments: /p:RuntimeOS=ubuntu.16.04 -warnAsError false
-                _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
-                _dockerContainer: ubuntu_1604_arm_cross_container
+              ${{ if eq(parameters.isFullMatrix, 'false') }}:
+                arm_Debug:
+                  _BuildConfig: Debug
+                  _architecture: arm
+                  _framework: netcoreapp
+                  _buildExtraArguments: /p:RuntimeOS=ubuntu.16.04 -warnAsError false
+                  _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
+                  _dockerContainer: ubuntu_1604_arm_cross_container
 
-              musl_arm64_Debug:
-                _BuildConfig: Debug
-                _architecture: arm64
-                _framework: netcoreapp
-                _dockerContainer: alpine_37_arm64_container
-                _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
-                _buildExtraArguments: -warnAsError false /p:BuildNativeCompiler=--clang5.0 /p:RuntimeOS=linux-musl
+                musl_arm64_Debug:
+                  _BuildConfig: Debug
+                  _architecture: arm64
+                  _framework: netcoreapp
+                  _dockerContainer: alpine_37_arm64_container
+                  _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
+                  _buildExtraArguments: -warnAsError false /p:BuildNativeCompiler=--clang5.0 /p:RuntimeOS=linux-musl
 
-              arm64_Debug:
-                _BuildConfig: Debug
-                _architecture: arm64
-                _framework: netcoreapp
-                _dockerContainer: ubuntu_1604_arm64_cross_container
-                _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
-                _buildExtraArguments: --warnAsError false
+                arm64_Debug:
+                  _BuildConfig: Debug
+                  _architecture: arm64
+                  _framework: netcoreapp
+                  _dockerContainer: ubuntu_1604_arm64_cross_container
+                  _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
+                  _buildExtraArguments: --warnAsError false
 
           pool:
             name: Hosted Ubuntu 1604
