@@ -190,6 +190,7 @@ namespace System.Security.Cryptography.Xml.Tests
 
         public static X509Certificate2 GetSampleX509Certificate()
         {
+            // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Value change would break test coverage. More info at https://github.com/dotnet/corefx/pull/43052#issuecomment-800481195.")]
             return new X509Certificate2(SamplePfx, "mono");
         }
 
