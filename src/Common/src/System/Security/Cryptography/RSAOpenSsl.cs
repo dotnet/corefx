@@ -25,9 +25,6 @@ namespace System.Security.Cryptography
     {
         private const int BitsPerByte = 8;
 
-        // 65537 (0x10001) in big-endian form
-        private static readonly byte[] s_defaultExponent = { 0x01, 0x00, 0x01 };
-
         private Lazy<SafeRsaHandle> _key;
 
         public RSAOpenSsl()
@@ -585,36 +582,18 @@ namespace System.Security.Cryptography
 
         private SafeRsaHandle GenerateKey()
         {
-            SafeRsaHandle key = Interop.Crypto.RsaCreate();
-            bool generated = false;
-
-            Interop.Crypto.CheckValidOpenSslHandle(key);
-
-            try
+            using (SafeEvpPKeyHandle pkey = Interop.Crypto.RsaGenerateKey(KeySize))
             {
-                using (SafeBignumHandle exponent = Interop.Crypto.CreateBignum(s_defaultExponent))
-                {
-                    // The documentation for RSA_generate_key_ex does not say that it returns only
-                    // 0 or 1, so the call marshals it back as a full Int32 and checks for a value
-                    // of 1 explicitly.
-                    int response = Interop.Crypto.RsaGenerateKeyEx(
-                        key,
-                        KeySize,
-                        exponent);
+                SafeRsaHandle rsa = Interop.Crypto.EvpPkeyGetRsa(pkey);
 
-                    CheckBoolReturn(response);
-                    generated = true;
-                }
-            }
-            finally
-            {
-                if (!generated)
+                if (rsa.IsInvalid)
                 {
-                    key.Dispose();
+                    rsa.Dispose();
+                    throw Interop.Crypto.CreateOpenSslCryptographicException();
                 }
-            }
 
-            return key;
+                return rsa;
+            }
         }
 
         protected override byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm) =>

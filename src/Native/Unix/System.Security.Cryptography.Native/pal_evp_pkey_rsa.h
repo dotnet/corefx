@@ -7,6 +7,11 @@
 #include "opensslshim.h"
 
 /*
+Creates an RSA key of the requested size.
+*/
+DLLEXPORT EVP_PKEY* CryptoNative_RsaGenerateKey(int32_t keySize);
+
+/*
 Shims the EVP_PKEY_get1_RSA method.
 
 Returns the RSA instance for the EVP_PKEY.

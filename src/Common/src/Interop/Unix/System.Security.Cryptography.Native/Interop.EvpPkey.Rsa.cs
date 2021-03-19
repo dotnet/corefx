@@ -10,6 +10,22 @@ internal static partial class Interop
 {
     internal static partial class Crypto
     {
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_RsaGenerateKey")]
+        private static extern SafeEvpPKeyHandle CryptoNative_RsaGenerateKey(int keySize);
+
+        internal static SafeEvpPKeyHandle RsaGenerateKey(int keySize)
+        {
+            SafeEvpPKeyHandle pkey = CryptoNative_RsaGenerateKey(keySize);
+
+            if (pkey.IsInvalid)
+            {
+                pkey.Dispose();
+                throw CreateOpenSslCryptographicException();
+            }
+
+            return pkey;
+        }
+
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EvpPkeyGetRsa")]
         internal static extern SafeRsaHandle EvpPkeyGetRsa(SafeEvpPKeyHandle pkey);
 

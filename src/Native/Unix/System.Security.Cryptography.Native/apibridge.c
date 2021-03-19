@@ -728,4 +728,12 @@ void local_SSL_CTX_set_security_level(SSL_CTX* ctx, int32_t level)
     (void)ctx;
     (void)level;
 }
+
+int32_t local_RSA_pkey_ctx_ctrl(EVP_PKEY_CTX* ctx, int32_t optype, int32_t cmd, int32_t p1, void* p2)
+{
+    // On OpenSSL 1.0.2 there aren't two different identifiers for RSA,
+    // so just pass the request on th EVP_PKEY_CTX_ctrl with the only identifier defined.
+    return EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_RSA, optype, cmd, p1, p2);
+}
+
 #endif
