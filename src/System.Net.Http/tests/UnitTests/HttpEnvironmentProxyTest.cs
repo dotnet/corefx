@@ -162,7 +162,7 @@ namespace System.Net.Http.Tests
             {
                 IWebProxy p;
 
-                Environment.SetEnvironmentVariable("all_proxy", "http://foo:bar@1.1.1.1:3000");
+                Environment.SetEnvironmentVariable("all_proxy", "http://foo:PLACEHOLDER@1.1.1.1:3000");
                 Assert.True(HttpEnvironmentProxy.TryCreate(out p));
                 Assert.NotNull(p);
                 Assert.NotNull(p.Credentials);
@@ -174,7 +174,7 @@ namespace System.Net.Http.Tests
                 Assert.NotNull(p.Credentials);
 
                 // Use different user for http and https
-                Environment.SetEnvironmentVariable("https_proxy", "http://foo1:bar1@1.1.1.1:3000");
+                Environment.SetEnvironmentVariable("https_proxy", "http://foo1:PLACEHOLDER@1.1.1.1:3000");
                 Assert.True(HttpEnvironmentProxy.TryCreate(out p));
                 Assert.NotNull(p);
                 Uri u = p.GetProxy(fooHttp);
@@ -197,7 +197,7 @@ namespace System.Net.Http.Tests
                 IWebProxy p;
 
                 Environment.SetEnvironmentVariable("no_proxy", ".test.com,, foo.com");
-                Environment.SetEnvironmentVariable("all_proxy", "http://foo:bar@1.1.1.1:3000");
+                Environment.SetEnvironmentVariable("all_proxy", "http://foo:PLACEHOLDER@1.1.1.1:3000");
                 Assert.True(HttpEnvironmentProxy.TryCreate(out p));
                 Assert.NotNull(p);
 
@@ -223,7 +223,7 @@ namespace System.Net.Http.Tests
         [MemberData(nameof(HttpProxyNoProxyEnvVarMemberData))]
         public void HttpProxy_TryCreate_CaseInsensitiveVariables(string proxyEnvVar, string noProxyEnvVar)
         {
-            string proxy = "http://foo:bar@1.1.1.1:3000";
+            string proxy = "http://foo:PLACEHOLDER@1.1.1.1:3000";
 
             var options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables.Add(proxyEnvVar, proxy);
@@ -258,7 +258,7 @@ namespace System.Net.Http.Tests
         public void HttpProxy_TryCreateAndPossibleCgi_HttpProxyUpperCaseDisabledInCgi(
             string proxyEnvVar, bool cgi, bool expectedProxyUse)
         {
-            string proxy = "http://foo:bar@1.1.1.1:3000";
+            string proxy = "http://foo:PLACEHOLDER@1.1.1.1:3000";
 
             var options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables.Add(proxyEnvVar, proxy);
