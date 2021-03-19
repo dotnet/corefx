@@ -16,8 +16,8 @@ namespace System.Net.Test.Common
     {
         public static partial class Certificates
         {
-            private const string CertificatePassword = "testcertificate";
-            private const string TestDataFolder = "TestData";
+            private const string CertificatePassword = "PLACEHOLDER";
+            private const string TestDataFolder = "TestDataCertificates";
 
             private static readonly Mutex m;
             private const int MutexTimeout = 120 * 1000;
