@@ -11,9 +11,11 @@ $script:testData = "corefx-testdata"
 $script:certificatePath = "$($script:testData)\corefx-testdata-master\System.Net.TestData"
 
 $script:clientPrivateKeyPath = Join-Path $script:certificatePath "testclient1_at_contoso.com.pfx"
+# [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Certificate no longer exists.")]
 $script:clientPrivateKeyPassword = "testcertificate"
 
 $script:serverPrivateKeyPath = Join-Path $script:certificatePath "contoso.com.pfx"
+# [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Certificate no longer exists.")]
 $script:serverPrivateKeyPassword = "testcertificate"
 
 Function GetFullPath($relativePath)
