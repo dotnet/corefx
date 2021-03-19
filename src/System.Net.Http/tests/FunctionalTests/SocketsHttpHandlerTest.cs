@@ -677,7 +677,7 @@ namespace System.Net.Http.Functional.Tests
 
         [Theory]
         [InlineData("Age", "1")]
-        [InlineData("Authorization", "Basic YWxhZGRpbjpvcGVuc2VzYW1l")]
+        [InlineData("Authorization", "Basic YWxhZGRpbjpQTEFDRUhPTERFUgo=")]
         [InlineData("Cache-Control", "no-cache")]
         [InlineData("Content-Encoding", "gzip")]
         [InlineData("Content-Length", "22")]
