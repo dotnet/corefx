@@ -156,7 +156,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.0-prerelease\content\**\*.*" />
+    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.7\content\**\*.*" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsOSX)'=='true'">
     <TestCommandLines Include="ulimit -Sn 4096" />
