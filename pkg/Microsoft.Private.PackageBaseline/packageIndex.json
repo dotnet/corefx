@@ -2515,7 +2515,7 @@
       ],
       "BaselineVersion": "4.5.5",
       "InboxOn": {
-        "netcoreapp2.1": "4.1.0.0"
+        "netcoreapp2.1": "4.1.0.0",
         "monoandroid10": "Any",
         "monotouch10": "Any",
         "xamarinios10": "Any",
