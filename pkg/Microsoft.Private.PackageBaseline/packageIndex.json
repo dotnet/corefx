@@ -2510,16 +2510,23 @@
         "4.5.1",
         "4.5.2",
         "4.5.3",
-        "4.5.4"
+        "4.5.4",
+        "4.5.5"
       ],
-      "BaselineVersion": "4.5.4",
+      "BaselineVersion": "4.5.5",
       "InboxOn": {
         "netcoreapp2.1": "4.1.0.0"
+        "monoandroid10": "Any",
+        "monotouch10": "Any",
+        "xamarinios10": "Any",
+        "xamarinmac20": "Any",
+        "xamarintvos10": "Any",
+        "xamarinwatchos10": "Any"
       },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.4.0",
         "4.0.1.0": "4.5.1",
-        "4.0.1.1": "4.5.4"
+        "4.0.1.1": "4.5.5"
       }
     },
     "System.Messaging": {
