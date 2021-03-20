@@ -417,9 +417,9 @@ namespace System.Net.Http.Tests
 
             expected = new CacheControlHeaderValue();
             expected.NoCache = true;
-            expected.NoCacheHeaders.Add("token1");
-            expected.NoCacheHeaders.Add("token2");
-            CheckGetCacheControlLength("no-cache=\"token1, token2\"", 0, null, 25, expected);
+            expected.NoCacheHeaders.Add("PLACEHOLDER1");
+            expected.NoCacheHeaders.Add("PLACEHOLDER2");
+            CheckGetCacheControlLength("no-cache=\"PLACEHOLDER1, PLACEHOLDER2\"", 0, null, 25, expected);
 
             expected = new CacheControlHeaderValue();
             expected.NoStore = true;
@@ -437,12 +437,12 @@ namespace System.Net.Http.Tests
             expected = new CacheControlHeaderValue();
             expected.Public = true;
             expected.Private = true;
-            expected.PrivateHeaders.Add("token1");
+            expected.PrivateHeaders.Add("PLACEHOLDER1");
             expected.MustRevalidate = true;
             expected.ProxyRevalidate = true;
             expected.Extensions.Add(new NameValueHeaderValue("c", "d"));
             expected.Extensions.Add(new NameValueHeaderValue("a", "b"));
-            CheckGetCacheControlLength(",public, , private=\"token1\", must-revalidate, c=d, proxy-revalidate, a=b", 0,
+            CheckGetCacheControlLength(",public, , private=\"PLACEHOLDER1\", must-revalidate, c=d, proxy-revalidate, a=b", 0,
                 null, 72, expected);
 
             expected = new CacheControlHeaderValue();
