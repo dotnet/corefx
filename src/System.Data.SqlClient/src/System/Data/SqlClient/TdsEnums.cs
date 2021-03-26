@@ -571,6 +571,7 @@ namespace System.Data.SqlClient
         // Login data validation Rules
         //
         internal const ushort MAXLEN_HOSTNAME = 128; // the client machine name
+        // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Not a password.")]
         internal const ushort MAXLEN_USERNAME = 128; // the client user id
         internal const ushort MAXLEN_PASSWORD = 128; // the password supplied by the client
         internal const ushort MAXLEN_APPNAME = 128; // the client application name

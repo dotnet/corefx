@@ -1,0 +1,11 @@
+{
+    "tool": "Credential Scanner",
+    "suppressions": [
+        {
+            "_justification": "Certificate for SQL test server.",
+            "file": [
+                "src/System.Data.SqlClient/tests/Tools/TDS/TDS.Servers/TdsServerCertificate.pfx"
+            ]
+        }
+    ]
+}
