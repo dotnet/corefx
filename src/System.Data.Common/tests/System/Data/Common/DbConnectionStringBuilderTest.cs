@@ -1876,8 +1876,8 @@ namespace System.Data.Tests.Common
                 sb.ConnectionString);
 
             // an embedded single-quote value will result in the value being delimieted with double quotes
-            sb["Password"] = "abc\'def";
-            Assert.Equal("Data Source=testdb;User ID=someuser;Password=\"abc\'def\"",
+            sb["Password"] = "PLACEHOLDER\'def";
+            Assert.Equal("Data Source=testdb;User ID=someuser;Password=\"PLACEHOLDER\'def\"",
                 sb.ConnectionString);
 
             // an embedded double-quote value will result in the value being delimieted with single quotes
