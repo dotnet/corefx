@@ -143,10 +143,10 @@ namespace System.Security.Cryptography.Xml.Tests
         {
             using (Aes aes = Aes.Create())
             {
-                byte[] keydata = Convert.FromBase64String("o/ilseZu+keLBBWGGPlUHweqxIPc4gzZEFWr2nBt640=");
                 aes.Mode = CipherMode.CBC;
                 aes.KeySize = 256;
-                aes.Key = keydata;
+                // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Approved suppresion: key fot test purpose.")]
+                aes.Key = Convert.FromBase64String("o/ilseZu+keLBBWGGPlUHweqxIPc4gzZEFWr2nBt640=");
                 aes.Padding = PaddingMode.Zeros;
 
                 XmlDocument doc = new XmlDocument();
@@ -175,11 +175,11 @@ namespace System.Security.Cryptography.Xml.Tests
 
                     using (Aes aes = Aes.Create())
                     {
-                        byte[] keydata = Convert.FromBase64String("o/ilseZu+keLBBWGGPlUHweqxIPc4gzZEFWr2nBt640=");
                         aes.Mode = CipherMode.CBC;
                         aes.KeySize = 256;
                         aes.IV = Convert.FromBase64String("pBUM5P03rZ6AE4ZK5EyBrw==");
-                        aes.Key = keydata;
+                        // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Approved suppresion: key fot test purpose.")]
+                        aes.Key = Convert.FromBase64String("o/ilseZu+keLBBWGGPlUHweqxIPc4gzZEFWr2nBt640=");
                         aes.Padding = PaddingMode.Zeros;
 
                         EncryptedXml exml = new EncryptedXml();
