@@ -677,6 +677,7 @@ namespace System.Net.Http.Functional.Tests
 
         [Theory]
         [InlineData("Age", "1")]
+        // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Authorization header.")]
         [InlineData("Authorization", "Basic YWxhZGRpbjpQTEFDRUhPTERFUgo=")]
         [InlineData("Cache-Control", "no-cache")]
         [InlineData("Content-Encoding", "gzip")]

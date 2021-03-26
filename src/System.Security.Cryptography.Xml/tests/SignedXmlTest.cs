@@ -658,7 +658,8 @@ namespace System.Security.Cryptography.Xml.Tests
             }
             
             Assert.Equal("IKbfdK2/DMfXyezCf5QggVCXfk8=", Convert.ToBase64String(digest));
-
+            
+            // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Value change would break test coverage. More info at https://github.com/dotnet/corefx/pull/43052#issuecomment-800481195.")]
             X509Certificate2 cert = new X509Certificate2(_pkcs12, "mono");
             SignedXml signedXml = new SignedXml(doc);
             signedXml.SigningKey = cert.PrivateKey;
@@ -718,6 +719,7 @@ namespace System.Security.Cryptography.Xml.Tests
 
             Assert.Equal("e3dsi1xK8FAx1vsug7J203JbEAU=", Convert.ToBase64String(digest));
 
+            // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Value change would break test coverage. More info at https://github.com/dotnet/corefx/pull/43052#issuecomment-800481195.")]
             X509Certificate2 cert = new X509Certificate2(_pkcs12, "mono");
             SignedXml signedXml = new SignedXml(doc);
             signedXml.SigningKey = cert.PrivateKey;
@@ -760,6 +762,7 @@ namespace System.Security.Cryptography.Xml.Tests
         [Fact]
         public void SignedXML_CRLF_Invalid()
         {
+            // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Value change would break test coverage. More info at https://github.com/dotnet/corefx/pull/43052#issuecomment-800481195.")]
             X509Certificate2 cert = new X509Certificate2(_pkcs12, "mono");
 
             XmlDocument doc = new XmlDocument();
@@ -823,6 +826,7 @@ namespace System.Security.Cryptography.Xml.Tests
         [Fact]
         public void SignedXML_CRLF_Valid()
         {
+            // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Value change would break test coverage. More info at https://github.com/dotnet/corefx/pull/43052#issuecomment-800481195.")]
             X509Certificate2 cert = new X509Certificate2(_pkcs12, "mono");
 
             XmlDocument doc = CreateSignedXml(cert, SignedXml.XmlDsigExcC14NTransformUrl, "\r\n");
@@ -880,6 +884,7 @@ namespace System.Security.Cryptography.Xml.Tests
         [Fact]
         public void SignedXML_LF_Valid()
         {
+            // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Value change would break test coverage. More info at https://github.com/dotnet/corefx/pull/43052#issuecomment-800481195.")]
             X509Certificate2 cert = new X509Certificate2(_pkcs12, "mono");
 
             XmlDocument doc = CreateSignedXml(cert, SignedXml.XmlDsigExcC14NTransformUrl, "\n");
@@ -938,6 +943,7 @@ namespace System.Security.Cryptography.Xml.Tests
         public void MultipleX509Certificates()
         {
             XmlDocument doc = null;
+            // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Value change would break test coverage. More info at https://github.com/dotnet/corefx/pull/43052#issuecomment-800481195.")]
             X509Certificate2 cert = new X509Certificate2(_pkcs12, "mono");
 
             doc = CreateSignedXml(cert, SignedXml.XmlDsigExcC14NTransformUrl, "\n");
