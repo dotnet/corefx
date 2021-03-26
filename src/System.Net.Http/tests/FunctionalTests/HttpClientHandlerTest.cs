@@ -1465,6 +1465,7 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Contains("Access-Control-Request-Method: GET", headersSet);
                     Assert.Contains("Access-Control-Request-Headers: GET", headersSet);
                     Assert.Contains("Age: 12", headersSet);
+                    // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Authorization header.")]
                     Assert.Contains("Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", headersSet);
                     Assert.Contains("Cache-Control: no-cache", headersSet);
                     Assert.Contains("Connection: close", headersSet, StringComparer.OrdinalIgnoreCase); // NetFxHandler uses "Close" vs "close"
@@ -1485,6 +1486,7 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Contains("Max-Forwards: 10", headersSet);
                     Assert.Contains("Origin: http://www.example-social-network.com", headersSet);
                     Assert.Contains("Pragma: no-cache", headersSet);
+                    // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Authorization header.")]
                     Assert.Contains("Proxy-Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", headersSet);
                     Assert.Contains("Range: bytes=500-999", headersSet);
                     Assert.Contains("Referer: http://en.wikipedia.org/wiki/Main_Page", headersSet);
@@ -1611,6 +1613,7 @@ namespace System.Net.Http.Functional.Tests
                 $"Accept-Patch:{fold} text/example;charset=utf-8{newline}" +
                 $"Accept-Ranges:{fold} bytes{newline}" +
                 $"Age: {fold}12{newline}" +
+                // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Test credentials. Authorization header.")]
                 $"Authorization: Bearer 63123a47139a49829bcd8d03005ca9d7{newline}" +
                 $"Allow: {fold}GET, HEAD{newline}" +
                 $"Alt-Svc:{fold} http/1.1=\"http2.example.com:8001\"; ma=7200{newline}" +
