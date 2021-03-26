@@ -6,6 +6,14 @@
             "file": [
                 "src/System.Data.SqlClient/tests/Tools/TDS/TDS.Servers/TdsServerCertificate.pfx"
             ]
+        },
+        {
+            "hash": "fS/wYB+xvioAzYC64E6NK/HITqQkWeDnLJ8FxlR6qxg=",
+            "_justification": "Secret used by tests, it is fake."
+        },
+        {
+            "hash": "CqiHEKi+eM1E9/buyfOU3HKs/aZvQa/KZQHLI71V6AQ=",
+            "_justification": "Secret used by tests, it is fake."
         }
     ]
 }
