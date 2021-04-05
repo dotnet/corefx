@@ -13,10 +13,14 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.X509Certificates.Asn1;
 using Microsoft.Win32.SafeHandles;
 
+using X509VerifyStatusCodeUniversal = Interop.Crypto.X509VerifyStatusCodeUniversal;
+
 namespace Internal.Cryptography.Pal
 {
     internal sealed class OpenSslX509ChainProcessor : IChainPal
     {
+        private delegate X509ChainStatusFlags MapVersionSpecificCode(Interop.Crypto.X509VerifyStatusCode code);
+
         // The average chain is 3 (End-Entity, Intermediate, Root)
         // 10 is plenty big.
         private const int DefaultChainCapacity = 10;
@@ -29,6 +33,8 @@ namespace Internal.Cryptography.Pal
 
         private static readonly CachedDirectoryStoreProvider s_userPersonalStore =
             new CachedDirectoryStoreProvider(X509Store.MyStoreName);
+
+        private static readonly MapVersionSpecificCode s_mapVersionSpecificCode = GetVersionLookup();
 
         private SafeX509Handle _leafHandle;
         private SafeX509StoreHandle _store;
@@ -156,10 +162,10 @@ namespace Internal.Cryptography.Pal
 
         internal static bool IsCompleteChain(Interop.Crypto.X509VerifyStatusCode statusCode)
         {
-            switch (statusCode)
+            switch (statusCode.UniversalCode)
             {
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
                     return false;
                 default:
                     return true;
@@ -173,7 +179,7 @@ namespace Internal.Cryptography.Pal
             SafeX509StoreCtxHandle storeCtx = _storeCtx;
 
             Interop.Crypto.X509VerifyStatusCode statusCode =
-                Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT;
+                X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT;
 
             while (!IsCompleteChain(statusCode))
             {
@@ -426,7 +432,7 @@ namespace Internal.Cryptography.Pal
             Interop.Crypto.X509VerifyStatusCode status =
                 Interop.Crypto.X509ChainGetCachedOcspStatus(_storeCtx, ocspCache);
 
-            if (status != Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_CRL)
+            if (status != X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_GET_CRL)
             {
                 return status;
             }
@@ -468,7 +474,7 @@ namespace Internal.Cryptography.Pal
                 {
                     if (resp == null || resp.IsInvalid)
                     {
-                        return Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_CRL;
+                        return X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_GET_CRL;
                     }
 
                     try
@@ -744,77 +750,111 @@ namespace Internal.Cryptography.Pal
 
         private static X509ChainStatusFlags MapVerifyErrorToChainStatus(Interop.Crypto.X509VerifyStatusCode code)
         {
-            switch (code)
+            switch (code.UniversalCode)
             {
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_OK:
+                case X509VerifyStatusCodeUniversal.X509_V_OK:
                     return X509ChainStatusFlags.NoError;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_NOT_YET_VALID:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_HAS_EXPIRED:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_CERT_NOT_YET_VALID:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_CERT_HAS_EXPIRED:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
                     return X509ChainStatusFlags.NotTimeValid;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_REVOKED:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_CERT_REVOKED:
                     return X509ChainStatusFlags.Revoked;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_SIGNATURE_FAILURE:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_CERT_SIGNATURE_FAILURE:
                     return X509ChainStatusFlags.NotSignatureValid;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_UNTRUSTED:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_CERT_UNTRUSTED:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
                     return X509ChainStatusFlags.UntrustedRoot;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CRL_HAS_EXPIRED:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_CRL_HAS_EXPIRED:
                     return X509ChainStatusFlags.OfflineRevocation;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CRL_NOT_YET_VALID:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CRL_SIGNATURE_FAILURE:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_KEYUSAGE_NO_CRL_SIGN:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_CRL:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_CRL_ISSUER:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNHANDLED_CRITICAL_CRL_EXTENSION:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_CRL_NOT_YET_VALID:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_CRL_SIGNATURE_FAILURE:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_KEYUSAGE_NO_CRL_SIGN:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_GET_CRL:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_GET_CRL_ISSUER:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNHANDLED_CRITICAL_CRL_EXTENSION:
                     return X509ChainStatusFlags.RevocationStatusUnknown;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_INVALID_EXTENSION:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_INVALID_EXTENSION:
                     return X509ChainStatusFlags.InvalidExtension;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
                     return X509ChainStatusFlags.PartialChain;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_INVALID_PURPOSE:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_INVALID_PURPOSE:
                     return X509ChainStatusFlags.NotValidForUsage;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_INVALID_CA:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_INVALID_NON_CA:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_PATH_LENGTH_EXCEEDED:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_KEYUSAGE_NO_CERTSIGN:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_KEYUSAGE_NO_DIGITAL_SIGNATURE:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_INVALID_NON_CA:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_PATH_LENGTH_EXCEEDED:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_KEYUSAGE_NO_CERTSIGN:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_KEYUSAGE_NO_DIGITAL_SIGNATURE:
                     return X509ChainStatusFlags.InvalidBasicConstraints;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_INVALID_POLICY_EXTENSION:
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_NO_EXPLICIT_POLICY:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_INVALID_POLICY_EXTENSION:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_NO_EXPLICIT_POLICY:
                     return X509ChainStatusFlags.InvalidPolicyConstraints;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_REJECTED:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_CERT_REJECTED:
                     return X509ChainStatusFlags.ExplicitDistrust;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNHANDLED_CRITICAL_EXTENSION:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_UNHANDLED_CRITICAL_EXTENSION:
                     return X509ChainStatusFlags.HasNotSupportedCriticalExtension;
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_CHAIN_TOO_LONG:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_CERT_CHAIN_TOO_LONG:
                     throw new CryptographicException();
 
-                case Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_OUT_OF_MEM:
+                case X509VerifyStatusCodeUniversal.X509_V_ERR_OUT_OF_MEM:
                     throw new OutOfMemoryException();
 
+                default:
+                    return s_mapVersionSpecificCode(code);
+            }
+        }
+
+        private static X509ChainStatusFlags MapOpenSsl30Code(Interop.Crypto.X509VerifyStatusCode code)
+        {
+            switch (code.Code30)
+            {
+                case Interop.Crypto.X509VerifyStatusCode30.X509_V_ERR_INVALID_CA:
+                    return X509ChainStatusFlags.InvalidBasicConstraints;
+                default:
+                    Debug.Fail("Unrecognized X509VerifyStatusCode:" + code);
+                    throw new CryptographicException();
+            }
+        }
+
+        private static X509ChainStatusFlags MapOpenSsl102Code(Interop.Crypto.X509VerifyStatusCode code)
+        {
+            switch (code.Code102)
+            {
+                case Interop.Crypto.X509VerifyStatusCode102.X509_V_ERR_INVALID_CA:
+                    return X509ChainStatusFlags.InvalidBasicConstraints;
+                default:
+                    Debug.Fail("Unrecognized X509VerifyStatusCode:" + code);
+                    throw new CryptographicException();
+            }
+        }
+
+        private static X509ChainStatusFlags MapOpenSsl111Code(Interop.Crypto.X509VerifyStatusCode code)
+        {
+            switch (code.Code111)
+            {
+                case Interop.Crypto.X509VerifyStatusCode111.X509_V_ERR_INVALID_CA:
+                    return X509ChainStatusFlags.InvalidBasicConstraints;
                 default:
                     Debug.Fail("Unrecognized X509VerifyStatusCode:" + code);
                     throw new CryptographicException();
@@ -969,7 +1009,7 @@ namespace Internal.Cryptography.Pal
                         int errorDepth = Interop.Crypto.X509StoreCtxGetErrorDepth(storeCtx);
 
                         if (AbortOnSignatureError &&
-                            errorCode == Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_SIGNATURE_FAILURE)
+                            errorCode == X509VerifyStatusCodeUniversal.X509_V_ERR_CERT_SIGNATURE_FAILURE)
                         {
                             AbortedForSignatureError = true;
                             return 0;
@@ -979,9 +1019,9 @@ namespace Internal.Cryptography.Pal
                         // * For compatibility with Windows / .NET Framework, do not report X509_V_CRL_NOT_YET_VALID.
                         // * X509_V_ERR_DIFFERENT_CRL_SCOPE will result in X509_V_ERR_UNABLE_TO_GET_CRL
                         //   which will trigger OCSP, so is ignorable.
-                        if (errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_OK &&
-                            errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CRL_NOT_YET_VALID &&
-                            errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_DIFFERENT_CRL_SCOPE)
+                        if (errorCode != X509VerifyStatusCodeUniversal.X509_V_OK &&
+                            errorCode != X509VerifyStatusCodeUniversal.X509_V_ERR_CRL_NOT_YET_VALID &&
+                            errorCode != X509VerifyStatusCodeUniversal.X509_V_ERR_DIFFERENT_CRL_SCOPE)
                         {
                             if (_errors == null)
                             {
@@ -1014,6 +1054,23 @@ namespace Internal.Cryptography.Pal
                     return -1;
                 }
             }
+        }
+
+        private static MapVersionSpecificCode GetVersionLookup()
+        {
+            // 3.0+ are M_NN_00_PP_p (Major, Minor, 0, Patch, Preview)
+            // 1.x.y are 1_XX_YY_PP_p
+            if (SafeEvpPKeyHandle.OpenSslVersion >= 0x3_00_00_00_0)
+            {
+                return MapOpenSsl30Code;
+            }
+
+            if (SafeEvpPKeyHandle.OpenSslVersion >= 0x1_01_01_00_0)
+            {
+                return MapOpenSsl111Code;
+            }
+
+            return MapOpenSsl102Code;
         }
 
         private unsafe struct ErrorCollection
@@ -1059,7 +1116,7 @@ namespace Internal.Cryptography.Pal
 
             private static int FindBucket(Interop.Crypto.X509VerifyStatusCode statusCode, out int bitValue)
             {
-                int val = (int)statusCode;
+                int val = statusCode.Code;
 
                 int bucket;
 

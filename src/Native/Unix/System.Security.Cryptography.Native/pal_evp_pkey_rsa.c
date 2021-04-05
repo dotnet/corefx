@@ -6,7 +6,7 @@
 #include "pal_utilities.h"
 #include <assert.h>
 
-static int HasNoPrivateKey(RSA* rsa);
+static int HasNoPrivateKey(const RSA* rsa);
 
 EVP_PKEY* CryptoNative_RsaGenerateKey(int keySize)
 {
@@ -86,7 +86,7 @@ int32_t CryptoNative_RsaDecrypt(EVP_PKEY* pkey,
 
     // This check may no longer be needed on OpenSSL 3.0
     {
-        RSA* rsa = EVP_PKEY_get0_RSA(pkey);
+        const RSA* rsa = EVP_PKEY_get0_RSA(pkey);
 
         if (rsa == NULL || HasNoPrivateKey(rsa))
         {
@@ -161,7 +161,7 @@ int32_t CryptoNative_RsaSignHash(EVP_PKEY* pkey,
 
     // This check may no longer be needed on OpenSSL 3.0
     {
-        RSA* rsa = EVP_PKEY_get0_RSA(pkey);
+        const RSA* rsa = EVP_PKEY_get0_RSA(pkey);
 
         if (rsa == NULL || HasNoPrivateKey(rsa))
         {
@@ -196,7 +196,7 @@ int32_t CryptoNative_EvpPkeySetRsa(EVP_PKEY* pkey, RSA* rsa)
     return EVP_PKEY_set1_RSA(pkey, rsa);
 }
 
-static int HasNoPrivateKey(RSA* rsa)
+static int HasNoPrivateKey(const RSA* rsa)
 {
     if (rsa == NULL)
         return 1;
