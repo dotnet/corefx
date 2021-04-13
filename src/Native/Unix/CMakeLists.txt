@@ -152,7 +152,7 @@ if(CLR_CMAKE_PLATFORM_UNIX)
         set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-bind_at_load")
     else (CMAKE_SYSTEM_NAME STREQUAL Darwin)
         add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-Wa,--noexecstack>)
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id=sha1 -Wl,-z,relro,-z,now")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id=sha1 -Wl,-z,relro,-z,now")
     endif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CLR_ADDITIONAL_LINKER_FLAGS}")
