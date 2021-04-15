@@ -73,3 +73,5 @@ DLLEXPORT int32_t CryptoNative_LookupFriendlyNameByOid(const char* oidValue, con
 DLLEXPORT int32_t CryptoNative_EnsureOpenSslInitialized(void);
 
 DLLEXPORT int64_t CryptoNative_OpenSslVersionNumber(void);
+
+DLLEXPORT void CryptoNative_RegisterLegacyAlgorithms(void);

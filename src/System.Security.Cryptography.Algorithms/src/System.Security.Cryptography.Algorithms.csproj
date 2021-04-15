@@ -519,6 +519,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Hmac.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Hmac.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.LegacyAlgorithms.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.LegacyAlgorithms.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.RAND.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.RAND.cs</Link>
     </Compile>
