@@ -3347,9 +3347,6 @@ namespace System.Data.SqlClient
                 }
                 throw;
             }
-            /* Even though ThreadAbortException exists in .NET Core, 
-             * since Abort is not supported, the common language runtime won't ever throw ThreadAbortException.
-             * just to keep a common codebase!*/
             catch (ThreadAbortException e)
             {
                 _isClosed = true;
