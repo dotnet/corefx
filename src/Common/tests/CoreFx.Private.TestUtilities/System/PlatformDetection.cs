@@ -35,6 +35,7 @@ namespace System
         public static bool IsArgIteratorSupported => IsMonoRuntime || (IsWindows && IsNotArmProcess);
         public static bool IsArgIteratorNotSupported => !IsArgIteratorSupported;
         public static bool Is32BitProcess => IntPtr.Size == 4;
+        public static bool Is64BitProcess => IntPtr.Size == 8;
 
         // Windows 10 Insider Preview Build 16215 introduced the necessary APIs for the UAP version of
         // ClientWebSocket.ReceiveAsync to consume partial message data as it arrives, without having to wait
