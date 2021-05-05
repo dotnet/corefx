@@ -381,8 +381,9 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         // On 32-bit we can't test these high inputs as they cause OutOfMemoryExceptions.
+        // On Linux, we may get killed by the OOM Killer; on Windows, it will swap instead
         [OuterLoop("Can take several seconds")]
-        [ConditionalTheory(typeof(Environment), nameof(Environment.Is64BitProcess))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.Is64BitProcess), nameof(PlatformDetection.IsWindows))]
         [InlineData(RegexOptions.Compiled)]
         [InlineData(RegexOptions.None)]
         public void Match_Timeout_Loop_Throws(RegexOptions options)
@@ -394,8 +395,9 @@ namespace System.Text.RegularExpressions.Tests
         }
 
         // On 32-bit we can't test these high inputs as they cause OutOfMemoryExceptions.
+        // On Linux, we may get killed by the OOM Killer; on Windows, it will swap instead
         [OuterLoop("Can take several seconds")]
-        [ConditionalTheory(typeof(Environment), nameof(Environment.Is64BitProcess))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.Is64BitProcess), nameof(PlatformDetection.IsWindows))]
         [InlineData(RegexOptions.Compiled)]
         [InlineData(RegexOptions.None)]
         public void Match_Timeout_Repetition_Throws(RegexOptions options)
