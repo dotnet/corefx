@@ -605,6 +605,13 @@ namespace System.Data.SqlClient
         //
         // SQL.SqlDelegatedTransaction
         //
+        internal static Exception CannotCompleteDelegatedTransactionWithOpenResults(SqlInternalConnectionTds internalConnection, bool marsOn)
+        {
+            SqlErrorCollection errors = new SqlErrorCollection();
+            errors.Add(new SqlError(TdsEnums.TIMEOUT_EXPIRED, (byte)0x00, TdsEnums.MIN_ERROR_CLASS, null, (SR.GetString(SR.ADP_OpenReaderExists, marsOn ? ADP.Command : ADP.Connection)), "", 0, TdsEnums.SNI_WAIT_TIMEOUT));
+            return SqlException.CreateException(errors, null, internalConnection);
+        }
+
         internal static TransactionPromotionException PromotionFailed(Exception inner)
         {
             TransactionPromotionException e = new TransactionPromotionException(SR.GetString(SR.SqlDelegatedTransaction_PromotionFailed), inner);

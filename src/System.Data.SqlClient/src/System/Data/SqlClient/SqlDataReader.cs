@@ -3176,6 +3176,8 @@ namespace System.Data.SqlClient
         private bool TryReadInternal(bool setTimeout, out bool more)
         {
             SqlStatistics statistics = null;
+            RuntimeHelpers.PrepareConstrainedRegions();
+
             try
             {
                 statistics = SqlStatistics.StartTimer(Statistics);
@@ -3324,6 +3326,36 @@ namespace System.Data.SqlClient
 #endif
 
                 return true;
+            }
+            catch (OutOfMemoryException e)
+            {
+                _isClosed = true;
+                SqlConnection con = _connection;
+                if (con != null)
+                {
+                    con.Abort(e);
+                }
+                throw;
+            }
+            catch (StackOverflowException e)
+            {
+                _isClosed = true;
+                SqlConnection con = _connection;
+                if (con != null)
+                {
+                    con.Abort(e);
+                }
+                throw;
+            }
+            catch (ThreadAbortException e)
+            {
+                _isClosed = true;
+                SqlConnection con = _connection;
+                if (con != null)
+                {
+                    con.Abort(e);
+                }
+                throw;
             }
             finally
             {
