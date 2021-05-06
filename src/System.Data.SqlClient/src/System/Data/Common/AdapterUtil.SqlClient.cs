@@ -574,6 +574,8 @@ namespace System.Data.Common
         }
 
         // global constant strings
+        internal const string Connection = "Connection";
+        internal const string Command = "Command";
         internal const string Parameter = "Parameter";
         internal const string ParameterName = "ParameterName";
         internal const string ParameterSetPosition = "set_Position";

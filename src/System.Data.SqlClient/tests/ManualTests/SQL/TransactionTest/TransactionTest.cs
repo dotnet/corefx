@@ -8,6 +8,98 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class TransactionTest
     {
+        public static TheoryData<string> PoolEnabledConnectionStrings =>
+            new TheoryData<string>
+            {
+                new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr)
+                {
+                    MultipleActiveResultSets = false,
+                    Pooling = true,
+                    MaxPoolSize = 1
+                }.ConnectionString
+                , new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr)
+                {
+                    Pooling = true,
+                    MultipleActiveResultSets = true
+                }.ConnectionString
+            };
+
+        public static TheoryData<string> PoolDisabledConnectionStrings =>
+            new TheoryData<string>
+            {
+                new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr)
+                {
+                    Pooling = false,
+                    MultipleActiveResultSets = false
+                }.ConnectionString
+                , new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr)
+                {
+                    Pooling = false,
+                    MultipleActiveResultSets = true
+                }.ConnectionString
+            };
+
+        [ConditionalTheory(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
+        [MemberData(nameof(PoolEnabledConnectionStrings))]
+        public static void ReadNextQueryAfterTxAbortedPoolEnabled(string connString)
+            => ReadNextQueryAfterTxAbortedTest(connString);
+
+        [ConditionalTheory(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
+        [MemberData(nameof(PoolDisabledConnectionStrings))]
+        public static void ReadNextQueryAfterTxAbortedPoolDisabled(string connString)
+            => ReadNextQueryAfterTxAbortedTest(connString);
+
+        private static void ReadNextQueryAfterTxAbortedTest(string connString)
+        {
+            using (System.Transactions.TransactionScope scope = new System.Transactions.TransactionScope())
+            {
+                using (SqlConnection sqlConnection = new SqlConnection(connString))
+                {
+                    SqlCommand cmd = new SqlCommand("SELECT 1", sqlConnection);
+                    sqlConnection.Open();
+                    var reader = cmd.ExecuteReader();
+                    // Disposing Transaction Scope before completing read triggers GitHub issue #980 use-case that leads to wrong data in future rounds.
+                    scope.Dispose();
+                }
+
+                using (SqlConnection sqlConnection = new SqlConnection(connString))
+                using (SqlCommand cmd = new SqlCommand("SELECT 2", sqlConnection))
+                {
+                    sqlConnection.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        bool result = reader.Read();
+                        Assert.True(result);
+                        Assert.Equal(2, reader.GetValue(0));
+                    }
+                }
+
+                using (SqlConnection sqlConnection = new SqlConnection(connString))
+                using (SqlCommand cmd = new SqlCommand("SELECT 3", sqlConnection))
+                {
+                    sqlConnection.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReaderAsync().Result)
+                    {
+                        bool result = reader.ReadAsync().Result;
+                        Assert.True(result);
+                        Assert.Equal(3, reader.GetValue(0));
+                    }
+                }
+
+                using (SqlConnection sqlConnection = new SqlConnection(connString))
+                using (SqlCommand cmd = new SqlCommand("SELECT TOP(1) 4 Clm0 FROM sysobjects FOR XML AUTO", sqlConnection))
+                {
+                    sqlConnection.Open();
+                    using (System.Xml.XmlReader reader = cmd.ExecuteXmlReader())
+                    {
+                        bool result = reader.Read();
+                        Assert.True(result);
+                        Assert.Equal("4", reader[0]);
+                    }
+                }
+            }
+        }
+
         [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestMain()
         {
