@@ -85,12 +85,12 @@ stages:
                       /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/PublishToArtifacts.binlog
               displayName: Publish to artifacts and produce manifest
 
-            - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 build.proj
-                      -warnaserror:0 -ci
-                      /t:UpdatePublishedVersions
-                      /p:GitHubAuthToken=$(AccessToken-dotnet-build-bot-public-repo)
-                      /p:VersionsRepoOwner=dotnet
-                      /p:VersionsRepo=versions
-                      /p:VersionsRepoPath=build-info/dotnet/corefx/$(FullBranchName)
-                      /p:ShippedNuGetPackageGlobPath=$(_artifactsDir)/packages/**/*.nupkg
-              displayName: Update dotnet/versions
+            #- script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 build.proj
+            #          -warnaserror:0 -ci
+            #          /t:UpdatePublishedVersions
+            #          /p:GitHubAuthToken=$(AccessToken-dotnet-build-bot-public-repo)
+            #          /p:VersionsRepoOwner=dotnet
+            #          /p:VersionsRepo=versions
+            #          /p:VersionsRepoPath=build-info/dotnet/corefx/$(FullBranchName)
+            #          /p:ShippedNuGetPackageGlobPath=$(_artifactsDir)/packages/**/*.nupkg
+            #  displayName: Update dotnet/versions
