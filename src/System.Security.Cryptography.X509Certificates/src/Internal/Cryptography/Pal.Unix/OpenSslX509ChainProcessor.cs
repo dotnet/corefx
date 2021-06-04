@@ -370,8 +370,8 @@ namespace Internal.Cryptography.Pal
                 // chain is just fine (unless it returned a negative code for an exception)
                 Debug.Assert(verify, "verify should have returned true");
 
-                const Interop.Crypto.X509VerifyStatusCode NoCrl =
-                    Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_CRL;
+                Interop.Crypto.X509VerifyStatusCode NoCrl =
+                   X509VerifyStatusCodeUniversal.X509_V_ERR_UNABLE_TO_GET_CRL;
 
                 ErrorCollection? errors =
                     workingChain.LastError > 0 ? (ErrorCollection?)workingChain[0] : null;
@@ -726,7 +726,7 @@ namespace Internal.Cryptography.Pal
             X509ChainStatus chainStatus = new X509ChainStatus
             {
                 Status = statusFlag,
-                StatusInformation = Interop.Crypto.GetX509VerifyCertErrorString(errorCode),
+                StatusInformation = Interop.Crypto.GetX509VerifyCertErrorString(errorCode.Code),
             };
 
             elementStatus.Add(chainStatus);
