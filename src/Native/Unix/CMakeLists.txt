@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(CoreFX C)
 
+if (NOT MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")
+    add_compile_options($<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:-fPIE>)
+    add_compile_options($<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:-fPIC>)
+endif()
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 set(CMAKE_MACOSX_RPATH ON)
 set(CMAKE_INSTALL_PREFIX $ENV{__CMakeBinDir})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -18,7 +26,6 @@ add_compile_options(-Wno-empty-translation-unit)
 add_compile_options(-Wno-cast-align)
 add_compile_options(-Wno-typedef-redefinition)
 add_compile_options(-Wno-c11-extensions)
-add_compile_options(-fPIC)
 add_compile_options(-I${CMAKE_CURRENT_SOURCE_DIR}/Common)
 add_compile_options(-I${CMAKE_CURRENT_BINARY_DIR}/Common)
 add_compile_options(-g)
@@ -106,9 +113,6 @@ endif ()
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE")
-   set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wa,--noexecstack")
-   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id=sha1")
-   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id=sha1")
 endif ()
 
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
@@ -122,8 +126,8 @@ endif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
 if(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
     set(CLR_CMAKE_PLATFORM_UNIX 1)
     add_definitions(-D_BSD_SOURCE) # required for getline
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld -Xlinker --build-id=sha1")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}  -fuse-ld=lld -Xlinker --build-id=sha1")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
 endif(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 
 if(CMAKE_SYSTEM_NAME STREQUAL OpenBSD)
@@ -145,6 +149,13 @@ endif(CMAKE_SYSTEM_NAME STREQUAL SunOS)
 #       ./build-native.sh cmakeargs -DCLR_ADDITIONAL_COMPILER_OPTIONS=<...> cmakeargs -DCLR_ADDITIONAL_LINKER_FLAGS=<...>
 #
 if(CLR_CMAKE_PLATFORM_UNIX)
+    if (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-bind_at_load")
+    else (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+        add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-Wa,--noexecstack>)
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id=sha1 -Wl,-z,relro,-z,now")
+    endif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CLR_ADDITIONAL_LINKER_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CLR_ADDITIONAL_LINKER_FLAGS}" )
     add_compile_options(${CLR_ADDITIONAL_COMPILER_OPTIONS})
