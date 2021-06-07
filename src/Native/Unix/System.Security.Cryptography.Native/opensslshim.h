@@ -91,9 +91,9 @@ void ERR_put_error(int32_t lib, int32_t func, int32_t reason, const char* file, 
 
 #ifdef FEATURE_DISTRO_AGNOSTIC_SSL
 
-#define NEED_OPENSSL_1_0 true
-#define NEED_OPENSSL_1_1 true
-#define NEED_OPENSSL_3_0 true
+#define NEED_OPENSSL_1_0 1
+#define NEED_OPENSSL_1_1 1
+#define NEED_OPENSSL_3_0 1
 
 #if !HAVE_OPENSSL_EC2M
 // In portable build, we need to support the following functions even if they were not present
@@ -991,14 +991,14 @@ FOR_ALL_OPENSSL_FUNCTIONS
 
 #else // FEATURE_DISTRO_AGNOSTIC_SSL
 
-#define API_EXISTS(fn) true
+#define API_EXISTS(fn) 1
 
 #if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_3_0_RTM
-#define NEED_OPENSSL_3_0 true
+#define NEED_OPENSSL_3_0 1
 #elif OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_0_RTM
-#define NEED_OPENSSL_1_1 true
+#define NEED_OPENSSL_1_1 1
 #else
-#define NEED_OPENSSL_1_0 true
+#define NEED_OPENSSL_1_0 1
 #endif
 
 #if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_3_0_RTM
