@@ -59,7 +59,7 @@ int32_t CryptoNative_EvpDigestFinalEx(EVP_MD_CTX* ctx, uint8_t* md, uint32_t* s)
 
 int32_t CryptoNative_EvpMdSize(const EVP_MD* md)
 {
-    return EVP_MD_size(md);
+    return EVP_MD_get_size(md);
 }
 
 const EVP_MD* CryptoNative_EvpMd5()
