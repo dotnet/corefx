@@ -414,8 +414,8 @@ namespace System.Net.WebSockets
             {
                 if (releaseSemaphoreAndSendBuffer)
                 {
-                    _sendFrameAsyncLock.Release();
                     ReleaseSendBuffer();
+                    _sendFrameAsyncLock.Release();
                 }
             }
 
@@ -436,8 +436,8 @@ namespace System.Net.WebSockets
             }
             finally
             {
-                _sendFrameAsyncLock.Release();
                 ReleaseSendBuffer();
+                _sendFrameAsyncLock.Release();
             }
         }
 
@@ -460,8 +460,8 @@ namespace System.Net.WebSockets
             }
             finally
             {
-                _sendFrameAsyncLock.Release();
                 ReleaseSendBuffer();
+                _sendFrameAsyncLock.Release();
             }
         }
 
