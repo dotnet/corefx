@@ -451,7 +451,7 @@
       "value": "$(PB_DockerRepository):$(PB_DockerTag)"
     },
     "PB_DockerRepository": {
-      "value": "microsoft/dotnet-buildtools-prereqs"
+      "value": "mcr.microsoft.com/dotnet-buildtools/prereqs"
     },
     "PB_DockerTag": {
       "value": "ubuntu-14.04-cross-0cd4667-20170319080304",

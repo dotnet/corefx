@@ -8,7 +8,7 @@
 
 def submittedHelixJson = null
 
-simpleDockerNode('microsoft/dotnet-buildtools-prereqs:centos-6-376e1a3-20174311014331') {
+simpleDockerNode('mcr.microsoft.com/dotnet-buildtools/prereqs:centos-6-376e1a3-20174311014331') {
     stage ('Checkout source') {
         checkoutRepo()
     }
