@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#include <assert.h>
 #include "pal_evp_pkey.h"
 
 EVP_PKEY* CryptoNative_EvpPkeyCreate()
@@ -15,6 +16,12 @@ void CryptoNative_EvpPkeyDestroy(EVP_PKEY* pkey)
     {
         EVP_PKEY_free(pkey);
     }
+}
+
+int32_t CryptoNative_EvpPKeySize(EVP_PKEY* pkey)
+{
+    assert(pkey != NULL);
+    return EVP_PKEY_size(pkey);
 }
 
 int32_t CryptoNative_UpRefEvpPkey(EVP_PKEY* pkey)

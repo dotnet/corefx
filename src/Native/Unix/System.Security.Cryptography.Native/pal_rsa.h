@@ -56,14 +56,6 @@ DLLEXPORT int32_t
 CryptoNative_RsaPublicEncrypt(int32_t flen, const uint8_t* from, uint8_t* to, RSA* rsa, RsaPadding padding);
 
 /*
-Shims the RSA_private_decrypt method.
-
-Returns the size of the signature, or -1 on error.
-*/
-DLLEXPORT int32_t
-CryptoNative_RsaPrivateDecrypt(int32_t flen, const uint8_t* from, uint8_t* to, RSA* rsa, RsaPadding padding);
-
-/*
 Shims RSA_private_encrypt with a fixed value of RSA_NO_PADDING.
 
 Requires that the input be the size of the key.
@@ -85,13 +77,6 @@ Shims the RSA_size method.
 Returns the RSA modulus size in bytes.
 */
 DLLEXPORT int32_t CryptoNative_RsaSize(RSA* rsa);
-
-/*
-Shims the RSA_generate_key_ex method.
-
-Returns 1 upon success, otherwise 0.
-*/
-DLLEXPORT int32_t CryptoNative_RsaGenerateKeyEx(RSA* rsa, int32_t bits, BIGNUM* e);
 
 /*
 Shims the RSA_sign method.
