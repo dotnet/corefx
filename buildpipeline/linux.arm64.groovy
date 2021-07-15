@@ -8,7 +8,7 @@
 
 def submittedHelixJson = null
 
-simpleDockerNode('microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180315221921') {
+simpleDockerNode('mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180315221921') {
     stage ('Checkout source') {
         checkoutRepo()
     }
