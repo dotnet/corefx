@@ -501,7 +501,7 @@
     "type": "TfsGit",
     "name": "DotNet-BuildPipeline",
     "url": "https://devdiv.visualstudio.com/DevDiv/_git/DotNet-BuildPipeline",
-    "defaultBranch": "refs/heads/master",
+    "defaultBranch": "refs/heads/main",
     "clean": "false",
     "checkoutSubmodules": false
   },
