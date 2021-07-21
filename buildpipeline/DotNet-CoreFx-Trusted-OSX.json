@@ -408,7 +408,9 @@
       "isSecret": true
     }
   },
-  "demands": [],
+  "demands": [
+    "Agent.Name -equals DCI-MAC-BUILD-017"
+  ],
   "retentionRules": [
     {
       "branches": [
