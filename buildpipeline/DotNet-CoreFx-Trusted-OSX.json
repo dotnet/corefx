@@ -35,6 +35,7 @@
         "definitionType": "task"
       },
       "inputs": {
+        "RemoveDotFiles": "true",
         "SourceFolder": "$(Agent.BuildDirectory)/s",
         "Contents": "**\n.gitignore\n.editorconfig\n.gitattributes\n.gitmirrorall\n.git/**\n.git\n.azure-ci.yml"
       }
