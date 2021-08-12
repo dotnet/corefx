@@ -977,6 +977,14 @@ namespace System.Net.WebSockets
             }
 
             bool shouldFail = reservedSet;
+
+            if (header.PayloadLength < 0)
+            {
+                // as per RFC, if payload length is a 64-bit integer, the most significant bit MUST be 0
+                // frame-payload-length-63 = %x0000000000000000-7FFFFFFFFFFFFFFF; 64 bits in length
+                shouldFail = true;
+            }
+
             if (masked)
             {
                 if (!_isServer)
