@@ -201,9 +201,10 @@
         "3.1.4",
         "3.1.5",
         "3.1.6",
-        "3.1.7"
+        "3.1.7",
+        "3.1.8"
       ],
-      "BaselineVersion": "3.1.7",
+      "BaselineVersion": "3.1.8",
       "InboxOn": {}
     },
     "Microsoft.NETCore.Platforms.Future": {
