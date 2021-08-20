@@ -21,6 +21,11 @@ namespace System.Memory.Tests
             public Memory() : base(ReadOnlySequenceFactory<byte>.MemoryFactory) { }
         }
 
+        public class MemoryManager : ReadOnlySequenceTestsByte
+        {
+            public MemoryManager() : base(ReadOnlySequenceFactory<byte>.MemoryManagerFactory) { }
+        }
+
         public class SingleSegment : ReadOnlySequenceTestsByte
         {
             public SingleSegment() : base(ReadOnlySequenceFactory<byte>.SingleSegmentFactory) { }
