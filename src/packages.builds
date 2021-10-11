@@ -31,7 +31,7 @@
     </Project>
     <Project Include="$(MSBuildThisFileDirectory)System.Drawing.Common\pkg\System.Drawing.Common.pkgproj">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project> 
+    </Project>
   </ItemGroup>
 
   <ItemGroup>
