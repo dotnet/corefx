@@ -832,7 +832,7 @@ namespace System.Drawing
             [DllImport(LibraryName, ExactSpelling = true)]
             internal static extern int GdipDeleteRegion(HandleRef region);
 
-            [DllImport(LibraryName, ExactSpelling = true)]
+            [DllImport(LibraryName, ExactSpelling = true, SetLastError = true)]
             internal static extern int GdipFillRegion(HandleRef graphics, HandleRef brush, HandleRef region);
 
             [DllImport(LibraryName, ExactSpelling = true)]
