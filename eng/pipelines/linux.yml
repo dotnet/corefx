@@ -132,6 +132,14 @@ stages:
           displayName: Build
           strategy:
             matrix:
+              RedHat7_x64_Release:
+                _BuildConfig: Release
+                _architecture: x64
+                _framework: netcoreapp
+                _buildScriptPrefix: ''
+                _buildExtraArguments: /p:RuntimeOS=rhel.7 /p:PortableBuild=false
+                _dockerContainer: rhel7_container
+
               ${{ if eq(parameters.isFullMatrix, 'false') }}:
                 arm_Debug:
                   _BuildConfig: Debug
