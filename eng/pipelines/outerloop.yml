@@ -5,9 +5,6 @@ resources:
   - container: rhel7_container
     image: mcr.microsoft.com/dotnet-buildtools/prereqs:rhel7_prereqs_2
 
-  - container: rhel6_container
-    image: mcr.microsoft.com/dotnet-buildtools/prereqs:centos-6-376e1a3-20174311014331
-
   - container: alpine_36_container
     image: mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.6-WithNode-f4d3fe3-20181213005010
 
