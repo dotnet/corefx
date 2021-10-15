@@ -133,7 +133,7 @@ namespace System.Net.Http
                 if (NetEventSource.IsEnabled) Trace($"{request}, {nameof(initialWindowSize)}={initialWindowSize}");
             }
 
-            private object SyncObject => _streamWindow;
+            private object SyncObject => this;
 
             public int StreamId => _streamId;
 
