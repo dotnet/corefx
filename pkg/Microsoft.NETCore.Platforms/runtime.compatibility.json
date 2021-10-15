@@ -2944,26 +2944,6 @@
     "any",
     "base"
   ],
-  "rhel.6": [
-    "rhel.6",
-    "rhel",
-    "linux",
-    "unix",
-    "any",
-    "base"
-  ],
-  "rhel.6-x64": [
-    "rhel.6-x64",
-    "rhel.6",
-    "rhel-x64",
-    "rhel",
-    "linux-x64",
-    "linux",
-    "unix-x64",
-    "unix",
-    "any",
-    "base"
-  ],
   "rhel.7": [
     "rhel.7",
     "rhel",
