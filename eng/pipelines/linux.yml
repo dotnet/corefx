@@ -100,16 +100,6 @@ stages:
                 _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
                 _buildExtraArguments: -warnAsError false
                 _publishTests: true
-            
-            ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-              RedHat6_x64_Release:
-                _BuildConfig: Release
-                _architecture: x64
-                _framework: netcoreapp
-                _buildScriptPrefix: ''
-                _buildExtraArguments: /p:RuntimeOS=rhel.6 /p:PortableBuild=false
-                _dockerContainer: rhel6_container
-                _publishTests: false
 
         pool:
           name: Hosted Ubuntu 1604
@@ -142,14 +132,6 @@ stages:
           displayName: Build
           strategy:
             matrix:
-              RedHat6_x64_Release:
-                _BuildConfig: Release
-                _architecture: x64
-                _framework: netcoreapp
-                _buildScriptPrefix: ''
-                _buildExtraArguments: /p:RuntimeOS=rhel.6 /p:PortableBuild=false
-                _dockerContainer: rhel6_container
-
               ${{ if eq(parameters.isFullMatrix, 'false') }}:
                 arm_Debug:
                   _BuildConfig: Debug
