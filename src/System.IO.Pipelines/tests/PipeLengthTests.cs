@@ -278,5 +278,19 @@ namespace System.IO.Pipelines.Tests
             ReadResult result = await _pipe.Reader.ReadAsync();
             _pipe.Reader.AdvanceTo(default, default);
         }
+
+        [Fact]
+        public async Task AdvanceFollowedByWriteAsyncTest()
+        {
+            Memory<byte> buffer = new byte[26];
+            Pipe pipe = new Pipe(new PipeOptions(minimumSegmentSize: 1));
+
+            var mem = pipe.Writer.GetMemory(14).Slice(0, 14);
+            buffer.Slice(0, 14).CopyTo(mem);
+            pipe.Writer.Advance(14);
+            await pipe.Writer.WriteAsync(buffer.Slice(14));
+            ReadResult res = await pipe.Reader.ReadAsync();
+            Assert.Equal(res.Buffer.Length, buffer.Length);
+        }
     }
 }
