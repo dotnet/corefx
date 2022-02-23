@@ -44,7 +44,7 @@ stages:
                 _publishTests: true
 
         pool:
-          name: Hosted macOS
+          vmImage: macos-10.15
 
         preBuildSteps:
           - script: |
@@ -57,4 +57,4 @@ stages:
         submitToHelix: true
 
         variables:
-            - macOSQueues: OSX.1013.Amd64.Open+OSX.1014.Amd64.Open
+            - macOSQueues: OSX.1015.Amd64.Open
