@@ -53,8 +53,13 @@ stages:
               ln -s /usr/local/opt/openssl@1.1/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
               ln -s /usr/local/opt/openssl@1.1/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
             displayName: Install Build Dependencies
-        
+
         submitToHelix: true
 
         variables:
-            - macOSQueues: OSX.1013.Amd64.Open+OSX.1014.Amd64.Open
+
+          - ${{ if eq(parameters.isInternalBuild, 'false') }}:
+            - macOSQueues: OSX.1015.Amd64.Open+OSX.1100.Amd64.Open
+
+          - ${{ else }}:
+            - macOSQueues: OSX.1015.Amd64+OSX.1100.Amd64
