@@ -217,12 +217,10 @@ jobs:
                 msbuildScript: $(_msbuildCommand)
                 framework: $(_framework)
                 testScope: ${{ coalesce(parameters.testScope, 'innerloop') }} # if parameters.testScope is empty use 'innerloop'
-
-                ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-                  officialBuildId: $(Build.BuildNumber)
+                officialBuildId: $(Build.BuildNumber)
+                ${{ if eq(variables['System.TeamProject'], 'internal') }}:
                   helixToken: $(HelixApiAccessToken)
-
-                ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+                ${{ if eq(variables['System.TeamProject'], 'public') }}:
                   # TODO: SET Creator to the PR owner whenever Azure DevOps supports a good way to retrieve it.
                   creator: dotnet-bot
                   helixToken: ''
