@@ -106,6 +106,10 @@ jobs:
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             - _commonArguments: $(_args) -stripSymbols
 
+        # DotNet-HelixApi-Access provides 'HelixApiAccessToken' for internal builds
+        - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          - group: DotNet-HelixApi-Access
+
         # pass along job properties
         ${{ each property in job }}:
           ${{ if and(ne(property.key, 'job'), ne(property.key, 'variables')) }}:
