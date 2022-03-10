@@ -135,7 +135,7 @@ stages:
               - netcoreappWindowsQueues: Windows.7.Amd64+Windows.81.Amd64+Windows.10.Amd64.Client21H1
 
             - ${{ if eq(parameters.fullMatrix, 'true') }}:
-              - netcoreappWindowsQueues: Windows.7.Amd64+Windows.81.Amd64+Windows.10.Amd64.ServerRS5+Windows.10.Amd64.Client21H2
+              - netcoreappWindowsQueues: Windows.7.Amd64+Windows.81.Amd64+Windows.10.Amd64.ServerRS5+Windows.10.Amd64.Client21H1
 
       # There is no point of running legs without outerloop tests, when in an outerloop build.
       - ${{ if and(ne(parameters.testScope, 'outerloop'), ne(parameters.testScope, 'all')) }}:
