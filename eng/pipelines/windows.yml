@@ -35,7 +35,7 @@ stages:
                 _BuildConfig: Debug
                 _architecture: x64
                 _framework: netcoreapp
-                _helixQueues: $(netcoreappWindowsQueues)
+                _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
 
               x86_Release:
                 _BuildConfig: Release
@@ -61,7 +61,7 @@ stages:
                 _BuildConfig: Release
                 _architecture: x64
                 _framework: netcoreapp
-                _helixQueues: $(netcoreappWindowsQueues)
+                _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
                 _publishTests: true
 
               x86_Release:
