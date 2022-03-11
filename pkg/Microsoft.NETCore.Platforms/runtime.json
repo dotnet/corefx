@@ -66,6 +66,17 @@
         "alpine.3.13-x64"
       ]
     },
+    "alpine.3.15": {
+      "#import": [
+        "alpine.3.14"
+      ]
+    },
+    "alpine.3.15-x64": {
+      "#import": [
+        "alpine.3.15",
+        "alpine.3.14-x64"
+      ]
+    },
     "alpine.3.6": {
       "#import": [
         "alpine"
