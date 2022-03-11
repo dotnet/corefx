@@ -44,7 +44,7 @@ stages:
                 _publishTests: true
 
         pool:
-          name: Hosted macOS
+          vmImage: macos-10.15
 
         preBuildSteps:
           - script: |

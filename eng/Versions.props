@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <!-- The .NET Core product branding version -->
-    <ProductVersion>3.1.23</ProductVersion>
+    <ProductVersion>3.1.24</ProductVersion>
     <!-- We need to move to 4.7 as part of our versioning change when we switch to arcade to avoid downgrading versions -->
     <MajorVersion>4</MajorVersion>
     <MinorVersion>7</MinorVersion>
@@ -53,9 +53,9 @@
     <MicrosoftNETCoreDotNetHostPackageVersion>3.1.17</MicrosoftNETCoreDotNetHostPackageVersion>
     <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.1.17</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
     <!-- Coreclr dependencies -->
-    <MicrosoftNETSdkILPackageVersion>3.1.22-servicing.21568.3</MicrosoftNETSdkILPackageVersion>
-    <MicrosoftNETCoreILAsmPackageVersion>3.1.22-servicing.21568.3</MicrosoftNETCoreILAsmPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.1.22-servicing.21568.3</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETSdkILPackageVersion>3.1.23-servicing.22116.1</MicrosoftNETSdkILPackageVersion>
+    <MicrosoftNETCoreILAsmPackageVersion>3.1.23-servicing.22116.1</MicrosoftNETCoreILAsmPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.1.23-servicing.22116.1</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- Corefx dependencies -->
     <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview9.19409.15</MicrosoftNETCorePlatformsPackageVersion>
     <runtimenativeSystemIOPortsPackageVersion>4.6.0-preview9.19409.15</runtimenativeSystemIOPortsPackageVersion>
