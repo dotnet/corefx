@@ -106,6 +106,10 @@ jobs:
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             - _commonArguments: $(_args) -stripSymbols
 
+        # DotNet-HelixApi-Access provides 'HelixApiAccessToken' for internal builds
+        - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          - group: DotNet-HelixApi-Access
+
         # pass along job properties
         ${{ each property in job }}:
           ${{ if and(ne(property.key, 'job'), ne(property.key, 'variables')) }}:
@@ -209,7 +213,7 @@ jobs:
             - template: /eng/pipelines/helix.yml
               parameters:
                 # send tests to helix only on public builds, official scheduled builds or manual official builds.
-                condition: and(ne(variables['System.TeamProject'], 'internal'), eq(${{ parameters.isOfficialBuild }}, False))
+                condition: eq(${{ parameters.isOfficialBuild }}, False)
                 targetOS: ${{ parameters.targetOS }}
                 archGroup: $(_architecture)
                 configuration: $(_BuildConfig)
@@ -217,12 +221,10 @@ jobs:
                 msbuildScript: $(_msbuildCommand)
                 framework: $(_framework)
                 testScope: ${{ coalesce(parameters.testScope, 'innerloop') }} # if parameters.testScope is empty use 'innerloop'
-
-                ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-                  officialBuildId: $(Build.BuildNumber)
+                officialBuildId: $(Build.BuildNumber)
+                ${{ if eq(variables['System.TeamProject'], 'internal') }}:
                   helixToken: $(HelixApiAccessToken)
-
-                ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+                ${{ if eq(variables['System.TeamProject'], 'public') }}:
                   # TODO: SET Creator to the PR owner whenever Azure DevOps supports a good way to retrieve it.
                   creator: dotnet-bot
                   helixToken: ''

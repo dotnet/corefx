@@ -35,7 +35,7 @@ stages:
                 _BuildConfig: Debug
                 _architecture: x64
                 _framework: netcoreapp
-                _helixQueues: $(netcoreappWindowsQueues)
+                _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
 
               x86_Release:
                 _BuildConfig: Release
@@ -54,14 +54,14 @@ stages:
                 _architecture: x64
                 _framework: uap
                 _helixQueues: $(uapNetfxQueues)
-            
+
             # Full test matrix
             ${{ if eq(parameters.fullMatrix, 'true') }}:
               x64_Release:
                 _BuildConfig: Release
                 _architecture: x64
                 _framework: netcoreapp
-                _helixQueues: $(netcoreappWindowsQueues)
+                _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
                 _publishTests: true
 
               x86_Release:
@@ -115,14 +115,27 @@ stages:
         buildExtraArguments: /p:RuntimeOS=win10
 
         variables:
-          - uapNetfxQueues: Windows.10.Amd64.ClientRS5.Open
-          - windowsArmQueue: Windows.10.Arm64.Open
+          - ${{ if eq(parameters.isInternalBuild, 'false') }}:
+            - nanoQueues: "`(Windows.Nano.1809.Amd64.Open`)windows.10.amd64.serverrs5.open@mcr.microsoft.com/dotnet-buildtools/prereqs:nanoserver-1809-helix-amd64-08e8e40-20200107182504"
+            - uapNetfxQueues: Windows.10.Amd64.ClientRS5.Open
+            - windowsArmQueue: Windows.10.Arm64.Open
 
-          - ${{ if eq(parameters.fullMatrix, 'false') }}:
-            - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.Client19H1.ES.Open
+            - ${{ if eq(parameters.fullMatrix, 'false') }}:
+              - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.Client21H1.Open
 
-          - ${{ if eq(parameters.fullMatrix, 'true') }}:
-            - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ServerRS5.Open+Windows.10.Amd64.Client19H1.Open
+            - ${{ if eq(parameters.fullMatrix, 'true') }}:
+              - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ServerRS5.Open+Windows.10.Amd64.Client21H1.Open
+
+          - ${{ else }}:
+            - nanoQueues: "`(Windows.Nano.1809.Amd64`)windows.10.amd64.serverrs5@mcr.microsoft.com/dotnet-buildtools/prereqs:nanoserver-1809-helix-amd64-08e8e40-20200107182504"
+            - uapNetfxQueues: Windows.10.Amd64.ClientRS5
+            - windowsArmQueue: Windows.10.Arm64
+
+            - ${{ if eq(parameters.fullMatrix, 'false') }}:
+              - netcoreappWindowsQueues: Windows.7.Amd64+Windows.81.Amd64+Windows.10.Amd64.Client21H1
+
+            - ${{ if eq(parameters.fullMatrix, 'true') }}:
+              - netcoreappWindowsQueues: Windows.7.Amd64+Windows.81.Amd64+Windows.10.Amd64.ServerRS5+Windows.10.Amd64.Client21H1
 
       # There is no point of running legs without outerloop tests, when in an outerloop build.
       - ${{ if and(ne(parameters.testScope, 'outerloop'), ne(parameters.testScope, 'all')) }}:
@@ -157,7 +170,11 @@ stages:
           buildExtraArguments: /p:RuntimeOS=win10
 
           variables:
-            - allConfigurationsQueues: Windows.10.Amd64.ClientRS5.Open
+            - ${{ if eq(parameters.isInternalBuild, 'false') }}:
+              - allConfigurationsQueues: Windows.10.Amd64.ClientRS5.Open
+
+            - ${{ else }}:
+              - allConfigurationsQueues: Windows.10.Amd64.ClientRS5
 
           frameworkArg: -allConfigurations
           customBuildSteps:
