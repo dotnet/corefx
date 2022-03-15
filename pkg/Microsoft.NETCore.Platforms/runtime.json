@@ -952,6 +952,12 @@
         "rhel"
       ]
     },
+    "ol-arm64": {
+      "#import": [
+        "ol",
+        "rhel-arm64"
+      ]
+    },
     "ol-x64": {
       "#import": [
         "ol",
@@ -995,6 +1001,19 @@
         "ol.7.1",
         "ol.7.0-x64",
         "rhel.7.1-x64"
+      ]
+    },
+    "ol.7.10": {
+      "#import": [
+        "ol.7.9",
+        "rhel.7.10"
+      ]
+    },
+    "ol.7.10-x64": {
+      "#import": [
+        "ol.7.10",
+        "ol.7.9-x64",
+        "rhel.7.10-x64"
       ]
     },
     "ol.7.2": {
@@ -1062,10 +1081,56 @@
         "rhel.7.6-x64"
       ]
     },
+    "ol.7.7": {
+      "#import": [
+        "ol.7.6",
+        "rhel.7.7"
+      ]
+    },
+    "ol.7.7-x64": {
+      "#import": [
+        "ol.7.7",
+        "ol.7.6-x64",
+        "rhel.7.7-x64"
+      ]
+    },
+    "ol.7.8": {
+      "#import": [
+        "ol.7.7",
+        "rhel.7.8"
+      ]
+    },
+    "ol.7.8-x64": {
+      "#import": [
+        "ol.7.8",
+        "ol.7.7-x64",
+        "rhel.7.8-x64"
+      ]
+    },
+    "ol.7.9": {
+      "#import": [
+        "ol.7.8",
+        "rhel.7.9"
+      ]
+    },
+    "ol.7.9-x64": {
+      "#import": [
+        "ol.7.9",
+        "ol.7.8-x64",
+        "rhel.7.9-x64"
+      ]
+    },
     "ol.8": {
       "#import": [
         "ol",
         "rhel.8"
+      ]
+    },
+    "ol.8-arm64": {
+      "#import": [
+        "ol.8",
+        "ol-arm64",
+        "rhel.8-arm64"
       ]
     },
     "ol.8-x64": {
@@ -1081,11 +1146,189 @@
         "rhel.8.0"
       ]
     },
+    "ol.8.0-arm64": {
+      "#import": [
+        "ol.8.0",
+        "ol.8-arm64",
+        "rhel.8.0-arm64"
+      ]
+    },
     "ol.8.0-x64": {
       "#import": [
         "ol.8.0",
         "ol.8-x64",
         "rhel.8.0-x64"
+      ]
+    },
+    "ol.8.1": {
+      "#import": [
+        "ol.8.0",
+        "rhel.8.1"
+      ]
+    },
+    "ol.8.1-arm64": {
+      "#import": [
+        "ol.8.1",
+        "ol.8.0-arm64",
+        "rhel.8.1-arm64"
+      ]
+    },
+    "ol.8.1-x64": {
+      "#import": [
+        "ol.8.1",
+        "ol.8.0-x64",
+        "rhel.8.1-x64"
+      ]
+    },
+    "ol.8.2": {
+      "#import": [
+        "ol.8.1",
+        "rhel.8.2"
+      ]
+    },
+    "ol.8.2-arm64": {
+      "#import": [
+        "ol.8.2",
+        "ol.8.1-arm64",
+        "rhel.8.2-arm64"
+      ]
+    },
+    "ol.8.2-x64": {
+      "#import": [
+        "ol.8.2",
+        "ol.8.1-x64",
+        "rhel.8.2-x64"
+      ]
+    },
+    "ol.8.3": {
+      "#import": [
+        "ol.8.2",
+        "rhel.8.3"
+      ]
+    },
+    "ol.8.3-arm64": {
+      "#import": [
+        "ol.8.3",
+        "ol.8.2-arm64",
+        "rhel.8.3-arm64"
+      ]
+    },
+    "ol.8.3-x64": {
+      "#import": [
+        "ol.8.3",
+        "ol.8.2-x64",
+        "rhel.8.3-x64"
+      ]
+    },
+    "ol.8.4": {
+      "#import": [
+        "ol.8.3",
+        "rhel.8.4"
+      ]
+    },
+    "ol.8.4-arm64": {
+      "#import": [
+        "ol.8.4",
+        "ol.8.3-arm64",
+        "rhel.8.4-arm64"
+      ]
+    },
+    "ol.8.4-x64": {
+      "#import": [
+        "ol.8.4",
+        "ol.8.3-x64",
+        "rhel.8.4-x64"
+      ]
+    },
+    "ol.8.5": {
+      "#import": [
+        "ol.8.4",
+        "rhel.8.5"
+      ]
+    },
+    "ol.8.5-arm64": {
+      "#import": [
+        "ol.8.5",
+        "ol.8.4-arm64",
+        "rhel.8.5-arm64"
+      ]
+    },
+    "ol.8.5-x64": {
+      "#import": [
+        "ol.8.5",
+        "ol.8.4-x64",
+        "rhel.8.5-x64"
+      ]
+    },
+    "ol.8.6": {
+      "#import": [
+        "ol.8.5",
+        "rhel.8.6"
+      ]
+    },
+    "ol.8.6-arm64": {
+      "#import": [
+        "ol.8.6",
+        "ol.8.5-arm64",
+        "rhel.8.6-arm64"
+      ]
+    },
+    "ol.8.6-x64": {
+      "#import": [
+        "ol.8.6",
+        "ol.8.5-x64",
+        "rhel.8.6-x64"
+      ]
+    },
+    "ol.9": {
+      "#import": [
+        "ol"
+      ]
+    },
+    "ol.9-arm64": {
+      "#import": [
+        "ol.9",
+        "ol-arm64"
+      ]
+    },
+    "ol.9-x64": {
+      "#import": [
+        "ol.9",
+        "ol-x64"
+      ]
+    },
+    "ol.9.0": {
+      "#import": [
+        "ol.9"
+      ]
+    },
+    "ol.9.0-arm64": {
+      "#import": [
+        "ol.9.0",
+        "ol.9-arm64"
+      ]
+    },
+    "ol.9.0-x64": {
+      "#import": [
+        "ol.9.0",
+        "ol.9-x64"
+      ]
+    },
+    "ol.9.1": {
+      "#import": [
+        "ol.9.0"
+      ]
+    },
+    "ol.9.1-arm64": {
+      "#import": [
+        "ol.9.1",
+        "ol.9.0-arm64"
+      ]
+    },
+    "ol.9.1-x64": {
+      "#import": [
+        "ol.9.1",
+        "ol.9.0-x64"
       ]
     },
     "opensuse": {
@@ -1335,6 +1578,17 @@
         "linux-x64"
       ]
     },
+    "rhel.6": {
+      "#import": [
+        "rhel"
+      ]
+    },
+    "rhel.6-x64": {
+      "#import": [
+        "rhel.6",
+        "rhel-x64"
+      ]
+    },
     "rhel.7": {
       "#import": [
         "rhel"
@@ -1366,6 +1620,17 @@
       "#import": [
         "rhel.7.1",
         "rhel.7.0-x64"
+      ]
+    },
+    "rhel.7.10": {
+      "#import": [
+        "rhel.7.9"
+      ]
+    },
+    "rhel.7.10-x64": {
+      "#import": [
+        "rhel.7.10",
+        "rhel.7.9-x64"
       ]
     },
     "rhel.7.2": {
@@ -1423,6 +1688,39 @@
         "rhel.7.5-x64"
       ]
     },
+    "rhel.7.7": {
+      "#import": [
+        "rhel.7.6"
+      ]
+    },
+    "rhel.7.7-x64": {
+      "#import": [
+        "rhel.7.7",
+        "rhel.7.6-x64"
+      ]
+    },
+    "rhel.7.8": {
+      "#import": [
+        "rhel.7.7"
+      ]
+    },
+    "rhel.7.8-x64": {
+      "#import": [
+        "rhel.7.8",
+        "rhel.7.7-x64"
+      ]
+    },
+    "rhel.7.9": {
+      "#import": [
+        "rhel.7.8"
+      ]
+    },
+    "rhel.7.9-x64": {
+      "#import": [
+        "rhel.7.9",
+        "rhel.7.8-x64"
+      ]
+    },
     "rhel.8": {
       "#import": [
         "rhel"
@@ -1474,6 +1772,91 @@
         "rhel.8.0-x64"
       ]
     },
+    "rhel.8.2": {
+      "#import": [
+        "rhel.8.1"
+      ]
+    },
+    "rhel.8.2-arm64": {
+      "#import": [
+        "rhel.8.2",
+        "rhel.8.1-arm64"
+      ]
+    },
+    "rhel.8.2-x64": {
+      "#import": [
+        "rhel.8.2",
+        "rhel.8.1-x64"
+      ]
+    },
+    "rhel.8.3": {
+      "#import": [
+        "rhel.8.2"
+      ]
+    },
+    "rhel.8.3-arm64": {
+      "#import": [
+        "rhel.8.3",
+        "rhel.8.2-arm64"
+      ]
+    },
+    "rhel.8.3-x64": {
+      "#import": [
+        "rhel.8.3",
+        "rhel.8.2-x64"
+      ]
+    },
+    "rhel.8.4": {
+      "#import": [
+        "rhel.8.3"
+      ]
+    },
+    "rhel.8.4-arm64": {
+      "#import": [
+        "rhel.8.4",
+        "rhel.8.3-arm64"
+      ]
+    },
+    "rhel.8.4-x64": {
+      "#import": [
+        "rhel.8.4",
+        "rhel.8.3-x64"
+      ]
+    },
+    "rhel.8.5": {
+      "#import": [
+        "rhel.8.4"
+      ]
+    },
+    "rhel.8.5-arm64": {
+      "#import": [
+        "rhel.8.5",
+        "rhel.8.4-arm64"
+      ]
+    },
+    "rhel.8.5-x64": {
+      "#import": [
+        "rhel.8.5",
+        "rhel.8.4-x64"
+      ]
+    },
+    "rhel.8.6": {
+      "#import": [
+        "rhel.8.5"
+      ]
+    },
+    "rhel.8.6-arm64": {
+      "#import": [
+        "rhel.8.6",
+        "rhel.8.5-arm64"
+      ]
+    },
+    "rhel.8.6-x64": {
+      "#import": [
+        "rhel.8.6",
+        "rhel.8.5-x64"
+      ]
+    },
     "rhel.9": {
       "#import": [
         "rhel"
@@ -1489,6 +1872,40 @@
       "#import": [
         "rhel.9",
         "rhel-x64"
+      ]
+    },
+    "rhel.9.0": {
+      "#import": [
+        "rhel.9"
+      ]
+    },
+    "rhel.9.0-arm64": {
+      "#import": [
+        "rhel.9.0",
+        "rhel.9-arm64"
+      ]
+    },
+    "rhel.9.0-x64": {
+      "#import": [
+        "rhel.9.0",
+        "rhel.9-x64"
+      ]
+    },
+    "rhel.9.1": {
+      "#import": [
+        "rhel.9.0"
+      ]
+    },
+    "rhel.9.1-arm64": {
+      "#import": [
+        "rhel.9.1",
+        "rhel.9.0-arm64"
+      ]
+    },
+    "rhel.9.1-x64": {
+      "#import": [
+        "rhel.9.1",
+        "rhel.9.0-x64"
       ]
     },
     "sles": {
