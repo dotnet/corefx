@@ -35,6 +35,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             yield return new TestCase(new EmailAddressAttribute(), "someName");
             yield return new TestCase(new EmailAddressAttribute(), "someName@");
             yield return new TestCase(new EmailAddressAttribute(), "someName@a@b.com");
+            yield return new TestCase(new EmailAddressAttribute(), "someName@[\r\n\tsomeDomain]");
         }
 
         [Fact]
