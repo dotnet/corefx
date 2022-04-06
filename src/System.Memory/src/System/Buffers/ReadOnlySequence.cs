@@ -130,7 +130,7 @@ namespace System.Buffers
             if (MemoryMarshal.TryGetMemoryManager(memory, out MemoryManager<T> manager, out int index, out int length))
             {
                 _sequenceStart = new SequencePosition(manager, ReadOnlySequence.MemoryManagerToSequenceStart(index));
-                _sequenceEnd = new SequencePosition(manager, ReadOnlySequence.MemoryManagerToSequenceEnd(length));
+                _sequenceEnd = new SequencePosition(manager, ReadOnlySequence.MemoryManagerToSequenceEnd(index + length));
             }
             else if (MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
             {
