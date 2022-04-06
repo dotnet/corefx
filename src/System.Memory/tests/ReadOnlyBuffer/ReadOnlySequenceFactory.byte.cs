@@ -166,7 +166,7 @@ namespace System.Memory.Tests
                 var items = new T[length * 2];
                 input.CopyTo(items, dataOffset);
                 Memory<T> memory = new Memory<T>(items, dataOffset, length);
-
+                
                 if (first == null)
                 {
                     first = new BufferSegment<T>(memory);
