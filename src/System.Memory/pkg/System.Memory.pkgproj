@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <PackageVersion>4.5.4</PackageVersion>
+    <PackageVersion>4.5.5</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageIndex Include="$(ProjectDir)\pkg\baseline\packageBaseline.1.1.json" />
