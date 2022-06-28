@@ -1,0 +1,38 @@
+{
+  "version": "1.0",
+  "tasks": [
+    {
+      "taskType": "trigger",
+      "capabilityId": "AutoMerge",
+      "subCapability": "AutoMerge",
+      "version": "1.0",
+      "id": "2sF1OF992",
+      "config": {
+        "label": "auto-merge",
+        "taskName": "Automatically squash and  merge PR once CI passes",
+        "minMinutesOpen": "12",
+        "mergeType": "squash",
+        "deleteBranches": true,
+        "requireAllStatuses": false,
+        "removeLabelOnPush": true,
+        "conditionalMergeTypes": [
+          {
+            "mergeType": "rebase",
+            "condition": {
+              "placeholder": "author",
+              "operator": "equals",
+              "value": "Dotnet-GitSync-Bot"
+            }
+          }
+        ],
+        "requireSpecificCheckRuns": true,
+        "requireSpecificCheckRunsList": [
+          "corefx-ci"
+        ],
+        "minimumNumberOfStatuses": 1,
+        "minimumNumberOfCheckRuns": 2
+      }
+    }
+  ],
+  "userGroups": []
+}
