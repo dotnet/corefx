@@ -29,7 +29,7 @@ namespace System.Text.Json
         public static string NewtonsoftReturnStringHelper(TextReader reader)
         {
             var sb = new StringBuilder();
-            var json = new JsonTextReader(reader);
+            var json = new JsonTextReader(reader) { MaxDepth = null };
             while (json.Read())
             {
                 if (json.Value != null)
@@ -345,7 +345,7 @@ namespace System.Text.Json
             {
                 writer.Formatting = Formatting.Indented;
 
-                var newtonsoft = new JsonTextReader(new StringReader(jsonString));
+                var newtonsoft = new JsonTextReader(new StringReader(jsonString)) { MaxDepth = null };
                 writer.WriteComment("comment");
                 while (newtonsoft.Read())
                 {
@@ -359,7 +359,7 @@ namespace System.Text.Json
 
         public static List<JsonTokenType> GetTokenTypes(string jsonString)
         {
-            var newtonsoft = new JsonTextReader(new StringReader(jsonString));
+            var newtonsoft = new JsonTextReader(new StringReader(jsonString)) { MaxDepth = null };
             int totalReads = 0;
             while (newtonsoft.Read())
             {
@@ -370,7 +370,7 @@ namespace System.Text.Json
 
             for (int i = 0; i < totalReads; i++)
             {
-                newtonsoft = new JsonTextReader(new StringReader(jsonString));
+                newtonsoft = new JsonTextReader(new StringReader(jsonString)) { MaxDepth = null };
                 for (int j = 0; j < i; j++)
                 {
                     Assert.True(newtonsoft.Read());
@@ -690,7 +690,7 @@ namespace System.Text.Json
 
         public static string GetCompactString(string jsonString)
         {
-            using (JsonTextReader jsonReader = new JsonTextReader(new StringReader(jsonString)))
+            using (JsonTextReader jsonReader = new JsonTextReader(new StringReader(jsonString)) { MaxDepth = null })
             {
                 jsonReader.FloatParseHandling = FloatParseHandling.Decimal;
                 JToken jtoken = JToken.ReadFrom(jsonReader);
