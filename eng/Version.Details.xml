@@ -1,16 +1,16 @@
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.30-servicing.22476.1">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.31-servicing.22504.3">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-coreclr</Uri>
-      <Sha>a7193c865f8951b7ede4ece6f66ba9456f563f8b</Sha>
+      <Sha>6e7610b7d4f16ef2f95dfe36153b64922f519d7f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.30-servicing.22476.1">
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.31-servicing.22504.3">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-coreclr</Uri>
-      <Sha>a7193c865f8951b7ede4ece6f66ba9456f563f8b</Sha>
+      <Sha>6e7610b7d4f16ef2f95dfe36153b64922f519d7f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.1.30-servicing.22476.1">
+    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.1.31-servicing.22504.3">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-coreclr</Uri>
-      <Sha>a7193c865f8951b7ede4ece6f66ba9456f563f8b</Sha>
+      <Sha>6e7610b7d4f16ef2f95dfe36153b64922f519d7f</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
