@@ -81,6 +81,7 @@ namespace System.Globalization.Tests
         /// Same applies to Windows 10 >= 10.0.15063 in the IdnaTest_9.txt file
         /// </remarks>
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // https://github.com/dotnet/corefx/issues/21332
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/76651", TestPlatforms.Linux | TestPlatforms.OSX)]
         public void GetAscii_Invalid()
         {
             Assert.All(Factory.GetDataset().Where(entry => !entry.ASCIIResult.Success), entry =>
