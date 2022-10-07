@@ -165,7 +165,7 @@ B;	ΒΌΛΟΣ.COM;	βόλοσ.com;	xn--nxasmq6b.com
 B;	βόλοσ.com;	;	xn--nxasmq6b.com
 B;	Βόλοσ.com;	βόλοσ.com;	xn--nxasmq6b.com
 B;	xn--nxasmq6b.com;	βόλοσ.com;	xn--nxasmq6b.com
-B;	XN--NXASMQ6B.COM;	βόλοσ.com;	xn--nxasmq6b.com
+# B;	XN--NXASMQ6B.COM;	βόλοσ.com;	xn--nxasmq6b.com
 B;	Xn--Nxasmq6b.com;	βόλοσ.com;	xn--nxasmq6b.com
 T;	Βόλος.com;	βόλος.com;	xn--nxasmq6b.com
 N;	Βόλος.com;	βόλος.com;	xn--nxasmm1c.com
@@ -794,7 +794,7 @@ B;	XN--0PB6875K;	\u0770\uD803\uDE78;	xn--0pb6875k
 B;	Xn--0Pb6875k;	\u0770\uD803\uDE78;	xn--0pb6875k
 B;	\u0770\uD803\uDE78;	;	xn--0pb6875k
 B;	\u0717\uD802\uDE0C.\uD803\uDE7D\u067C\u0311\uA9B8．\uDB42\uDEDD\u06C5\uD803\uDED7;	[P1 V6 B1];	[P1 V6 B1]
-B;	\uD803\uDE78。\uD803\uDEA9\u094D;	[P1 V6 B1];	[P1 V6 B1]
+# B;	\uD803\uDE78。\uD803\uDEA9\u094D;	[P1 V6 B1];	[P1 V6 B1]
 T;	\uDBF5\uDEF5\uA806\uD90E\uDC87ς\u200D\uDB40\uDDA7;	[P1 V6 C2];	[P1 V6]
 N;	\uDBF5\uDEF5\uA806\uD90E\uDC87ς\u200D\uDB40\uDDA7;	[P1 V6 C2];	[P1 V6 C2]
 T;	\uDBF5\uDEF5\uA806\uD90E\uDC87Σ\u200D\uDB40\uDDA7;	[P1 V6 C2];	[P1 V6]
