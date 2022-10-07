@@ -1624,6 +1624,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(99)]
         [InlineData(1000)]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/76654", TestPlatforms.Linux)]
         public async Task GetAsync_StatusCodeOutOfRange_ExpectedException(int statusCode)
         {
             if (PlatformDetection.IsUap && statusCode == 99)
