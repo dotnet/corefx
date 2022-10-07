@@ -332,6 +332,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/76653", TestPlatforms.OSX)]
         public static void AlwaysVersion3()
         {
             using (ECDsa ecdsa = ECDsa.Create(EccTestData.Secp384r1Data.KeyParameters))

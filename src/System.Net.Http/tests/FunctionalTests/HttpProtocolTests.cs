@@ -163,6 +163,7 @@ namespace System.Net.Http.Functional.Tests
             }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/76654", TestPlatforms.Linux | TestPlatforms.OSX)]
         [Theory]
         [InlineData(2)]
         [InlineData(7)]
@@ -207,6 +208,7 @@ namespace System.Net.Http.Functional.Tests
             }, new LoopbackServer.Options { StreamWrapper = GetStream });
         }
 
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/76654", TestPlatforms.Linux | TestPlatforms.OSX)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Uap ignores response version if not 1.0 or 1.1")]
         [Theory]
         [InlineData(0)]
@@ -246,6 +248,7 @@ namespace System.Net.Http.Functional.Tests
             }, new LoopbackServer.Options { StreamWrapper = GetStream_ClientDisconnectOk });
         }
 
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/76654", TestPlatforms.Linux | TestPlatforms.OSX)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Uap ignores response version if not 1.0 or 1.1")]
         [Theory]
         [InlineData(2, 0)]
@@ -362,7 +365,7 @@ namespace System.Net.Http.Functional.Tests
                 await GetAsyncSuccessHelper(statusLine, expectedStatusCode, reasonNoSpace);
             }
         }
-        
+
         [Theory]
         [InlineData("HTTP/1.1 200", 200, "")] // This test data requires the fix in .NET Framework 4.7.3
         [InlineData("HTTP/1.1 200 O\tK", 200, "O\tK")]
@@ -403,7 +406,7 @@ namespace System.Net.Http.Functional.Tests
             yield return "HTTP/1.1 2345";
             yield return "HTTP/A.1 200 OK";
             yield return "HTTP/X.Y.Z 200 OK";
-            
+
             // Only pass on .NET Core Windows & SocketsHttpHandler.
             if (PlatformDetection.IsNetCore && !PlatformDetection.IsUap && PlatformDetection.IsWindows)
             {
@@ -426,7 +429,7 @@ namespace System.Net.Http.Functional.Tests
                 yield return "HTTP/1.1\t";
                 yield return "HTTP/1.1  ";
             }
-            
+
             // Skip these test cases on UAP since the behavior is different.
             if (!PlatformDetection.IsUap)
             {
@@ -447,16 +450,17 @@ namespace System.Net.Http.Functional.Tests
                 yield return "NOTHTTP/1.1 200 OK";
             }
         }
-        
+
         public static TheoryData InvalidStatusLine = GetInvalidStatusLine().ToTheoryData();
 
         [Theory]
         [MemberData(nameof(InvalidStatusLine))]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/76654", TestPlatforms.Linux)]
         public async Task GetAsync_InvalidStatusLine_ThrowsException(string responseString)
         {
             await GetAsyncThrowsExceptionHelper(responseString);
         }
-        
+
         [Fact]
         public async Task GetAsync_ReasonPhraseHasLF_BehaviorDifference()
         {
