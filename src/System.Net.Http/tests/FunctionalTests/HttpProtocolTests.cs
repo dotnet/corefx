@@ -455,6 +455,7 @@ namespace System.Net.Http.Functional.Tests
 
         [Theory]
         [MemberData(nameof(InvalidStatusLine))]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/76654", TestPlatforms.Linux)]
         public async Task GetAsync_InvalidStatusLine_ThrowsException(string responseString)
         {
             await GetAsyncThrowsExceptionHelper(responseString);
