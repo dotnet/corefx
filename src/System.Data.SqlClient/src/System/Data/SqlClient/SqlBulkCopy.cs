@@ -2598,7 +2598,7 @@ namespace System.Data.SqlClient
                     {
                         _stateObj.CancelRequest();
                     }
-                    _stateObj._internalTimeout = false;
+                    _stateObj.SetTimeoutStateStopped();
                     _stateObj.CloseSession();
                     _stateObj._bulkCopyOpperationInProgress = false;
                     _stateObj._bulkCopyWriteTimeout = false;

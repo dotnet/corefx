@@ -2,8 +2,8 @@
   <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
     <!-- Must be kept in sync with pkg\Microsoft.Windows.Compatibility\Microsoft.Windows.Compatibility.pkgproj -->
-    <PackageVersion>4.8.4</PackageVersion>
-    <AssemblyVersion>4.6.1.4</AssemblyVersion>
+    <PackageVersion>4.8.5</PackageVersion>
+    <AssemblyVersion>4.6.1.5</AssemblyVersion>
     <!-- Downgrade the Assembly Version to match RTM in order to have System.Data shim to still 
     typeforward to RTM version instead of servicing version -->
     <AssemblyVersion Condition="'$(TargetGroup)' == 'netcoreapp'">4.6.1.0</AssemblyVersion>
