@@ -18,6 +18,7 @@ namespace System.Diagnostics.Tests
             Assert.Throws<EventLogNotFoundException>(() => new ProviderMetadata("Source_Does_Not_Exist"));
         }
 
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/77234")]
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
         [InlineData(true)]
         [InlineData(false)]
