@@ -412,6 +412,7 @@ namespace System.IO.Tests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/77233")]
         [Theory,
             MemberData(nameof(PathsWithReservedDeviceNames))]
         [PlatformSpecific(TestPlatforms.Windows)] // device name prefixes

@@ -86,6 +86,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/77234")]
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
         public void ExceptionOnce()
         {
