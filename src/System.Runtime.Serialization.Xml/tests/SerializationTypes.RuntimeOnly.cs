@@ -2557,6 +2557,23 @@ public class TypeWithEnumerableInterfaceGetOnlyCollection
     }
 }
 
+// RecursiveEnumerable
+// =============================
+// IEnumerable<>
+// Not-explicit [CollectionDataContract]
+// Direct recursion
+//
+// RecursiveCollection
+// =============================
+// List<>
+// Explicit [CollectionDataContract]
+// Indirect recursion
+public class RecursiveEnumerable : IEnumerable<RecursiveEnumerable>
+{
+    public IEnumerator<RecursiveEnumerable> GetEnumerator() => null;
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+}
+
 [CollectionDataContract]
 public class RecursiveCollection : List<RecursiveCollection2>
 {
