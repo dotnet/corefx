@@ -3,8 +3,8 @@
   <PropertyGroup>
     <!-- We use the PackageVersion property defined in Packaging.props for the Prerelease packages which are using it to be built --> 
     <_PreReleasePackageVersion>$(PackageVersion)</_PreReleasePackageVersion> 
-    <PackageVersion>3.1.3</PackageVersion>
-    <ServiceModelVersion>4.7.1</ServiceModelVersion>
+    <PackageVersion>3.1.4</PackageVersion>
+    <ServiceModelVersion>4.7.0</ServiceModelVersion>
     <!-- We don't need to harvest the stable packages to build this -->
     <HarvestStablePackage>false</HarvestStablePackage>
   </PropertyGroup>
@@ -30,7 +30,7 @@
     <PrereleaseLibraryPackage Include="System.Data.OleDb" />
     <PrereleaseLibraryPackage Include="System.Data.SqlClient"> 
       <!-- SQL client defines its own version, higher than rest of master --> 
-      <Version>4.8.4</Version>
+      <Version>4.8.5</Version>
     </PrereleaseLibraryPackage>
     <PrereleaseLibraryPackage Include="System.Drawing.Common" />
     <PrereleaseLibraryPackage Include="System.Diagnostics.EventLog" />

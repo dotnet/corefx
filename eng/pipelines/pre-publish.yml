@@ -20,7 +20,7 @@ stages:
 
           pool:
             name: NetCore1ESPool-Svc-Internal
-            demands: ImageOverride -equals Build.windows.10.amd64.vs2017
+            demands: ImageOverride -equals windows.vs2017.amd64
 
           workspace:
             clean: all
